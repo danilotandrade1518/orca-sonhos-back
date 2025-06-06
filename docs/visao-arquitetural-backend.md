@@ -16,7 +16,9 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
 ## 2. Organização dos Diretórios
 
 - `/src`
-  - `/domain` — Agregados, Entidades, Value Objects e regras de negócio
+  - `/domain` — Agregados, Value Objects globais e regras de negócio
+    - `/aggregates` — Cada agregado possui uma pasta própria, contendo suas entidades e value objects específicos
+    - `/shared/value-objects` — Value Objects globais, reutilizáveis em todo o domínio
   - `/application/usecases` — Casos de uso (aplicação)
   - `/application/queries` - Query Handlers
   - `/infra` — Implementações de infraestrutura (banco, serviços externos)
@@ -25,7 +27,7 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
 
 ## 3. Responsabilidades das Camadas
 
-- **Domain:** Agregados, Entidades, Value Objects e regras de negócio puras, sem dependências externas.
+- **Domain:** Agregados, entidades (dentro dos agregados), value objects (globais e específicos) e regras de negócio puras, sem dependências externas.
 - **Use Cases:** Orquestram as regras de negócio, coordenando entidades e serviços. Use Cases sempre normalmente irão utilizar Repositories para acesso ao banco da dados.
 - **Queries:** Tratam views do sistema. Query Handlers normalmente irão utilizar DAO's para acesso ao banco de dados.
 - **Web:** Pontos de entrada/saída HTTP, adapta dados para os casos de uso.
