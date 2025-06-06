@@ -6,6 +6,11 @@
 - Orçamento mensal por categoria (envelopes)
 - Dashboard de resumo e alertas de estouro
 - Compartilhamento básico de orçamento com outro usuário
+- Gestão básica de cartões de crédito:
+  - Cadastro de cartões com limite, data de fechamento e vencimento
+  - Lançamento de despesas vinculadas ao cartão
+  - Visualização da fatura atual (total acumulado)
+  - Registro do pagamento da fatura como transação
 
 ---
 
