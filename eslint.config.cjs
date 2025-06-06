@@ -18,12 +18,20 @@ module.exports = [
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
-      'prettier': prettierPlugin,
+      prettier: prettierPlugin,
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
       'prettier/prettier': 'error',
     },
   },
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+  },
   prettier,
-]; 
+];
