@@ -36,4 +36,9 @@ npm test:coverage
 ## Contribuição
 - Siga o padrão de código (ESLint/Prettier)
 - Crie testes para novas funcionalidades
-- Use variáveis de ambiente conforme `.env.example` 
+- Use variáveis de ambiente conforme `.env.example`
+
+## Migrations
+
+- As migrations do banco são gerenciadas com [umzug](https://github.com/sequelize/umzug).
+- Para rodar as migrations, utilize o script npm correspondente (ver abaixo). 
