@@ -1,0 +1,26 @@
+@startuml
+' Diagrama de Casos de Uso – MVP OrçaSonhos
+
+actor "Usuário" as User
+
+usecase "Criar Orçamento" as UC1
+usecase "Alternar Orçamento" as UC2
+usecase "Lançar Receita/Despesa" as UC3
+usecase "Criar Meta" as UC4
+usecase "Acompanhar Meta" as UC5
+usecase "Definir Envelope" as UC6
+usecase "Visualizar Dashboard" as UC7
+usecase "Receber Alerta de Estouro" as UC8
+usecase "Compartilhar Orçamento" as UC9
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+
+@enduml 

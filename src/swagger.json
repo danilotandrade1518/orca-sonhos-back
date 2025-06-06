@@ -1,0 +1,9 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "OrçaSonhos API",
+    "version": "1.0.0",
+    "description": "Documentação inicial da API OrçaSonhos."
+  },
+  "paths": {}
+} 

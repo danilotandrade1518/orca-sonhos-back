@@ -1,0 +1,68 @@
+@startuml
+' ERD Simplificado – OrçaSonhos
+
+entity "User" as User {
+  *id : UUID
+  *name : string
+  *email : string
+}
+
+entity "Budget" as Budget {
+  *id : UUID
+  *name : string
+  *type : string
+}
+
+entity "Category" as Category {
+  *id : UUID
+  *name : string
+  *type : string
+}
+
+entity "Goal" as Goal {
+  *id : UUID
+  *name : string
+  *target_value : decimal
+  *current_value : decimal
+  *due_date : date
+}
+
+entity "Envelope" as Envelope {
+  *id : UUID
+  *limit : decimal
+}
+
+entity "Transaction" as Transaction {
+  *id : UUID
+  *amount : decimal
+  *date : date
+  *type : string
+}
+
+entity "CreditCard" as CreditCard {
+  *id : UUID
+  *name : string
+  *limit : decimal
+}
+
+entity "Invoice" as Invoice {
+  *id : UUID
+  *closing_date : date
+  *due_date : date
+  *total : decimal
+}
+
+' Relacionamentos
+User --o{ Budget : "acessa >"
+Budget ||--o{ Category : "possui >"
+Budget ||--o{ Goal : "possui >"
+Budget ||--o{ Envelope : "possui >"
+Budget ||--o{ Transaction : "possui >"
+Category ||--o{ Transaction : "classifica >"
+Envelope ||--|| Category : "limita >"
+Goal ||--|| Budget : "pertence >"
+Transaction }o--|| CreditCard : "paga com >"
+CreditCard ||--o{ Invoice : "possui >"
+Invoice ||--o{ Transaction : "agrupa >"
+
+@enduml 
