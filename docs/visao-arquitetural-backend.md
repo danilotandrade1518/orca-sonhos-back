@@ -84,6 +84,15 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
 
 O tratamento de erros será realizado utilizando o padrão `Either`, evitando o uso de `throw/try/catch` exceto em situações explicitamente necessárias (ex: falhas inesperadas ou integrações externas). Os métodos retornarão objetos do tipo `Either<Erro, Sucesso>`, facilitando o controle de fluxo e a previsibilidade dos resultados.
 
+## 9. Padrão de Imports e Path Alias
+
+Para manter a organização e a clareza do projeto, adotaremos o seguinte padrão para imports:
+
+- **Path Alias:** Devem ser utilizados apenas para importar arquivos entre diferentes camadas (por exemplo, importar algo da camada `domain` para a camada `application`).
+- **Imports Relativos:** Devem ser utilizados para importar arquivos dentro da mesma camada (por exemplo, entre arquivos dentro de `usecases`, ou entre arquivos dentro de `aggregates`).
+
+Este padrão visa facilitar a navegação, evitar ciclos de dependência e reforçar a separação entre as camadas da arquitetura.
+
 ---
 
 **Este documento deve ser atualizado conforme a arquitetura evoluir. Todo o código do projeto será escrito em Inglês.** 
