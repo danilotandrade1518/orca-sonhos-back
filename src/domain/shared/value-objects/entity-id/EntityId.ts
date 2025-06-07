@@ -14,26 +14,27 @@ export class EntityId implements IValueObject<EntityIdValue> {
     this.validate();
   }
 
-  equals(vo: this): boolean {
-    return vo instanceof EntityId && vo.value?.id === this.value?.id;
-  }
-
   get value(): EntityIdValue | null {
     return this.either.data ?? null;
-  }
-
-  get errors(): DomainError[] {
-    return this.either.errors;
   }
 
   get hasError(): boolean {
     return this.either.hasError;
   }
 
+  get errors(): DomainError[] {
+    return this.either.errors;
+  }
+
+  equals(vo: this): boolean {
+    return vo instanceof EntityId && vo.value?.id === this.value?.id;
+  }
+
   static create(): EntityId {
-    const uuid = crypto.randomUUID
-      ? crypto.randomUUID()
-      : EntityId.generateUUIDv4();
+    const uuid =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : EntityId.generateUUIDv4();
     return new EntityId(uuid);
   }
 
@@ -42,9 +43,9 @@ export class EntityId implements IValueObject<EntityIdValue> {
   }
 
   private validate() {
-    if (!this._id || !this.isValidUUID(this._id)) {
+    if (!this._id || !this.isValidUUID(this._id))
       this.either.addError(new InvalidEntityIdError(this._id));
-    }
+
     this.either.setData({ id: this._id });
   }
 

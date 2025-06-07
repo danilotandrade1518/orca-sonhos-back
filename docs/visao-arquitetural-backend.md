@@ -4,6 +4,7 @@
 
 Este documento descreve a arquitetura do backend do projeto OrçaSonhos, baseado em Node.js, Express, TypeScript, Clean Architecture e MySQL.
 Iremos utilizar alguns conceitos que vêm do DDD, que são:
+
 - Aggregates
 - Entities
 - Value Objects
@@ -36,6 +37,7 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
 ## 4. Fluxo de Dados
 
 - Mutação de estado
+
 1. Uma requisição chega pela camada web (ex: controller Express).
 2. O controller chama o caso de uso apropriado.
 3. O caso de uso manipula entidades e utiliza repositórios/serviços definidos por interfaces.
@@ -43,6 +45,7 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
 5. A resposta retorna pela cadeia até o usuário.
 
 - View request
+
 1. Uma requisição chega pela camada web (ex: controller Express).
 2. O controller chama a query handler apropriada.
 3. A query handler consulta o banco através do's DAO's apropriados.
@@ -93,6 +96,16 @@ Para manter a organização e a clareza do projeto, adotaremos o seguinte padrã
 
 Este padrão visa facilitar a navegação, evitar ciclos de dependência e reforçar a separação entre as camadas da arquitetura.
 
+## 10. Padrão de Ordenação de Métodos em Classes
+
+Para manter a legibilidade e padronização do código, todas as classes devem seguir a seguinte ordem de declaração de métodos:
+
+1. Métodos públicos (incluindo getters/setters)
+2. Métodos estáticos
+3. Métodos privados
+
+Este padrão deve ser seguido em todas as classes do domínio, value objects, entidades, use cases, etc.
+
 ---
 
-**Este documento deve ser atualizado conforme a arquitetura evoluir. Todo o código do projeto será escrito em Inglês.** 
+**Este documento deve ser atualizado conforme a arquitetura evoluir. Todo o código do projeto será escrito em Inglês.**

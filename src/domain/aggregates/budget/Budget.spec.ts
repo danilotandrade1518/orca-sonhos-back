@@ -16,12 +16,10 @@ describe('Budget (Orçamento)', () => {
     expect(result.hasError).toBe(false);
     const budget = result.data!;
     expect(budget.name).toBe('Orçamento Familiar');
-    expect(budget.ownerId.equals(ownerId)).toBe(true);
-    expect(budget.participantIds.length).toBe(2); // owner + extra
-    expect(budget.participantIds.some((id) => id.equals(ownerId))).toBe(true);
-    expect(
-      budget.participantIds.some((id) => id.equals(participanteExtra)),
-    ).toBe(true);
+    expect(budget.ownerId).toBe(ownerId.value?.id ?? '');
+    expect(budget.participantIds.length).toBe(2);
+    expect(budget.participantIds).toContain(ownerId.value?.id ?? '');
+    expect(budget.participantIds).toContain(participanteExtra.value?.id ?? '');
     expect(budget.createdAt).toBeInstanceOf(Date);
     expect(budget.updatedAt).toBeInstanceOf(Date);
   });
@@ -30,31 +28,52 @@ describe('Budget (Orçamento)', () => {
     const result = Budget.create(baseProps);
     const budget = result.data!;
     const novoParticipante = EntityId.create();
-    budget.adicionarParticipante(novoParticipante);
+    const addResult = budget.adicionarParticipante(
+      novoParticipante.value?.id ?? '',
+    );
+    expect(addResult.hasError).toBe(false);
     expect(budget.participantIds.length).toBe(3);
-    expect(
-      budget.participantIds.some((id) => id.equals(novoParticipante)),
-    ).toBe(true);
+    expect(budget.participantIds).toContain(novoParticipante.value?.id ?? '');
   });
 
   it('não deve adicionar o mesmo participante duas vezes', () => {
     const result = Budget.create(baseProps);
     const budget = result.data!;
-    budget.adicionarParticipante(ownerId);
+    const addResult = budget.adicionarParticipante(ownerId.value?.id ?? '');
+    expect(addResult.hasError).toBe(false);
     expect(
-      budget.participantIds.filter((id) => id.equals(ownerId)).length,
+      budget.participantIds.filter((id) => id === ownerId.value?.id).length,
     ).toBe(1);
   });
 
   it('deve retornar erro se o nome for vazio', () => {
     const result = Budget.create({ ...baseProps, name: '' });
     expect(result.hasError).toBe(true);
-    expect(result.errors[0].name).toBe('RequiredFieldError');
+    expect(result.errors[0].name).toBe('InvalidEntityNameError');
   });
 
   it('deve retornar erro se o ownerId for inválido', () => {
     const result = Budget.create({ ...baseProps, ownerId: 'id-invalido' });
     expect(result.hasError).toBe(true);
-    expect(result.errors[0]).toEqual(new InvalidEntityIdError('id-invalido'));
+    expect(result.errors[0]).toBeInstanceOf(InvalidEntityIdError);
+    expect(result.errors[0].errorObj.field).toBe('id');
+    expect(result.errors[0].errorObj.message).toMatch(/invalid/i);
+  });
+
+  it('deve retornar erro ao adicionar participante inválido', () => {
+    const result = Budget.create(baseProps);
+    const budget = result.data!;
+    const addResult = budget.adicionarParticipante('id-invalido');
+    expect(addResult.hasError).toBe(true);
+    expect(addResult.errors[0].name).toBe('InvalidEntityIdError');
+  });
+
+  it('deve retornar erro se algum participantId for inválido', () => {
+    const result = Budget.create({
+      ...baseProps,
+      participantIds: ['id-invalido'],
+    });
+    expect(result.hasError).toBe(true);
+    expect(result.errors[0].name).toBe('InvalidEntityIdError');
   });
 });

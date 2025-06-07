@@ -1,8 +1,8 @@
 import { Either } from '../../../shared/core/either';
 import { DomainError } from '../../shared/domain-error';
 import { IEntity } from '../../shared/entity';
-import { RequiredFieldError } from '../../shared/errors/RequiredFieldError';
 import { EntityId } from '../../shared/value-objects/entity-id/EntityId';
+import { EntityName } from './../../shared/value-objects/entity-name/EntityName';
 
 // import { Category } from './Category';
 // import { Goal } from './Goal';
@@ -16,7 +16,7 @@ export interface CreateBudgetDTO {
 
 export class Budget implements IEntity {
   private _id: EntityId;
-  private _name: string;
+  private _name: EntityName;
   private _ownerId: EntityId;
   private _participantIds: EntityId[];
   // categories: Category[];
@@ -26,7 +26,7 @@ export class Budget implements IEntity {
   private _updatedAt: Date;
 
   private constructor(
-    name: string,
+    name: EntityName,
     ownerId: EntityId,
     participantIds: EntityId[],
   ) {
@@ -45,13 +45,13 @@ export class Budget implements IEntity {
     return this._id.value?.id ?? '';
   }
   get name(): string {
-    return this._name;
+    return this._name.value?.name ?? '';
   }
-  get ownerId(): EntityId {
-    return this._ownerId;
+  get ownerId(): string {
+    return this._ownerId.value?.id ?? '';
   }
-  get participantIds(): EntityId[] {
-    return this._participantIds;
+  get participantIds(): string[] {
+    return this._participantIds.map((id) => id.value?.id ?? '');
   }
   get createdAt(): Date {
     return this._createdAt;
@@ -60,34 +60,45 @@ export class Budget implements IEntity {
     return this._updatedAt;
   }
 
-  adicionarParticipante(EntityId: EntityId) {
-    if (!this._participantIds.find((id) => id.equals(EntityId))) {
-      this._participantIds.push(EntityId);
+  adicionarParticipante(entityId: string): Either<DomainError, void> {
+    const either = new Either<DomainError, void>();
+
+    const entityIdVo = EntityId.fromString(entityId);
+    either.addManyErrors(entityIdVo.errors);
+
+    if (either.hasError) return either;
+
+    if (!this._participantIds.find((id) => id.equals(entityIdVo))) {
+      this._participantIds.push(entityIdVo);
       this._updatedAt = new Date();
     }
+
+    return either;
   }
 
   static create(data: CreateBudgetDTO): Either<DomainError, Budget> {
     const either = new Either<DomainError, Budget>();
 
-    if (!data.name?.trim()) either.addError(new RequiredFieldError('name'));
+    const nameVo = EntityName.create(data.name);
+    if (nameVo.hasError) either.addManyErrors(nameVo.errors);
 
-    const ownerId = EntityId.fromString(data.ownerId);
-    if (ownerId.hasError) either.addManyErrors(ownerId.errors);
+    const ownerIdVo = EntityId.fromString(data.ownerId);
+    if (ownerIdVo.hasError) either.addManyErrors(ownerIdVo.errors);
 
     const participantIds = (data.participantIds || []).map((id) =>
       EntityId.fromString(id),
     );
-    participantIds.forEach((pid) => {
-      if (pid.hasError) either.addManyErrors(pid.errors);
-    });
 
-    if (!participantIds.find((id) => id.equals(ownerId)))
-      participantIds.push(ownerId);
+    participantIds
+      .filter((pid) => pid.hasError)
+      .forEach((pid) => either.addManyErrors(pid.errors));
+
+    if (!participantIds.find((id) => id.equals(ownerIdVo)))
+      participantIds.push(ownerIdVo);
 
     if (either.hasError) return either;
 
-    const budget = new Budget(data.name, ownerId, participantIds);
+    const budget = new Budget(nameVo, ownerIdVo, participantIds);
 
     either.setData(budget);
     return either;

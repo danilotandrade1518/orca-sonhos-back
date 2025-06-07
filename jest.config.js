@@ -1,4 +1,4 @@
-const { createDefaultPreset } = require("ts-jest");
+const { createDefaultPreset } = require('ts-jest');
 
 const tsJestTransformCfg = createDefaultPreset().transform;
 
@@ -12,4 +12,8 @@ module.exports = {
   ],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
+  moduleNameMapper: {
+    '^@either$': '<rootDir>/src/shared/core/either.ts',
+    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+  },
 };
