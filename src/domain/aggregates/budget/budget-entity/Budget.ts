@@ -1,10 +1,13 @@
-import { Either } from '../../../shared/core/either';
-import { DomainError } from '../../shared/domain-error';
-import { IEntity } from '../../shared/entity';
-import { CannotRemoveOwnerFromParticipantsError } from '../../shared/errors/CannotRemoveOwnerFromParticipantsError';
-import { EntityId } from '../../shared/value-objects/entity-id/EntityId';
-import { NotFoundError } from './../../shared/errors/NotFoundError';
-import { EntityName } from './../../shared/value-objects/entity-name/EntityName';
+import { Either } from '@either';
+
+import { DomainError } from '../../../shared/domain-error';
+import { IEntity } from '../../../shared/entity';
+import { CannotRemoveOwnerFromParticipantsError } from '../../../shared/errors/CannotRemoveOwnerFromParticipantsError';
+import { NotFoundError } from '../../../shared/errors/NotFoundError';
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
+import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
+import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 
 // import { Category } from './Category';
 // import { Goal } from './Goal';
@@ -33,9 +36,19 @@ export class Budget implements IEntity {
     participantIds: EntityId[],
   ) {
     this._id = EntityId.create();
+
     this._name = name;
+    if (this._name.hasError) throw new InvalidEntityNameError(this.name);
+
     this._ownerId = ownerId;
+    if (this._ownerId.hasError) throw new InvalidEntityIdError(this.ownerId);
+
     this._participantIds = participantIds;
+    if (this._participantIds.some((id) => id.hasError))
+      throw new InvalidEntityIdError(
+        this._participantIds.find((id) => id.hasError)?.value?.id ?? '',
+      );
+
     // this.categories = props.categories;
     // this.goals = props.goals;
     // this.envelopes = props.envelopes;

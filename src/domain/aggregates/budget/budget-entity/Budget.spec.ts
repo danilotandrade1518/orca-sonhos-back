@@ -1,7 +1,7 @@
-import { EntityId } from '../../shared/value-objects/entity-id/EntityId';
-import { CannotRemoveOwnerFromParticipantsError } from './../../shared/errors/CannotRemoveOwnerFromParticipantsError';
-import { InvalidEntityIdError } from './../../shared/errors/InvalidEntityIdError';
-import { NotFoundError } from './../../shared/errors/NotFoundError';
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { CannotRemoveOwnerFromParticipantsError } from './../../../shared/errors/CannotRemoveOwnerFromParticipantsError';
+import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
+import { NotFoundError } from './../../../shared/errors/NotFoundError';
 import { Budget, CreateBudgetDTO } from './Budget';
 
 describe('Budget (Orçamento)', () => {
