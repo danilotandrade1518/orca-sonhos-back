@@ -18,7 +18,25 @@ describe('Budget (Orçamento)', () => {
       expect(result.data).toBeDefined();
       expect(result.data!.name).toBe(data.name);
       expect(result.data!.ownerId).toBe(data.ownerId);
-      expect(result.data!.participantIds).toContain(data.ownerId);
+      expect(result.data!.participants).toContain(data.ownerId);
+    });
+
+    it('should create a budget with additional participants', () => {
+      const ownerId = EntityId.create().value!.id;
+      const participantId = EntityId.create().value!.id;
+
+      const data: CreateBudgetDTO = {
+        name: 'Test Budget',
+        ownerId,
+        participantIds: [participantId],
+      };
+
+      const result = Budget.create(data);
+
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBeDefined();
+      expect(result.data!.participants).toContain(ownerId);
+      expect(result.data!.participants).toContain(participantId);
     });
 
     it('should return error when name is invalid', () => {
@@ -84,8 +102,8 @@ describe('Budget (Orçamento)', () => {
       const result = budget.addParticipant(participantId);
 
       expect(result.hasError).toBe(false);
-      expect(budget.participantIds).toContain(participantId);
-      expect(budget.participantIds).toContain(ownerId);
+      expect(budget.participants).toContain(participantId);
+      expect(budget.participants).toContain(ownerId);
     });
 
     it('should not add the same participant twice', () => {
@@ -98,8 +116,8 @@ describe('Budget (Orçamento)', () => {
       expect(secondResult.hasError).toBe(false);
 
       // Verifica se o participante aparece apenas uma vez
-      const participantCount = budget.participantIds.filter(
-        (id) => id === participantId,
+      const participantCount = budget.participants.filter(
+        (id: string) => id === participantId,
       ).length;
       expect(participantCount).toBe(1);
     });
@@ -152,8 +170,8 @@ describe('Budget (Orçamento)', () => {
       const result = budget.removeParticipant(participantId);
 
       expect(result.hasError).toBe(false);
-      expect(budget.participantIds).not.toContain(participantId);
-      expect(budget.participantIds).toContain(ownerId);
+      expect(budget.participants).not.toContain(participantId);
+      expect(budget.participants).toContain(ownerId);
     });
 
     it('should not allow removing the owner', () => {
@@ -163,7 +181,7 @@ describe('Budget (Orçamento)', () => {
       expect(result.errors[0]).toBeInstanceOf(
         CannotRemoveOwnerFromParticipantsError,
       );
-      expect(budget.participantIds).toContain(ownerId);
+      expect(budget.participants).toContain(ownerId);
     });
 
     it('should return error when participant does not exist', () => {
