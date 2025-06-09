@@ -1,5 +1,7 @@
 import { EntityId } from '../../shared/value-objects/entity-id/EntityId';
+import { CannotRemoveOwnerFromParticipantsError } from './../../shared/errors/CannotRemoveOwnerFromParticipantsError';
 import { InvalidEntityIdError } from './../../shared/errors/InvalidEntityIdError';
+import { NotFoundError } from './../../shared/errors/NotFoundError';
 import { Budget, CreateBudgetDTO } from './Budget';
 
 describe('Budget (Orçamento)', () => {
@@ -28,9 +30,7 @@ describe('Budget (Orçamento)', () => {
     const result = Budget.create(baseProps);
     const budget = result.data!;
     const novoParticipante = EntityId.create();
-    const addResult = budget.adicionarParticipante(
-      novoParticipante.value?.id ?? '',
-    );
+    const addResult = budget.addParticipant(novoParticipante.value?.id ?? '');
     expect(addResult.hasError).toBe(false);
     expect(budget.participantIds.length).toBe(3);
     expect(budget.participantIds).toContain(novoParticipante.value?.id ?? '');
@@ -39,7 +39,7 @@ describe('Budget (Orçamento)', () => {
   it('não deve adicionar o mesmo participante duas vezes', () => {
     const result = Budget.create(baseProps);
     const budget = result.data!;
-    const addResult = budget.adicionarParticipante(ownerId.value?.id ?? '');
+    const addResult = budget.addParticipant(ownerId.value?.id ?? '');
     expect(addResult.hasError).toBe(false);
     expect(
       budget.participantIds.filter((id) => id === ownerId.value?.id).length,
@@ -63,7 +63,7 @@ describe('Budget (Orçamento)', () => {
   it('deve retornar erro ao adicionar participante inválido', () => {
     const result = Budget.create(baseProps);
     const budget = result.data!;
-    const addResult = budget.adicionarParticipante('id-invalido');
+    const addResult = budget.addParticipant('id-invalido');
     expect(addResult.hasError).toBe(true);
     expect(addResult.errors[0].name).toBe('InvalidEntityIdError');
   });
@@ -75,5 +75,76 @@ describe('Budget (Orçamento)', () => {
     });
     expect(result.hasError).toBe(true);
     expect(result.errors[0].name).toBe('InvalidEntityIdError');
+  });
+
+  describe('removeParticipant', () => {
+    let budget: Budget;
+    let ownerId: string;
+    let participantId: string;
+
+    beforeEach(() => {
+      ownerId = EntityId.create().value!.id;
+      participantId = EntityId.create().value!.id;
+
+      const either = Budget.create({
+        name: 'Test Budget',
+        ownerId,
+        participantIds: [participantId],
+      });
+
+      if (either.hasError) {
+        throw new Error('Failed to create budget for testing');
+      }
+
+      budget = either.data!;
+    });
+
+    it('should remove a participant successfully', () => {
+      const result = budget.removeParticipant(participantId);
+
+      expect(result.hasError).toBe(false);
+      expect(budget.participantIds).not.toContain(participantId);
+      expect(budget.participantIds).toContain(ownerId);
+    });
+
+    it('should not allow removing the owner', () => {
+      const result = budget.removeParticipant(ownerId);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(
+        CannotRemoveOwnerFromParticipantsError,
+      );
+      expect(budget.participantIds).toContain(ownerId);
+    });
+
+    it('should return error when participant does not exist', () => {
+      const nonExistentId = EntityId.create().value!.id;
+      const result = budget.removeParticipant(nonExistentId);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(NotFoundError);
+      expect(result.errors[0].message).toBe('participantId not found');
+    });
+
+    it('should return error when participant id is invalid', () => {
+      const invalidId = 'invalid-id-format';
+      const result = budget.removeParticipant(invalidId);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidEntityIdError);
+    });
+
+    it('should update the updatedAt timestamp after removing participant', () => {
+      const oldUpdatedAt = budget.updatedAt;
+
+      setTimeout(() => {
+        const result = budget.removeParticipant(participantId);
+
+        expect(result.hasError).toBe(false);
+        expect(budget.updatedAt.getTime()).toBeGreaterThan(
+          oldUpdatedAt.getTime(),
+        );
+      }, 1);
+    });
   });
 });

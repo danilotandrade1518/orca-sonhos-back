@@ -106,6 +106,29 @@ Para manter a legibilidade e padronização do código, todas as classes devem s
 
 Este padrão deve ser seguido em todas as classes do domínio, value objects, entidades, use cases, etc.
 
+## 11. Organização dos Testes
+
+Os testes devem ser organizados seguindo a mesma estrutura do código de produção, mantendo a proximidade com o código testado:
+
+- **Testes Unitários:** Devem ser colocados na mesma pasta do arquivo testado, com o sufixo `.spec.ts`
+
+  - Exemplo: `src/domain/aggregates/budget/Budget.ts` → `src/domain/aggregates/budget/Budget.spec.ts`
+  - Exemplo: `src/domain/shared/value-objects/Money.ts` → `src/domain/shared/value-objects/Money.spec.ts`
+
+- **Testes de Integração:** Devem ser colocados em uma pasta `__tests__` dentro do módulo testado
+
+  - Exemplo: `src/application/usecases/__tests__/CreateBudgetUseCase.spec.ts`
+
+- **Testes E2E:** Devem ser colocados em uma pasta `__tests__` na raiz do projeto
+  - Exemplo: `src/__tests__/e2e/budget.spec.ts`
+
+Esta organização visa:
+
+- Manter os testes próximos ao código testado
+- Facilitar a manutenção e localização dos testes
+- Seguir o princípio de coesão e acoplamento
+- Manter a consistência com a arquitetura do projeto
+
 ---
 
 **Este documento deve ser atualizado conforme a arquitetura evoluir. Todo o código do projeto será escrito em Inglês.**

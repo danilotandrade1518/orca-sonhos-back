@@ -1,7 +1,9 @@
 import { Either } from '../../../shared/core/either';
 import { DomainError } from '../../shared/domain-error';
 import { IEntity } from '../../shared/entity';
+import { CannotRemoveOwnerFromParticipantsError } from '../../shared/errors/CannotRemoveOwnerFromParticipantsError';
 import { EntityId } from '../../shared/value-objects/entity-id/EntityId';
+import { NotFoundError } from './../../shared/errors/NotFoundError';
 import { EntityName } from './../../shared/value-objects/entity-name/EntityName';
 
 // import { Category } from './Category';
@@ -39,6 +41,9 @@ export class Budget implements IEntity {
     // this.envelopes = props.envelopes;
     this._createdAt = new Date();
     this._updatedAt = new Date();
+
+    if (!participantIds.find((id) => id.equals(this._ownerId)))
+      participantIds.push(this._ownerId);
   }
 
   get id(): string {
@@ -60,7 +65,7 @@ export class Budget implements IEntity {
     return this._updatedAt;
   }
 
-  adicionarParticipante(entityId: string): Either<DomainError, void> {
+  addParticipant(entityId: string): Either<DomainError, void> {
     const either = new Either<DomainError, void>();
 
     const entityIdVo = EntityId.fromString(entityId);
@@ -72,6 +77,33 @@ export class Budget implements IEntity {
       this._participantIds.push(entityIdVo);
       this._updatedAt = new Date();
     }
+
+    return either;
+  }
+
+  removeParticipant(participantId: string): Either<DomainError, void> {
+    const either = new Either<DomainError, void>();
+
+    const participantIdVo = EntityId.fromString(participantId);
+    either.addManyErrors(participantIdVo.errors);
+
+    if (either.hasError) return either;
+
+    if (participantIdVo.equals(this._ownerId)) {
+      either.addError(new CannotRemoveOwnerFromParticipantsError());
+      return either;
+    }
+
+    const index = this._participantIds.findIndex((id) =>
+      id.equals(participantIdVo),
+    );
+    if (index === -1) {
+      either.addError(new NotFoundError('participantId'));
+      return either;
+    }
+
+    this._participantIds.splice(index, 1);
+    this._updatedAt = new Date();
 
     return either;
   }
@@ -92,9 +124,6 @@ export class Budget implements IEntity {
     participantIds
       .filter((pid) => pid.hasError)
       .forEach((pid) => either.addManyErrors(pid.errors));
-
-    if (!participantIds.find((id) => id.equals(ownerIdVo)))
-      participantIds.push(ownerIdVo);
 
     if (either.hasError) return either;
 
