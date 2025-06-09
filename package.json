@@ -11,7 +11,7 @@
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "test:watch": "jest --watchAll --testMatch '**/?(*.)+(spec).[tj]s'",
     "test:integration": "jest --runInBand --testMatch '**/?(*.)+(test).[tj]s'",
     "test:coverage": "jest --coverage",

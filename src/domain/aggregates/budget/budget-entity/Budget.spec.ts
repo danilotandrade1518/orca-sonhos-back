@@ -21,6 +21,40 @@ describe('Budget (Orçamento)', () => {
       expect(result.data!.participants).toContain(data.ownerId);
     });
 
+    it('should create a budget with empty participants list', () => {
+      const ownerId = EntityId.create().value!.id;
+
+      const data: CreateBudgetDTO = {
+        name: 'Test Budget',
+        ownerId,
+        participantIds: [],
+      };
+
+      const result = Budget.create(data);
+
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBeDefined();
+      expect(result.data!.participants).toContain(ownerId);
+      expect(result.data!.participants.length).toBe(1);
+    });
+
+    it('should create a budget with null participants list', () => {
+      const ownerId = EntityId.create().value!.id;
+
+      const data: CreateBudgetDTO = {
+        name: 'Test Budget',
+        ownerId,
+        participantIds: undefined,
+      };
+
+      const result = Budget.create(data);
+
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBeDefined();
+      expect(result.data!.participants).toContain(ownerId);
+      expect(result.data!.participants.length).toBe(1);
+    });
+
     it('should create a budget with additional participants', () => {
       const ownerId = EntityId.create().value!.id;
       const participantId = EntityId.create().value!.id;
@@ -42,6 +76,18 @@ describe('Budget (Orçamento)', () => {
     it('should return error when name is invalid', () => {
       const data: CreateBudgetDTO = {
         name: '',
+        ownerId: EntityId.create().value!.id,
+      };
+
+      const result = Budget.create(data);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0].name).toBe('InvalidEntityNameError');
+    });
+
+    it('should return error when name is too long', () => {
+      const data: CreateBudgetDTO = {
+        name: 'a'.repeat(256),
         ownerId: EntityId.create().value!.id,
       };
 
