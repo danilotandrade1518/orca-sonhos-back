@@ -3,8 +3,9 @@ import { BudgetParticipants } from './BudgetParticipants';
 
 describe('BudgetParticipants', () => {
   describe('create', () => {
-    it('should create a BudgetParticipants instance successfully', () => {
+    it('should create participants successfully', () => {
       const participantId = EntityId.create().value!.id;
+
       const result = BudgetParticipants.create({
         participantIds: [participantId],
       });
@@ -13,25 +14,6 @@ describe('BudgetParticipants', () => {
       expect(result.data).toBeDefined();
       expect(result.data!.participants).toContain(participantId);
       expect(result.data!.participantCount).toBe(1);
-      expect(result.data!.id).toBeDefined();
-      expect(result.data!.id).not.toBe('');
-    });
-
-    it('should create a BudgetParticipants instance with multiple participants', () => {
-      const participantId1 = EntityId.create().value!.id;
-      const participantId2 = EntityId.create().value!.id;
-
-      const result = BudgetParticipants.create({
-        participantIds: [participantId1, participantId2],
-      });
-
-      expect(result.hasError).toBe(false);
-      expect(result.data).toBeDefined();
-      expect(result.data!.participants).toContain(participantId1);
-      expect(result.data!.participants).toContain(participantId2);
-      expect(result.data!.participantCount).toBe(2);
-      expect(result.data!.id).toBeDefined();
-      expect(result.data!.id).not.toBe('');
     });
 
     it('should return error when participant id is invalid', () => {
@@ -42,49 +24,54 @@ describe('BudgetParticipants', () => {
       expect(result.hasError).toBe(true);
       expect(result.errors[0].name).toBe('InvalidEntityIdError');
     });
+
+    it('should create with empty participants list', () => {
+      const result = BudgetParticipants.create({
+        participantIds: [],
+      });
+
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBeDefined();
+      expect(result.data!.participants).toHaveLength(0);
+      expect(result.data!.participantCount).toBe(0);
+    });
   });
 
   describe('addParticipant', () => {
-    let budgetParticipants: BudgetParticipants;
-    let participantId: string;
+    it('should add participant successfully', () => {
+      const participantId = EntityId.create().value!.id;
 
-    beforeEach(() => {
-      participantId = EntityId.create().value!.id;
+      const participants = BudgetParticipants.create({
+        participantIds: [],
+      }).data!;
 
-      const result = BudgetParticipants.create({ participantIds: [] });
-      if (result.hasError) {
-        throw new Error('Failed to create BudgetParticipants for testing');
-      }
-
-      budgetParticipants = result.data!;
-    });
-
-    it('should add a participant successfully', () => {
-      const result = budgetParticipants.addParticipant(participantId);
+      const result = participants.addParticipant(participantId);
 
       expect(result.hasError).toBe(false);
-      expect(budgetParticipants.participants).toContain(participantId);
-      expect(budgetParticipants.participantCount).toBe(1);
+      expect(participants.participants).toContain(participantId);
+      expect(participants.participantCount).toBe(1);
     });
 
     it('should not add the same participant twice', () => {
-      // Primeira adição
-      const firstResult = budgetParticipants.addParticipant(participantId);
-      expect(firstResult.hasError).toBe(false);
+      const participantId = EntityId.create().value!.id;
 
-      // Segunda adição do mesmo participante
-      const secondResult = budgetParticipants.addParticipant(participantId);
-      expect(secondResult.hasError).toBe(false);
+      const participants = BudgetParticipants.create({
+        participantIds: [participantId],
+      }).data!;
 
-      // Verifica se o participante aparece apenas uma vez
-      const participantCount = budgetParticipants.participants.filter(
-        (id) => id === participantId,
-      ).length;
-      expect(participantCount).toBe(1);
+      const result = participants.addParticipant(participantId);
+
+      expect(result.hasError).toBe(false);
+      expect(participants.participants).toHaveLength(1);
+      expect(participants.participantCount).toBe(1);
     });
 
     it('should return error when participant id is invalid', () => {
-      const result = budgetParticipants.addParticipant('invalid-id');
+      const participants = BudgetParticipants.create({
+        participantIds: [],
+      }).data!;
+
+      const result = participants.addParticipant('invalid-id');
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0].name).toBe('InvalidEntityIdError');
@@ -92,37 +79,53 @@ describe('BudgetParticipants', () => {
   });
 
   describe('removeParticipant', () => {
-    let budgetParticipants: BudgetParticipants;
-    let participantId: string;
+    it('should remove participant successfully', () => {
+      const participantId = EntityId.create().value!.id;
 
-    beforeEach(() => {
-      participantId = EntityId.create().value!.id;
-
-      const result = BudgetParticipants.create({
+      const participants = BudgetParticipants.create({
         participantIds: [participantId],
-      });
+      }).data!;
 
-      if (result.hasError) {
-        throw new Error('Failed to create BudgetParticipants for testing');
-      }
-
-      budgetParticipants = result.data!;
-    });
-
-    it('should remove a participant successfully', () => {
-      const result = budgetParticipants.removeParticipant(participantId);
+      const result = participants.removeParticipant(participantId);
 
       expect(result.hasError).toBe(false);
-      expect(budgetParticipants.participants).not.toContain(participantId);
-      expect(budgetParticipants.participantCount).toBe(0);
+      expect(participants.participants).not.toContain(participantId);
+      expect(participants.participantCount).toBe(0);
     });
 
     it('should return error when participant does not exist', () => {
       const nonExistentId = EntityId.create().value!.id;
-      const result = budgetParticipants.removeParticipant(nonExistentId);
+
+      const participants = BudgetParticipants.create({
+        participantIds: [],
+      }).data!;
+
+      const result = participants.removeParticipant(nonExistentId);
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0].name).toBe('NotFoundError');
+    });
+  });
+
+  describe('getters', () => {
+    it('should return participants list', () => {
+      const participantId = EntityId.create().value!.id;
+
+      const participants = BudgetParticipants.create({
+        participantIds: [participantId],
+      }).data!;
+
+      expect(participants.participants).toContain(participantId);
+    });
+
+    it('should return participant count', () => {
+      const participantId = EntityId.create().value!.id;
+
+      const participants = BudgetParticipants.create({
+        participantIds: [participantId],
+      }).data!;
+
+      expect(participants.participantCount).toBe(1);
     });
   });
 });

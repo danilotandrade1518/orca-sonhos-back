@@ -34,5 +34,55 @@ describe('BudgetParticipant', () => {
       expect(result.hasError).toBe(true);
       expect(result.errors[0].name).toBe('InvalidEntityIdError');
     });
+
+    it('should create with default role when not specified', () => {
+      const id = EntityId.create().value!.id;
+      const result = BudgetParticipant.create({ id, role: undefined });
+
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBeDefined();
+      expect(result.data!.role).toBe(ParticipantRole.PARTICIPANT);
+    });
+  });
+
+  describe('getters', () => {
+    it('should return id', () => {
+      const id = EntityId.create().value!.id;
+      const result = BudgetParticipant.create({ id });
+
+      expect(result.data!.id).toBe(id);
+    });
+
+    it('should return role', () => {
+      const id = EntityId.create().value!.id;
+      const result = BudgetParticipant.create({
+        id,
+        role: ParticipantRole.OWNER,
+      });
+
+      expect(result.data!.role).toBe(ParticipantRole.OWNER);
+    });
+  });
+
+  describe('isOwner', () => {
+    it('should return true for owner role', () => {
+      const id = EntityId.create().value!.id;
+      const result = BudgetParticipant.create({
+        id,
+        role: ParticipantRole.OWNER,
+      });
+
+      expect(result.data!.isOwner()).toBe(true);
+    });
+
+    it('should return false for participant role', () => {
+      const id = EntityId.create().value!.id;
+      const result = BudgetParticipant.create({
+        id,
+        role: ParticipantRole.PARTICIPANT,
+      });
+
+      expect(result.data!.isOwner()).toBe(false);
+    });
   });
 });
