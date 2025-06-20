@@ -12,21 +12,17 @@ export interface CreateBudgetParticipantsDTO {
 
 export class BudgetParticipants implements IEntity {
   private _id: EntityId;
-  private _participants: BudgetParticipant[];
 
-  private constructor(participants: BudgetParticipant[]) {
+  private constructor(private readonly _participants: BudgetParticipant[]) {
     this._id = EntityId.create();
-    this._participants = participants;
   }
 
   get id(): string {
     return this._id.value?.id ?? '';
   }
-
   get participants(): string[] {
     return this._participants.map((p) => p.id);
   }
-
   get participantCount(): number {
     return this._participants.length;
   }

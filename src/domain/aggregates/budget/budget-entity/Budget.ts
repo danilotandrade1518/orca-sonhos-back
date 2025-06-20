@@ -6,12 +6,6 @@ import { CannotRemoveOwnerFromParticipantsError } from '../../../shared/errors/C
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { BudgetParticipants } from '../budget-participants-entity/BudgetParticipants';
-import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
-import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
-
-// import { Category } from './Category';
-// import { Goal } from './Goal';
-// import { Envelope } from './Envelope';
 
 export interface CreateBudgetDTO {
   name: string;
@@ -20,33 +14,18 @@ export interface CreateBudgetDTO {
 }
 
 export class Budget implements IEntity {
-  private _id: EntityId;
-  private _name: EntityName;
-  private _ownerId: EntityId;
-  private _participants: BudgetParticipants;
-  // categories: Category[];
-  // goals: Goal[];
-  // envelopes: Envelope[];
-  private _createdAt: Date;
+  private readonly _id: EntityId;
+  private readonly _createdAt: Date;
+
   private _updatedAt: Date;
 
   private constructor(
-    name: EntityName,
-    ownerId: EntityId,
-    participants: BudgetParticipants,
+    private readonly _name: EntityName,
+    private readonly _ownerId: EntityId,
+    private readonly _participants: BudgetParticipants,
   ) {
     this._id = EntityId.create();
 
-    this._name = name;
-    if (this._name.hasError) throw new InvalidEntityNameError(this.name);
-
-    this._ownerId = ownerId;
-    if (this._ownerId.hasError) throw new InvalidEntityIdError(this.ownerId);
-
-    this._participants = participants;
-    // this.categories = props.categories;
-    // this.goals = props.goals;
-    // this.envelopes = props.envelopes;
     this._createdAt = new Date();
     this._updatedAt = new Date();
   }

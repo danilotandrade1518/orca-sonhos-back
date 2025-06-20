@@ -3,7 +3,6 @@ import { Either } from '@either';
 import { DomainError } from '../../../shared/domain-error';
 import { IEntity } from '../../../shared/entity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
-import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 
 export enum ParticipantRole {
   OWNER = 'OWNER',
@@ -16,21 +15,14 @@ export interface CreateBudgetParticipantDTO {
 }
 
 export class BudgetParticipant implements IEntity {
-  private _id: EntityId;
-  private _role: ParticipantRole;
-
-  private constructor(id: EntityId, role: ParticipantRole) {
-    this._id = id;
-    if (this._id.hasError)
-      throw new InvalidEntityIdError(this._id.value?.id ?? '');
-
-    this._role = role;
-  }
+  private constructor(
+    private readonly _id: EntityId,
+    private readonly _role: ParticipantRole,
+  ) {}
 
   get id(): string {
     return this._id.value?.id ?? '';
   }
-
   get role(): ParticipantRole {
     return this._role;
   }

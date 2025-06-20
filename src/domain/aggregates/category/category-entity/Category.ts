@@ -7,8 +7,6 @@ import {
   CategoryType,
   CategoryTypeEnum,
 } from '../value-objects/category-type/CategoryType';
-import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
-import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 
 export interface CreateCategoryDTO {
   name: string;
@@ -18,22 +16,13 @@ export interface CreateCategoryDTO {
 
 export class Category {
   private readonly _id: EntityId;
-  private readonly _name: EntityName;
-  private readonly _type: CategoryType;
-  private readonly _budgetId: EntityId;
 
   private constructor(
-    name: EntityName,
-    type: CategoryType,
-    budgetId: EntityId,
+    private readonly _name: EntityName,
+    private readonly _type: CategoryType,
+    private readonly _budgetId: EntityId,
   ) {
     this._id = EntityId.create();
-    this._name = name;
-    if (this._name.hasError) throw new InvalidEntityNameError(this.name);
-
-    this._type = type;
-    this._budgetId = budgetId;
-    if (this._budgetId.hasError) throw new InvalidEntityIdError(this.budgetId);
   }
 
   get id(): string {
