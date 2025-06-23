@@ -4,6 +4,7 @@ import { DomainError } from '../../../shared/domain-error';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
+import { IEntity } from './../../../shared/entity';
 
 export interface CreateGoalDTO {
   name: string;
@@ -13,7 +14,7 @@ export interface CreateGoalDTO {
   budgetId: string;
 }
 
-export class Goal {
+export class Goal implements IEntity {
   private readonly _id: EntityId;
   private readonly _createdAt: Date;
 

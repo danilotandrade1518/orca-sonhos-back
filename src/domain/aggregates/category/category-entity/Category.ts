@@ -7,6 +7,7 @@ import {
   CategoryType,
   CategoryTypeEnum,
 } from '../value-objects/category-type/CategoryType';
+import { IEntity } from './../../../shared/entity';
 
 export interface CreateCategoryDTO {
   name: string;
@@ -14,7 +15,7 @@ export interface CreateCategoryDTO {
   budgetId: string;
 }
 
-export class Category {
+export class Category implements IEntity {
   private readonly _id: EntityId;
 
   private constructor(
