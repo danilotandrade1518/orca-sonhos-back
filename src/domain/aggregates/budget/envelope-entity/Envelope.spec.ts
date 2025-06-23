@@ -7,7 +7,6 @@ const mockDto = () => ({
   name: 'Alimentação',
   limit: 1000,
   categoryId: EntityId.create().value?.id || '',
-  budgetId: EntityId.create().value?.id || '',
 });
 
 describe('Envelope', () => {
@@ -21,7 +20,6 @@ describe('Envelope', () => {
     expect(result.data?.name).toBe('Alimentação');
     expect(result.data?.limit).toBe(1000);
     expect(result.data?.categoryId).toBe(dto.categoryId);
-    expect(result.data?.budgetId).toBe(dto.budgetId);
   });
 
   it('deve acumular erro se o nome for vazio', () => {
@@ -49,18 +47,6 @@ describe('Envelope', () => {
   it('deve acumular erro se o categoryId for inválido', () => {
     const dto = mockDto();
     dto.categoryId = 'invalid-category-id';
-
-    const result = Envelope.create(dto);
-
-    expect(result.hasError).toBe(true);
-    expect(
-      result.errors.some((e) => e.message?.toLowerCase().includes('id')),
-    ).toBe(true);
-  });
-
-  it('deve acumular erro se o budgetId for inválido', () => {
-    const dto = mockDto();
-    dto.budgetId = '';
 
     const result = Envelope.create(dto);
 

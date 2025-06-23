@@ -9,7 +9,6 @@ export interface CreateEnvelopeDTO {
   name: string;
   limit: number;
   categoryId: string;
-  budgetId: string;
 }
 
 export class Envelope {
@@ -22,7 +21,6 @@ export class Envelope {
     private readonly _name: EntityName,
     private readonly _limit: MoneyVo,
     private readonly _categoryId: EntityId,
-    private readonly _budgetId: EntityId,
   ) {
     this._id = EntityId.create();
     this._createdAt = new Date();
@@ -40,9 +38,6 @@ export class Envelope {
   }
   get categoryId(): string {
     return this._categoryId.value?.id ?? '';
-  }
-  get budgetId(): string {
-    return this._budgetId.value?.id ?? '';
   }
   get createdAt(): Date {
     return this._createdAt;
@@ -63,12 +58,9 @@ export class Envelope {
     const categoryIdVo = EntityId.fromString(data.categoryId);
     if (categoryIdVo.hasError) either.addManyErrors(categoryIdVo.errors);
 
-    const budgetIdVo = EntityId.fromString(data.budgetId);
-    if (budgetIdVo.hasError) either.addManyErrors(budgetIdVo.errors);
-
     if (either.hasError) return either;
 
-    const envelope = new Envelope(nameVo, limitVo, categoryIdVo, budgetIdVo);
+    const envelope = new Envelope(nameVo, limitVo, categoryIdVo);
     either.setData(envelope);
     return either;
   }
