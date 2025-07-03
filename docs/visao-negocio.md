@@ -37,10 +37,15 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 ### 💸 Transações (Receitas e Despesas)
 - São os lançamentos manuais ou importados que alimentam o sistema.
 - Associadas a uma **categoria**, um **orçamento** e uma **data**.
+- **Podem ser futuras**: O sistema permite lançar transações com data futura para facilitar o **planejamento financeiro** e controle antecipado de gastos.
 - Tipos:
   - Receita (entrada)
   - Despesa (saída)
   - Transferência (entre orçamentos)
+- Status:
+  - **Agendada**: Transação futura que ainda não foi efetivada
+  - **Realizada**: Transação que já aconteceu
+  - **Cancelada**: Transação agendada que foi cancelada
 - Cada transação possui uma **forma de pagamento**, que pode incluir cartões de crédito.
 
 ### 🗂️ Categorias
@@ -118,6 +123,15 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - Ajustar envelopes e metas
 - Realocar valores entre orçamentos
 - Acompanhar faturas de cartão e programar quitação
+- **Agendar transações futuras**: Lançar salários, contas fixas e gastos programados
+- **Projetar fluxo de caixa**: Visualizar entradas e saídas futuras para melhor planejamento
+
+### 📅 Transações Futuras - Casos de Uso
+- **Receitas recorrentes**: Agendar salário do próximo mês
+- **Despesas fixas**: Contas de luz, água, internet com vencimento futuro  
+- **Planejamento de gastos**: Aniversários, viagens, compras planejadas
+- **Parcelas e financiamentos**: Controlar prestações futuras
+- **Gestão de metas**: Calcular quando objetivos serão atingidos com aportes futuros
 
 ---
 
@@ -129,7 +143,9 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 | **Categoria** | Tipo de gasto/receita (ex: alimentação, transporte, investimento). Organiza as transações. |
 | **Meta** | Objetivo financeiro (ex: comprar carro, fazer intercâmbio), com valor-alvo e prazo. |
 | **Envelope** | Limite de gastos por categoria dentro de um orçamento mensal. |
-| **Transação** | Registro de entrada ou saída de dinheiro. Deve sempre ter um valor, data, categoria e orçamento. |
+| **Transação** | Registro de entrada ou saída de dinheiro. Pode ser atual ou futura. Deve sempre ter um valor, data, categoria e orçamento. |
+| **Transação Agendada** | Transação com data futura que ainda não foi efetivada. Útil para planejamento. |
+| **Transação Realizada** | Transação que já aconteceu e impacta o saldo atual. |
 | **Cartão de Crédito** | Meio de pagamento com controle de limite e fatura. Não é tratado como conta bancária. |
 | **Fatura** | Conjunto de despesas em um cartão com data de fechamento e vencimento. |
 | **Pagamento de fatura** | Despesa pontual que representa a quitação da fatura do cartão. |
