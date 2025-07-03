@@ -1,5 +1,7 @@
+import { InvalidMoneyError } from '@domain/shared/errors/InvalidMoneyError';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
+import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 import { Envelope } from './Envelope';
 
@@ -39,9 +41,7 @@ describe('Envelope', () => {
     const result = Envelope.create(dto);
 
     expect(result.hasError).toBe(true);
-    expect(
-      result.errors.some((e) => e.message?.toLowerCase().includes('valor')),
-    ).toBe(true);
+    expect(result.errors[0]).toEqual(new InvalidMoneyError(-100));
   });
 
   it('deve acumular erro se o categoryId for inválido', () => {
@@ -51,8 +51,8 @@ describe('Envelope', () => {
     const result = Envelope.create(dto);
 
     expect(result.hasError).toBe(true);
-    expect(
-      result.errors.some((e) => e.message?.toLowerCase().includes('id')),
-    ).toBe(true);
+    expect(result.errors[0]).toEqual(
+      new InvalidEntityIdError('invalid-category-id'),
+    );
   });
 });

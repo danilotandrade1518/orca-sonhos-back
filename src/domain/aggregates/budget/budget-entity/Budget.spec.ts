@@ -1,4 +1,8 @@
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { CannotRemoveOwnerFromParticipantsError } from './../../../shared/errors/CannotRemoveOwnerFromParticipantsError';
+import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
+import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
+import { NotFoundError } from './../../../shared/errors/NotFoundError';
 import { Budget, CreateBudgetDTO } from './Budget';
 
 describe('Budget', () => {
@@ -78,7 +82,7 @@ describe('Budget', () => {
       });
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('InvalidEntityNameError');
+      expect(result.errors[0]).toEqual(new InvalidEntityNameError(''));
     });
 
     it('should return error when name is too long', () => {
@@ -88,7 +92,9 @@ describe('Budget', () => {
       });
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('InvalidEntityNameError');
+      expect(result.errors[0]).toEqual(
+        new InvalidEntityNameError('a'.repeat(256)),
+      );
     });
 
     it('should return error when owner id is invalid', () => {
@@ -98,7 +104,7 @@ describe('Budget', () => {
       });
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('InvalidEntityIdError');
+      expect(result.errors[0]).toEqual(new InvalidEntityIdError('invalid-id'));
     });
 
     it('should return error when participant id is invalid', () => {
@@ -111,7 +117,7 @@ describe('Budget', () => {
       const result = Budget.create(data);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('InvalidEntityIdError');
+      expect(result.errors[0]).toEqual(new InvalidEntityIdError('invalid-id'));
     });
   });
 
@@ -159,7 +165,7 @@ describe('Budget', () => {
       const result = budget.addParticipant('invalid-id');
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('InvalidEntityIdError');
+      expect(result.errors[0]).toEqual(new InvalidEntityIdError('invalid-id'));
     });
   });
 
@@ -195,7 +201,7 @@ describe('Budget', () => {
       const result = budget.removeParticipant(nonExistentId);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('NotFoundError');
+      expect(result.errors[0]).toEqual(new NotFoundError('participantId'));
     });
 
     it('should return error when removing owner', () => {
@@ -210,8 +216,8 @@ describe('Budget', () => {
       const result = budget.removeParticipant(ownerId);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe(
-        'CannotRemoveOwnerFromParticipantsError',
+      expect(result.errors[0]).toEqual(
+        new CannotRemoveOwnerFromParticipantsError(),
       );
     });
   });

@@ -17,16 +17,26 @@ export interface CreateCreditCardDTO {
 export class CreditCard {
   private readonly _id: EntityId;
   private readonly _createdAt: Date;
+  private readonly _name: EntityName;
+  private readonly _limit: MoneyVo;
+  private readonly _closingDay: CreditCardDayVo;
+  private readonly _dueDay: CreditCardDayVo;
+  private readonly _budgetId: EntityId;
 
   private _updatedAt: Date;
 
   private constructor(
-    private readonly _name: EntityName,
-    private readonly _limit: MoneyVo,
-    private readonly _closingDay: CreditCardDayVo,
-    private readonly _dueDay: CreditCardDayVo,
-    private readonly _budgetId: EntityId,
+    name: EntityName,
+    limit: MoneyVo,
+    closingDay: CreditCardDayVo,
+    dueDay: CreditCardDayVo,
+    budgetId: EntityId,
   ) {
+    this._name = name;
+    this._limit = limit;
+    this._closingDay = closingDay;
+    this._dueDay = dueDay;
+    this._budgetId = budgetId;
     this._id = EntityId.create();
     this._createdAt = new Date();
     this._updatedAt = new Date();
@@ -39,7 +49,7 @@ export class CreditCard {
     return this._name.value?.name ?? '';
   }
   get limit(): number {
-    return this._limit.value?.amount ?? 0;
+    return this._limit.value?.cents ?? 0;
   }
   get closingDay(): number {
     return this._closingDay.value?.day ?? 0;

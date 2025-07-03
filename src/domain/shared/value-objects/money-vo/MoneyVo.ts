@@ -5,13 +5,13 @@ import { InvalidMoneyError } from '../../errors/InvalidMoneyError';
 import { IValueObject } from '../../value-object';
 
 export type MoneyVoValue = {
-  amount: number;
+  cents: number;
 };
 
 export class MoneyVo implements IValueObject<MoneyVoValue> {
   private either = new Either<DomainError, MoneyVoValue>();
 
-  private constructor(private _amount: number) {
+  private constructor(private _cents: number) {
     this.validate();
   }
 
@@ -28,27 +28,27 @@ export class MoneyVo implements IValueObject<MoneyVoValue> {
   }
 
   equals(vo: this): boolean {
-    return vo instanceof MoneyVo && vo.value?.amount === this.value?.amount;
+    return vo instanceof MoneyVo && vo.value?.cents === this.value?.cents;
   }
 
   static create(amount: number): MoneyVo {
     return new MoneyVo(amount);
   }
 
+  get asMonetaryValue(): number {
+    return (this.value?.cents ?? 0) / 100;
+  }
+
   private validate() {
-    if (typeof this._amount !== 'number' || isNaN(this._amount))
-      this.either.addError(
-        new InvalidMoneyError('Valor deve ser um número válido'),
-      );
+    if (typeof this._cents !== 'number' || isNaN(this._cents))
+      this.either.addError(new InvalidMoneyError(this._cents));
 
-    if (!isFinite(this._amount))
-      this.either.addError(new InvalidMoneyError('Valor deve ser finito'));
+    if (!isFinite(this._cents))
+      this.either.addError(new InvalidMoneyError(this._cents));
 
-    if (this._amount < 0)
-      this.either.addError(
-        new InvalidMoneyError('Valor não pode ser negativo'),
-      );
+    if (this._cents < 0)
+      this.either.addError(new InvalidMoneyError(this._cents));
 
-    this.either.setData({ amount: this._amount });
+    this.either.setData({ cents: this._cents });
   }
 }

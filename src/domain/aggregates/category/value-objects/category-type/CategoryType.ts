@@ -17,7 +17,7 @@ export type CategoryTypeValue = {
 export class CategoryType implements IValueObject<CategoryTypeValue> {
   private either = new Either<DomainError, CategoryTypeValue>();
 
-  private constructor(private _type: string) {
+  private constructor(private _type: CategoryTypeEnum) {
     this.validate();
   }
 
@@ -37,19 +37,13 @@ export class CategoryType implements IValueObject<CategoryTypeValue> {
     return vo instanceof CategoryType && vo.value?.type === this.value?.type;
   }
 
-  static create(type: string): CategoryType {
+  static create(type: CategoryTypeEnum): CategoryType {
     return new CategoryType(type);
   }
 
   private validate() {
-    if (!this._type?.trim())
-      this.either.addError(new InvalidCategoryTypeError());
+    if (!this._type) this.either.addError(new InvalidCategoryTypeError());
 
-    const validType = Object.values(CategoryTypeEnum).find(
-      (t) => t === this._type.toUpperCase(),
-    );
-    if (!validType) this.either.addError(new InvalidCategoryTypeError());
-
-    if (validType) this.either.setData({ type: validType });
+    this.either.setData({ type: this._type });
   }
 }

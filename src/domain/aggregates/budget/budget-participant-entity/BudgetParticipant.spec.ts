@@ -1,4 +1,5 @@
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { BudgetParticipant, ParticipantRole } from './BudgetParticipant';
 
 describe('BudgetParticipant', () => {
@@ -32,7 +33,7 @@ describe('BudgetParticipant', () => {
       const result = BudgetParticipant.create({ id: 'invalid-id' });
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('InvalidEntityIdError');
+      expect(result.errors[0]).toEqual(new InvalidEntityIdError('invalid-id'));
     });
 
     it('should create with default role when not specified', () => {

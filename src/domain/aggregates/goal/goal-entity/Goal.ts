@@ -39,10 +39,10 @@ export class Goal implements IEntity {
     return this._name.value?.name ?? '';
   }
   get totalAmount(): number {
-    return this._totalAmount.value?.amount ?? 0;
+    return this._totalAmount.value?.cents ?? 0;
   }
   get accumulatedAmount(): number {
-    return this._accumulatedAmount.value?.amount ?? 0;
+    return this._accumulatedAmount.value?.cents ?? 0;
   }
   get deadline(): Date | undefined {
     return this._deadline;

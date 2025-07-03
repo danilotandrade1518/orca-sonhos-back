@@ -1,5 +1,6 @@
 import { InvalidCategoryTypeError } from '../errors/InvalidCategoryTypeError';
 import { CategoryTypeEnum } from '../value-objects/category-type/CategoryType';
+import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 import { EntityId } from './../../../shared/value-objects/entity-id/EntityId';
 import { Category } from './Category';
@@ -18,6 +19,7 @@ describe('Categoria', () => {
       const data = makeCategoryDTO();
 
       const result = Category.create(data);
+
       expect(result.hasError).toBe(false);
       expect(result.data).toBeInstanceOf(Category);
       expect(result.data?.id).not.toBeNull();
@@ -28,28 +30,25 @@ describe('Categoria', () => {
 
     it('deve retornar erro se name não for informado', () => {
       const result = Category.create(makeCategoryDTO({ name: '' }));
+
       expect(result.hasError).toBe(true);
-      expect(
-        result.errors.some((e) => e instanceof InvalidEntityNameError),
-      ).toBe(true);
+      expect(result.errors[0]).toEqual(new InvalidEntityNameError(''));
     });
 
     it('deve retornar erro se type não for informado', () => {
       const result = Category.create(
         makeCategoryDTO({ type: '' as CategoryTypeEnum }),
       );
+
       expect(result.hasError).toBe(true);
-      expect(
-        result.errors.some(
-          (e: unknown) => e instanceof InvalidCategoryTypeError,
-        ),
-      ).toBe(true);
+      expect(result.errors[0]).toEqual(new InvalidCategoryTypeError());
     });
 
     it('deve retornar erro se budgetId não for informado', () => {
       const result = Category.create(makeCategoryDTO({ budgetId: '' }));
+
       expect(result.hasError).toBe(true);
-      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]).toEqual(new InvalidEntityIdError(''));
     });
 
     it('deve acumular múltiplos erros se mais de um campo não for informado', () => {
@@ -60,16 +59,14 @@ describe('Categoria', () => {
           budgetId: '',
         }),
       );
+
       expect(result.hasError).toBe(true);
-      expect(
-        result.errors.some((e: unknown) => e instanceof InvalidEntityNameError),
-      ).toBe(true);
-      expect(
-        result.errors.some(
-          (e: unknown) => e instanceof InvalidCategoryTypeError,
-        ),
-      ).toBe(true);
-      expect(result.errors.length).toBeGreaterThan(1);
+      expect(result.errors).toEqual([
+        new InvalidEntityNameError(''),
+        new InvalidEntityNameError(''),
+        new InvalidCategoryTypeError(),
+        new InvalidEntityIdError(''),
+      ]);
     });
   });
 });

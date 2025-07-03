@@ -1,4 +1,6 @@
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
+import { NotFoundError } from './../../../shared/errors/NotFoundError';
 import { BudgetParticipants } from './BudgetParticipants';
 
 describe('BudgetParticipants', () => {
@@ -74,7 +76,7 @@ describe('BudgetParticipants', () => {
       const result = participants.addParticipant('invalid-id');
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('InvalidEntityIdError');
+      expect(result.errors[0]).toEqual(new InvalidEntityIdError('invalid-id'));
     });
   });
 
@@ -103,7 +105,7 @@ describe('BudgetParticipants', () => {
       const result = participants.removeParticipant(nonExistentId);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].name).toBe('NotFoundError');
+      expect(result.errors[0]).toEqual(new NotFoundError('participantId'));
     });
   });
 

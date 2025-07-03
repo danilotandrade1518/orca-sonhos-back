@@ -35,7 +35,7 @@ export class Envelope implements IEntity {
     return this._name.value?.name ?? '';
   }
   get limit(): number {
-    return this._limit.value?.amount ?? 0;
+    return this._limit.value?.cents ?? 0;
   }
   get categoryId(): string {
     return this._categoryId.value?.id ?? '';
