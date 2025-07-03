@@ -37,16 +37,23 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 ### 💸 Transações (Receitas e Despesas)
 - São os lançamentos manuais ou importados que alimentam o sistema.
 - Associadas a uma **categoria**, um **orçamento** e uma **data**.
-- **Podem ser futuras**: O sistema permite lançar transações com data futura para facilitar o **planejamento financeiro** e controle antecipado de gastos.
+- **Flexibilidade temporal**: O sistema permite transações com **data passada, presente ou futura** para máximo controle financeiro.
 - Tipos:
   - Receita (entrada)
   - Despesa (saída)
   - Transferência (entre orçamentos)
 - Status:
   - **Agendada**: Transação futura que ainda não foi efetivada
-  - **Realizada**: Transação que já aconteceu
+  - **Realizada**: Transação que já aconteceu e impacta o saldo atual
+  - **Atrasada**: Transação com data passada que ainda não foi concluída
   - **Cancelada**: Transação agendada que foi cancelada
+- **Controle de pagamento**: Ao cadastrar, o usuário define se a transação já foi paga/recebida ou se ainda está pendente.
 - Cada transação possui uma **forma de pagamento**, que pode incluir cartões de crédito.
+
+#### 💡 Impacto no Saldo:
+- **Transações Realizadas**: Afetam imediatamente o saldo atual, independente da data
+- **Transações Agendadas**: Não afetam o saldo atual, apenas aparecem nas projeções
+- **Transações Atrasadas**: Não afetam o saldo atual, mas geram alertas de pendência
 
 ### 🗂️ Categorias
 - Organizam os lançamentos para permitir análise.
@@ -133,6 +140,13 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - **Parcelas e financiamentos**: Controlar prestações futuras
 - **Gestão de metas**: Calcular quando objetivos serão atingidos com aportes futuros
 
+### 📅 Transações Passadas - Casos de Uso
+- **Lançamento retroativo**: Cadastrar gastos esquecidos com data correta
+- **Conciliação bancária**: Registrar transações já realizadas no banco
+- **Controle de pendências**: Marcar contas vencidas que ainda não foram pagas
+- **Histórico completo**: Manter registro fiel da movimentação financeira
+- **Alertas de atraso**: Sistema identifica automaticamente transações em atraso
+
 ---
 
 ## 📚 Termos importantes para a IA Assistente
@@ -143,9 +157,10 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 | **Categoria** | Tipo de gasto/receita (ex: alimentação, transporte, investimento). Organiza as transações. |
 | **Meta** | Objetivo financeiro (ex: comprar carro, fazer intercâmbio), com valor-alvo e prazo. |
 | **Envelope** | Limite de gastos por categoria dentro de um orçamento mensal. |
-| **Transação** | Registro de entrada ou saída de dinheiro. Pode ser atual ou futura. Deve sempre ter um valor, data, categoria e orçamento. |
+| **Transação** | Registro de entrada ou saída de dinheiro. Pode ter data passada, presente ou futura. Deve sempre ter um valor, data, categoria e orçamento. |
 | **Transação Agendada** | Transação com data futura que ainda não foi efetivada. Útil para planejamento. |
-| **Transação Realizada** | Transação que já aconteceu e impacta o saldo atual. |
+| **Transação Realizada** | Transação que já aconteceu e impacta o saldo atual. Pode ter qualquer data. |
+| **Transação Atrasada** | Transação com data passada que ainda não foi concluída/paga. Gera alerta no sistema. |
 | **Cartão de Crédito** | Meio de pagamento com controle de limite e fatura. Não é tratado como conta bancária. |
 | **Fatura** | Conjunto de despesas em um cartão com data de fechamento e vencimento. |
 | **Pagamento de fatura** | Despesa pontual que representa a quitação da fatura do cartão. |
