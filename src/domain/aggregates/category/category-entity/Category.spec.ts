@@ -63,7 +63,6 @@ describe('Categoria', () => {
       expect(result.hasError).toBe(true);
       expect(result.errors).toEqual([
         new InvalidEntityNameError(''),
-        new InvalidEntityNameError(''),
         new InvalidCategoryTypeError(),
         new InvalidEntityIdError(''),
       ]);

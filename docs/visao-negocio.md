@@ -78,6 +78,24 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 - Ajudam o usuário a **controlar o que pode gastar** em cada área.
 - Funcionam como subcontas dentro de um orçamento.
 
+### 🏦 Contas (Accounts)
+- Representam **onde o dinheiro está fisicamente armazenado** antes de ser gasto ou após ser recebido.
+- **Dimensão complementar** aos orçamentos: orçamentos definem "para que uso", contas definem "onde está".
+- Cada conta mantém seu **saldo próprio** e histórico de movimentações.
+- Tipos de conta:
+  - **Conta Corrente**: Conta bancária para movimentações do dia a dia
+  - **Conta Poupança**: Conta bancária para reservas e economias
+  - **Carteira Física**: Dinheiro em espécie que o usuário carrega
+  - **Carteira Digital**: Saldo em apps como PIX, PayPal, cartões pré-pagos
+  - **Conta Investimento**: Recursos aplicados em investimentos líquidos
+  - **Outros**: Tipos personalizados conforme necessidade
+
+#### Como funciona na prática:
+- **Toda transação** deve indicar de qual conta o dinheiro saiu/entrou
+- **Transferências** podem mover dinheiro entre contas (ex: saque no caixa)
+- **Reconciliação**: Saldos das contas devem bater com extratos reais
+- **Controle total**: Usuário sabe exatamente onde cada centavo está guardado
+
 ### 💳 Gestão de Cartões de Crédito
 
 O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao controle de despesas**, seguindo o modelo:
@@ -161,6 +179,7 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 | **Transação Agendada** | Transação com data futura que ainda não foi efetivada. Útil para planejamento. |
 | **Transação Realizada** | Transação que já aconteceu e impacta o saldo atual. Pode ter qualquer data. |
 | **Transação Atrasada** | Transação com data passada que ainda não foi concluída/paga. Gera alerta no sistema. |
+| **Conta** | Local físico onde o dinheiro está armazenado (conta bancária, carteira, etc.). Pode ter saldo negativo. |
 | **Cartão de Crédito** | Meio de pagamento com controle de limite e fatura. Não é tratado como conta bancária. |
 | **Fatura** | Conjunto de despesas em um cartão com data de fechamento e vencimento. |
 | **Pagamento de fatura** | Despesa pontual que representa a quitação da fatura do cartão. |

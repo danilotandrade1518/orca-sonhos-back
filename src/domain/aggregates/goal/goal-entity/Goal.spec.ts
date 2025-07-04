@@ -71,7 +71,7 @@ describe('Goal', () => {
       );
 
       expect(result.hasError).toBe(true);
-      expect(result.errors.length).toBeGreaterThan(4);
+      expect(result.errors).toHaveLength(4);
     });
   });
 

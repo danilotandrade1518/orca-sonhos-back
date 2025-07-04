@@ -39,13 +39,15 @@ export class EntityName implements IValueObject<EntityNameValue> {
   }
 
   private validate() {
-    if (!this._name?.trim())
+    const trimedName = this._name?.trim();
+
+    if (!trimedName)
       this.either.addError(new InvalidEntityNameError(this._name));
 
-    if (this._name?.length < EntityName.MIN_LENGTH)
+    if (trimedName && trimedName.length < EntityName.MIN_LENGTH)
       this.either.addError(new InvalidEntityNameError(this._name));
 
-    if (this._name?.length > EntityName.MAX_LENGTH)
+    if (trimedName && trimedName.length > EntityName.MAX_LENGTH)
       this.either.addError(new InvalidEntityNameError(this._name));
 
     this.either.setData({ name: this._name });
