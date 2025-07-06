@@ -116,6 +116,20 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - Não fragmenta a experiência de lançamento
 - Permite visão clara da fatura e pagamento
 
+### 💳 Fatura de Cartão (CreditCardBill)
+- Agregado que representa uma fatura específica de um cartão de crédito.
+- Cada fatura tem:
+  - Data de fechamento e vencimento
+  - Valor total da fatura
+  - Status (OPEN, CLOSED, PAID, OVERDUE) - Enum type-safe
+  - Referência ao cartão de crédito
+- **Regras de negócio**:
+  - Data de fechamento deve ser anterior à data de vencimento
+  - Fatura em atraso quando passou do vencimento e não foi paga
+  - Pode ser marcada como paga, alterando o status e registrando data do pagamento
+  - Calcula automaticamente dias restantes até o vencimento
+  - Status controlado por enum para garantir type-safety
+
 ---
 
 ## 📊 Relatórios e Painéis
