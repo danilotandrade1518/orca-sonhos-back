@@ -50,44 +50,34 @@ export class Budget implements IEntity {
   }
 
   addParticipant(userId: string): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
     const entityIdVo = EntityId.fromString(userId);
-    either.addManyErrors(entityIdVo.errors);
 
-    if (either.hasError) return either;
+    if (entityIdVo.hasError)
+      return Either.errors<DomainError, void>(entityIdVo.errors);
 
     const result = this._participants.addParticipant(userId);
-    if (result.hasError) {
-      either.addManyErrors(result.errors);
-      return either;
-    }
+    if (result.hasError) return Either.errors<DomainError, void>(result.errors);
 
     this._updatedAt = new Date();
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   removeParticipant(participantId: string): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
     const participantIdVo = EntityId.fromString(participantId);
-    either.addManyErrors(participantIdVo.errors);
 
-    if (either.hasError) return either;
+    if (participantIdVo.hasError)
+      return Either.errors<DomainError, void>(participantIdVo.errors);
 
-    if (participantIdVo.equals(this._ownerId)) {
-      either.addError(new CannotRemoveOwnerFromParticipantsError());
-      return either;
-    }
+    if (participantIdVo.equals(this._ownerId))
+      return Either.error<DomainError, void>(
+        new CannotRemoveOwnerFromParticipantsError(),
+      );
 
     const result = this._participants.removeParticipant(participantId);
-    if (result.hasError) {
-      either.addManyErrors(result.errors);
-      return either;
-    }
+    if (result.hasError) return Either.errors<DomainError, void>(result.errors);
 
     this._updatedAt = new Date();
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   static create(data: CreateBudgetDTO): Either<DomainError, Budget> {
@@ -105,18 +95,14 @@ export class Budget implements IEntity {
       participantIds: data.participantIds || [],
     });
 
-    if (participantsResult.hasError) {
-      either.addManyErrors(participantsResult.errors);
-      return either;
-    }
+    if (participantsResult.hasError)
+      return Either.errors<DomainError, Budget>(participantsResult.errors);
 
     const budget = new Budget(nameVo, ownerIdVo, participantsResult.data!);
 
     const addOwnerResult = budget.addParticipant(data.ownerId);
-    if (addOwnerResult.hasError) {
-      either.addManyErrors(addOwnerResult.errors);
-      return either;
-    }
+    if (addOwnerResult.hasError)
+      return Either.errors<DomainError, Budget>(addOwnerResult.errors);
 
     either.setData(budget);
     return either;

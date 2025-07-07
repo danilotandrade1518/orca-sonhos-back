@@ -40,15 +40,12 @@ export class BalanceVo implements IValueObject<BalanceVoValue> {
   }
 
   private validate() {
-    if (typeof this._cents !== 'number') {
+    if (
+      typeof this._cents !== 'number' ||
+      isNaN(this._cents) ||
+      !isFinite(this._cents)
+    )
       this.either.addError(new InvalidBalanceError(this._cents));
-      return;
-    }
-
-    if (isNaN(this._cents) || !isFinite(this._cents)) {
-      this.either.addError(new InvalidBalanceError(this._cents));
-      return;
-    }
 
     this.either.setData({ cents: this._cents });
   }

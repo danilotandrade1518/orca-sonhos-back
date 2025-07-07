@@ -1,6 +1,6 @@
-import { DomainError } from '@domain/shared/domain-error';
+import { ApplicationError } from './ApplicationError';
 
-export class RepositoryError extends DomainError {
+export class RepositoryError extends ApplicationError {
   constructor(
     message: string,
     public readonly cause?: Error,

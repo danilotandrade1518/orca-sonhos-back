@@ -105,7 +105,7 @@ describe('BudgetParticipants', () => {
       const result = participants.removeParticipant(nonExistentId);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toEqual(new NotFoundError('participantId'));
+      expect(result.errors[0]).toEqual(new NotFoundError('userId'));
     });
   });
 

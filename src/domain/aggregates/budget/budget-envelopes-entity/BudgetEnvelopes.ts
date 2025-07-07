@@ -28,42 +28,41 @@ export class BudgetEnvelopes {
     limit: number;
     categoryId: string;
   }): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
     const envelopeOrError = Envelope.create(data);
-    if (envelopeOrError.hasError) {
-      either.addManyErrors(envelopeOrError.errors);
-      return either;
-    }
+
+    if (envelopeOrError.hasError)
+      return Either.errors<DomainError, void>(envelopeOrError.errors);
+
     this._envelopes.push(envelopeOrError.data!);
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   removeEnvelope(envelopeId: string): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
     const index = this._envelopes.findIndex((e) => e.id === envelopeId);
-    if (index === -1) {
-      either.addError(new NotFoundError('envelopeId'));
-      return either;
-    }
+    if (index === -1)
+      return Either.error<DomainError, void>(new NotFoundError('envelopeId'));
+
     this._envelopes.splice(index, 1);
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   static create(
     data: CreateBudgetEnvelopesDTO,
   ): Either<DomainError, BudgetEnvelopes> {
-    const either = new Either<DomainError, BudgetEnvelopes>();
     const envelopes: Envelope[] = [];
-    for (const env of data.envelopes) {
-      const envOrError = Envelope.create(env);
-      if (envOrError.hasError) {
-        either.addManyErrors(envOrError.errors);
-      } else {
-        envelopes.push(envOrError.data!);
-      }
+    for (const envelope of data.envelopes) {
+      const envelopeOrError = Envelope.create(envelope);
+
+      if (envelopeOrError.hasError)
+        return Either.errors<DomainError, BudgetEnvelopes>(
+          envelopeOrError.errors,
+        );
+
+      envelopes.push(envelopeOrError.data!);
     }
-    if (either.hasError) return either;
-    either.setData(new BudgetEnvelopes(envelopes));
-    return either;
+
+    return Either.success<DomainError, BudgetEnvelopes>(
+      new BudgetEnvelopes(envelopes),
+    );
   }
 }

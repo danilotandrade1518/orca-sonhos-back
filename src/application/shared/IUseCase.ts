@@ -1,5 +1,12 @@
-import { UseCaseResponse } from './UseCaseResponse';
+import { DomainError } from '@domain/shared/domain-error';
 
-export interface IUseCase<TRequest, TResponse extends UseCaseResponse> {
-  execute(request: TRequest): Promise<TResponse>;
+import { Either } from '../../shared/core/either';
+import { ApplicationError } from './errors/ApplicationError';
+
+export type UseCaseResponse = { id: string };
+
+export interface IUseCase<TRequest> {
+  execute(
+    request: TRequest,
+  ): Promise<Either<DomainError | ApplicationError, UseCaseResponse>>;
 }

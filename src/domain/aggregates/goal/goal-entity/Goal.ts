@@ -58,19 +58,16 @@ export class Goal implements IEntity {
   }
 
   addAmount(amount: number): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
     const newAmount = this.accumulatedAmount + amount;
 
     const newAccumulatedVo = MoneyVo.create(newAmount);
     if (newAccumulatedVo.hasError)
-      either.addManyErrors(newAccumulatedVo.errors);
-
-    if (either.hasError) return either;
+      return Either.errors<DomainError, void>(newAccumulatedVo.errors);
 
     this._accumulatedAmount = newAccumulatedVo;
     this._updatedAt = new Date();
-    return either;
+
+    return Either.success<DomainError, void>();
   }
 
   static create(data: CreateGoalDTO): Either<DomainError, Goal> {
@@ -99,7 +96,6 @@ export class Goal implements IEntity {
       accumulatedAmountVo,
     );
 
-    either.setData(goal);
-    return either;
+    return Either.success<DomainError, Goal>(goal);
   }
 }

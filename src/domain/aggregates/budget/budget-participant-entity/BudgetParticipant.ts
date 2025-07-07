@@ -34,19 +34,15 @@ export class BudgetParticipant implements IEntity {
   static create(
     data: CreateBudgetParticipantDTO,
   ): Either<DomainError, BudgetParticipant> {
-    const either = new Either<DomainError, BudgetParticipant>();
-
     const idVo = EntityId.fromString(data.id);
-    if (idVo.hasError) either.addManyErrors(idVo.errors);
-
-    if (either.hasError) return either;
+    if (idVo.hasError)
+      return Either.errors<DomainError, BudgetParticipant>(idVo.errors);
 
     const participant = new BudgetParticipant(
       idVo,
       data.role ?? ParticipantRole.PARTICIPANT,
     );
 
-    either.setData(participant);
-    return either;
+    return Either.success<DomainError, BudgetParticipant>(participant);
   }
 }

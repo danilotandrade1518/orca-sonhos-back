@@ -47,10 +47,8 @@ export class TransactionDescription
       !trimmedDescription ||
       trimmedDescription.length < 3 ||
       trimmedDescription.length > 100
-    ) {
+    )
       this.either.addError(new InvalidTransactionDescriptionError());
-      return;
-    }
 
     this.either.setData({ description: trimmedDescription });
   }

@@ -94,7 +94,7 @@ export class CreditCard {
       dueDayVo,
       budgetIdVo,
     );
-    either.setData(card);
-    return either;
+
+    return Either.success<DomainError, CreditCard>(card);
   }
 }

@@ -62,6 +62,68 @@ export class Account implements IEntity {
     return this._description;
   }
 
+  updateName(newName: string): Either<DomainError, void> {
+    const newNameVo = EntityName.create(newName);
+
+    if (newNameVo.hasError)
+      return Either.errors<DomainError, void>(newNameVo.errors);
+
+    this._name = newNameVo;
+    this._updatedAt = new Date();
+
+    return Either.success<DomainError, void>();
+  }
+
+  updateDescription(newDescription?: string): Either<DomainError, void> {
+    this._description = newDescription;
+    this._updatedAt = new Date();
+
+    return Either.success<DomainError, void>();
+  }
+
+  addAmount(amount: number): Either<DomainError, void> {
+    const currentBalance = this._balance.value?.cents ?? 0;
+    const newBalance = BalanceVo.create(currentBalance + amount);
+
+    if (newBalance.hasError)
+      return Either.errors<DomainError, void>(newBalance.errors);
+
+    this._balance = newBalance;
+    this._updatedAt = new Date();
+
+    return Either.success<DomainError, void>();
+  }
+
+  subtractAmount(amount: number): Either<DomainError, void> {
+    const currentBalance = this._balance.value?.cents ?? 0;
+    const newBalance = BalanceVo.create(currentBalance - amount);
+
+    if (newBalance.hasError)
+      return Either.errors<DomainError, void>(newBalance.errors);
+
+    this._balance = newBalance;
+    this._updatedAt = new Date();
+
+    return Either.success<DomainError, void>();
+  }
+
+  setBalance(newBalance: number): Either<DomainError, void> {
+    const newBalanceVo = BalanceVo.create(newBalance);
+
+    if (newBalanceVo.hasError)
+      return Either.errors<DomainError, void>(newBalanceVo.errors);
+
+    this._balance = newBalanceVo;
+    this._updatedAt = new Date();
+
+    return Either.success<DomainError, void>();
+  }
+
+  canSubtract(amount: number): boolean {
+    const currentBalance = this._balance.value?.cents ?? 0;
+    return currentBalance >= amount;
+  }
+
   static create(data: CreateAccountDTO): Either<DomainError, Account> {
     const either = new Either<DomainError, Account>();
 
@@ -78,77 +140,5 @@ export class Account implements IEntity {
 
     either.setData(new Account(name, type, balance, data.description));
     return either;
-  }
-
-  updateName(newName: string): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    const newNameVo = EntityName.create(newName);
-    either.addManyErrors(newNameVo.errors);
-
-    if (either.hasError) return either;
-
-    this._name = newNameVo;
-    this._updatedAt = new Date();
-
-    return either;
-  }
-
-  updateDescription(newDescription?: string): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    this._description = newDescription;
-    this._updatedAt = new Date();
-
-    return either;
-  }
-
-  addAmount(amount: number): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    const currentBalance = this._balance.value?.cents ?? 0;
-    const newBalance = BalanceVo.create(currentBalance + amount);
-    either.addManyErrors(newBalance.errors);
-
-    if (either.hasError) return either;
-
-    this._balance = newBalance;
-    this._updatedAt = new Date();
-
-    return either;
-  }
-
-  subtractAmount(amount: number): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    const currentBalance = this._balance.value?.cents ?? 0;
-    const newBalance = BalanceVo.create(currentBalance - amount);
-    either.addManyErrors(newBalance.errors);
-
-    if (either.hasError) return either;
-
-    this._balance = newBalance;
-    this._updatedAt = new Date();
-
-    return either;
-  }
-
-  setBalance(newBalance: number): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    const newBalanceVo = BalanceVo.create(newBalance);
-    either.addManyErrors(newBalanceVo.errors);
-
-    if (either.hasError) return either;
-
-    this._balance = newBalanceVo;
-    this._updatedAt = new Date();
-
-    return either;
-  }
-
-  canSubtract(amount: number): boolean {
-    const currentBalance = this._balance.value?.cents ?? 0;
-    return currentBalance >= amount;
   }
 }

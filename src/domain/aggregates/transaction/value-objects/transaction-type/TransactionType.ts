@@ -42,13 +42,8 @@ export class TransactionType implements IValueObject<TransactionTypeValue> {
   }
 
   private validate() {
-    if (
-      !this._type ||
-      !Object.values(TransactionTypeEnum).includes(this._type)
-    ) {
+    if (!this._type || !Object.values(TransactionTypeEnum).includes(this._type))
       this.either.addError(new InvalidTransactionTypeError());
-      return;
-    }
 
     this.either.setData({ type: this._type });
   }

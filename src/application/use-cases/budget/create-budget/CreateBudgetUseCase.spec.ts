@@ -25,11 +25,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(true);
-      expect(response.id).toBeDefined();
-      expect(response.errors).toBeUndefined();
+      expect(result.hasData).toBe(true);
+      expect(result.hasError).toBe(false);
+      expect(result.data!.id).toBeDefined();
       expect(executeSpy).toHaveBeenCalledTimes(1);
       expect(executeSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -46,10 +46,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(true);
-      expect(response.id).toBeDefined();
+      expect(result.hasData).toBe(true);
+      expect(result.hasError).toBe(false);
+      expect(result.data!.id).toBeDefined();
       expect(executeSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -61,12 +62,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(false);
-      expect(response.errors).toBeDefined();
-      expect(response.errors!.length).toBeGreaterThan(0);
-      expect(response.id).toBeUndefined();
+      expect(result.hasError).toBe(true);
+      expect(result.hasData).toBe(false);
+      expect(result.errors[0].message).toContain('is invalid');
       expect(executeSpy).not.toHaveBeenCalled();
     });
 
@@ -78,11 +78,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(false);
-      expect(response.errors).toBeDefined();
-      expect(response.errors!.length).toBeGreaterThan(0);
+      expect(result.hasError).toBe(true);
+      expect(result.hasData).toBe(false);
+      expect(result.errors[0].message).toContain('is invalid');
       expect(executeSpy).not.toHaveBeenCalled();
     });
 
@@ -94,11 +94,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(false);
-      expect(response.errors).toBeDefined();
-      expect(response.errors!.length).toBeGreaterThan(0);
+      expect(result.hasError).toBe(true);
+      expect(result.hasData).toBe(false);
+      expect(result.errors[0].message).toContain('is invalid');
       expect(executeSpy).not.toHaveBeenCalled();
     });
 
@@ -110,11 +110,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(false);
-      expect(response.errors).toBeDefined();
-      expect(response.errors!.length).toBeGreaterThan(0);
+      expect(result.hasError).toBe(true);
+      expect(result.hasData).toBe(false);
+      expect(result.errors[0].message).toContain('is invalid');
       expect(executeSpy).not.toHaveBeenCalled();
     });
 
@@ -125,19 +125,19 @@ describe('CreateBudgetUseCase', () => {
       };
 
       const repositoryError = new RepositoryError('Database connection failed');
-      const failureEither = new Either<RepositoryError, void>();
-      failureEither.addError(repositoryError);
+      const failureEither = Either.error<RepositoryError, void>(
+        repositoryError,
+      );
 
       const executeSpy = jest
         .spyOn(repositoryStub, 'execute')
         .mockResolvedValue(failureEither);
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(false);
-      expect(response.errors).toBeDefined();
-      expect(response.errors).toContain('Database connection failed');
-      expect(response.id).toBeUndefined();
+      expect(result.hasError).toBe(true);
+      expect(result.hasData).toBe(false);
+      expect(result.errors[0].message).toContain('Database connection failed');
       expect(executeSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -154,11 +154,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(false);
-      expect(response.errors).toBeDefined();
-      expect(response.errors!.length).toBeGreaterThan(0);
+      expect(result.hasError).toBe(true);
+      expect(result.hasData).toBe(false);
+      expect(result.errors[0].message).toContain('is invalid');
       expect(executeSpy).not.toHaveBeenCalled();
     });
 
@@ -171,11 +171,11 @@ describe('CreateBudgetUseCase', () => {
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
 
-      const response = await useCase.execute(dto);
+      const result = await useCase.execute(dto);
 
-      expect(response.success).toBe(false);
-      expect(response.errors).toBeDefined();
-      expect(response.errors!.length).toBeGreaterThan(1);
+      expect(result.hasError).toBe(true);
+      expect(result.hasData).toBe(false);
+      expect(result.errors[0].message).toContain('is invalid');
       expect(executeSpy).not.toHaveBeenCalled();
     });
   });

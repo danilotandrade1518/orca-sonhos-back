@@ -62,7 +62,6 @@ export class Envelope implements IEntity {
     if (either.hasError) return either;
 
     const envelope = new Envelope(nameVo, limitVo, categoryIdVo);
-    either.setData(envelope);
-    return either;
+    return Either.success<DomainError, Envelope>(envelope);
   }
 }

@@ -57,8 +57,6 @@ export class Category implements IEntity {
     if (either.hasError) return either;
 
     const category = new Category(nameVo, typeVo, budgetIdVo);
-
-    either.setData(category);
-    return either;
+    return Either.success<DomainError, Category>(category);
   }
 }

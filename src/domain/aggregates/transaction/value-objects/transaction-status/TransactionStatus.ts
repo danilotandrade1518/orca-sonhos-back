@@ -48,10 +48,8 @@ export class TransactionStatus implements IValueObject<TransactionStatusValue> {
     if (
       !this._status ||
       !Object.values(TransactionStatusEnum).includes(this._status)
-    ) {
+    )
       this.either.addError(new InvalidTransactionStatusError());
-      return;
-    }
 
     this.either.setData({ status: this._status });
   }

@@ -30,4 +30,22 @@ export class Either<E, D> {
   get errors() {
     return this._errors;
   }
+
+  static success<E, D>(data?: D): Either<E, D> {
+    const either = new Either<E, D>();
+    if (data) either.setData(data);
+    return either;
+  }
+
+  static error<E, D>(error: E): Either<E, D> {
+    const either = new Either<E, D>();
+    either.addError(error);
+    return either;
+  }
+
+  static errors<E, D>(errors: E[]): Either<E, D> {
+    const either = new Either<E, D>();
+    either.addManyErrors(errors);
+    return either;
+  }
 }

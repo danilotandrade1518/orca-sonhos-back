@@ -28,31 +28,24 @@ export class BudgetParticipants implements IEntity {
   }
 
   addParticipant(userId: string): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    if (this._participants.some((p) => p.id === userId)) return either;
+    if (this._participants.some((p) => p.id === userId))
+      return Either.success<DomainError, void>();
 
     const participantOrError = BudgetParticipant.create({ id: userId });
-    if (participantOrError.hasError) {
-      either.addManyErrors(participantOrError.errors);
-      return either;
-    }
+    if (participantOrError.hasError)
+      return Either.errors<DomainError, void>(participantOrError.errors);
 
     this._participants.push(participantOrError.data!);
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   removeParticipant(userId: string): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
     const index = this._participants.findIndex((p) => p.id === userId);
-    if (index === -1) {
-      either.addError(new NotFoundError('participantId'));
-      return either;
-    }
+    if (index === -1)
+      return Either.error<DomainError, void>(new NotFoundError('userId'));
 
     this._participants.splice(index, 1);
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   static create(
@@ -73,7 +66,6 @@ export class BudgetParticipants implements IEntity {
     if (either.hasError) return either;
 
     const budgetParticipants = new BudgetParticipants(participants);
-    either.setData(budgetParticipants);
-    return either;
+    return Either.success<DomainError, BudgetParticipants>(budgetParticipants);
   }
 }

@@ -1,37 +1,37 @@
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { DomainError } from '@domain/shared/domain-error';
 
+import { Either } from '../../../../shared/core/either';
 import { IAddBudgetRepository } from '../../../contracts/repositories/budget/IAddBudgetRepository';
-import { ResponseBuilder } from '../../../shared/ResponseBuilder';
-import { IUseCase } from './../../../shared/IUseCase';
+import { ApplicationError } from '../../../shared/errors/ApplicationError';
+import { IUseCase, UseCaseResponse } from './../../../shared/IUseCase';
 import { CreateBudgetDto } from './CreateBudgetDto';
-import { CreateBudgetResponse } from './CreateBudgetResponse';
 
-export class CreateBudgetUseCase
-  implements IUseCase<CreateBudgetDto, CreateBudgetResponse>
-{
+export class CreateBudgetUseCase implements IUseCase<CreateBudgetDto> {
   constructor(private readonly addBudgetRepository: IAddBudgetRepository) {}
 
-  async execute(dto: CreateBudgetDto): Promise<CreateBudgetResponse> {
+  async execute(dto: CreateBudgetDto) {
     const budgetResult = Budget.create({
       name: dto.name,
       ownerId: dto.ownerId,
       participantIds: dto.participantIds,
     });
 
-    if (budgetResult.hasError) {
-      const errorMessages = budgetResult.errors.map((error) => error.message);
-      return ResponseBuilder.failure(errorMessages);
-    }
+    if (budgetResult.hasError)
+      return Either.errors<DomainError, UseCaseResponse>(budgetResult.errors);
 
     const budget = budgetResult.data!;
 
     const persistResult = await this.addBudgetRepository.execute(budget);
 
     if (persistResult.hasError) {
-      const errorMessages = persistResult.errors.map((error) => error.message);
-      return ResponseBuilder.failure(errorMessages);
+      return Either.errors<ApplicationError, UseCaseResponse>(
+        persistResult.errors,
+      );
     }
 
-    return ResponseBuilder.success(budget.id);
+    return Either.success<ApplicationError, UseCaseResponse>({
+      id: budget.id,
+    });
   }
 }

@@ -108,70 +108,60 @@ export class Transaction implements IEntity {
   }
 
   complete(): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    if (this.isCancelled) {
-      either.addError(
+    if (this.isCancelled)
+      return Either.error<DomainError, void>(
         new TransactionBusinessRuleError(
           'Cannot complete a cancelled transaction',
         ),
       );
-      return either;
-    }
 
     this._status = TransactionStatus.create(TransactionStatusEnum.COMPLETED);
     this._updatedAt = new Date();
 
-    either.setData(undefined);
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   cancel(): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    if (this.isCompleted) {
-      either.addError(
+    if (this.isCompleted)
+      return Either.error<DomainError, void>(
         new TransactionBusinessRuleError(
           'Cannot cancel a completed transaction',
         ),
       );
-      return either;
-    }
+
+    if (this.isCancelled)
+      return Either.error<DomainError, void>(
+        new TransactionBusinessRuleError(
+          'Cannot cancel a cancelled transaction',
+        ),
+      );
 
     this._status = TransactionStatus.create(TransactionStatusEnum.CANCELLED);
     this._updatedAt = new Date();
 
-    either.setData(undefined);
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   markAsOverdue(): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    if (this.isCompleted || this.isCancelled) {
-      either.addError(
+    if (this.isCompleted || this.isCancelled)
+      return Either.error<DomainError, void>(
         new TransactionBusinessRuleError(
           'Cannot mark completed or cancelled transaction as overdue',
         ),
       );
-      return either;
-    }
 
     const now = new Date();
-    if (this._transactionDate >= now) {
-      either.addError(
+    if (this._transactionDate >= now)
+      return Either.error<DomainError, void>(
         new TransactionBusinessRuleError(
           'Cannot mark future transaction as overdue',
         ),
       );
-      return either;
-    }
 
     this._status = TransactionStatus.create(TransactionStatusEnum.OVERDUE);
     this._updatedAt = new Date();
 
-    either.setData(undefined);
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   static create(data: CreateTransactionDTO): Either<DomainError, Transaction> {
@@ -215,8 +205,7 @@ export class Transaction implements IEntity {
       creditCardId,
     );
 
-    either.setData(transaction);
-    return either;
+    return Either.success<DomainError, Transaction>(transaction);
   }
 
   private static determineInitialStatus(

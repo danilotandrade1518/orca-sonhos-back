@@ -84,21 +84,18 @@ export class CreditCardBill {
   }
 
   markAsPaid(): Either<DomainError, void> {
-    const either = new Either<DomainError, void>();
-
-    if (this.status === BillStatusEnum.PAID) return either;
+    if (this.status === BillStatusEnum.PAID)
+      return Either.success<DomainError, void>();
 
     const paidStatus = BillStatus.create(BillStatusEnum.PAID);
-    if (paidStatus.hasError) {
-      paidStatus.errors.forEach((error) => either.addError(error));
-      return either;
-    }
+    if (paidStatus.hasError)
+      return Either.errors<DomainError, void>(paidStatus.errors);
 
     this._status = paidStatus;
     this._paidAt = new Date();
     this._updatedAt = new Date();
 
-    return either;
+    return Either.success<DomainError, void>();
   }
 
   static create(
@@ -106,28 +103,19 @@ export class CreditCardBill {
   ): Either<DomainError, CreditCardBill> {
     const either = new Either<DomainError, CreditCardBill>();
 
-    if (data.closingDate >= data.dueDate) {
+    if (data.closingDate >= data.dueDate)
       either.addError(new InvalidCreditCardBillDateError());
-    }
 
     const creditCardId = EntityId.fromString(data.creditCardId);
-    if (creditCardId.hasError) {
-      creditCardId.errors.forEach((error) => either.addError(error));
-    }
+    if (creditCardId.hasError) either.addManyErrors(creditCardId.errors);
 
     const amount = MoneyVo.create(data.amount);
-    if (amount.hasError) {
-      amount.errors.forEach((error) => either.addError(error));
-    }
+    if (amount.hasError) either.addManyErrors(amount.errors);
 
     const status = BillStatus.create(data.status ?? BillStatusEnum.OPEN);
-    if (status.hasError) {
-      status.errors.forEach((error) => either.addError(error));
-    }
+    if (status.hasError) either.addManyErrors(status.errors);
 
-    if (either.hasError) {
-      return either;
-    }
+    if (either.hasError) return either;
 
     const bill = new CreditCardBill(
       creditCardId,
@@ -137,7 +125,6 @@ export class CreditCardBill {
       status,
     );
 
-    either.setData(bill);
-    return either;
+    return Either.success<DomainError, CreditCardBill>(bill);
   }
 }
