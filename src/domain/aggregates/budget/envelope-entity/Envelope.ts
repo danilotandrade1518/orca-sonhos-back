@@ -1,10 +1,10 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../../shared/domain-error';
+import { DomainError } from '../../../shared/DomainError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
-import { IEntity } from './../../../shared/entity';
+import { IEntity } from './../../../shared/IEntity';
 
 export interface CreateEnvelopeDTO {
   name: string;

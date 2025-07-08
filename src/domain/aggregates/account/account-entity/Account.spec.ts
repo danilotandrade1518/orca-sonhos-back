@@ -2,7 +2,7 @@ import { Either } from '@either';
 
 import { InvalidAccountTypeError } from '../errors/InvalidAccountTypeError';
 import { AccountTypeEnum } from '../value-objects/account-type/AccountType';
-import { DomainError } from './../../../shared/domain-error';
+import { DomainError } from './../../../shared/DomainError';
 import { InvalidBalanceError } from './../../../shared/errors/InvalidBalanceError';
 import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 import { Account, CreateAccountDTO } from './Account';

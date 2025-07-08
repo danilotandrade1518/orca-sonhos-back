@@ -1,7 +1,7 @@
 import { NotFoundError } from '@domain/shared/errors/NotFoundError';
 import { Either } from '@either';
 
-import { DomainError } from '../../../shared/domain-error';
+import { DomainError } from '../../../shared/DomainError';
 import { Envelope } from '../envelope-entity/Envelope';
 
 export interface CreateBudgetEnvelopesDTO {

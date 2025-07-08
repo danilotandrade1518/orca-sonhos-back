@@ -1,4 +1,4 @@
-import { DomainError } from '../../../shared/domain-error';
+import { DomainError } from '../../../shared/DomainError';
 
 export class InvalidTransactionDescriptionError extends DomainError {
   constructor() {

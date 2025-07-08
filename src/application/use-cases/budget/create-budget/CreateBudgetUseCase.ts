@@ -1,5 +1,5 @@
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
-import { DomainError } from '@domain/shared/domain-error';
+import { DomainError } from '@domain/shared/DomainError';
 
 import { Either } from '../../../../shared/core/either';
 import { IAddBudgetRepository } from '../../../contracts/repositories/budget/IAddBudgetRepository';

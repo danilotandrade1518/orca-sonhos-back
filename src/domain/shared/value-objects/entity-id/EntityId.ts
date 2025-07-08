@@ -1,7 +1,7 @@
 import { Either } from '../../../../shared/core/either';
-import { DomainError } from '../../domain-error';
+import { DomainError } from '../../DomainError';
 import { InvalidEntityIdError } from '../../errors/InvalidEntityIdError';
-import { IValueObject } from '../../value-object';
+import { IValueObject } from '../../IValueObject';
 
 export type EntityIdValue = {
   id: string;

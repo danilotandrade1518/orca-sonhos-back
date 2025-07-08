@@ -1,13 +1,13 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../../shared/domain-error';
+import { DomainError } from '../../../shared/DomainError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import {
   CategoryType,
   CategoryTypeEnum,
 } from '../value-objects/category-type/CategoryType';
-import { IEntity } from './../../../shared/entity';
+import { IEntity } from './../../../shared/IEntity';
 
 export interface CreateCategoryDTO {
   name: string;

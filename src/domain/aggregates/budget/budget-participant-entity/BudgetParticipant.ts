@@ -1,7 +1,7 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../../shared/domain-error';
-import { IEntity } from '../../../shared/entity';
+import { DomainError } from '../../../shared/DomainError';
+import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 
 export enum ParticipantRole {

@@ -1,10 +1,10 @@
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
 
+import { RepositoryError } from '../../../shared/errors/RepositoryError';
+import { AddBudgetRepositoryStub } from '../../../shared/tests/stubs/AddBudgetRepositoryStub';
 import { CreateBudgetDto } from './CreateBudgetDto';
 import { CreateBudgetUseCase } from './CreateBudgetUseCase';
-import { AddBudgetRepositoryStub } from '../../../shared/tests/stubs/AddBudgetRepositoryStub';
-import { RepositoryError } from '../../../shared/errors/RepositoryError';
 
 describe('CreateBudgetUseCase', () => {
   let useCase: CreateBudgetUseCase;

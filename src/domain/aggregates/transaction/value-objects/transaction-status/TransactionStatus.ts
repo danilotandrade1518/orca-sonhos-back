@@ -1,7 +1,7 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../../../shared/domain-error';
-import { IValueObject } from '../../../../shared/value-object';
+import { DomainError } from '../../../../shared/DomainError';
+import { IValueObject } from '../../../../shared/IValueObject';
 import { InvalidTransactionStatusError } from '../../errors/InvalidTransactionStatusError';
 
 export enum TransactionStatusEnum {

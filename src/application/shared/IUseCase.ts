@@ -1,4 +1,4 @@
-import { DomainError } from '@domain/shared/domain-error';
+import { DomainError } from '@domain/shared/DomainError';
 
 import { Either } from '../../shared/core/either';
 import { ApplicationError } from './errors/ApplicationError';

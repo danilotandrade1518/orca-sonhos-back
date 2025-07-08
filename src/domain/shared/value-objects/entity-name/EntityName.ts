@@ -1,8 +1,8 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../domain-error';
+import { DomainError } from '../../DomainError';
 import { InvalidEntityNameError } from '../../errors/InvalidEntityNameError';
-import { IValueObject } from '../../value-object';
+import { IValueObject } from '../../IValueObject';
 
 export type EntityNameValue = {
   name: string;

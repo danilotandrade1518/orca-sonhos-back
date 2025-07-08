@@ -1,7 +1,7 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../domain-error';
-import { IValueObject } from '../../value-object';
+import { DomainError } from '../../DomainError';
+import { IValueObject } from '../../IValueObject';
 import { InvalidBalanceError } from './../../errors/InvalidBalanceError';
 
 export type BalanceVoValue = {

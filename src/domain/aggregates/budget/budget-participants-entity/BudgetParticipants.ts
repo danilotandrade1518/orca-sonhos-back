@@ -1,7 +1,7 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../../shared/domain-error';
-import { IEntity } from '../../../shared/entity';
+import { DomainError } from '../../../shared/DomainError';
+import { IEntity } from '../../../shared/IEntity';
 import { NotFoundError } from '../../../shared/errors/NotFoundError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { BudgetParticipant } from '../budget-participant-entity/BudgetParticipant';

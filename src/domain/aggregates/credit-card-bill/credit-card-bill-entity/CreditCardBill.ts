@@ -1,6 +1,6 @@
 import { Either } from '@either';
 
-import { DomainError } from '../../../shared/domain-error';
+import { DomainError } from '../../../shared/DomainError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
 import { InvalidCreditCardBillDateError } from '../errors/InvalidCreditCardBillDateError';

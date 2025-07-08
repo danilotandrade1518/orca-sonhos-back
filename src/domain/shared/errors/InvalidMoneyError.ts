@@ -1,4 +1,4 @@
-import { DomainError } from '../domain-error';
+import { DomainError } from '../DomainError';
 
 export class InvalidMoneyError extends DomainError {
   constructor(invalidValue: number) {
