@@ -13,6 +13,7 @@ import { EntityName } from './../../../shared/value-objects/entity-name/EntityNa
 export interface CreateAccountDTO {
   name: string;
   type: AccountTypeEnum;
+  budgetId: string;
   initialBalance?: number;
   description?: string;
 }
@@ -26,6 +27,7 @@ export class Account implements IEntity {
   private constructor(
     private _name: EntityName,
     private readonly _type: AccountType,
+    private readonly _budgetId: EntityId,
     private _balance: BalanceVo,
     private _description?: string,
   ) {
@@ -60,6 +62,10 @@ export class Account implements IEntity {
 
   get description(): string | undefined {
     return this._description;
+  }
+
+  get budgetId(): string | null {
+    return this._budgetId.value?.id ?? null;
   }
 
   updateName(newName: string): Either<DomainError, void> {
@@ -133,12 +139,17 @@ export class Account implements IEntity {
     const type = AccountType.create(data.type);
     either.addManyErrors(type.errors);
 
+    const budgetId = EntityId.fromString(data.budgetId);
+    either.addManyErrors(budgetId.errors);
+
     const balance = BalanceVo.create(data.initialBalance ?? 0);
     either.addManyErrors(balance.errors);
 
     if (either.hasError) return either;
 
-    either.setData(new Account(name, type, balance, data.description));
+    either.setData(
+      new Account(name, type, budgetId, balance, data.description),
+    );
     return either;
   }
 }
