@@ -7,6 +7,6 @@ import { RepositoryError } from '../../errors/RepositoryError';
 export class AddBudgetRepositoryStub implements IAddBudgetRepository {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async execute(_budget: Budget): Promise<Either<RepositoryError, void>> {
-    return Either.success(undefined);
+    return Either.success();
   }
 }
