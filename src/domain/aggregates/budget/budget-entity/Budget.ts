@@ -1,5 +1,6 @@
 import { Either } from '@either';
 
+import { AggregateRoot } from '../../../shared/AggregateRoot';
 import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { CannotRemoveOwnerFromParticipantsError } from '../../../shared/errors/CannotRemoveOwnerFromParticipantsError';
@@ -13,7 +14,7 @@ export interface CreateBudgetDTO {
   participantIds?: string[];
 }
 
-export class Budget implements IEntity {
+export class Budget extends AggregateRoot implements IEntity {
   private readonly _id: EntityId;
   private readonly _createdAt: Date;
 
@@ -24,6 +25,8 @@ export class Budget implements IEntity {
     private readonly _ownerId: EntityId,
     private readonly _participants: BudgetParticipants,
   ) {
+    super();
+
     this._id = EntityId.create();
 
     this._createdAt = new Date();

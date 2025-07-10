@@ -1,5 +1,6 @@
 import { Either } from '@either';
 
+import { AggregateRoot } from '../../../shared/AggregateRoot';
 import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
@@ -26,7 +27,7 @@ export interface CreateTransactionDTO {
   creditCardId?: string;
 }
 
-export class Transaction implements IEntity {
+export class Transaction extends AggregateRoot implements IEntity {
   private readonly _id: EntityId;
   private readonly _createdAt: Date;
 
@@ -42,6 +43,8 @@ export class Transaction implements IEntity {
     private _status: TransactionStatus,
     private readonly _creditCardId?: EntityId,
   ) {
+    super();
+
     this._id = EntityId.create();
     this._createdAt = new Date();
     this._updatedAt = new Date();
