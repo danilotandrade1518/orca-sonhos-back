@@ -8,24 +8,33 @@ import { Either } from '@either';
 
 import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { AddAccountRepositoryStub } from '../../../shared/tests/stubs/AddAccountRepositoryStub';
+import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { CreateAccountDto } from './CreateAccountDto';
 import { CreateAccountUseCase } from './CreateAccountUseCase';
 
 describe('CreateAccountUseCase', () => {
   let useCase: CreateAccountUseCase;
   let repositoryStub: AddAccountRepositoryStub;
+  let authorizationServiceStub: BudgetAuthorizationServiceStub;
+  const userId = EntityId.create().value!.id;
+  const budgetId = EntityId.create().value!.id;
 
   beforeEach(() => {
     repositoryStub = new AddAccountRepositoryStub();
-    useCase = new CreateAccountUseCase(repositoryStub);
+    authorizationServiceStub = new BudgetAuthorizationServiceStub();
+    useCase = new CreateAccountUseCase(
+      repositoryStub,
+      authorizationServiceStub,
+    );
   });
 
   describe('execute', () => {
     it('should create account successfully with valid data', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'Conta Corrente Principal',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
         initialBalance: 1000,
         description: 'Minha conta principal para gastos do dia a dia',
       };
@@ -48,9 +57,10 @@ describe('CreateAccountUseCase', () => {
 
     it('should create account successfully without initial balance', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'Conta Poupança',
         type: AccountTypeEnum.SAVINGS_ACCOUNT,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
       };
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
@@ -65,9 +75,10 @@ describe('CreateAccountUseCase', () => {
 
     it('should create account successfully without description', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'Carteira Digital',
         type: AccountTypeEnum.DIGITAL_WALLET,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
         initialBalance: 500,
       };
 
@@ -83,9 +94,10 @@ describe('CreateAccountUseCase', () => {
 
     it('should fail when account name is empty', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: '',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
       };
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
@@ -100,9 +112,10 @@ describe('CreateAccountUseCase', () => {
 
     it('should fail when account name is too short', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'a',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
       };
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
@@ -117,9 +130,10 @@ describe('CreateAccountUseCase', () => {
 
     it('should fail when account type is invalid', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'Conta Teste',
         type: 'INVALID_TYPE' as AccountTypeEnum,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
       };
 
       const executeSpy = jest.spyOn(repositoryStub, 'execute');
@@ -134,6 +148,7 @@ describe('CreateAccountUseCase', () => {
 
     it('should fail when budgetId is invalid', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'Conta Teste',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
         budgetId: 'invalid-uuid',
@@ -153,9 +168,10 @@ describe('CreateAccountUseCase', () => {
 
     it('should fail when initial balance is invalid', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'Conta Teste',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
         initialBalance: NaN,
       };
 
@@ -171,9 +187,10 @@ describe('CreateAccountUseCase', () => {
 
     it('should fail when repository throws error', async () => {
       const dto: CreateAccountDto = {
+        userId,
         name: 'Conta Teste',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
-        budgetId: EntityId.create().value!.id,
+        budgetId,
         initialBalance: 1000,
       };
 
@@ -203,6 +220,7 @@ describe('CreateAccountUseCase', () => {
 
       for (const type of accountTypes) {
         const dto: CreateAccountDto = {
+          userId,
           name: `Conta ${type}`,
           type,
           budgetId,

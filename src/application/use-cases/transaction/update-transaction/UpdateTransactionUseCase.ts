@@ -4,9 +4,11 @@ import { IUseCase } from '../../../shared/IUseCase';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
+import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { TransactionUpdateFailedError } from '../../../shared/errors/TransactionUpdateFailedError';
+import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IFindAccountByIdRepository } from '../../../contracts/repositories/account/IFindAccountByIdRepository';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
@@ -20,6 +22,7 @@ export class UpdateTransactionUseCase
     private getTransactionRepository: IGetTransactionRepository,
     private saveTransactionRepository: ISaveTransactionRepository,
     private findAccountByIdRepository: IFindAccountByIdRepository,
+    private budgetAuthorizationService: IBudgetAuthorizationService,
     private eventPublisher: IEventPublisher,
   ) {}
 
@@ -38,6 +41,34 @@ export class UpdateTransactionUseCase
     }
 
     const existingTransaction = transactionResult.data;
+
+    // Buscar a conta para obter o budgetId
+    const accountResult = await this.findAccountByIdRepository.execute(
+      existingTransaction.accountId,
+    );
+
+    if (accountResult.hasError) {
+      return Either.error(new AccountRepositoryError());
+    }
+
+    if (!accountResult.data) {
+      return Either.error(new AccountNotFoundError());
+    }
+
+    const account = accountResult.data;
+
+    const authResult = await this.budgetAuthorizationService.canAccessBudget(
+      dto.userId,
+      account.budgetId!,
+    );
+
+    if (authResult.hasError) {
+      return Either.errors<ApplicationError, { id: string }>(authResult.errors);
+    }
+
+    if (!authResult.data) {
+      return Either.error(new InsufficientPermissionsError());
+    }
 
     if (dto.accountId && dto.accountId !== existingTransaction.accountId) {
       const accountResult = await this.findAccountByIdRepository.execute(

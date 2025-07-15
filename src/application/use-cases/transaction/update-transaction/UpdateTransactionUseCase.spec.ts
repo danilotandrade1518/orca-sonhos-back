@@ -14,6 +14,7 @@ import { TransactionUpdateFailedError } from '../../../shared/errors/Transaction
 import { FindAccountByIdRepositoryStub } from '../../../shared/tests/stubs/FindAccountByIdRepositoryStub';
 import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
 import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
+import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { UpdateTransactionDto } from './UpdateTransactionDto';
 import { UpdateTransactionUseCase } from './UpdateTransactionUseCase';
@@ -23,35 +24,18 @@ describe('UpdateTransactionUseCase', () => {
   let getTransactionRepositoryStub: GetTransactionRepositoryStub;
   let saveTransactionRepositoryStub: SaveTransactionRepositoryStub;
   let findAccountByIdRepositoryStub: FindAccountByIdRepositoryStub;
+  let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
   let eventPublisherStub: EventPublisherStub;
   let mockTransaction: Transaction;
   let mockAccount: Account;
+  const userId = EntityId.create().value!.id;
 
   beforeEach(() => {
     getTransactionRepositoryStub = new GetTransactionRepositoryStub();
     saveTransactionRepositoryStub = new SaveTransactionRepositoryStub();
     findAccountByIdRepositoryStub = new FindAccountByIdRepositoryStub();
+    budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
     eventPublisherStub = new EventPublisherStub();
-
-    const transactionResult = Transaction.create({
-      description: 'Original Transaction',
-      amount: 100,
-      type: TransactionTypeEnum.EXPENSE,
-      transactionDate: new Date(),
-      categoryId: EntityId.create().value!.id,
-      budgetId: EntityId.create().value!.id,
-      accountId: EntityId.create().value!.id,
-    });
-
-    if (transactionResult.hasError) {
-      throw new Error(
-        `Failed to create transaction: ${transactionResult.errors.map((e) => e.message).join(', ')}`,
-      );
-    }
-
-    mockTransaction = transactionResult.data!;
-
-    getTransactionRepositoryStub.mockTransaction = mockTransaction;
 
     const accountResult = Account.create({
       name: 'Test Account',
@@ -68,12 +52,32 @@ describe('UpdateTransactionUseCase', () => {
 
     mockAccount = accountResult.data!;
 
+    const transactionResult = Transaction.create({
+      description: 'Original Transaction',
+      amount: 100,
+      type: TransactionTypeEnum.EXPENSE,
+      transactionDate: new Date(),
+      categoryId: EntityId.create().value!.id,
+      budgetId: mockAccount.budgetId!,
+      accountId: mockAccount.id,
+    });
+
+    if (transactionResult.hasError) {
+      throw new Error(
+        `Failed to create transaction: ${transactionResult.errors.map((e) => e.message).join(', ')}`,
+      );
+    }
+
+    mockTransaction = transactionResult.data!;
+
+    getTransactionRepositoryStub.mockTransaction = mockTransaction;
     findAccountByIdRepositoryStub.addAccount(mockAccount);
 
     useCase = new UpdateTransactionUseCase(
       getTransactionRepositoryStub,
       saveTransactionRepositoryStub,
       findAccountByIdRepositoryStub,
+      budgetAuthorizationServiceStub,
       eventPublisherStub,
     );
   });
@@ -81,6 +85,7 @@ describe('UpdateTransactionUseCase', () => {
   describe('execute', () => {
     it('should update transaction description successfully', async () => {
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         description: 'Updated description',
       };
@@ -94,6 +99,7 @@ describe('UpdateTransactionUseCase', () => {
 
     it('should update transaction amount and emit event', async () => {
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         amount: 200, // Changed amount
       };
@@ -106,9 +112,25 @@ describe('UpdateTransactionUseCase', () => {
     });
 
     it('should update transaction account and emit event with correct data', async () => {
+      // Create a second account in the same budget
+      const secondAccountResult = Account.create({
+        name: 'Second Account',
+        type: AccountTypeEnum.SAVINGS_ACCOUNT,
+        budgetId: mockAccount.budgetId!,
+        initialBalance: 500,
+      });
+
+      if (secondAccountResult.hasError) {
+        throw new Error('Failed to create second account');
+      }
+
+      const secondAccount = secondAccountResult.data!;
+      findAccountByIdRepositoryStub.addAccount(secondAccount);
+
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
-        accountId: mockAccount.id, // Changed account
+        accountId: secondAccount.id, // Changed account
       };
 
       const result = await useCase.execute(dto);
@@ -120,6 +142,7 @@ describe('UpdateTransactionUseCase', () => {
 
     it('should update multiple fields and emit single event', async () => {
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         amount: 200,
         type: TransactionTypeEnum.INCOME,
@@ -135,6 +158,7 @@ describe('UpdateTransactionUseCase', () => {
 
     it('should update transaction without emitting events when no relevant changes', async () => {
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         description: 'New description only', // Only description changed
       };
@@ -150,6 +174,7 @@ describe('UpdateTransactionUseCase', () => {
       getTransactionRepositoryStub.shouldReturnNull = true;
 
       const dto: UpdateTransactionDto = {
+        userId,
         id: 'non-existent-id',
         description: 'Updated description',
       };
@@ -165,6 +190,7 @@ describe('UpdateTransactionUseCase', () => {
       findAccountByIdRepositoryStub.clear();
 
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         accountId: 'non-existent-account',
       };
@@ -178,6 +204,7 @@ describe('UpdateTransactionUseCase', () => {
 
     it('should return error when update data is invalid', async () => {
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         amount: -100, // Invalid amount
       };
@@ -193,6 +220,7 @@ describe('UpdateTransactionUseCase', () => {
       getTransactionRepositoryStub.shouldFail = true;
 
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         description: 'Updated description',
       };
@@ -208,6 +236,7 @@ describe('UpdateTransactionUseCase', () => {
       saveTransactionRepositoryStub.shouldFail = true;
 
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         description: 'Updated description',
       };
@@ -227,6 +256,7 @@ describe('UpdateTransactionUseCase', () => {
         );
 
       const dto: UpdateTransactionDto = {
+        userId,
         id: mockTransaction.id,
         accountId: 'new-account-id',
       };

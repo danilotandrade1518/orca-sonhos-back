@@ -4,14 +4,36 @@ import { DomainError } from '@domain/shared/DomainError';
 
 import { Either } from '../../../../shared/core/either';
 import { IAddAccountRepository } from '../../../contracts/repositories/account/IAddAccountRepository';
+import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
+import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { IUseCase, UseCaseResponse } from './../../../shared/IUseCase';
 import { CreateAccountDto } from './CreateAccountDto';
 
 export class CreateAccountUseCase implements IUseCase<CreateAccountDto> {
-  constructor(private readonly addAccountRepository: IAddAccountRepository) {}
+  constructor(
+    private readonly addAccountRepository: IAddAccountRepository,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
+  ) {}
 
-  async execute(dto: CreateAccountDto) {
+  async execute(
+    dto: CreateAccountDto,
+  ): Promise<Either<ApplicationError | DomainError, UseCaseResponse>> {
+    const authResult = await this.budgetAuthorizationService.canAccessBudget(
+      dto.userId,
+      dto.budgetId,
+    );
+
+    if (authResult.hasError) {
+      return Either.errors<ApplicationError | DomainError, UseCaseResponse>(
+        authResult.errors,
+      );
+    }
+
+    if (!authResult.data) {
+      return Either.error(new InsufficientPermissionsError());
+    }
+
     const accountResult = Account.create({
       name: dto.name,
       type: dto.type as AccountTypeEnum,

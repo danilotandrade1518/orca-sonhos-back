@@ -1,4 +1,5 @@
 export interface CreateAccountDto {
+  userId: string;
   name: string;
   type: string;
   budgetId: string;

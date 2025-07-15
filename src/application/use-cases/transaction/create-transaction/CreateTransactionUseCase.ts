@@ -5,9 +5,11 @@ import { Either } from '@either';
 import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IAddTransactionRepository } from '../../../contracts/repositories/transaction/IAddTransactionRepository';
 import { IFindAccountByIdRepository } from '../../../contracts/repositories/account/IFindAccountByIdRepository';
+import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
+import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { TransactionCreationFailedError } from '../../../shared/errors/TransactionCreationFailedError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { IUseCase } from '../../../shared/IUseCase';
@@ -20,12 +22,30 @@ export class CreateTransactionUseCase
   constructor(
     private readonly addTransactionRepository: IAddTransactionRepository,
     private readonly findAccountRepository: IFindAccountByIdRepository,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
     private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
     dto: CreateTransactionDto,
   ): Promise<Either<DomainError | ApplicationError, UseCaseResponse>> {
+    const authResult = await this.budgetAuthorizationService.canAccessBudget(
+      dto.userId,
+      dto.budgetId,
+    );
+
+    if (authResult.hasError) {
+      return Either.errors<DomainError | ApplicationError, UseCaseResponse>(
+        authResult.errors,
+      );
+    }
+
+    if (!authResult.data) {
+      return Either.errors<DomainError | ApplicationError, UseCaseResponse>([
+        new InsufficientPermissionsError(),
+      ]);
+    }
+
     const accountResult = await this.findAccountRepository.execute(
       dto.accountId,
     );

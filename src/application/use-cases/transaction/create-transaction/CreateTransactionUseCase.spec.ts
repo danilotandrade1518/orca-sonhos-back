@@ -9,6 +9,7 @@ import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundErro
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { AddTransactionRepositoryStub } from '../../../shared/tests/stubs/AddTransactionRepositoryStub';
+import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { FindAccountByIdRepositoryStub } from '../../../shared/tests/stubs/FindAccountByIdRepositoryStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { CreateTransactionDto } from './CreateTransactionDto';
@@ -18,16 +19,20 @@ describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
   let addTransactionRepositoryStub: AddTransactionRepositoryStub;
   let findAccountByIdRepositoryStub: FindAccountByIdRepositoryStub;
+  let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
   let eventPublisherStub: EventPublisherStub;
   let validAccount: Account;
+  const userId = EntityId.create().value!.id;
 
   beforeEach(() => {
     addTransactionRepositoryStub = new AddTransactionRepositoryStub();
     findAccountByIdRepositoryStub = new FindAccountByIdRepositoryStub();
+    budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
     eventPublisherStub = new EventPublisherStub();
     useCase = new CreateTransactionUseCase(
       addTransactionRepositoryStub,
       findAccountByIdRepositoryStub,
+      budgetAuthorizationServiceStub,
       eventPublisherStub,
     );
 
@@ -48,6 +53,7 @@ describe('CreateTransactionUseCase', () => {
   describe('execute', () => {
     it('should create transaction successfully with valid data', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Compra no Supermercado',
         amount: 150.5,
         type: TransactionTypeEnum.EXPENSE,
@@ -65,6 +71,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should create transaction successfully with minimal data', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Transferência PIX',
         amount: 200,
         type: TransactionTypeEnum.INCOME,
@@ -83,6 +90,7 @@ describe('CreateTransactionUseCase', () => {
     it('should fail when account does not exist', async () => {
       const nonExistentAccountId = EntityId.create().value!.id;
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Compra Online',
         amount: 100,
         type: TransactionTypeEnum.EXPENSE,
@@ -100,6 +108,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should fail when transaction description is empty', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: '',
         amount: 100,
         type: TransactionTypeEnum.EXPENSE,
@@ -116,6 +125,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should create transaction successfully with zero amount', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Transação com valor zero',
         amount: 0,
         type: TransactionTypeEnum.EXPENSE,
@@ -133,6 +143,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should fail when amount is negative', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Transação Inválida',
         amount: -100,
         type: TransactionTypeEnum.EXPENSE,
@@ -149,6 +160,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should fail when accountId is invalid', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Compra Teste',
         amount: 100,
         type: TransactionTypeEnum.EXPENSE,
@@ -166,6 +178,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should fail when categoryId is invalid', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Compra Teste',
         amount: 100,
         type: TransactionTypeEnum.EXPENSE,
@@ -183,6 +196,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should fail when repository returns error', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Compra Teste',
         amount: 100,
         type: TransactionTypeEnum.EXPENSE,
@@ -205,6 +219,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should fail when find account repository returns error', async () => {
       const dto: CreateTransactionDto = {
+        userId,
         description: 'Compra Teste',
         amount: 100,
         type: TransactionTypeEnum.EXPENSE,
