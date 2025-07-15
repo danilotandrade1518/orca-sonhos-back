@@ -24,7 +24,7 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
     - `/shared/events` — Domain Events e interfaces base
   - `/application/usecases` — Casos de uso (aplicação)
   - `/application/queries` - Query Handlers
-  - `/application/events` - Event Handlers e Event Publisher
+  - `/application/contracts` - Interfaces de Repositórios e Serviços
   - `/infra` — Implementações de infraestrutura (banco, serviços externos)
   - `/interfaces/web` - Web controllers
   - `/config` — Configurações gerais do projeto
