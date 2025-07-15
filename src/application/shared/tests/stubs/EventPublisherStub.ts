@@ -2,13 +2,14 @@ import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IDomainEvent } from '../../../../domain/shared/events/IDomainEvent';
 
 export class EventPublisherStub implements IEventPublisher {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async publish(_event: IDomainEvent): Promise<void> {
-    // Stub implementation - does nothing
+  public publishCalls: IDomainEvent[] = [];
+  public publishManyCalls: IDomainEvent[][] = [];
+
+  async publish(event: IDomainEvent): Promise<void> {
+    this.publishCalls.push(event);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async publishMany(_events: IDomainEvent[]): Promise<void> {
-    // Stub implementation - does nothing
+  async publishMany(events: IDomainEvent[]): Promise<void> {
+    this.publishManyCalls.push(events);
   }
 }

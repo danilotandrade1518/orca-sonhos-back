@@ -6,6 +6,7 @@ import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
 import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
+import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionDescription } from '../value-objects/transaction-description/TransactionDescription';
 import {
@@ -29,6 +30,15 @@ export interface CreateTransactionDTO {
   creditCardId?: string;
 }
 
+export interface UpdateTransactionDTO {
+  description: string;
+  amount: number;
+  type: TransactionTypeEnum;
+  accountId: string;
+  categoryId?: string;
+  transactionDate?: Date;
+}
+
 export class Transaction extends AggregateRoot implements IEntity {
   private readonly _id: EntityId;
   private readonly _createdAt: Date;
@@ -45,10 +55,11 @@ export class Transaction extends AggregateRoot implements IEntity {
     private readonly _accountId: EntityId,
     private _status: TransactionStatus,
     private readonly _creditCardId?: EntityId,
+    existingId?: EntityId,
   ) {
     super();
 
-    this._id = EntityId.create();
+    this._id = existingId || EntityId.create();
     this._createdAt = new Date();
     this._updatedAt = new Date();
   }
@@ -172,6 +183,65 @@ export class Transaction extends AggregateRoot implements IEntity {
     this._updatedAt = new Date();
 
     return Either.success<DomainError, void>();
+  }
+
+  update(data: UpdateTransactionDTO): Either<DomainError, Transaction> {
+    const either = new Either<DomainError, Transaction>();
+
+    // Validações dos novos dados
+    const newDescription = TransactionDescription.create(data.description);
+    const newAmount = MoneyVo.create(data.amount);
+    const newType = TransactionType.create(data.type);
+    const newAccountId = EntityId.fromString(data.accountId);
+    const newCategoryId = data.categoryId
+      ? EntityId.fromString(data.categoryId)
+      : undefined;
+
+    // Validar todos os value objects
+    if (newDescription.hasError) either.addManyErrors(newDescription.errors);
+    if (newAmount.hasError) either.addManyErrors(newAmount.errors);
+    if (newType.hasError) either.addManyErrors(newType.errors);
+    if (newAccountId.hasError) either.addManyErrors(newAccountId.errors);
+    if (newCategoryId?.hasError) either.addManyErrors(newCategoryId.errors);
+
+    if (either.hasError) return either;
+
+    // Verificar se houve mudanças que afetam saldo
+    const accountChanged = this.accountId !== data.accountId;
+    const amountChanged = this.amount !== data.amount;
+    const typeChanged = this.type !== data.type;
+
+    // Criar nova instância com dados atualizados
+    const updatedTransaction = new Transaction(
+      newDescription,
+      newAmount,
+      newType,
+      data.transactionDate || this._transactionDate,
+      newCategoryId || this._categoryId,
+      this._budgetId,
+      newAccountId,
+      this._status,
+      this._creditCardId,
+      this._id, // Passar o ID existente para manter o mesmo ID
+    );
+
+    // Emitir evento apenas se houve mudanças relevantes
+    if (accountChanged || amountChanged || typeChanged) {
+      updatedTransaction.addEvent(
+        new TransactionUpdatedEvent(
+          this.id,
+          this.accountId, // anterior
+          data.accountId, // novo
+          this.amount, // anterior
+          data.amount, // novo
+          this.type, // anterior
+          data.type, // novo
+        ),
+      );
+    }
+
+    either.setData(updatedTransaction);
+    return either;
   }
 
   static create(data: CreateTransactionDTO): Either<DomainError, Transaction> {

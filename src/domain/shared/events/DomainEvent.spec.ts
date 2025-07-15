@@ -35,7 +35,7 @@ describe('DomainEvent', () => {
     const event1 = new TestEvent('test-id', 'data1');
 
     // Small delay to ensure different timestamps
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, 2));
 
     const event2 = new TestEvent('test-id', 'data2');
 
