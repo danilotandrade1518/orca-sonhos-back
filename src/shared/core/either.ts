@@ -19,7 +19,7 @@ export class Either<E, D> {
   }
 
   get hasData(): boolean {
-    return !this.hasError && Boolean(this._data);
+    return !this.hasError && this._data !== undefined;
   }
 
   get data() {
@@ -33,7 +33,7 @@ export class Either<E, D> {
 
   static success<E, D>(data?: D): Either<E, D> {
     const either = new Either<E, D>();
-    if (data) either.setData(data);
+    either.setData(data as D);
     return either;
   }
 

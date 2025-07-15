@@ -52,6 +52,14 @@ export class Budget extends AggregateRoot implements IEntity {
     return this._updatedAt;
   }
 
+  isParticipant(userId: string): boolean {
+    if (this.ownerId === userId) {
+      return true;
+    }
+
+    return this.participants.includes(userId);
+  }
+
   addParticipant(userId: string): Either<DomainError, void> {
     const entityIdVo = EntityId.fromString(userId);
 

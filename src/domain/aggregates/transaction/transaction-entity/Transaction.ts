@@ -5,9 +5,11 @@ import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
-import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
-import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
+import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
+import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
+import { TransactionDeletedEvent } from '../events/TransactionDeletedEvent';
+import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
 import { TransactionDescription } from '../value-objects/transaction-description/TransactionDescription';
 import {
   TransactionStatus,
@@ -44,6 +46,7 @@ export class Transaction extends AggregateRoot implements IEntity {
   private readonly _createdAt: Date;
 
   private _updatedAt: Date;
+  private _isDeleted: boolean = false;
 
   private constructor(
     private readonly _description: TransactionDescription,
@@ -110,6 +113,10 @@ export class Transaction extends AggregateRoot implements IEntity {
 
   get updatedAt(): Date {
     return this._updatedAt;
+  }
+
+  get isDeleted(): boolean {
+    return this._isDeleted;
   }
 
   get isCompleted(): boolean {
@@ -185,10 +192,39 @@ export class Transaction extends AggregateRoot implements IEntity {
     return Either.success<DomainError, void>();
   }
 
+  delete(): Either<DomainError, Transaction> {
+    const either = new Either<DomainError, Transaction>();
+
+    if (this._isDeleted) {
+      either.addError(new TransactionAlreadyDeletedError());
+      return either;
+    }
+
+    this._isDeleted = true;
+    this._updatedAt = new Date();
+
+    this.addEvent(
+      new TransactionDeletedEvent(
+        this.id,
+        this.accountId,
+        this.budgetId,
+        this.amount,
+        this.type,
+        this.description,
+        this.status,
+        this.categoryId,
+        this.creditCardId || undefined,
+        this.transactionDate,
+      ),
+    );
+
+    either.setData(this);
+    return either;
+  }
+
   update(data: UpdateTransactionDTO): Either<DomainError, Transaction> {
     const either = new Either<DomainError, Transaction>();
 
-    // Validações dos novos dados
     const newDescription = TransactionDescription.create(data.description);
     const newAmount = MoneyVo.create(data.amount);
     const newType = TransactionType.create(data.type);
@@ -197,7 +233,6 @@ export class Transaction extends AggregateRoot implements IEntity {
       ? EntityId.fromString(data.categoryId)
       : undefined;
 
-    // Validar todos os value objects
     if (newDescription.hasError) either.addManyErrors(newDescription.errors);
     if (newAmount.hasError) either.addManyErrors(newAmount.errors);
     if (newType.hasError) either.addManyErrors(newType.errors);
@@ -206,12 +241,10 @@ export class Transaction extends AggregateRoot implements IEntity {
 
     if (either.hasError) return either;
 
-    // Verificar se houve mudanças que afetam saldo
     const accountChanged = this.accountId !== data.accountId;
     const amountChanged = this.amount !== data.amount;
     const typeChanged = this.type !== data.type;
 
-    // Criar nova instância com dados atualizados
     const updatedTransaction = new Transaction(
       newDescription,
       newAmount,
@@ -222,20 +255,19 @@ export class Transaction extends AggregateRoot implements IEntity {
       newAccountId,
       this._status,
       this._creditCardId,
-      this._id, // Passar o ID existente para manter o mesmo ID
+      this._id,
     );
 
-    // Emitir evento apenas se houve mudanças relevantes
     if (accountChanged || amountChanged || typeChanged) {
       updatedTransaction.addEvent(
         new TransactionUpdatedEvent(
           this.id,
-          this.accountId, // anterior
-          data.accountId, // novo
-          this.amount, // anterior
-          data.amount, // novo
-          this.type, // anterior
-          data.type, // novo
+          this.accountId,
+          data.accountId,
+          this.amount,
+          data.amount,
+          this.type,
+          data.type,
         ),
       );
     }
@@ -264,7 +296,6 @@ export class Transaction extends AggregateRoot implements IEntity {
       ? EntityId.fromString(data.creditCardId)
       : undefined;
 
-    // Validar todos os value objects
     if (description.hasError) either.addManyErrors(description.errors);
     if (amount.hasError) either.addManyErrors(amount.errors);
     if (type.hasError) either.addManyErrors(type.errors);
@@ -288,7 +319,6 @@ export class Transaction extends AggregateRoot implements IEntity {
       creditCardId,
     );
 
-    // Adicionar evento de transação criada
     transaction.addEvent(
       new TransactionCreatedEvent(
         transaction.id,
