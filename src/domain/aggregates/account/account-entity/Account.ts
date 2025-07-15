@@ -1,5 +1,6 @@
 import { Either } from '@either';
 
+import { AggregateRoot } from '../../../shared/AggregateRoot';
 import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { BalanceVo } from '../../../shared/value-objects/balance-vo/BalanceVo';
@@ -9,6 +10,8 @@ import {
   AccountTypeEnum,
 } from '../value-objects/account-type/AccountType';
 import { EntityName } from './../../../shared/value-objects/entity-name/EntityName';
+import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
+import { InvalidAccountDataError } from '../errors/InvalidAccountDataError';
 
 export interface CreateAccountDTO {
   name: string;
@@ -18,7 +21,13 @@ export interface CreateAccountDTO {
   description?: string;
 }
 
-export class Account implements IEntity {
+export interface UpdateAccountDTO {
+  name?: string;
+  description?: string;
+  initialBalance?: number;
+}
+
+export class Account extends AggregateRoot implements IEntity {
   private readonly _id: EntityId;
   private readonly _createdAt: Date;
 
@@ -30,8 +39,11 @@ export class Account implements IEntity {
     private readonly _budgetId: EntityId,
     private _balance: BalanceVo,
     private _description?: string,
+    existingId?: EntityId,
   ) {
-    this._id = EntityId.create();
+    super();
+
+    this._id = existingId || EntityId.create();
     this._createdAt = new Date();
     this._updatedAt = new Date();
   }
@@ -128,6 +140,73 @@ export class Account implements IEntity {
   canSubtract(amount: number): boolean {
     const currentBalance = this._balance.value?.cents ?? 0;
     return currentBalance >= amount;
+  }
+
+  update(data: UpdateAccountDTO): Either<DomainError, Account> {
+    const either = new Either<DomainError, Account>();
+
+    const newName = data.name ?? this.name;
+    const newDescription = data.description ?? this.description;
+    const newInitialBalance = data.initialBalance ?? this.balance;
+
+    if (newName === null) {
+      return Either.errors<DomainError, Account>([
+        new InvalidAccountDataError('Account name cannot be null'),
+      ]);
+    }
+    if (newInitialBalance === null) {
+      return Either.errors<DomainError, Account>([
+        new InvalidAccountDataError('Account balance cannot be null'),
+      ]);
+    }
+
+    const nameVo = EntityName.create(newName);
+    if (nameVo.hasError) either.addManyErrors(nameVo.errors);
+
+    const balanceVo = BalanceVo.create(newInitialBalance);
+    if (balanceVo.hasError) either.addManyErrors(balanceVo.errors);
+
+    if (either.hasError) return either;
+
+    const hasNameChanged = newName !== this.name;
+    const hasDescriptionChanged = newDescription !== this.description;
+    const hasInitialBalanceChanged = newInitialBalance !== this.balance;
+
+    if (
+      !hasNameChanged &&
+      !hasDescriptionChanged &&
+      !hasInitialBalanceChanged
+    ) {
+      either.setData(this);
+      return either;
+    }
+
+    const updatedAccount = new Account(
+      nameVo,
+      this._type,
+      this._budgetId,
+      balanceVo,
+      newDescription,
+      this._id,
+    );
+
+    if (hasNameChanged || hasInitialBalanceChanged) {
+      updatedAccount.addEvent(
+        new AccountUpdatedEvent(
+          updatedAccount.id,
+          updatedAccount.budgetId!,
+          this.name!,
+          newName,
+          this.balance!,
+          newInitialBalance,
+          this.description,
+          newDescription,
+        ),
+      );
+    }
+
+    either.setData(updatedAccount);
+    return either;
   }
 
   static create(data: CreateAccountDTO): Either<DomainError, Account> {
