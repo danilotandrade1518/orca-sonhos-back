@@ -5,6 +5,7 @@ import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
+import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionDescription } from '../value-objects/transaction-description/TransactionDescription';
 import {
@@ -23,6 +24,7 @@ export interface CreateTransactionDTO {
   transactionDate: Date;
   categoryId: string;
   budgetId: string;
+  accountId: string;
   status?: TransactionStatusEnum;
   creditCardId?: string;
 }
@@ -40,6 +42,7 @@ export class Transaction extends AggregateRoot implements IEntity {
     private readonly _transactionDate: Date,
     private readonly _categoryId: EntityId,
     private readonly _budgetId: EntityId,
+    private readonly _accountId: EntityId,
     private _status: TransactionStatus,
     private readonly _creditCardId?: EntityId,
   ) {
@@ -76,6 +79,10 @@ export class Transaction extends AggregateRoot implements IEntity {
 
   get budgetId(): string {
     return this._budgetId.value?.id ?? '';
+  }
+
+  get accountId(): string {
+    return this._accountId.value?.id ?? '';
   }
 
   get status(): TransactionStatusEnum {
@@ -175,6 +182,7 @@ export class Transaction extends AggregateRoot implements IEntity {
     const type = TransactionType.create(data.type);
     const categoryId = EntityId.fromString(data.categoryId);
     const budgetId = EntityId.fromString(data.budgetId);
+    const accountId = EntityId.fromString(data.accountId);
 
     const status = data.status
       ? TransactionStatus.create(data.status)
@@ -192,6 +200,7 @@ export class Transaction extends AggregateRoot implements IEntity {
     if (type.hasError) either.addManyErrors(type.errors);
     if (categoryId.hasError) either.addManyErrors(categoryId.errors);
     if (budgetId.hasError) either.addManyErrors(budgetId.errors);
+    if (accountId.hasError) either.addManyErrors(accountId.errors);
     if (status.hasError) either.addManyErrors(status.errors);
     if (creditCardId?.hasError) either.addManyErrors(creditCardId.errors);
 
@@ -204,8 +213,20 @@ export class Transaction extends AggregateRoot implements IEntity {
       data.transactionDate,
       categoryId,
       budgetId,
+      accountId,
       status,
       creditCardId,
+    );
+
+    // Adicionar evento de transação criada
+    transaction.addEvent(
+      new TransactionCreatedEvent(
+        transaction.id,
+        data.accountId,
+        data.amount,
+        data.type,
+        data.categoryId,
+      ),
     );
 
     return Either.success<DomainError, Transaction>(transaction);
