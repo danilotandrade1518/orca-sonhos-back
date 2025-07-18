@@ -154,4 +154,50 @@ export class Budget extends AggregateRoot implements IEntity {
     either.setData(budget);
     return either;
   }
+
+  static restore(data: {
+    id: string;
+    name: string;
+    ownerId: string;
+    participantIds: string[];
+    createdAt: Date;
+    updatedAt: Date;
+    isDeleted: boolean;
+  }): Either<DomainError, Budget> {
+    const either = new Either<DomainError, Budget>();
+
+    const nameVo = EntityName.create(data.name);
+    if (nameVo.hasError) either.addManyErrors(nameVo.errors);
+
+    const ownerIdVo = EntityId.fromString(data.ownerId);
+    if (ownerIdVo.hasError) either.addManyErrors(ownerIdVo.errors);
+
+    const idVo = EntityId.fromString(data.id);
+    if (idVo.hasError) either.addManyErrors(idVo.errors);
+
+    if (either.hasError) return either;
+
+    const participantsResult = BudgetParticipants.create({
+      participantIds: data.participantIds,
+    });
+
+    if (participantsResult.hasError)
+      return Either.errors<DomainError, Budget>(participantsResult.errors);
+
+    const budget = new Budget(nameVo, ownerIdVo, participantsResult.data!);
+
+    Object.defineProperty(budget, '_id', {
+      value: idVo,
+      writable: false,
+    });
+    Object.defineProperty(budget, '_createdAt', {
+      value: data.createdAt,
+      writable: false,
+    });
+    budget._updatedAt = data.updatedAt;
+    budget._isDeleted = data.isDeleted;
+
+    either.setData(budget);
+    return either;
+  }
 }

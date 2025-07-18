@@ -282,4 +282,135 @@ describe('Budget', () => {
       expect(result.hasError).toBe(true);
     });
   });
+
+  describe('restore', () => {
+    it('should restore a budget from persistence data', () => {
+      const id = EntityId.create().value!.id;
+      const ownerId = EntityId.create().value!.id;
+      const participantId = EntityId.create().value!.id;
+      const createdAt = new Date('2023-01-01');
+      const updatedAt = new Date('2023-01-02');
+
+      const restoreData = {
+        id,
+        name: 'Restored Budget',
+        ownerId,
+        participantIds: [ownerId, participantId],
+        createdAt,
+        updatedAt,
+        isDeleted: false,
+      };
+
+      const result = Budget.restore(restoreData);
+
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBeDefined();
+
+      const budget = result.data!;
+      expect(budget.id).toBe(id);
+      expect(budget.name).toBe('Restored Budget');
+      expect(budget.ownerId).toBe(ownerId);
+      expect(budget.participants).toEqual([ownerId, participantId]);
+      expect(budget.createdAt).toEqual(createdAt);
+      expect(budget.updatedAt).toEqual(updatedAt);
+      expect(budget.isDeleted).toBe(false);
+    });
+
+    it('should restore a deleted budget', () => {
+      const id = EntityId.create().value!.id;
+      const ownerId = EntityId.create().value!.id;
+
+      const restoreData = {
+        id,
+        name: 'Deleted Budget',
+        ownerId,
+        participantIds: [ownerId],
+        createdAt: new Date('2023-01-01'),
+        updatedAt: new Date('2023-01-02'),
+        isDeleted: true,
+      };
+
+      const result = Budget.restore(restoreData);
+
+      expect(result.hasError).toBe(false);
+      expect(result.data!.isDeleted).toBe(true);
+    });
+
+    it('should return error with invalid name', () => {
+      const id = EntityId.create().value!.id;
+      const ownerId = EntityId.create().value!.id;
+
+      const restoreData = {
+        id,
+        name: '', // Invalid empty name
+        ownerId,
+        participantIds: [ownerId],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false,
+      };
+
+      const result = Budget.restore(restoreData);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidEntityNameError);
+    });
+
+    it('should return error with invalid owner id', () => {
+      const id = EntityId.create().value!.id;
+
+      const restoreData = {
+        id,
+        name: 'Valid Budget',
+        ownerId: '', // Invalid empty owner ID
+        participantIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false,
+      };
+
+      const result = Budget.restore(restoreData);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidEntityIdError);
+    });
+
+    it('should return error with invalid id', () => {
+      const ownerId = EntityId.create().value!.id;
+
+      const restoreData = {
+        id: '', // Invalid empty ID
+        name: 'Valid Budget',
+        ownerId,
+        participantIds: [ownerId],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false,
+      };
+
+      const result = Budget.restore(restoreData);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidEntityIdError);
+    });
+
+    it('should return error with invalid participant ids', () => {
+      const id = EntityId.create().value!.id;
+      const ownerId = EntityId.create().value!.id;
+
+      const restoreData = {
+        id,
+        name: 'Valid Budget',
+        ownerId,
+        participantIds: ['', 'invalid-id'], // Invalid participant IDs
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false,
+      };
+
+      const result = Budget.restore(restoreData);
+
+      expect(result.hasError).toBe(true);
+    });
+  });
 });
