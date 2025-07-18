@@ -4,6 +4,8 @@ import { AggregateRoot } from '../../../shared/AggregateRoot';
 import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { CannotRemoveOwnerFromParticipantsError } from '../../../shared/errors/CannotRemoveOwnerFromParticipantsError';
+import { BudgetDeletedEvent } from '../events/BudgetDeletedEvent';
+import { BudgetAlreadyDeletedError } from '../errors/BudgetAlreadyDeletedError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { BudgetParticipants } from '../budget-participants-entity/BudgetParticipants';
@@ -19,6 +21,7 @@ export class Budget extends AggregateRoot implements IEntity {
   private readonly _createdAt: Date;
 
   private _updatedAt: Date;
+  private _isDeleted: boolean = false;
 
   private constructor(
     private readonly _name: EntityName,
@@ -50,6 +53,9 @@ export class Budget extends AggregateRoot implements IEntity {
   }
   get updatedAt(): Date {
     return this._updatedAt;
+  }
+  get isDeleted(): boolean {
+    return this._isDeleted;
   }
 
   isParticipant(userId: string): boolean {
@@ -89,6 +95,23 @@ export class Budget extends AggregateRoot implements IEntity {
 
     this._updatedAt = new Date();
     return Either.success<DomainError, void>();
+  }
+
+  delete(): Either<DomainError, Budget> {
+    const either = new Either<DomainError, Budget>();
+
+    if (this._isDeleted) {
+      either.addError(new BudgetAlreadyDeletedError());
+      return either;
+    }
+
+    this._isDeleted = true;
+    this._updatedAt = new Date();
+
+    this.addEvent(new BudgetDeletedEvent(this.id, this.ownerId, this.name));
+
+    either.setData(this);
+    return either;
   }
 
   static create(data: CreateBudgetDTO): Either<DomainError, Budget> {
