@@ -16,8 +16,9 @@
     "test:integration": "jest --runInBand --testMatch '**/?(*.)+(test).[tj]s'",
     "test:coverage": "jest --coverage",
     "prepare": "husky",
-    "migrate": "ts-node ./migrations/run-migrations.ts",
-    "migrate:down": "ts-node ./migrations/run-migrations.ts down"
+    "migrate": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
+    "migrate:create": "node-pg-migrate create"
   },
   "keywords": [],
   "author": "",
@@ -28,9 +29,9 @@
     "dotenv": "^16.5.0",
     "eventemitter2": "^6.4.9",
     "express": "^5.1.0",
-    "mysql2": "^3.14.1",
-    "swagger-ui-express": "^5.0.1",
-    "umzug": "^3.8.2"
+    "node-pg-migrate": "^8.0.3",
+    "pg": "^8.16.3",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.18",
@@ -38,6 +39,7 @@
     "@types/express": "^5.0.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.30",
+    "@types/pg": "^8.15.4",
     "@types/supertest": "^6.0.3",
     "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.33.1",
@@ -54,6 +56,11 @@
     "ts-jest": "^29.3.4",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
+  },
+  "node-pg-migrate": {
+    "migrations-dir": "src/infrastructure/database/pg/migrations",
+    "migration-file-language": "ts",
+    "dir": "src/infrastructure/database/pg/migrations"
   },
   "lint-staged": {
     "*.ts": [

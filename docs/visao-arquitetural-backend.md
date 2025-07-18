@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-Este documento descreve a arquitetura do backend do projeto OrçaSonhos, baseado em Node.js, Express, TypeScript, Clean Architecture e MySQL.
+Este documento descreve a arquitetura do backend do projeto OrçaSonhos, baseado em Node.js, Express, TypeScript, Clean Architecture e PostgreSQL.
 Iremos utilizar alguns conceitos que vêm do DDD, que são:
 
 - Aggregates
@@ -182,13 +182,13 @@ Esta abordagem visa simplicidade no início, permitindo evolução futura para s
 
 1. O usuário faz uma requisição GET `/users/:id`.
 2. O controller chama o QueryHandler `FindUserQueryHandler`.
-3. O QueryHandler utiliza um DAO para buscar diretamente o usuário no banco.
+3. O QueryHandler utiliza um DAO para buscar diretamente o usuário no PostgreSQL.
 4. O resultado é retornado ao controller e, em seguida, ao usuário.
 
 ## 7. DAO vs Repository
 
 - **Repository:** Representa uma coleção de agregados (entidades) e encapsula regras de negócio relacionadas à persistência. Utilizado principalmente em operações de mutação (criação, atualização, remoção) e segue contratos definidos na camada de domínio.
-- **DAO (Data Access Object):** Focado em consultas (queries) e otimizado para leitura de dados. Utilizado em Query Handlers para buscar informações diretamente do banco, podendo retornar dados em formatos específicos para views.
+- **DAO (Data Access Object):** Focado em consultas (queries) e otimizado para leitura de dados. Utilizado em Query Handlers para buscar informações diretamente do PostgreSQL, podendo retornar dados em formatos específicos para views.
 
 ## 8. Padrões de Nomenclatura
 
