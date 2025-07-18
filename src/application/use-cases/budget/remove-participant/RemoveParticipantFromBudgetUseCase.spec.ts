@@ -116,7 +116,9 @@ describe('RemoveParticipantFromBudgetUseCase', () => {
       expect(result.hasData).toBe(false);
       expect(result.errors[0]).toBeInstanceOf(BudgetUpdateFailedError);
       expect(result.errors[0]).toEqual(
-        new BudgetUpdateFailedError(new CannotRemoveOwnerFromParticipantsError().message),
+        new BudgetUpdateFailedError(
+          new CannotRemoveOwnerFromParticipantsError().message,
+        ),
       );
     });
 
@@ -167,7 +169,9 @@ describe('RemoveParticipantFromBudgetUseCase', () => {
     });
 
     it('should fail when authorization service returns error', async () => {
-      const repositoryError = new RepositoryError('Authorization service failed');
+      const repositoryError = new RepositoryError(
+        'Authorization service failed',
+      );
       jest
         .spyOn(budgetAuthorizationServiceStub, 'canAccessBudget')
         .mockResolvedValueOnce(Either.errors([repositoryError]));
@@ -193,7 +197,9 @@ describe('RemoveParticipantFromBudgetUseCase', () => {
 
       await useCase.execute(dto);
 
-      expect(budgetAuthorizationServiceStub.canAccessBudgetCalls).toHaveLength(1);
+      expect(budgetAuthorizationServiceStub.canAccessBudgetCalls).toHaveLength(
+        1,
+      );
       expect(budgetAuthorizationServiceStub.canAccessBudgetCalls[0]).toEqual({
         userId: 'test-user',
         budgetId: validBudget.id,
@@ -213,7 +219,9 @@ describe('RemoveParticipantFromBudgetUseCase', () => {
       const events = validBudget.getEvents();
       if (events.length > 0) {
         expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-        expect(eventPublisherStub.publishManyCalls[0]).toHaveLength(events.length);
+        expect(eventPublisherStub.publishManyCalls[0]).toHaveLength(
+          events.length,
+        );
       } else {
         expect(eventPublisherStub.publishManyCalls).toHaveLength(0);
       }
