@@ -10,7 +10,7 @@ import { TransactionPersistenceFailedError } from '../../../shared/errors/Transa
 import { TransactionUpdateFailedError } from '../../../shared/errors/TransactionUpdateFailedError';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
-import { IFindAccountByIdRepository } from '../../../contracts/repositories/account/IFindAccountByIdRepository';
+import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
 import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
 import { UpdateTransactionDto } from './UpdateTransactionDto';
@@ -21,7 +21,7 @@ export class UpdateTransactionUseCase
   constructor(
     private getTransactionRepository: IGetTransactionRepository,
     private saveTransactionRepository: ISaveTransactionRepository,
-    private findAccountByIdRepository: IFindAccountByIdRepository,
+    private getAccountRepository: IGetAccountRepository,
     private budgetAuthorizationService: IBudgetAuthorizationService,
     private eventPublisher: IEventPublisher,
   ) {}
@@ -43,7 +43,7 @@ export class UpdateTransactionUseCase
     const existingTransaction = transactionResult.data;
 
     // Buscar a conta para obter o budgetId
-    const accountResult = await this.findAccountByIdRepository.execute(
+    const accountResult = await this.getAccountRepository.execute(
       existingTransaction.accountId,
     );
 
@@ -71,7 +71,7 @@ export class UpdateTransactionUseCase
     }
 
     if (dto.accountId && dto.accountId !== existingTransaction.accountId) {
-      const accountResult = await this.findAccountByIdRepository.execute(
+      const accountResult = await this.getAccountRepository.execute(
         dto.accountId,
       );
       if (accountResult.hasError) {

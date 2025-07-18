@@ -10,7 +10,7 @@ import { AccountRepositoryError } from '../../../shared/errors/AccountRepository
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { AddTransactionRepositoryStub } from '../../../shared/tests/stubs/AddTransactionRepositoryStub';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { FindAccountByIdRepositoryStub } from '../../../shared/tests/stubs/FindAccountByIdRepositoryStub';
+import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { CreateTransactionDto } from './CreateTransactionDto';
 import { CreateTransactionUseCase } from './CreateTransactionUseCase';
@@ -18,7 +18,7 @@ import { CreateTransactionUseCase } from './CreateTransactionUseCase';
 describe('CreateTransactionUseCase', () => {
   let useCase: CreateTransactionUseCase;
   let addTransactionRepositoryStub: AddTransactionRepositoryStub;
-  let findAccountByIdRepositoryStub: FindAccountByIdRepositoryStub;
+  let getAccountRepositoryStub: GetAccountRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
   let eventPublisherStub: EventPublisherStub;
   let validAccount: Account;
@@ -26,12 +26,12 @@ describe('CreateTransactionUseCase', () => {
 
   beforeEach(() => {
     addTransactionRepositoryStub = new AddTransactionRepositoryStub();
-    findAccountByIdRepositoryStub = new FindAccountByIdRepositoryStub();
+    getAccountRepositoryStub = new GetAccountRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
     eventPublisherStub = new EventPublisherStub();
     useCase = new CreateTransactionUseCase(
       addTransactionRepositoryStub,
-      findAccountByIdRepositoryStub,
+      getAccountRepositoryStub,
       budgetAuthorizationServiceStub,
       eventPublisherStub,
     );
@@ -43,11 +43,12 @@ describe('CreateTransactionUseCase', () => {
       initialBalance: 1000,
     });
     validAccount = accountResult.data!;
-    findAccountByIdRepositoryStub.addAccount(validAccount);
+    getAccountRepositoryStub.mockAccount = validAccount;
   });
 
   afterEach(() => {
-    findAccountByIdRepositoryStub.clear();
+    getAccountRepositoryStub.mockAccount = null;
+    getAccountRepositoryStub.executeCalls = [];
   });
 
   describe('execute', () => {
@@ -230,7 +231,7 @@ describe('CreateTransactionUseCase', () => {
 
       const repositoryError = new RepositoryError('Database connection failed');
       jest
-        .spyOn(findAccountByIdRepositoryStub, 'execute')
+        .spyOn(getAccountRepositoryStub, 'execute')
         .mockResolvedValueOnce(Either.errors([repositoryError]));
 
       const result = await useCase.execute(dto);
