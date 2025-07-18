@@ -259,4 +259,27 @@ describe('Budget', () => {
       expect(budget.participants).toContain(ownerId);
     });
   });
+
+  describe('delete', () => {
+    it('should delete budget and add event', () => {
+      const ownerId = EntityId.create().value!.id;
+      const budget = Budget.create({ name: 'Budget', ownerId }).data!;
+
+      const result = budget.delete();
+
+      expect(result.hasError).toBe(false);
+      expect(budget.isDeleted).toBe(true);
+      expect(budget.getEvents()).toHaveLength(1);
+    });
+
+    it('should return error when budget already deleted', () => {
+      const ownerId = EntityId.create().value!.id;
+      const budget = Budget.create({ name: 'Budget', ownerId }).data!;
+      budget.delete();
+
+      const result = budget.delete();
+
+      expect(result.hasError).toBe(true);
+    });
+  });
 });

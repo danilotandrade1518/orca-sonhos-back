@@ -7,6 +7,8 @@ import { RepositoryError } from '../../errors/RepositoryError';
 export class GetAccountRepositoryStub implements IGetAccountRepository {
   public shouldFail = false;
   public shouldReturnNull = false;
+  private accounts: Record<string, Account> = {};
+
   private _mockAccount: Account | null = null;
   public executeCalls: string[] = [];
   private accounts: Record<string, Account> = {};
@@ -18,6 +20,19 @@ export class GetAccountRepositoryStub implements IGetAccountRepository {
     } else {
       this.accounts = {};
     }
+  }
+
+  get mockAccount(): Account | null {
+    return this._mockAccount;
+  }
+
+  set mockAccount(account: Account | null) {
+    if (account) {
+      this.accounts[account.id] = account;
+    } else {
+      this.accounts = {};
+    }
+    this._mockAccount = account;
   }
 
   get mockAccount(): Account | null {
@@ -37,6 +52,10 @@ export class GetAccountRepositoryStub implements IGetAccountRepository {
 
     const account = this.accounts[id];
 
-    return Either.success(account ?? null);
+    if (!account) {
+      return Either.success(null);
+    }
+
+    return Either.success(account);
   }
 }
