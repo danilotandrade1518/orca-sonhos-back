@@ -90,6 +90,7 @@ describe('CreateTransactionUseCase', () => {
 
     it('should fail when account does not exist', async () => {
       const nonExistentAccountId = EntityId.create().value!.id;
+      getAccountRepositoryStub.shouldReturnNull = true;
       const dto: CreateTransactionDto = {
         userId,
         description: 'Compra Online',
@@ -160,6 +161,7 @@ describe('CreateTransactionUseCase', () => {
     });
 
     it('should fail when accountId is invalid', async () => {
+      getAccountRepositoryStub.shouldReturnNull = true;
       const dto: CreateTransactionDto = {
         userId,
         description: 'Compra Teste',

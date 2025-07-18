@@ -4,37 +4,33 @@ import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetBudgetRepository } from '../../../contracts/repositories/budget/IGetBudgetRepository';
 import { ISaveBudgetRepository } from '../../../contracts/repositories/budget/ISaveBudgetRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
+import { IUseCase } from '../../../shared/IUseCase';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { BudgetNotFoundError } from '../../../shared/errors/BudgetNotFoundError';
 import { BudgetRepositoryError } from '../../../shared/errors/BudgetRepositoryError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
-import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { BudgetPersistenceFailedError } from '../../../shared/errors/BudgetPersistenceFailedError';
 import { BudgetUpdateFailedError } from '../../../shared/errors/BudgetUpdateFailedError';
-import { RemoveParticipantFromBudgetDto } from './RemoveParticipantFromBudgetDto';
+import { UpdateBudgetDto } from './UpdateBudgetDto';
 
-export class RemoveParticipantFromBudgetUseCase
-  implements IUseCase<RemoveParticipantFromBudgetDto>
-{
+export class UpdateBudgetUseCase implements IUseCase<UpdateBudgetDto> {
   constructor(
-    private getBudgetRepository: IGetBudgetRepository,
-    private saveBudgetRepository: ISaveBudgetRepository,
-    private budgetAuthorizationService: IBudgetAuthorizationService,
-    private eventPublisher: IEventPublisher,
+    private readonly getBudgetRepository: IGetBudgetRepository,
+    private readonly saveBudgetRepository: ISaveBudgetRepository,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
+    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
-    dto: RemoveParticipantFromBudgetDto,
-  ): Promise<Either<ApplicationError, UseCaseResponse>> {
+    dto: UpdateBudgetDto,
+  ): Promise<Either<ApplicationError, { id: string }>> {
     const authResult = await this.budgetAuthorizationService.canAccessBudget(
       dto.userId,
       dto.budgetId,
     );
 
     if (authResult.hasError) {
-      return Either.errors<ApplicationError, UseCaseResponse>(
-        authResult.errors,
-      );
+      return Either.errors<ApplicationError, { id: string }>(authResult.errors);
     }
 
     if (!authResult.data) {
@@ -53,11 +49,11 @@ export class RemoveParticipantFromBudgetUseCase
 
     const budget = budgetResult.data;
 
-    const removeResult = budget.removeParticipant(dto.participantId);
+    const updateResult = budget.update({ name: dto.name });
 
-    if (removeResult.hasError) {
-      const errorMessage = removeResult.errors.map((e) => e.message).join('; ');
-      return Either.error(new BudgetUpdateFailedError(errorMessage));
+    if (updateResult.hasError) {
+      const message = updateResult.errors.map((e) => e.message).join('; ');
+      return Either.error(new BudgetUpdateFailedError(message));
     }
 
     const saveResult = await this.saveBudgetRepository.execute(budget);

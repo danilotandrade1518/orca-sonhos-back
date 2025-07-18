@@ -24,7 +24,7 @@ export class Budget extends AggregateRoot implements IEntity {
   private _isDeleted: boolean = false;
 
   private constructor(
-    private readonly _name: EntityName,
+    private _name: EntityName,
     private readonly _ownerId: EntityId,
     private readonly _participants: BudgetParticipants,
   ) {
@@ -112,6 +112,19 @@ export class Budget extends AggregateRoot implements IEntity {
 
     either.setData(this);
     return either;
+  }
+
+  update(data: { name?: string }): Either<DomainError, void> {
+    const newName = data.name ?? this.name;
+    const nameVo = EntityName.create(newName);
+    if (nameVo.hasError) return Either.errors<DomainError, void>(nameVo.errors);
+
+    if (newName === this.name) return Either.success<DomainError, void>();
+
+    this._name = nameVo;
+    this._updatedAt = new Date();
+
+    return Either.success<DomainError, void>();
   }
 
   static create(data: CreateBudgetDTO): Either<DomainError, Budget> {
