@@ -1,6 +1,6 @@
 import { Either } from '@either';
 
-import { Budget } from '../../../../domain/aggregates/budget/budget-entity/Budget';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { RepositoryError } from '../../../shared/errors/RepositoryError';
 
 export interface IGetBudgetRepository {

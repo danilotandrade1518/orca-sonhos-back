@@ -11,7 +11,7 @@ import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { TransactionUpdateFailedError } from '../../../shared/errors/TransactionUpdateFailedError';
-import { FindAccountByIdRepositoryStub } from '../../../shared/tests/stubs/FindAccountByIdRepositoryStub';
+import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
 import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
@@ -23,7 +23,7 @@ describe('UpdateTransactionUseCase', () => {
   let useCase: UpdateTransactionUseCase;
   let getTransactionRepositoryStub: GetTransactionRepositoryStub;
   let saveTransactionRepositoryStub: SaveTransactionRepositoryStub;
-  let findAccountByIdRepositoryStub: FindAccountByIdRepositoryStub;
+  let getAccountRepositoryStub: GetAccountRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
   let eventPublisherStub: EventPublisherStub;
   let mockTransaction: Transaction;
@@ -33,7 +33,7 @@ describe('UpdateTransactionUseCase', () => {
   beforeEach(() => {
     getTransactionRepositoryStub = new GetTransactionRepositoryStub();
     saveTransactionRepositoryStub = new SaveTransactionRepositoryStub();
-    findAccountByIdRepositoryStub = new FindAccountByIdRepositoryStub();
+    getAccountRepositoryStub = new GetAccountRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
     eventPublisherStub = new EventPublisherStub();
 
@@ -71,12 +71,12 @@ describe('UpdateTransactionUseCase', () => {
     mockTransaction = transactionResult.data!;
 
     getTransactionRepositoryStub.mockTransaction = mockTransaction;
-    findAccountByIdRepositoryStub.addAccount(mockAccount);
+    getAccountRepositoryStub.mockAccount = mockAccount;
 
     useCase = new UpdateTransactionUseCase(
       getTransactionRepositoryStub,
       saveTransactionRepositoryStub,
-      findAccountByIdRepositoryStub,
+      getAccountRepositoryStub,
       budgetAuthorizationServiceStub,
       eventPublisherStub,
     );
@@ -125,7 +125,7 @@ describe('UpdateTransactionUseCase', () => {
       }
 
       const secondAccount = secondAccountResult.data!;
-      findAccountByIdRepositoryStub.addAccount(secondAccount);
+      getAccountRepositoryStub.mockAccount = secondAccount;
 
       const dto: UpdateTransactionDto = {
         userId,
@@ -187,7 +187,8 @@ describe('UpdateTransactionUseCase', () => {
     });
 
     it('should return error when new account does not exist', async () => {
-      findAccountByIdRepositoryStub.clear();
+      getAccountRepositoryStub.mockAccount = null;
+      getAccountRepositoryStub.executeCalls = [];
 
       const dto: UpdateTransactionDto = {
         userId,
@@ -250,7 +251,7 @@ describe('UpdateTransactionUseCase', () => {
 
     it('should return error when findAccount repository fails', async () => {
       jest
-        .spyOn(findAccountByIdRepositoryStub, 'execute')
+        .spyOn(getAccountRepositoryStub, 'execute')
         .mockResolvedValueOnce(
           Either.errors([new RepositoryError('Repository error')]),
         );

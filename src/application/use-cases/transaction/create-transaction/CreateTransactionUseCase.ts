@@ -4,7 +4,7 @@ import { Either } from '@either';
 
 import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IAddTransactionRepository } from '../../../contracts/repositories/transaction/IAddTransactionRepository';
-import { IFindAccountByIdRepository } from '../../../contracts/repositories/account/IFindAccountByIdRepository';
+import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
@@ -21,7 +21,7 @@ export class CreateTransactionUseCase
 {
   constructor(
     private readonly addTransactionRepository: IAddTransactionRepository,
-    private readonly findAccountRepository: IFindAccountByIdRepository,
+    private readonly getAccountRepository: IGetAccountRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
     private readonly eventPublisher: IEventPublisher,
   ) {}
@@ -46,7 +46,7 @@ export class CreateTransactionUseCase
       ]);
     }
 
-    const accountResult = await this.findAccountRepository.execute(
+    const accountResult = await this.getAccountRepository.execute(
       dto.accountId,
     );
 
