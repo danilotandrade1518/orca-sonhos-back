@@ -8,6 +8,9 @@ const globals = require('globals');
 module.exports = [
   js.configs.recommended,
   {
+    ignores: ['dist/**', 'coverage/**', 'node_modules/**'],
+  },
+  {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tsParser,
@@ -30,6 +33,14 @@ module.exports = [
     languageOptions: {
       globals: {
         ...globals.jest,
+      },
+    },
+  },
+  {
+    files: ['*.js', '*.cjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
       },
     },
   },
