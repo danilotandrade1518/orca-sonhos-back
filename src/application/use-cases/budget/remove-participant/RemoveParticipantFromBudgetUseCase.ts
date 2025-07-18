@@ -32,7 +32,9 @@ export class RemoveParticipantFromBudgetUseCase
     );
 
     if (authResult.hasError) {
-      return Either.errors<ApplicationError, UseCaseResponse>(authResult.errors);
+      return Either.errors<ApplicationError, UseCaseResponse>(
+        authResult.errors,
+      );
     }
 
     if (!authResult.data) {
