@@ -11,6 +11,7 @@ import {
 } from '../value-objects/account-type/AccountType';
 import { EntityName } from './../../../shared/value-objects/entity-name/EntityName';
 import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
+import { AccountDeletedEvent } from '../events/AccountDeletedEvent';
 import { InvalidAccountDataError } from '../errors/InvalidAccountDataError';
 
 export interface CreateAccountDTO {
@@ -32,6 +33,7 @@ export class Account extends AggregateRoot implements IEntity {
   private readonly _createdAt: Date;
 
   private _updatedAt: Date;
+  private _isDeleted = false;
 
   private constructor(
     private _name: EntityName,
@@ -58,6 +60,10 @@ export class Account extends AggregateRoot implements IEntity {
 
   get updatedAt(): Date {
     return this._updatedAt;
+  }
+
+  get isDeleted(): boolean {
+    return this._isDeleted;
   }
 
   get name(): string | null {
@@ -207,6 +213,21 @@ export class Account extends AggregateRoot implements IEntity {
 
     either.setData(updatedAccount);
     return either;
+  }
+
+  delete(): void {
+    this._updatedAt = new Date();
+    this._isDeleted = true;
+    this.addEvent(
+      new AccountDeletedEvent(
+        this.id,
+        this.budgetId!,
+        this.name!,
+        this.type as AccountTypeEnum,
+        this.balance!,
+        this.description,
+      ),
+    );
   }
 
   static create(data: CreateAccountDTO): Either<DomainError, Account> {
