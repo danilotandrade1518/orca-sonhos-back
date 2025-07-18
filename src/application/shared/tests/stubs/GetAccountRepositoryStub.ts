@@ -7,8 +7,22 @@ import { RepositoryError } from '../../errors/RepositoryError';
 export class GetAccountRepositoryStub implements IGetAccountRepository {
   public shouldFail = false;
   public shouldReturnNull = false;
-  public mockAccount: Account | null = null;
+  private _mockAccount: Account | null = null;
   public executeCalls: string[] = [];
+  private accounts: Record<string, Account> = {};
+
+  set mockAccount(account: Account | null) {
+    this._mockAccount = account;
+    if (account) {
+      this.accounts[account.id] = account;
+    } else {
+      this.accounts = {};
+    }
+  }
+
+  get mockAccount(): Account | null {
+    return this._mockAccount;
+  }
 
   async execute(id: string): Promise<Either<RepositoryError, Account | null>> {
     this.executeCalls.push(id);
@@ -21,6 +35,8 @@ export class GetAccountRepositoryStub implements IGetAccountRepository {
       return Either.success(null);
     }
 
-    return Either.success(this.mockAccount);
+    const account = this.accounts[id];
+
+    return Either.success(account ?? null);
   }
 }
