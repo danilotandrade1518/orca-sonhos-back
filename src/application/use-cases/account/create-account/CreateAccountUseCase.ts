@@ -1,8 +1,8 @@
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { DomainError } from '@domain/shared/DomainError';
+import { Either } from '@either';
 
-import { Either } from '../../../../shared/core/either';
 import { IAddAccountRepository } from '../../../contracts/repositories/account/IAddAccountRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';

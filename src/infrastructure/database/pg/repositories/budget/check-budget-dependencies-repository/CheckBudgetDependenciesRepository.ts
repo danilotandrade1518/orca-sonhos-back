@@ -1,13 +1,17 @@
-import { Either } from '../../../../../../shared/core/either';
+import { ICheckBudgetDependenciesRepository } from '@application/contracts/repositories/budget/ICheckBudgetDependenciesRepository';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { Either } from '@either';
 
-import { ICheckBudgetDependenciesRepository } from '../../../../../../application/contracts/repositories/budget/ICheckBudgetDependenciesRepository';
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 
-export class CheckBudgetDependenciesRepository implements ICheckBudgetDependenciesRepository {
+export class CheckBudgetDependenciesRepository
+  implements ICheckBudgetDependenciesRepository
+{
   private readonly connection = PostgreSQLConnection.getInstance();
 
-  async hasAccounts(budgetId: string): Promise<Either<RepositoryError, boolean>> {
+  async hasAccounts(
+    budgetId: string,
+  ): Promise<Either<RepositoryError, boolean>> {
     try {
       const query = `
         SELECT EXISTS(
@@ -20,20 +24,22 @@ export class CheckBudgetDependenciesRepository implements ICheckBudgetDependenci
         query,
         [budgetId],
       );
-      return Either.success<RepositoryError, boolean>(result?.has_accounts || false);
-    } catch (error: any) {
-      const message =
-        'Failed to check budget accounts' + (error?.message ? `: ${error.message}` : '');
+      return Either.success<RepositoryError, boolean>(
+        result?.has_accounts || false,
+      );
+    } catch (error) {
       return Either.error(
         new RepositoryError(
-          message,
+          `Failed to check budget accounts: ${error instanceof Error ? error.message : 'Unknown error'}`,
           error instanceof Error ? error : new Error('Unknown error'),
         ),
       );
     }
   }
 
-  async hasTransactions(budgetId: string): Promise<Either<RepositoryError, boolean>> {
+  async hasTransactions(
+    budgetId: string,
+  ): Promise<Either<RepositoryError, boolean>> {
     try {
       const query = `
         SELECT EXISTS(
@@ -42,17 +48,16 @@ export class CheckBudgetDependenciesRepository implements ICheckBudgetDependenci
         ) as has_transactions
       `;
 
-      const result = await this.connection.queryOne<{ has_transactions: boolean }>(
-        query,
-        [budgetId],
+      const result = await this.connection.queryOne<{
+        has_transactions: boolean;
+      }>(query, [budgetId]);
+      return Either.success<RepositoryError, boolean>(
+        result?.has_transactions || false,
       );
-      return Either.success<RepositoryError, boolean>(result?.has_transactions || false);
-    } catch (error: any) {
-      const message =
-        'Failed to check budget transactions' + (error?.message ? `: ${error.message}` : '');
+    } catch (error) {
       return Either.error(
         new RepositoryError(
-          message,
+          `Failed to check budget transactions: ${error instanceof Error ? error.message : 'Unknown error'}`,
           error instanceof Error ? error : new Error('Unknown error'),
         ),
       );

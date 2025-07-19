@@ -1,10 +1,10 @@
-import { Either } from '../../../../../../shared/core/either';
+import { ISaveBudgetRepository } from '@application/contracts/repositories/budget/ISaveBudgetRepository';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { Either } from '@either';
 
-import { Budget } from '../../../../../../domain/aggregates/budget/budget-entity/Budget';
-import { ISaveBudgetRepository } from '../../../../../../application/contracts/repositories/budget/ISaveBudgetRepository';
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
-import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
+import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 
 export class SaveBudgetRepository implements ISaveBudgetRepository {
   private readonly connection = PostgreSQLConnection.getInstance();

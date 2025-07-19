@@ -1,6 +1,6 @@
 import { DomainError } from '@domain/shared/DomainError';
+import { Either } from '@either';
 
-import { Either } from '../../shared/core/either';
 import { ApplicationError } from './errors/ApplicationError';
 
 export type UseCaseResponse = { id: string };

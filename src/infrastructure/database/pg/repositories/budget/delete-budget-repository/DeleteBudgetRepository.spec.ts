@@ -1,6 +1,5 @@
-import { Either } from '../../../../../../shared/core/either';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
 
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import { DeleteBudgetRepository } from './DeleteBudgetRepository';
 
@@ -8,6 +7,7 @@ jest.mock('../../../connection/PostgreSQLConnection');
 
 describe('DeleteBudgetRepository', () => {
   let repository: DeleteBudgetRepository;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockQueryOne: jest.MockedFunction<any>;
 
   beforeEach(() => {

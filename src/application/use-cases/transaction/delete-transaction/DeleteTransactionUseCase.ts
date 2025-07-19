@@ -1,6 +1,7 @@
 import { DomainError } from '@domain/shared/DomainError';
+import { Either } from '@either';
 
-import { Either } from '../../../../shared/core/either';
+import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IDeleteTransactionRepository } from '../../../contracts/repositories/transaction/IDeleteTransactionRepository';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
@@ -9,7 +10,6 @@ import { InsufficientPermissionsError } from '../../../shared/errors/Insufficien
 import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { DeleteTransactionDto } from './DeleteTransactionDto';
 
 export class DeleteTransactionUseCase

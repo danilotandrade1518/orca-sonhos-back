@@ -32,8 +32,9 @@
     "baseUrl": "./src",
     "paths": {
       "@domain/*": ["domain/*"],
-      "@either": ["shared/core/either.ts"],
-      "@application/*": ["application/*"]
+      "@application/*": ["application/*"],
+      "@infrastructure/*": ["infrastructure/*"],
+      "@either": ["shared/core/either.ts"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

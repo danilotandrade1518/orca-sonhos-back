@@ -1,4 +1,5 @@
-import { Either } from '../../../../shared/core/either';
+import { Either } from '@either';
+
 import { DomainError } from '../../DomainError';
 import { InvalidEntityIdError } from '../../errors/InvalidEntityIdError';
 import { IValueObject } from '../../IValueObject';

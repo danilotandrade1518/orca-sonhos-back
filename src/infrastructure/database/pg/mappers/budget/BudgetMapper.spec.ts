@@ -1,5 +1,6 @@
-import { EntityId } from '../../../../domain/shared/value-objects/entity-id/EntityId';
-import { Budget } from '../../../../domain/aggregates/budget/budget-entity/Budget';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+
 import { BudgetMapper, BudgetRow } from './BudgetMapper';
 
 describe('BudgetMapper', () => {

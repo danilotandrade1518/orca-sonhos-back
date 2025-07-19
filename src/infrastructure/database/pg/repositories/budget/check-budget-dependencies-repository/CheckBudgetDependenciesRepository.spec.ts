@@ -1,4 +1,5 @@
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import { CheckBudgetDependenciesRepository } from './CheckBudgetDependenciesRepository';
 
@@ -6,6 +7,7 @@ jest.mock('../../../connection/PostgreSQLConnection');
 
 describe('CheckBudgetDependenciesRepository', () => {
   let repository: CheckBudgetDependenciesRepository;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockQueryOne: jest.MockedFunction<any>;
 
   beforeEach(() => {

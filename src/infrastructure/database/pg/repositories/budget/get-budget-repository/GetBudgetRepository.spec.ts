@@ -1,16 +1,16 @@
-import { Either } from '../../../../../../shared/core/either';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { DomainError } from '@domain/shared/DomainError';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { Either } from '@either';
 
-import { EntityId } from '../../../../../../domain/shared/value-objects/entity-id/EntityId';
-import { Budget } from '../../../../../../domain/aggregates/budget/budget-entity/Budget';
-import { DomainError } from '../../../../../../domain/shared/DomainError';
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
-import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
+import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { GetBudgetRepository } from './GetBudgetRepository';
 
 // Mock do PostgreSQLConnection
 jest.mock('../../../connection/PostgreSQLConnection');
-jest.mock('../../../mappers/BudgetMapper');
+jest.mock('../../../mappers/budget/BudgetMapper');
 
 class TestDomainError extends DomainError {
   constructor(message: string) {
