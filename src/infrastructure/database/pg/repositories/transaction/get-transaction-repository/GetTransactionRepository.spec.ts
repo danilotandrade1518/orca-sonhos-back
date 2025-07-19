@@ -64,17 +64,6 @@ describe('GetTransactionRepository', () => {
       expect(result.data).toBe(tx);
     });
 
-    it('should handle null category_id', async () => {
-      const rowNull = { ...row, category_id: null } as TransactionRow;
-      const tx = {} as Transaction;
-      mockQueryOne.mockResolvedValue(rowNull);
-      mockMapper.toDomain.mockReturnValue(Either.success(tx));
-
-      const result = await repository.execute(validId);
-      expect(result.hasError).toBe(false);
-      expect(result.data).toBe(tx);
-    });
-
     it('should return null when not found', async () => {
       mockQueryOne.mockResolvedValue(null);
 

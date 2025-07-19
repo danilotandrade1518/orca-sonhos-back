@@ -58,11 +58,11 @@ export class Transaction extends AggregateRoot implements IEntity {
     private readonly _accountId: EntityId,
     private _status: TransactionStatus,
     private readonly _creditCardId?: EntityId,
-    existingId?: EntityId,
+    private readonly _existingId?: EntityId,
   ) {
     super();
 
-    this._id = existingId || EntityId.create();
+    this._id = this._existingId || EntityId.create();
     this._createdAt = new Date();
     this._updatedAt = new Date();
   }
@@ -338,7 +338,7 @@ export class Transaction extends AggregateRoot implements IEntity {
     amount: number;
     type: TransactionTypeEnum;
     accountId: string;
-    categoryId: string | null;
+    categoryId: string;
     budgetId: string;
     transactionDate: Date;
     status: TransactionStatusEnum;
@@ -353,9 +353,7 @@ export class Transaction extends AggregateRoot implements IEntity {
     const type = TransactionType.create(data.type);
     const accountId = EntityId.fromString(data.accountId);
     const budgetId = EntityId.fromString(data.budgetId);
-    const categoryId = data.categoryId
-      ? EntityId.fromString(data.categoryId)
-      : EntityId.create();
+    const categoryId = EntityId.fromString(data.categoryId);
     const status = TransactionStatus.create(data.status);
     const idVo = EntityId.fromString(data.id);
 

@@ -1,11 +1,11 @@
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
-import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
+import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { AddBudgetRepository } from './AddBudgetRepository';
 
 jest.mock('../../../connection/PostgreSQLConnection');
-jest.mock('../../../mappers/BudgetMapper');
+jest.mock('../../../mappers/budget/BudgetMapper');
 
 describe('AddBudgetRepository', () => {
   let repository: AddBudgetRepository;

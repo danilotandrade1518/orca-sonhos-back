@@ -10,7 +10,7 @@ export interface TransactionRow {
   amount: string;
   type: string;
   account_id: string;
-  category_id: string | null;
+  category_id: string;
   budget_id: string;
   transaction_date: Date;
   status: string;

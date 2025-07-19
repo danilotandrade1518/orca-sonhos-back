@@ -33,26 +33,6 @@ describe('TransactionMapper', () => {
       expect(tx.status).toBe(TransactionStatusEnum.SCHEDULED);
     });
 
-    it('should handle null category_id', () => {
-      const row: TransactionRow = {
-        id: EntityId.create().value!.id,
-        description: 'Test',
-        amount: '50.00',
-        type: 'INCOME',
-        account_id: EntityId.create().value!.id,
-        category_id: null,
-        budget_id: EntityId.create().value!.id,
-        transaction_date: new Date('2024-01-02'),
-        status: 'COMPLETED',
-        is_deleted: false,
-        created_at: new Date('2024-01-02'),
-        updated_at: new Date('2024-01-03'),
-      };
-
-      const result = TransactionMapper.toDomain(row);
-      expect(result.hasError).toBe(false);
-    });
-
     it('should return error with invalid data', () => {
       const row: TransactionRow = {
         id: 'invalid',
