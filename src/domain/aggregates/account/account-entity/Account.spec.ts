@@ -4,6 +4,7 @@ import { InvalidBalanceError } from './../../../shared/errors/InvalidBalanceErro
 import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 import { Account, CreateAccountDTO } from './Account';
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 
 describe('Account', () => {
   const VALID_BUDGET_ID = '123e4567-e89b-12d3-a456-426614174000';
@@ -325,6 +326,47 @@ describe('Account', () => {
       expect(result.hasError).toBe(false);
       expect(result.data!.type).toBe(AccountTypeEnum.INVESTMENT_ACCOUNT);
       expect(result.data!.balance).toBe(10000);
+    });
+  });
+
+  describe('restore', () => {
+    it('should restore account from persistence', () => {
+      const createdAt = new Date('2023-01-01');
+      const updatedAt = new Date('2023-01-02');
+      const id = EntityId.create().value!.id;
+      const budgetId = EntityId.create().value!.id;
+      const result = Account.restore({
+        id,
+        name: 'Acc',
+        type: AccountTypeEnum.CHECKING_ACCOUNT,
+        budgetId,
+        balance: 200,
+        isDeleted: false,
+        createdAt,
+        updatedAt,
+      });
+
+      expect(result.hasError).toBe(false);
+      const acc = result.data!;
+      expect(acc.id).toBe(id);
+      expect(acc.createdAt).toEqual(createdAt);
+      expect(acc.updatedAt).toEqual(updatedAt);
+      expect(acc.balance).toBe(200);
+    });
+
+    it('should return error with invalid data', () => {
+      const result = Account.restore({
+        id: '',
+        name: '',
+        type: 'INVALID' as AccountTypeEnum,
+        budgetId: '',
+        balance: NaN,
+        isDeleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      expect(result.hasError).toBe(true);
     });
   });
 });

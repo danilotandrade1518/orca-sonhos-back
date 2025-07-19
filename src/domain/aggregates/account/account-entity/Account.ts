@@ -252,4 +252,54 @@ export class Account extends AggregateRoot implements IEntity {
     );
     return either;
   }
+
+  static restore(data: {
+    id: string;
+    name: string;
+    type: AccountTypeEnum;
+    budgetId: string;
+    balance: number;
+    description?: string;
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }): Either<DomainError, Account> {
+    const either = new Either<DomainError, Account>();
+
+    const nameVo = EntityName.create(data.name);
+    if (nameVo.hasError) either.addManyErrors(nameVo.errors);
+
+    const typeVo = AccountType.create(data.type);
+    if (typeVo.hasError) either.addManyErrors(typeVo.errors);
+
+    const budgetIdVo = EntityId.fromString(data.budgetId);
+    if (budgetIdVo.hasError) either.addManyErrors(budgetIdVo.errors);
+
+    const balanceVo = BalanceVo.create(data.balance);
+    if (balanceVo.hasError) either.addManyErrors(balanceVo.errors);
+
+    const idVo = EntityId.fromString(data.id);
+    if (idVo.hasError) either.addManyErrors(idVo.errors);
+
+    if (either.hasError) return either;
+
+    const account = new Account(
+      nameVo,
+      typeVo,
+      budgetIdVo,
+      balanceVo,
+      data.description,
+      idVo,
+    );
+
+    Object.defineProperty(account, '_createdAt', {
+      value: data.createdAt,
+      writable: false,
+    });
+    account._updatedAt = data.updatedAt;
+    account._isDeleted = data.isDeleted;
+
+    either.setData(account);
+    return either;
+  }
 }
