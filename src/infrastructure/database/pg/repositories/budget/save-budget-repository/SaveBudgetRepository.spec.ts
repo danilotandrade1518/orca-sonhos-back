@@ -3,11 +3,11 @@ import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
-import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
+import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { SaveBudgetRepository } from './SaveBudgetRepository';
 
 jest.mock('../../../connection/PostgreSQLConnection');
-jest.mock('../../../mappers/BudgetMapper');
+jest.mock('../../../mappers/budget/BudgetMapper');
 
 describe('SaveBudgetRepository', () => {
   let repository: SaveBudgetRepository;

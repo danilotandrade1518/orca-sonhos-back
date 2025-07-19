@@ -4,7 +4,7 @@ import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { Either } from '@either';
 
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
-import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
+import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 
 export class GetBudgetRepository implements IGetBudgetRepository {
   private readonly connection = PostgreSQLConnection.getInstance();

@@ -5,12 +5,12 @@ import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
 
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
-import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
+import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { GetBudgetRepository } from './GetBudgetRepository';
 
 // Mock do PostgreSQLConnection
 jest.mock('../../../connection/PostgreSQLConnection');
-jest.mock('../../../mappers/BudgetMapper');
+jest.mock('../../../mappers/budget/BudgetMapper');
 
 class TestDomainError extends DomainError {
   constructor(message: string) {
