@@ -332,6 +332,68 @@ export class Transaction extends AggregateRoot implements IEntity {
     return Either.success<DomainError, Transaction>(transaction);
   }
 
+  static restore(data: {
+    id: string;
+    description: string;
+    amount: number;
+    type: TransactionTypeEnum;
+    accountId: string;
+    categoryId: string | null;
+    budgetId: string;
+    transactionDate: Date;
+    status: TransactionStatusEnum;
+    isDeleted: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }): Either<DomainError, Transaction> {
+    const either = new Either<DomainError, Transaction>();
+
+    const description = TransactionDescription.create(data.description);
+    const amount = MoneyVo.create(data.amount);
+    const type = TransactionType.create(data.type);
+    const accountId = EntityId.fromString(data.accountId);
+    const budgetId = EntityId.fromString(data.budgetId);
+    const categoryId = data.categoryId
+      ? EntityId.fromString(data.categoryId)
+      : EntityId.create();
+    const status = TransactionStatus.create(data.status);
+    const idVo = EntityId.fromString(data.id);
+
+    if (description.hasError) either.addManyErrors(description.errors);
+    if (amount.hasError) either.addManyErrors(amount.errors);
+    if (type.hasError) either.addManyErrors(type.errors);
+    if (accountId.hasError) either.addManyErrors(accountId.errors);
+    if (budgetId.hasError) either.addManyErrors(budgetId.errors);
+    if (categoryId.hasError) either.addManyErrors(categoryId.errors);
+    if (status.hasError) either.addManyErrors(status.errors);
+    if (idVo.hasError) either.addManyErrors(idVo.errors);
+
+    if (either.hasError) return either;
+
+    const transaction = new Transaction(
+      description,
+      amount,
+      type,
+      data.transactionDate,
+      categoryId,
+      budgetId,
+      accountId,
+      status,
+      undefined,
+      idVo,
+    );
+
+    Object.defineProperty(transaction, '_createdAt', {
+      value: data.createdAt,
+      writable: false,
+    });
+    transaction._updatedAt = data.updatedAt;
+    transaction._isDeleted = data.isDeleted;
+
+    either.setData(transaction);
+    return either;
+  }
+
   private static determineInitialStatus(
     transactionDate: Date,
     providedStatus?: TransactionStatusEnum,
