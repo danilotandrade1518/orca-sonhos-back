@@ -11,5 +11,6 @@ module.exports = {
   moduleNameMapper: {
     '^@either$': '<rootDir>/src/shared/core/either.ts',
     '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@application/(.*)$': '<rootDir>/src/application/$1',
   },
 };
