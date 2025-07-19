@@ -1,7 +1,7 @@
-import { Either } from '../../../../../../shared/core/either';
+import { IDeleteBudgetRepository } from '@application/contracts/repositories/budget/IDeleteBudgetRepository';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { Either } from '@either';
 
-import { IDeleteBudgetRepository } from '../../../../../../application/contracts/repositories/budget/IDeleteBudgetRepository';
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 
 export class DeleteBudgetRepository implements IDeleteBudgetRepository {

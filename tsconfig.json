@@ -32,6 +32,8 @@
     "baseUrl": "./src",
     "paths": {
       "@domain/*": ["domain/*"],
+      "@application/*": ["application/*"],
+      "@infrastructure/*": ["infrastructure/*"],
       "@either": ["shared/core/either.ts"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */

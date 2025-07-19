@@ -1,8 +1,8 @@
-import { Either } from '../../../../../../shared/core/either';
+import { IGetBudgetRepository } from '@application/contracts/repositories/budget/IGetBudgetRepository';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { Either } from '@either';
 
-import { Budget } from '../../../../../../domain/aggregates/budget/budget-entity/Budget';
-import { IGetBudgetRepository } from '../../../../../../application/contracts/repositories/budget/IGetBudgetRepository';
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
 

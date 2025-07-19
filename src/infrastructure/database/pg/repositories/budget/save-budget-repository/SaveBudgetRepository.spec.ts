@@ -1,6 +1,7 @@
-import { Budget } from '../../../../../../domain/aggregates/budget/budget-entity/Budget';
-import { EntityId } from '../../../../../../domain/shared/value-objects/entity-id/EntityId';
-import { RepositoryError } from '../../../../../../application/shared/errors/RepositoryError';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import { BudgetMapper, BudgetRow } from '../../../mappers/BudgetMapper';
 import { SaveBudgetRepository } from './SaveBudgetRepository';

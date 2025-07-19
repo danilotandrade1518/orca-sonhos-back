@@ -1,7 +1,7 @@
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { DomainError } from '@domain/shared/DomainError';
+import { Either } from '@either';
 
-import { Either } from '../../../../shared/core/either';
 import { IAddBudgetRepository } from '../../../contracts/repositories/budget/IAddBudgetRepository';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { IUseCase, UseCaseResponse } from './../../../shared/IUseCase';

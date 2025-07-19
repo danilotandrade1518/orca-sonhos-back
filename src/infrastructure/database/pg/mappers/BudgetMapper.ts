@@ -1,7 +1,6 @@
-import { Either } from '../../../../shared/core/either';
-
-import { Budget } from '../../../../domain/aggregates/budget/budget-entity/Budget';
-import { DomainError } from '../../../../domain/shared/DomainError';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { DomainError } from '@domain/shared/DomainError';
+import { Either } from '@either';
 
 export interface BudgetRow {
   id: string;
