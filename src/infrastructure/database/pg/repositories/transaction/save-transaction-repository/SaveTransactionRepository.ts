@@ -29,21 +29,18 @@ export class SaveTransactionRepository implements ISaveTransactionRepository {
 
     try {
       const query = `
-        INSERT INTO transactions (
-          id, description, amount, type, account_id, category_id,
-          budget_id, transaction_date, status, is_deleted, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-        ON CONFLICT (id) DO UPDATE SET
-          description = EXCLUDED.description,
-          amount = EXCLUDED.amount,
-          type = EXCLUDED.type,
-          account_id = EXCLUDED.account_id,
-          category_id = EXCLUDED.category_id,
-          budget_id = EXCLUDED.budget_id,
-          transaction_date = EXCLUDED.transaction_date,
-          status = EXCLUDED.status,
-          is_deleted = EXCLUDED.is_deleted,
-          updated_at = EXCLUDED.updated_at
+        UPDATE transactions SET
+          description = $2,
+          amount = $3,
+          type = $4,
+          account_id = $5,
+          category_id = $6,
+          budget_id = $7,
+          transaction_date = $8,
+          status = $9,
+          is_deleted = $10,
+          updated_at = $11
+        WHERE id = $1
       `;
 
       const params = [
@@ -57,7 +54,6 @@ export class SaveTransactionRepository implements ISaveTransactionRepository {
         row.transaction_date,
         row.status,
         row.is_deleted,
-        row.created_at,
         row.updated_at,
       ];
 

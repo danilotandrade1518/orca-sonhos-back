@@ -2,13 +2,13 @@ import { Either } from '@either';
 
 import { AggregateRoot } from '../../../shared/AggregateRoot';
 import { DomainError } from '../../../shared/DomainError';
-import { IEntity } from '../../../shared/IEntity';
 import { CannotRemoveOwnerFromParticipantsError } from '../../../shared/errors/CannotRemoveOwnerFromParticipantsError';
-import { BudgetDeletedEvent } from '../events/BudgetDeletedEvent';
-import { BudgetAlreadyDeletedError } from '../errors/BudgetAlreadyDeletedError';
+import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { BudgetParticipants } from '../budget-participants-entity/BudgetParticipants';
+import { BudgetAlreadyDeletedError } from '../errors/BudgetAlreadyDeletedError';
+import { BudgetDeletedEvent } from '../events/BudgetDeletedEvent';
 
 export interface CreateBudgetDTO {
   name: string;
@@ -27,10 +27,11 @@ export class Budget extends AggregateRoot implements IEntity {
     private _name: EntityName,
     private readonly _ownerId: EntityId,
     private readonly _participants: BudgetParticipants,
+    existingId?: EntityId,
   ) {
     super();
 
-    this._id = EntityId.create();
+    this._id = existingId || EntityId.create();
 
     this._createdAt = new Date();
     this._updatedAt = new Date();
@@ -184,12 +185,13 @@ export class Budget extends AggregateRoot implements IEntity {
     if (participantsResult.hasError)
       return Either.errors<DomainError, Budget>(participantsResult.errors);
 
-    const budget = new Budget(nameVo, ownerIdVo, participantsResult.data!);
+    const budget = new Budget(
+      nameVo,
+      ownerIdVo,
+      participantsResult.data!,
+      idVo,
+    );
 
-    Object.defineProperty(budget, '_id', {
-      value: idVo,
-      writable: false,
-    });
     Object.defineProperty(budget, '_createdAt', {
       value: data.createdAt,
       writable: false,

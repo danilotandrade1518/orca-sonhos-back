@@ -1,12 +1,13 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import {
   AccountMapper,
   AccountRow,
 } from '../../../mappers/account/AccountMapper';
-import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { SaveAccountRepository } from './SaveAccountRepository';
 
 jest.mock('../../../connection/PostgreSQLConnection');
@@ -48,7 +49,7 @@ describe('SaveAccountRepository', () => {
       updated_at: account.updatedAt,
     };
 
-    it('should save account successfully', async () => {
+    it('should update account successfully', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       mockQueryOne.mockResolvedValue(null);
 
@@ -62,18 +63,18 @@ describe('SaveAccountRepository', () => {
         row.budget_id,
         row.balance,
         row.is_deleted,
-        row.created_at,
-        expect.any(Date),
+        expect.any(Date), // updated_at é atualizado dinamicamente
       ]);
     });
 
-    it('should update existing account via upsert', async () => {
+    it('should update existing account', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       mockQueryOne.mockResolvedValue(null);
 
       await repository.execute(account);
 
-      expect(mockQueryOne.mock.calls[0][0]).toContain('ON CONFLICT');
+      expect(mockQueryOne.mock.calls[0][0]).toContain('UPDATE accounts SET');
+      expect(mockQueryOne.mock.calls[0][0]).toContain('WHERE id = $1');
     });
 
     it('should return error when database query fails', async () => {

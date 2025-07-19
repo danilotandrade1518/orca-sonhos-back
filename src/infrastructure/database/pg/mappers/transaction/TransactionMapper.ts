@@ -1,8 +1,8 @@
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
+import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-objects/transaction-status/TransactionStatus';
+import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
-import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
-import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-objects/transaction-status/TransactionStatus';
 
 export interface TransactionRow {
   id: string;

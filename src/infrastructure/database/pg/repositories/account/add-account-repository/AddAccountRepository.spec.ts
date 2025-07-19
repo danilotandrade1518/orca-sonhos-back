@@ -1,13 +1,14 @@
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
-import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import {
   AccountMapper,
   AccountRow,
 } from '../../../mappers/account/AccountMapper';
 import { AddAccountRepository } from './AddAccountRepository';
-import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
 jest.mock('../../../connection/PostgreSQLConnection');
 jest.mock('../../../mappers/account/AccountMapper');

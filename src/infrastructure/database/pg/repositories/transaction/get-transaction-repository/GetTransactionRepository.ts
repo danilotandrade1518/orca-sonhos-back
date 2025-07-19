@@ -2,6 +2,7 @@ import { IGetTransactionRepository } from '@application/contracts/repositories/t
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { Either } from '@either';
+
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import {
   TransactionMapper,

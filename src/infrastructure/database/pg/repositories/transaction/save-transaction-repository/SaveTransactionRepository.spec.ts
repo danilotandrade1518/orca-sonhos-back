@@ -55,7 +55,7 @@ describe('SaveTransactionRepository', () => {
       updated_at: tx.updatedAt,
     };
 
-    it('should save transaction successfully', async () => {
+    it('should update transaction successfully', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       mockQueryOne.mockResolvedValue(null);
 
@@ -69,7 +69,29 @@ describe('SaveTransactionRepository', () => {
 
       await repository.execute(tx);
       const query = mockQueryOne.mock.calls[0][0];
-      expect(query).toContain('ON CONFLICT');
+      expect(query).toContain('UPDATE transactions SET');
+      expect(query).toContain('WHERE id = $1');
+    });
+
+    it('should call UPDATE with correct parameters', async () => {
+      mockMapper.toRow.mockReturnValue({ ...row });
+      mockQueryOne.mockResolvedValue(null);
+
+      await repository.execute(tx);
+      const params = mockQueryOne.mock.calls[0][1];
+      expect(params).toEqual([
+        row.id,
+        row.description,
+        row.amount,
+        row.type,
+        row.account_id,
+        row.category_id,
+        row.budget_id,
+        row.transaction_date,
+        row.status,
+        row.is_deleted,
+        expect.any(Date), // updated_at é atualizado dinamicamente
+      ]);
     });
 
     it('should return error when db fails', async () => {

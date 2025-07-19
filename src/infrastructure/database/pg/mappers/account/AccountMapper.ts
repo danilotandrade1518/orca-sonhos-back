@@ -1,6 +1,6 @@
 import { Account } from '@domain/aggregates/account/account-entity/Account';
-import { DomainError } from '@domain/shared/DomainError';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
+import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
 export interface AccountRow {

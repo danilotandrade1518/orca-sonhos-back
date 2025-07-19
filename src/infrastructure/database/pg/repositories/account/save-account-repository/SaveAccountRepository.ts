@@ -28,16 +28,14 @@ export class SaveAccountRepository implements ISaveAccountRepository {
 
     try {
       const query = `
-        INSERT INTO accounts (
-          id, name, type, budget_id, balance, is_deleted, created_at, updated_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-        ON CONFLICT (id) DO UPDATE SET
-          name = EXCLUDED.name,
-          type = EXCLUDED.type,
-          budget_id = EXCLUDED.budget_id,
-          balance = EXCLUDED.balance,
-          is_deleted = EXCLUDED.is_deleted,
-          updated_at = EXCLUDED.updated_at
+        UPDATE accounts SET
+          name = $2,
+          type = $3,
+          budget_id = $4,
+          balance = $5,
+          is_deleted = $6,
+          updated_at = $7
+        WHERE id = $1
       `;
 
       const params = [
@@ -47,7 +45,6 @@ export class SaveAccountRepository implements ISaveAccountRepository {
         row.budget_id,
         row.balance,
         row.is_deleted,
-        row.created_at,
         row.updated_at,
       ];
 

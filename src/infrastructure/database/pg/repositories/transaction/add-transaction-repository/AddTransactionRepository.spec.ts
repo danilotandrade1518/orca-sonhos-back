@@ -1,8 +1,9 @@
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-objects/transaction-status/TransactionStatus';
 import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
-import { RepositoryError } from '@application/shared/errors/RepositoryError';
+
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 import {
   TransactionMapper,

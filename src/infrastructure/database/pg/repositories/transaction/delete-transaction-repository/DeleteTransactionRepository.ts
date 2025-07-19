@@ -1,6 +1,7 @@
 import { IDeleteTransactionRepository } from '@application/contracts/repositories/transaction/IDeleteTransactionRepository';
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Either } from '@either';
+
 import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
 
 export class DeleteTransactionRepository
