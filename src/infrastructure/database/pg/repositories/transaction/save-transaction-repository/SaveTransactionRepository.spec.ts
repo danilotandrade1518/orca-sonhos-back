@@ -1,0 +1,95 @@
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
+import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
+import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-objects/transaction-status/TransactionStatus';
+import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import {
+  TransactionMapper,
+  TransactionRow,
+} from '../../../mappers/transaction/TransactionMapper';
+import { SaveTransactionRepository } from './SaveTransactionRepository';
+
+jest.mock('../../../connection/PostgreSQLConnection');
+jest.mock('../../../mappers/transaction/TransactionMapper');
+
+describe('SaveTransactionRepository', () => {
+  let repository: SaveTransactionRepository;
+  let mockQueryOne: jest.MockedFunction<PostgreSQLConnection['queryOne']>;
+  let mockMapper: jest.Mocked<typeof TransactionMapper>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockQueryOne = jest.fn();
+    mockMapper = TransactionMapper as jest.Mocked<typeof TransactionMapper>;
+    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
+      queryOne: mockQueryOne,
+    });
+    repository = new SaveTransactionRepository();
+  });
+
+  describe('execute', () => {
+    const tx = Transaction.create({
+      description: 'save',
+      amount: 2000,
+      type: TransactionTypeEnum.EXPENSE,
+      transactionDate: new Date('2024-01-10'),
+      categoryId: EntityId.create().value!.id,
+      budgetId: EntityId.create().value!.id,
+      accountId: EntityId.create().value!.id,
+      status: TransactionStatusEnum.SCHEDULED,
+    }).data!;
+
+    const row: TransactionRow = {
+      id: tx.id,
+      description: tx.description,
+      amount: '20.00',
+      type: tx.type,
+      account_id: tx.accountId,
+      category_id: tx.categoryId,
+      budget_id: tx.budgetId,
+      transaction_date: tx.transactionDate,
+      status: tx.status,
+      is_deleted: tx.isDeleted,
+      created_at: tx.createdAt,
+      updated_at: tx.updatedAt,
+    };
+
+    it('should save transaction successfully', async () => {
+      mockMapper.toRow.mockReturnValue({ ...row });
+      mockQueryOne.mockResolvedValue(null);
+
+      const result = await repository.execute(tx);
+      expect(result.hasError).toBe(false);
+    });
+
+    it('should update existing transaction', async () => {
+      mockMapper.toRow.mockReturnValue({ ...row });
+      mockQueryOne.mockResolvedValue(null);
+
+      await repository.execute(tx);
+      const query = mockQueryOne.mock.calls[0][0];
+      expect(query).toContain('ON CONFLICT');
+    });
+
+    it('should return error when db fails', async () => {
+      mockMapper.toRow.mockReturnValue({ ...row });
+      const err = new Error('db');
+      mockQueryOne.mockRejectedValue(err);
+
+      const result = await repository.execute(tx);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(RepositoryError);
+    });
+
+    it('should return error when mapping fails', async () => {
+      mockMapper.toRow.mockImplementation(() => {
+        throw new Error('map');
+      });
+
+      const result = await repository.execute(tx);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(RepositoryError);
+    });
+  });
+});
