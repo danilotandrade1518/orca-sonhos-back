@@ -4,37 +4,44 @@ import { DomainError } from '@domain/shared/DomainError';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   TransactionMapper,
   TransactionRow,
 } from '../../../mappers/transaction/TransactionMapper';
 import { GetTransactionRepository } from './GetTransactionRepository';
 
-jest.mock('../../../connection/PostgreSQLConnection');
 jest.mock('../../../mappers/transaction/TransactionMapper');
 
 class TestDomainError extends DomainError {
+  protected fieldName: string = 'test';
+
   constructor(message: string) {
     super(message);
-    this.fieldName = 'test';
   }
 }
 
 describe('GetTransactionRepository', () => {
   let repository: GetTransactionRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockQueryOne: jest.MockedFunction<any>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
   let mockMapper: jest.Mocked<typeof TransactionMapper>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
     mockMapper = TransactionMapper as jest.Mocked<typeof TransactionMapper>;
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
-    repository = new GetTransactionRepository();
+    repository = new GetTransactionRepository(mockConnection);
   });
 
   describe('execute', () => {
@@ -56,7 +63,7 @@ describe('GetTransactionRepository', () => {
 
     it('should return transaction when found', async () => {
       const tx = {} as Transaction;
-      mockQueryOne.mockResolvedValue(row);
+      mockConnection.queryOne.mockResolvedValue(row);
       mockMapper.toDomain.mockReturnValue(Either.success(tx));
 
       const result = await repository.execute(validId);
@@ -65,7 +72,7 @@ describe('GetTransactionRepository', () => {
     });
 
     it('should return null when not found', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
       expect(result.hasError).toBe(false);
@@ -74,7 +81,7 @@ describe('GetTransactionRepository', () => {
     });
 
     it('should return error when mapping fails', async () => {
-      mockQueryOne.mockResolvedValue(row);
+      mockConnection.queryOne.mockResolvedValue(row);
       mockMapper.toDomain.mockReturnValue(
         Either.error(new TestDomainError('map')),
       );
@@ -86,7 +93,7 @@ describe('GetTransactionRepository', () => {
 
     it('should return error on db failure', async () => {
       const err = new Error('fail');
-      mockQueryOne.mockRejectedValue(err);
+      mockConnection.queryOne.mockRejectedValue(err);
 
       const result = await repository.execute(validId);
       expect(result.hasError).toBe(true);

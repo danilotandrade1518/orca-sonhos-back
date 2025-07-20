@@ -3,14 +3,14 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   AccountMapper,
   AccountRow,
 } from '../../../mappers/account/AccountMapper';
 
 export class SaveAccountRepository implements ISaveAccountRepository {
-  private readonly connection = PostgreSQLConnection.getInstance();
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(account: Account): Promise<Either<RepositoryError, void>> {
     let row: AccountRow;

@@ -3,30 +3,36 @@ import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   AccountMapper,
   AccountRow,
 } from '../../../mappers/account/AccountMapper';
 import { SaveAccountRepository } from './SaveAccountRepository';
 
-jest.mock('../../../connection/PostgreSQLConnection');
 jest.mock('../../../mappers/account/AccountMapper');
 
 describe('SaveAccountRepository', () => {
   let repository: SaveAccountRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockQueryOne: jest.MockedFunction<any>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
   let mockMapper: jest.Mocked<typeof AccountMapper>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
     mockMapper = AccountMapper as jest.Mocked<typeof AccountMapper>;
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
-    repository = new SaveAccountRepository();
+    repository = new SaveAccountRepository(mockConnection);
   });
 
   describe('execute', () => {
@@ -51,12 +57,11 @@ describe('SaveAccountRepository', () => {
 
     it('should update account successfully', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute(account);
-
       expect(result.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
         row.id,
         row.name,
         row.type,
@@ -69,21 +74,37 @@ describe('SaveAccountRepository', () => {
 
     it('should update existing account', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(account);
+      const query = mockConnection.queryOne.mock.calls[0][0];
+      expect(query).toContain('UPDATE accounts SET');
+      expect(query).toContain('WHERE id = $1');
+    });
 
-      expect(mockQueryOne.mock.calls[0][0]).toContain('UPDATE accounts SET');
-      expect(mockQueryOne.mock.calls[0][0]).toContain('WHERE id = $1');
+    it('should call UPDATE with correct parameters', async () => {
+      mockMapper.toRow.mockReturnValue({ ...row });
+      mockConnection.queryOne.mockResolvedValue(null);
+
+      await repository.execute(account);
+      const params = mockConnection.queryOne.mock.calls[0][1];
+      expect(params).toEqual([
+        row.id,
+        row.name,
+        row.type,
+        row.budget_id,
+        row.balance,
+        row.is_deleted,
+        expect.any(Date), // updated_at é atualizado dinamicamente
+      ]);
     });
 
     it('should return error when database query fails', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       const dbErr = new Error('db');
-      mockQueryOne.mockRejectedValue(dbErr);
+      mockConnection.queryOne.mockRejectedValue(dbErr);
 
       const result = await repository.execute(account);
-
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(RepositoryError);
     });
@@ -94,7 +115,6 @@ describe('SaveAccountRepository', () => {
       });
 
       const result = await repository.execute(account);
-
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(RepositoryError);
       expect(result.errors[0].message).toContain('Failed to map account');

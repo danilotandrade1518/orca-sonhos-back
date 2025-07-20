@@ -3,11 +3,11 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 
 export class SaveBudgetRepository implements ISaveBudgetRepository {
-  private readonly connection = PostgreSQLConnection.getInstance();
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(budget: Budget): Promise<Either<RepositoryError, void>> {
     let row: BudgetRow;

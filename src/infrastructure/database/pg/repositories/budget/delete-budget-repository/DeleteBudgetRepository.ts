@@ -2,10 +2,10 @@ import { IDeleteBudgetRepository } from '@application/contracts/repositories/bud
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 
 export class DeleteBudgetRepository implements IDeleteBudgetRepository {
-  private readonly connection = PostgreSQLConnection.getInstance();
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(budgetId: string): Promise<Either<RepositoryError, void>> {
     try {

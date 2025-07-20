@@ -1,36 +1,43 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { CheckAccountDependenciesRepository } from './CheckAccountDependenciesRepository';
-
-jest.mock('../../../connection/PostgreSQLConnection');
 
 describe('CheckAccountDependenciesRepository', () => {
   let repository: CheckAccountDependenciesRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockQueryOne: jest.MockedFunction<any>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
-    repository = new CheckAccountDependenciesRepository();
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
+    repository = new CheckAccountDependenciesRepository(mockConnection);
   });
 
   describe('hasTransactions', () => {
     it('should return true when account has transactions', async () => {
-      mockQueryOne.mockResolvedValue({ has_transactions: true });
+      mockConnection.queryOne.mockResolvedValue({ has_transactions: true });
 
       const result = await repository.hasTransactions('acc-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(true);
-      expect(mockQueryOne).toHaveBeenCalledWith(expect.any(String), ['acc-id']);
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+        'acc-id',
+      ]);
     });
 
     it('should return false when account has no transactions', async () => {
-      mockQueryOne.mockResolvedValue({ has_transactions: false });
+      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
 
       const result = await repository.hasTransactions('acc-id');
 
@@ -39,18 +46,19 @@ describe('CheckAccountDependenciesRepository', () => {
     });
 
     it('should ignore deleted transactions', async () => {
-      mockQueryOne.mockResolvedValue({ has_transactions: false });
+      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
 
       await repository.hasTransactions('acc-id');
 
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['acc-id'],
       );
     });
 
     it('should handle database errors', async () => {
-      mockQueryOne.mockRejectedValue(new Error('db'));
+      const err = new Error('db');
+      mockConnection.queryOne.mockRejectedValue(err);
 
       const result = await repository.hasTransactions('acc-id');
 

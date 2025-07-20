@@ -2,14 +2,14 @@ import { ISaveTransactionRepository } from '@application/contracts/repositories/
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { Either } from '@either';
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   TransactionMapper,
   TransactionRow,
 } from '../../../mappers/transaction/TransactionMapper';
 
 export class SaveTransactionRepository implements ISaveTransactionRepository {
-  private readonly connection = PostgreSQLConnection.getInstance();
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(
     transaction: Transaction,

@@ -3,13 +3,14 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { BudgetMapper } from '../../../mappers/budget/BudgetMapper';
 
 export class AddBudgetRepository implements IAddBudgetRepository {
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
+
   async execute(budget: Budget): Promise<Either<RepositoryError, void>> {
     try {
-      const connection = PostgreSQLConnection.getInstance();
       const row = BudgetMapper.toRow(budget);
 
       const query = `
@@ -28,7 +29,7 @@ export class AddBudgetRepository implements IAddBudgetRepository {
         row.updated_at,
       ];
 
-      await connection.queryOne(query, params);
+      await this.connection.queryOne(query, params);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
       const err = error as Error & { code?: string };

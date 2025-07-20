@@ -2,26 +2,33 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { SaveBudgetRepository } from './SaveBudgetRepository';
 
-jest.mock('../../../connection/PostgreSQLConnection');
 jest.mock('../../../mappers/budget/BudgetMapper');
 
 describe('SaveBudgetRepository', () => {
   let repository: SaveBudgetRepository;
-  let mockQueryOne: jest.MockedFunction<PostgreSQLConnection['queryOne']>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
   let mockBudgetMapper: jest.Mocked<typeof BudgetMapper>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
     mockBudgetMapper = BudgetMapper as jest.Mocked<typeof BudgetMapper>;
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
-    repository = new SaveBudgetRepository();
+    repository = new SaveBudgetRepository(mockConnection);
   });
 
   describe('execute', () => {
@@ -47,12 +54,12 @@ describe('SaveBudgetRepository', () => {
 
     it('should save budget successfully', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute(budget);
 
       expect(result.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
         row.id,
         row.name,
         row.participant_ids,
@@ -63,18 +70,18 @@ describe('SaveBudgetRepository', () => {
 
     it('should update existing budget', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(budget);
 
-      const calledQuery: string = mockQueryOne.mock.calls[0][0];
+      const calledQuery: string = mockConnection.queryOne.mock.calls[0][0];
       expect(calledQuery).toContain('UPDATE budgets SET');
     });
 
     it('should return error when database query fails', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
       const dbError = new Error('DB fail');
-      mockQueryOne.mockRejectedValue(dbError);
+      mockConnection.queryOne.mockRejectedValue(dbError);
 
       const result = await repository.execute(budget);
 
@@ -98,18 +105,18 @@ describe('SaveBudgetRepository', () => {
 
     it('should use correct SQL query', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(budget);
 
       const expected =
         /UPDATE budgets SET[\s\S]*updated_at = \$5[\s\S]*WHERE id = \$1/;
-      expect(mockQueryOne.mock.calls[0][0]).toMatch(expected);
+      expect(mockConnection.queryOne.mock.calls[0][0]).toMatch(expected);
     });
 
     it('should handle non-Error exceptions', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockRejectedValue('string-error');
+      mockConnection.queryOne.mockRejectedValue('string-error');
 
       const result = await repository.execute(budget);
 
@@ -121,11 +128,11 @@ describe('SaveBudgetRepository', () => {
 
     it('should call queryOne once', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(budget);
 
-      expect(mockQueryOne).toHaveBeenCalledTimes(1);
+      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
     });
   });
 });

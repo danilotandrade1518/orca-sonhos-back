@@ -1,41 +1,48 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { DeleteTransactionRepository } from './DeleteTransactionRepository';
-
-jest.mock('../../../connection/PostgreSQLConnection');
 
 describe('DeleteTransactionRepository', () => {
   let repository: DeleteTransactionRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockQueryOne: jest.MockedFunction<any>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
-    repository = new DeleteTransactionRepository();
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
+    repository = new DeleteTransactionRepository(mockConnection);
   });
 
   describe('execute', () => {
     it('should mark transaction as deleted', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
       const result = await repository.execute('id');
       expect(result.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledWith(expect.any(String), ['id']);
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+        'id',
+      ]);
     });
 
     it('should be idempotent', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
       await repository.execute('id');
       await repository.execute('id');
-      expect(mockQueryOne).toHaveBeenCalledTimes(2);
+      expect(mockConnection.queryOne).toHaveBeenCalledTimes(2);
     });
 
     it('should return error on db failure', async () => {
-      mockQueryOne.mockRejectedValue(new Error('db'));
+      mockConnection.queryOne.mockRejectedValue(new Error('db'));
       const result = await repository.execute('id');
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(RepositoryError);

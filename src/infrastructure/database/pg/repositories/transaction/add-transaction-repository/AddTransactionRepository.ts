@@ -2,15 +2,17 @@ import { IAddTransactionRepository } from '@application/contracts/repositories/t
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { Either } from '@either';
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { TransactionMapper } from '../../../mappers/transaction/TransactionMapper';
 
 export class AddTransactionRepository implements IAddTransactionRepository {
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
+
   async execute(
     transaction: Transaction,
   ): Promise<Either<RepositoryError, void>> {
     try {
-      const connection = PostgreSQLConnection.getInstance();
       const row = TransactionMapper.toRow(transaction);
       const query = `
         INSERT INTO transactions (
@@ -32,7 +34,7 @@ export class AddTransactionRepository implements IAddTransactionRepository {
         row.created_at,
         row.updated_at,
       ];
-      await connection.queryOne(query, params);
+      await this.connection.queryOne(query, params);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
       const err = error as Error & { code?: string };

@@ -3,18 +3,19 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   TransactionMapper,
   TransactionRow,
 } from '../../../mappers/transaction/TransactionMapper';
 
 export class GetTransactionRepository implements IGetTransactionRepository {
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
+
   async execute(
     id: string,
   ): Promise<Either<RepositoryError, Transaction | null>> {
     try {
-      const connection = PostgreSQLConnection.getInstance();
       const query = `
         SELECT
           id, description, amount, type, account_id, category_id,
@@ -23,7 +24,7 @@ export class GetTransactionRepository implements IGetTransactionRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const row = await connection.queryOne<TransactionRow>(query, [id]);
+      const row = await this.connection.queryOne<TransactionRow>(query, [id]);
 
       if (!row) {
         return Either.success<RepositoryError, Transaction | null>(null);

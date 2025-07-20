@@ -1,25 +1,33 @@
-import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { AddBudgetRepository } from './AddBudgetRepository';
 
-jest.mock('../../../connection/PostgreSQLConnection');
 jest.mock('../../../mappers/budget/BudgetMapper');
 
 describe('AddBudgetRepository', () => {
   let repository: AddBudgetRepository;
-  let mockQueryOne: jest.MockedFunction<PostgreSQLConnection['queryOne']>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
   let mockBudgetMapper: jest.Mocked<typeof BudgetMapper>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
     mockBudgetMapper = BudgetMapper as jest.Mocked<typeof BudgetMapper>;
-    repository = new AddBudgetRepository();
+    repository = new AddBudgetRepository(mockConnection);
   });
 
   describe('execute', () => {
@@ -45,12 +53,12 @@ describe('AddBudgetRepository', () => {
       };
 
       mockBudgetMapper.toRow.mockReturnValue({ ...mockRow });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute(mockBudget);
 
       expect(result.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO budgets'),
         [
           mockRow.id,
@@ -80,7 +88,7 @@ describe('AddBudgetRepository', () => {
         code?: string;
       };
       constraintError.code = '23505';
-      mockQueryOne.mockRejectedValue(constraintError);
+      mockConnection.queryOne.mockRejectedValue(constraintError);
 
       const result = await repository.execute(mockBudget);
 
@@ -103,7 +111,7 @@ describe('AddBudgetRepository', () => {
       }).data!;
 
       mockBudgetMapper.toRow.mockReturnValue({} as unknown as BudgetRow);
-      mockQueryOne.mockRejectedValue(new Error('Connection failed'));
+      mockConnection.queryOne.mockRejectedValue(new Error('Connection failed'));
 
       const result = await repository.execute(mockBudget);
 
@@ -134,13 +142,13 @@ describe('AddBudgetRepository', () => {
       };
 
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(mockBudget);
 
       const expected =
         /INSERT INTO budgets\s*\(\s*id, name, owner_id, participant_ids, is_deleted, created_at, updated_at\s*\)\s*VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7\)/;
-      expect(mockQueryOne.mock.calls[0][0]).toMatch(expected);
+      expect(mockConnection.queryOne.mock.calls[0][0]).toMatch(expected);
     });
 
     it('should handle non-Error exceptions', async () => {
@@ -155,7 +163,7 @@ describe('AddBudgetRepository', () => {
       }).data!;
 
       mockBudgetMapper.toRow.mockReturnValue({} as unknown as BudgetRow);
-      mockQueryOne.mockRejectedValue('fail');
+      mockConnection.queryOne.mockRejectedValue('fail');
 
       const result = await repository.execute(mockBudget);
 
@@ -187,11 +195,11 @@ describe('AddBudgetRepository', () => {
       };
 
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(mockBudget);
 
-      expect(mockQueryOne).toHaveBeenCalledTimes(1);
+      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
     });
   });
 });

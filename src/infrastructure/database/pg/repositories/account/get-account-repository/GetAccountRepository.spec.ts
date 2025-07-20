@@ -2,7 +2,7 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   AccountMapper,
   AccountRow,
@@ -10,23 +10,29 @@ import {
 import { DomainError } from '@domain/shared/DomainError';
 import { GetAccountRepository } from './GetAccountRepository';
 
-jest.mock('../../../connection/PostgreSQLConnection');
 jest.mock('../../../mappers/account/AccountMapper');
 
 describe('GetAccountRepository', () => {
   let repository: GetAccountRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockQueryOne: jest.MockedFunction<any>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
   let mockMapper: jest.Mocked<typeof AccountMapper>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
     mockMapper = AccountMapper as jest.Mocked<typeof AccountMapper>;
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
-    repository = new GetAccountRepository();
+    repository = new GetAccountRepository(mockConnection);
   });
 
   describe('execute', () => {
@@ -43,19 +49,21 @@ describe('GetAccountRepository', () => {
 
     it('should return account when found', async () => {
       const account = {} as Account;
-      mockQueryOne.mockResolvedValue(validRow);
+      mockConnection.queryOne.mockResolvedValue(validRow);
       mockMapper.toDomain.mockReturnValue(Either.success(account));
 
       const result = await repository.execute('acc-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(account);
-      expect(mockQueryOne).toHaveBeenCalledWith(expect.any(String), ['acc-id']);
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+        'acc-id',
+      ]);
       expect(mockMapper.toDomain).toHaveBeenCalledWith(validRow);
     });
 
     it('should return null when account not found', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute('acc-id');
 
@@ -65,11 +73,11 @@ describe('GetAccountRepository', () => {
     });
 
     it('should filter deleted accounts', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute('acc-id');
 
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['acc-id'],
       );
@@ -77,7 +85,7 @@ describe('GetAccountRepository', () => {
 
     it('should return error when database query fails', async () => {
       const err = new Error('db');
-      mockQueryOne.mockRejectedValue(err);
+      mockConnection.queryOne.mockRejectedValue(err);
 
       const result = await repository.execute('acc-id');
 
@@ -86,7 +94,7 @@ describe('GetAccountRepository', () => {
     });
 
     it('should return error when mapping fails', async () => {
-      mockQueryOne.mockResolvedValue(validRow);
+      mockConnection.queryOne.mockResolvedValue(validRow);
       mockMapper.toDomain.mockReturnValue(
         Either.error(new Error('map') as unknown as DomainError),
       );

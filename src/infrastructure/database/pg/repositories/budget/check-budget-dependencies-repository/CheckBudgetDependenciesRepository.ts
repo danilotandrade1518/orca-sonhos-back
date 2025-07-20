@@ -2,12 +2,12 @@ import { ICheckBudgetDependenciesRepository } from '@application/contracts/repos
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 
 export class CheckBudgetDependenciesRepository
   implements ICheckBudgetDependenciesRepository
 {
-  private readonly connection = PostgreSQLConnection.getInstance();
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async hasAccounts(
     budgetId: string,

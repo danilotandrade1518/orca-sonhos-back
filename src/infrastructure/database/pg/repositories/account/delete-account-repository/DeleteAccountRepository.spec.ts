@@ -1,58 +1,66 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { DeleteAccountRepository } from './DeleteAccountRepository';
-
-jest.mock('../../../connection/PostgreSQLConnection');
 
 describe('DeleteAccountRepository', () => {
   let repository: DeleteAccountRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockQueryOne: jest.MockedFunction<any>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
-    repository = new DeleteAccountRepository();
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
+    repository = new DeleteAccountRepository(mockConnection);
   });
 
   describe('execute', () => {
     it('should mark account as deleted successfully', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute('acc-id');
 
       expect(result.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledWith(expect.any(String), ['acc-id']);
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+        'acc-id',
+      ]);
     });
 
     it('should be idempotent', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const first = await repository.execute('acc-id');
       const second = await repository.execute('acc-id');
 
       expect(first.hasError).toBe(false);
       expect(second.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledTimes(2);
+      expect(mockConnection.queryOne).toHaveBeenCalledTimes(2);
     });
 
     it('should not fail when account already deleted', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute('acc-id');
 
       expect(result.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledWith(
-        expect.stringContaining('is_deleted = false'),
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE accounts'),
         ['acc-id'],
       );
     });
 
     it('should return error when database query fails', async () => {
-      mockQueryOne.mockRejectedValue(new Error('fail'));
+      const err = new Error('db');
+      mockConnection.queryOne.mockRejectedValue(err);
 
       const result = await repository.execute('acc-id');
 

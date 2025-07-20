@@ -3,13 +3,14 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { AccountMapper } from '../../../mappers/account/AccountMapper';
 
 export class AddAccountRepository implements IAddAccountRepository {
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
+
   async execute(account: Account): Promise<Either<RepositoryError, void>> {
     try {
-      const connection = PostgreSQLConnection.getInstance();
       const row = AccountMapper.toRow(account);
 
       const query = `
@@ -29,7 +30,7 @@ export class AddAccountRepository implements IAddAccountRepository {
         row.updated_at,
       ];
 
-      await connection.queryOne(query, params);
+      await this.connection.queryOne(query, params);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
       const err = error as Error & { code?: string };

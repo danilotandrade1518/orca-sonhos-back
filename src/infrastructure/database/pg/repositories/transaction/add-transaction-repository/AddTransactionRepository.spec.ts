@@ -4,29 +4,36 @@ import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-obje
 import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   TransactionMapper,
   TransactionRow,
 } from '../../../mappers/transaction/TransactionMapper';
 import { AddTransactionRepository } from './AddTransactionRepository';
 
-jest.mock('../../../connection/PostgreSQLConnection');
 jest.mock('../../../mappers/transaction/TransactionMapper');
 
 describe('AddTransactionRepository', () => {
   let repository: AddTransactionRepository;
-  let mockQueryOne: jest.MockedFunction<PostgreSQLConnection['queryOne']>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
   let mockMapper: jest.Mocked<typeof TransactionMapper>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
+
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
+
     mockMapper = TransactionMapper as jest.Mocked<typeof TransactionMapper>;
-    repository = new AddTransactionRepository();
+    repository = new AddTransactionRepository(mockConnection);
   });
 
   describe('execute', () => {
@@ -58,18 +65,18 @@ describe('AddTransactionRepository', () => {
 
     it('should add transaction successfully', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(false);
-      expect(mockQueryOne).toHaveBeenCalledTimes(1);
+      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
     });
 
     it('should return error when transaction already exists', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       const err = new Error('dup') as Error & { code?: string };
       err.code = '23505';
-      mockQueryOne.mockRejectedValue(err);
+      mockConnection.queryOne.mockRejectedValue(err);
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(true);
@@ -79,7 +86,7 @@ describe('AddTransactionRepository', () => {
     it('should return error on connection fail', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       const err = new Error('fail');
-      mockQueryOne.mockRejectedValue(err);
+      mockConnection.queryOne.mockRejectedValue(err);
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(true);

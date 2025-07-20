@@ -1,21 +1,13 @@
-import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
+import {
+  IPostgresConnectionAdapter,
+  DatabaseConfig,
+} from '../../infrastructure/adapters/IPostgresConnectionAdapter';
 
-export interface DatabaseConfig {
-  host: string;
-  port: number;
-  database: string;
-  user: string;
-  password: string;
-  max?: number;
-  idleTimeoutMillis?: number;
-  connectionTimeoutMillis?: number;
-}
-
-export class PostgreSQLConnection {
+export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
   private pool: Pool;
-  private static instance: PostgreSQLConnection;
 
-  private constructor(config: DatabaseConfig) {
+  constructor(config: DatabaseConfig) {
     this.pool = new Pool({
       host: config.host,
       port: config.port,
@@ -31,18 +23,6 @@ export class PostgreSQLConnection {
       console.error('Unexpected error on idle client', err);
       process.exit(-1);
     });
-  }
-
-  public static getInstance(config?: DatabaseConfig): PostgreSQLConnection {
-    if (!PostgreSQLConnection.instance) {
-      if (!config) {
-        throw new Error(
-          'Database configuration is required for first initialization',
-        );
-      }
-      PostgreSQLConnection.instance = new PostgreSQLConnection(config);
-    }
-    return PostgreSQLConnection.instance;
   }
 
   async query<T extends QueryResultRow = QueryResultRow>(
@@ -66,13 +46,11 @@ export class PostgreSQLConnection {
     return rows.length > 0 ? rows[0] : null;
   }
 
-  async transaction<T>(
-    callback: (client: PoolClient) => Promise<T>,
-  ): Promise<T> {
+  async transaction<T>(callback: (client: unknown) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      const result = await callback(client);
+      const result = await callback(client as unknown);
       await client.query('COMMIT');
       return result;
     } catch (error) {

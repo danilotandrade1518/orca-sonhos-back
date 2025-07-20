@@ -1,42 +1,44 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
-
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { CheckBudgetDependenciesRepository } from './CheckBudgetDependenciesRepository';
-
-jest.mock('../../../connection/PostgreSQLConnection');
 
 describe('CheckBudgetDependenciesRepository', () => {
   let repository: CheckBudgetDependenciesRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockQueryOne: jest.MockedFunction<any>;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQueryOne = jest.fn();
 
-    (PostgreSQLConnection.getInstance as jest.Mock).mockReturnValue({
-      queryOne: mockQueryOne,
-    });
+    mockConnection = {
+      query: jest.fn(),
+      queryOne: jest.fn(),
+      transaction: jest.fn(),
+      healthCheck: jest.fn(),
+      close: jest.fn(),
+      getPoolSize: jest.fn(),
+      getIdleCount: jest.fn(),
+      getWaitingCount: jest.fn(),
+    };
 
-    repository = new CheckBudgetDependenciesRepository();
+    repository = new CheckBudgetDependenciesRepository(mockConnection);
   });
 
   describe('hasAccounts', () => {
     it('should return true when budget has active accounts', async () => {
-      mockQueryOne.mockResolvedValue({ has_accounts: true });
+      mockConnection.queryOne.mockResolvedValue({ has_accounts: true });
 
       const result = await repository.hasAccounts('budget-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(true);
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
         expect.stringContaining('EXISTS'),
         ['budget-id'],
       );
     });
 
     it('should return false when budget has no accounts', async () => {
-      mockQueryOne.mockResolvedValue({ has_accounts: false });
+      mockConnection.queryOne.mockResolvedValue({ has_accounts: false });
 
       const result = await repository.hasAccounts('budget-id');
 
@@ -45,11 +47,11 @@ describe('CheckBudgetDependenciesRepository', () => {
     });
 
     it('should ignore deleted accounts', async () => {
-      mockQueryOne.mockResolvedValue({ has_accounts: false });
+      mockConnection.queryOne.mockResolvedValue({ has_accounts: false });
 
       await repository.hasAccounts('budget-id');
 
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['budget-id'],
       );
@@ -57,7 +59,7 @@ describe('CheckBudgetDependenciesRepository', () => {
 
     it('should handle database errors', async () => {
       const dbError = new Error('db error');
-      mockQueryOne.mockRejectedValue(dbError);
+      mockConnection.queryOne.mockRejectedValue(dbError);
 
       const result = await repository.hasAccounts('budget-id');
 
@@ -68,20 +70,20 @@ describe('CheckBudgetDependenciesRepository', () => {
 
   describe('hasTransactions', () => {
     it('should return true when budget has active transactions', async () => {
-      mockQueryOne.mockResolvedValue({ has_transactions: true });
+      mockConnection.queryOne.mockResolvedValue({ has_transactions: true });
 
       const result = await repository.hasTransactions('budget-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(true);
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
         expect.stringContaining('EXISTS'),
         ['budget-id'],
       );
     });
 
     it('should return false when budget has no transactions', async () => {
-      mockQueryOne.mockResolvedValue({ has_transactions: false });
+      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
 
       const result = await repository.hasTransactions('budget-id');
 
@@ -90,11 +92,11 @@ describe('CheckBudgetDependenciesRepository', () => {
     });
 
     it('should ignore deleted transactions', async () => {
-      mockQueryOne.mockResolvedValue({ has_transactions: false });
+      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
 
       await repository.hasTransactions('budget-id');
 
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.queryOne).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['budget-id'],
       );
@@ -102,7 +104,7 @@ describe('CheckBudgetDependenciesRepository', () => {
 
     it('should handle database errors', async () => {
       const dbError = new Error('db error');
-      mockQueryOne.mockRejectedValue(dbError);
+      mockConnection.queryOne.mockRejectedValue(dbError);
 
       const result = await repository.hasTransactions('budget-id');
 

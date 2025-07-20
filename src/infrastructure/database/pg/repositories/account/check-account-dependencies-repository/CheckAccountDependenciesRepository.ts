@@ -2,12 +2,12 @@ import { ICheckAccountDependenciesRepository } from '@application/contracts/repo
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 
 export class CheckAccountDependenciesRepository
   implements ICheckAccountDependenciesRepository
 {
-  private readonly connection = PostgreSQLConnection.getInstance();
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async hasTransactions(
     accountId: string,

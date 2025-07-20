@@ -2,10 +2,10 @@ import { IDeleteAccountRepository } from '@application/contracts/repositories/ac
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Either } from '@either';
 
-import { PostgreSQLConnection } from '../../../connection/PostgreSQLConnection';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 
 export class DeleteAccountRepository implements IDeleteAccountRepository {
-  private readonly connection = PostgreSQLConnection.getInstance();
+  constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(accountId: string): Promise<Either<RepositoryError, void>> {
     try {
