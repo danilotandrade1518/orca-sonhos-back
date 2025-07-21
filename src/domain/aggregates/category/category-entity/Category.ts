@@ -1,13 +1,18 @@
 import { Either } from '@either';
 
+import { AggregateRoot } from '../../../shared/AggregateRoot';
 import { DomainError } from '../../../shared/DomainError';
+import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import {
   CategoryType,
   CategoryTypeEnum,
 } from '../value-objects/category-type/CategoryType';
-import { IEntity } from './../../../shared/IEntity';
+import { CategoryAlreadyDeletedError } from '../errors/CategoryAlreadyDeletedError';
+import { CategoryCreatedEvent } from '../events/CategoryCreatedEvent';
+import { CategoryDeletedEvent } from '../events/CategoryDeletedEvent';
+import { CategoryUpdatedEvent } from '../events/CategoryUpdatedEvent';
 
 export interface CreateCategoryDTO {
   name: string;
@@ -15,15 +20,38 @@ export interface CreateCategoryDTO {
   budgetId: string;
 }
 
-export class Category implements IEntity {
+export interface UpdateCategoryDTO {
+  name: string;
+  type: CategoryTypeEnum;
+}
+
+export interface RestoreCategoryDTO {
+  id: string;
+  name: string;
+  type: CategoryTypeEnum;
+  budgetId: string;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class Category extends AggregateRoot implements IEntity {
   private readonly _id: EntityId;
+  private readonly _createdAt: Date;
+  private _updatedAt: Date;
+  private _isDeleted = false;
 
   private constructor(
-    private readonly _name: EntityName,
-    private readonly _type: CategoryType,
+    private _name: EntityName,
+    private _type: CategoryType,
     private readonly _budgetId: EntityId,
+    existingId?: EntityId,
   ) {
-    this._id = EntityId.create();
+    super();
+
+    this._id = existingId || EntityId.create();
+    this._createdAt = new Date();
+    this._updatedAt = new Date();
   }
 
   get id(): string {
@@ -39,11 +67,20 @@ export class Category implements IEntity {
     return this._budgetId.value?.id || '';
   }
 
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  get isDeleted(): boolean {
+    return this._isDeleted;
+  }
+
   static create(data: CreateCategoryDTO): Either<DomainError, Category> {
     const either = new Either<DomainError, Category>();
-
-    const idVo = EntityId.create();
-    if (idVo.hasError) either.addManyErrors(idVo.errors);
 
     const nameVo = EntityName.create(data.name);
     if (nameVo.hasError) either.addManyErrors(nameVo.errors);
@@ -57,6 +94,92 @@ export class Category implements IEntity {
     if (either.hasError) return either;
 
     const category = new Category(nameVo, typeVo, budgetIdVo);
-    return Either.success<DomainError, Category>(category);
+
+    category.addEvent(
+      new CategoryCreatedEvent(
+        category.id,
+        category.name,
+        category.type!,
+        category.budgetId,
+      ),
+    );
+
+    either.setData(category);
+    return either;
+  }
+
+  update(data: UpdateCategoryDTO): Either<DomainError, void> {
+    if (this._isDeleted)
+      return Either.error<DomainError, void>(new CategoryAlreadyDeletedError());
+
+    const nameVo = EntityName.create(data.name);
+    const typeVo = CategoryType.create(data.type);
+
+    if (nameVo.hasError || typeVo.hasError)
+      return Either.errors<DomainError, void>([
+        ...nameVo.errors,
+        ...typeVo.errors,
+      ]);
+
+    const nameChanged = this.name !== data.name;
+    const typeChanged = this.type !== data.type;
+
+    if (!nameChanged && !typeChanged)
+      return Either.success<DomainError, void>();
+
+    const previousName = this.name;
+    const previousType = this.type!;
+
+    this._name = nameVo;
+    this._type = typeVo;
+    this._updatedAt = new Date();
+
+    this.addEvent(
+      new CategoryUpdatedEvent(
+        this.id,
+        previousName,
+        this.name,
+        previousType,
+        this.type!,
+      ),
+    );
+
+    return Either.success<DomainError, void>();
+  }
+
+  delete(): Either<DomainError, void> {
+    if (this._isDeleted)
+      return Either.error<DomainError, void>(new CategoryAlreadyDeletedError());
+
+    this._isDeleted = true;
+    this._updatedAt = new Date();
+
+    this.addEvent(new CategoryDeletedEvent(this.id, this.name, this.budgetId));
+
+    return Either.success<DomainError, void>();
+  }
+
+  static restore(data: RestoreCategoryDTO): Either<DomainError, Category> {
+    const either = new Either<DomainError, Category>();
+
+    const idVo = EntityId.fromString(data.id);
+    const nameVo = EntityName.create(data.name);
+    const typeVo = CategoryType.create(data.type);
+    const budgetIdVo = EntityId.fromString(data.budgetId);
+
+    if (idVo.hasError) either.addManyErrors(idVo.errors);
+    if (nameVo.hasError) either.addManyErrors(nameVo.errors);
+    if (typeVo.hasError) either.addManyErrors(typeVo.errors);
+    if (budgetIdVo.hasError) either.addManyErrors(budgetIdVo.errors);
+
+    if (either.hasError) return either;
+
+    const category = new Category(nameVo, typeVo, budgetIdVo, idVo);
+    Object.defineProperty(category, '_createdAt', { value: data.createdAt });
+    category._updatedAt = data.updatedAt;
+    category._isDeleted = data.isDeleted;
+
+    either.setData(category);
+    return either;
   }
 }
