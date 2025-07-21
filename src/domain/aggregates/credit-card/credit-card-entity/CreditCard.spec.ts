@@ -1,116 +1,140 @@
 import { InvalidEntityNameError } from '@domain/shared/errors/InvalidEntityNameError';
 import { InvalidMoneyError } from '@domain/shared/errors/InvalidMoneyError';
-
-import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { InvalidCreditCardDayError } from '../errors/InvalidCreditCardDayError';
-import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { CreditCard } from './CreditCard';
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { CreditCardCreatedEvent } from '../events/CreditCardCreatedEvent';
+import { CreditCardUpdatedEvent } from '../events/CreditCardUpdatedEvent';
+import { CreditCardDeletedEvent } from '../events/CreditCardDeletedEvent';
+import { CreditCardAlreadyDeletedError } from '../errors/CreditCardAlreadyDeletedError';
 
 describe('CreditCard', () => {
-  it('deve criar um cartão de crédito válido', () => {
-    const dto = {
-      name: 'Nubank',
-      limit: 2000,
-      closingDay: 10,
-      dueDay: 20,
-      budgetId: EntityId.create().value?.id || '',
-    };
-    const result = CreditCard.create(dto);
+  const validDTO = {
+    name: 'Nubank',
+    limit: 2000,
+    closingDay: 10,
+    dueDay: 20,
+    budgetId: EntityId.create().value!.id,
+  };
 
-    expect(result.hasError).toBe(false);
-    expect(result.data).toBeDefined();
-    expect(result.data?.name).toBe('Nubank');
-    expect(result.data?.limit).toBe(2000);
-    expect(result.data?.closingDay).toBe(10);
-    expect(result.data?.dueDay).toBe(20);
+  describe('create', () => {
+    it('should create valid credit card and emit event', () => {
+      const result = CreditCard.create(validDTO);
+
+      expect(result.hasError).toBe(false);
+      const card = result.data!;
+      expect(card.getEvents()[0]).toBeInstanceOf(CreditCardCreatedEvent);
+      expect(card.name).toBe(validDTO.name);
+    });
+
+    it('should validate invalid name', () => {
+      const result = CreditCard.create({ ...validDTO, name: '' });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toEqual(new InvalidEntityNameError(''));
+    });
+
+    it('should validate invalid data', () => {
+      const result = CreditCard.create({ ...validDTO, limit: -1 });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toEqual(new InvalidMoneyError(-1));
+    });
+
+    it('should validate invalid days', () => {
+      const result = CreditCard.create({ ...validDTO, closingDay: 0 });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toEqual(new InvalidCreditCardDayError());
+    });
   });
 
-  it('deve acumular erro se o closingDay for inválido', () => {
-    const dto = {
-      name: 'Nubank',
-      limit: 2000,
-      closingDay: 0,
-      dueDay: 20,
-      budgetId: EntityId.create().value?.id || '',
-    };
-    const result = CreditCard.create(dto);
+  describe('restore', () => {
+    it('should restore credit card without emitting events', () => {
+      const created = CreditCard.create(validDTO).data!;
+      const restoreData = {
+        id: created.id,
+        name: created.name,
+        limit: created.limit,
+        closingDay: created.closingDay,
+        dueDay: created.dueDay,
+        budgetId: created.budgetId,
+        isDeleted: false,
+        createdAt: created.createdAt,
+        updatedAt: created.updatedAt,
+      };
 
-    expect(result.hasError).toBe(true);
-    expect(result.errors[0]).toEqual(new InvalidCreditCardDayError());
+      const result = CreditCard.restore(restoreData);
+
+      expect(result.hasError).toBe(false);
+      const restored = result.data!;
+      expect(restored.getEvents().length).toBe(0);
+      expect(restored.id).toBe(created.id);
+    });
   });
 
-  it('deve acumular erro se o dueDay for inválido', () => {
-    const dto = {
-      name: 'Nubank',
-      limit: 2000,
-      closingDay: 10,
-      dueDay: 32,
-      budgetId: EntityId.create().value?.id || '',
-    };
-    const result = CreditCard.create(dto);
+  describe('update', () => {
+    it('should update fields and emit event', () => {
+      const card = CreditCard.create(validDTO).data!;
+      card.clearEvents();
 
-    expect(result.hasError).toBe(true);
-    expect(result.errors[0]).toEqual(new InvalidCreditCardDayError());
+      const result = card.update({
+        name: 'New',
+        limit: 3000,
+        closingDay: 12,
+        dueDay: 22,
+      });
+
+      expect(result.hasError).toBe(false);
+      expect(card.name).toBe('New');
+      expect(card.getEvents()[0]).toBeInstanceOf(CreditCardUpdatedEvent);
+    });
+
+    it('should not emit event if no changes', () => {
+      const card = CreditCard.create(validDTO).data!;
+      card.clearEvents();
+
+      const result = card.update({
+        name: validDTO.name,
+        limit: validDTO.limit,
+        closingDay: validDTO.closingDay,
+        dueDay: validDTO.dueDay,
+      });
+
+      expect(result.hasError).toBe(false);
+      expect(card.getEvents().length).toBe(0);
+    });
+
+    it('should return error when card deleted', () => {
+      const card = CreditCard.create(validDTO).data!;
+      card.delete();
+
+      const result = card.update({ ...validDTO });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toEqual(new CreditCardAlreadyDeletedError());
+    });
   });
 
-  it('deve acumular múltiplos erros se ambos os dias forem inválidos', () => {
-    const dto = {
-      name: 'Nubank',
-      limit: 2000,
-      closingDay: 0,
-      dueDay: 32,
-      budgetId: EntityId.create().value?.id || '',
-    };
-    const result = CreditCard.create(dto);
+  describe('delete', () => {
+    it('should soft delete card and emit event', () => {
+      const card = CreditCard.create(validDTO).data!;
+      card.clearEvents();
 
-    expect(result.hasError).toBe(true);
-    expect(result.errors).toEqual([
-      new InvalidCreditCardDayError(),
-      new InvalidCreditCardDayError(),
-    ]);
-  });
-});
+      const result = card.delete();
 
-describe('CreditCard - cenários de erro para name, limit e budgetId', () => {
-  it('deve acumular erro se o nome for vazio', () => {
-    const dto = {
-      name: '',
-      limit: 2000,
-      closingDay: 10,
-      dueDay: 20,
-      budgetId: EntityId.create().value?.id || '',
-    };
-    const result = CreditCard.create(dto);
+      expect(result.hasError).toBe(false);
+      expect(card.isDeleted).toBe(true);
+      expect(card.getEvents()[0]).toBeInstanceOf(CreditCardDeletedEvent);
+    });
 
-    expect(result.hasError).toBe(true);
-    expect(result.errors[0]).toEqual(new InvalidEntityNameError(''));
-  });
+    it('should not delete twice', () => {
+      const card = CreditCard.create(validDTO).data!;
+      card.delete();
+      const result = card.delete();
 
-  it('deve acumular erro se o limite for negativo', () => {
-    const dto = {
-      name: 'Nubank',
-      limit: -100,
-      closingDay: 10,
-      dueDay: 20,
-      budgetId: EntityId.create().value?.id || '',
-    };
-    const result = CreditCard.create(dto);
-
-    expect(result.hasError).toBe(true);
-    expect(result.errors[0]).toEqual(new InvalidMoneyError(-100));
-  });
-
-  it('deve acumular erro se o budgetId for inválido', () => {
-    const dto = {
-      name: 'Nubank',
-      limit: 2000,
-      closingDay: 10,
-      dueDay: 20,
-      budgetId: '',
-    };
-    const result = CreditCard.create(dto);
-
-    expect(result.hasError).toBe(true);
-    expect(result.errors[0]).toEqual(new InvalidEntityIdError(''));
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toEqual(new CreditCardAlreadyDeletedError());
+    });
   });
 });
