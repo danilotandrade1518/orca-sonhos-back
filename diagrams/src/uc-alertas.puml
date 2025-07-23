@@ -1,0 +1,42 @@
+@startuml
+' Casos de Uso - Sistema de Alertas e Notificações
+
+actor "Usuário" as User
+actor "Sistema" as System
+
+package "Sistema de Alertas e Notificações" {
+  usecase "Configurar Alerta de Orçamento" as UC55
+  usecase "Configurar Alerta de Meta" as UC56
+  usecase "Configurar Lembrete de Vencimento" as UC57
+  usecase "Receber Notificação de Limite" as UC58
+  usecase "Receber Alerta de Oportunidade" as UC59
+  usecase "Personalizar Canais de Notificação" as UC60
+  usecase "Configurar Frequência de Alertas" as UC61
+  usecase "Visualizar Histórico de Alertas" as UC62
+}
+
+' === RELACIONAMENTOS ===
+User --> UC55
+User --> UC56
+User --> UC57
+User --> UC58
+User --> UC59
+User --> UC60
+User --> UC61
+User --> UC62
+
+System --> UC58
+System --> UC59
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC55 ..> UC58 : <<include>>
+UC56 ..> UC58 : <<include>>
+UC57 ..> UC58 : <<include>>
+UC60 ..> UC61 : <<include>>
+
+note right of UC55 : "Avisos quando orçamento\nestá sendo ultrapassado"
+note right of UC56 : "Lembretes sobre progresso\ndas metas financeiras"
+note right of UC59 : "Sugestões inteligentes\nde economia"
+note bottom of UC60 : "Email, push, SMS\nconforme preferência"
+
+@enduml

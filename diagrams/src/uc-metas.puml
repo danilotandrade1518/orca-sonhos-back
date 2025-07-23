@@ -1,0 +1,37 @@
+@startuml
+' Casos de Uso - Gestão de Metas
+
+actor "Usuário" as User
+actor "Parceiro/Família" as Partner
+
+package "Gestão de Metas" {
+  usecase "Criar Meta" as UC32
+  usecase "Editar Meta" as UC33
+  usecase "Excluir Meta" as UC34
+  usecase "Fazer Aporte Manual" as UC35
+  usecase "Configurar Aporte Automático" as UC36
+  usecase "Acompanhar Progresso da Meta" as UC37
+  usecase "Calcular Prazo de Conclusão" as UC38
+}
+
+' === RELACIONAMENTOS ===
+User --> UC32
+User --> UC33
+User --> UC34
+User --> UC35
+User --> UC36
+User --> UC37
+User --> UC38
+
+Partner --> UC35
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC32 ..> UC35 : <<include>>
+UC35 ..> UC37 : <<include>>
+UC37 ..> UC38 : <<include>>
+
+note right of UC32 : "Sonhos transformados\nem planos financeiros"
+note right of UC35 : "Aportes manuais ou\nautomáticos permitidos"
+note bottom of UC38 : "Calcula quando objetivo\nserá atingido"
+
+@enduml

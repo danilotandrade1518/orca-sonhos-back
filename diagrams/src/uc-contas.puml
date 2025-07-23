@@ -1,0 +1,28 @@
+@startuml
+' Casos de Uso - Gestão de Contas
+
+actor "Usuário" as User
+
+package "Gestão de Contas" {
+  usecase "Criar Conta" as UC7
+  usecase "Editar Conta" as UC8
+  usecase "Excluir Conta" as UC9
+  usecase "Transferir entre Contas" as UC10
+  usecase "Reconciliar Saldo" as UC11
+}
+
+' === RELACIONAMENTOS ===
+User --> UC7
+User --> UC8
+User --> UC9
+User --> UC10
+User --> UC11
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC10 ..> UC11 : <<include>>
+
+note right of UC7 : "Tipos: Conta Corrente,\nPoupança, Carteira,\nCarteira Digital, etc."
+note right of UC10 : "Move dinheiro entre\ncontas físicas"
+note bottom of UC11 : "Garante que saldos\nbatem com extratos reais"
+
+@enduml

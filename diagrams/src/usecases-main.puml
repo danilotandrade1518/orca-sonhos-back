@@ -1,0 +1,61 @@
+@startuml
+' Diagrama Principal de Casos de Uso – MVP OrçaSonhos
+' Este diagrama mostra a visão geral e referencia os diagramas específicos
+
+actor "Usuário" as User
+actor "Parceiro/Família" as Partner
+
+' === PACKAGES PRINCIPAIS ===
+package "Gestão de Orçamentos" as P1 {
+  note "Ver: uc-orcamentos.puml"
+}
+
+package "Gestão de Contas" as P2 {
+  note "Ver: uc-contas.puml"
+}
+
+package "Gestão de Transações" as P3 {
+  note "Ver: uc-transacoes.puml"
+}
+
+package "Gestão de Categorias" as P4 {
+  note "Ver: uc-categorias.puml"
+}
+
+package "Gestão de Cartões" as P5 {
+  note "Ver: uc-cartoes.puml"
+}
+
+package "Gestão de Metas" as P6 {
+  note "Ver: uc-metas.puml"
+}
+
+package "Gestão de Envelopes" as P7 {
+  note "Ver: uc-envelopes.puml"
+}
+
+package "Relatórios e Painéis" as P8 {
+  note "Ver: uc-relatorios.puml"
+}
+
+package "Alertas e Notificações" as P9 {
+  note "Ver: uc-alertas.puml"
+}
+
+' === RELACIONAMENTOS GERAIS ===
+User --> P1
+User --> P2  
+User --> P3
+User --> P4
+User --> P5
+User --> P6
+User --> P7
+User --> P8
+User --> P9
+
+Partner --> P1
+Partner --> P3
+Partner --> P6
+Partner --> P8
+
+@enduml

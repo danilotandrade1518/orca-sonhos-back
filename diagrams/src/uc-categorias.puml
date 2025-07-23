@@ -1,0 +1,26 @@
+@startuml
+' Casos de Uso - Gestão de Categorias
+
+actor "Usuário" as User
+
+package "Gestão de Categorias" {
+  usecase "Criar Categoria" as UC21
+  usecase "Editar Categoria" as UC22
+  usecase "Excluir Categoria" as UC23
+  usecase "Personalizar Categorias por Orçamento" as UC24
+}
+
+' === RELACIONAMENTOS ===
+User --> UC21
+User --> UC22
+User --> UC23
+User --> UC24
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC21 ..> UC24 : <<include>>
+
+note right of UC21 : "Baseado no modelo\n50-30-20"
+note right of UC24 : "Cada orçamento pode\nter categorias específicas"
+note bottom of UC22 : "Necessidades: 50%\nEstilo de vida: 30%\nPrioridades financeiras: 20%"
+
+@enduml

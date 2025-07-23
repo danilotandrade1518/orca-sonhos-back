@@ -1,0 +1,34 @@
+@startuml
+' Casos de Uso - Gestão de Cartões de Crédito
+
+actor "Usuário" as User
+
+package "Gestão de Cartões" {
+  usecase "Cadastrar Cartão de Crédito" as UC25  
+  usecase "Editar Cartão de Crédito" as UC26
+  usecase "Excluir Cartão de Crédito" as UC27
+  usecase "Visualizar Fatura Atual" as UC28
+  usecase "Marcar Fatura como Paga" as UC29
+  usecase "Reabrir Fatura" as UC30
+  usecase "Controlar Limite do Cartão" as UC31
+}
+
+' === RELACIONAMENTOS ===
+User --> UC25
+User --> UC26
+User --> UC27
+User --> UC28
+User --> UC29
+User --> UC30
+User --> UC31
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC28 ..> UC29 : <<include>>
+UC29 ..> UC30 : <<extend>>
+UC25 ..> UC31 : <<include>>
+
+note right of UC28 : "Mostra total acumulado,\ndata fechamento/vencimento"
+note right of UC29 : "Registra pagamento\ne altera status"
+note bottom of UC31 : "Controla limite total\ne disponível"
+
+@enduml

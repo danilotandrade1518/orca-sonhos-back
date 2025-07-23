@@ -1,0 +1,45 @@
+@startuml
+' Casos de Uso - Gestão de Transações
+
+actor "Usuário" as User
+actor "Parceiro/Família" as Partner
+
+package "Gestão de Transações" {
+  usecase "Lançar Receita" as UC12
+  usecase "Lançar Despesa" as UC13
+  usecase "Agendar Transação Futura" as UC14
+  usecase "Registrar Transação Passada" as UC15
+  usecase "Marcar Transação como Realizada" as UC16
+  usecase "Marcar Transação como Atrasada" as UC17
+  usecase "Cancelar Transação Agendada" as UC18
+  usecase "Editar Transação" as UC19
+  usecase "Excluir Transação" as UC20
+}
+
+' === RELACIONAMENTOS ===
+User --> UC12
+User --> UC13
+User --> UC14
+User --> UC15
+User --> UC16
+User --> UC17
+User --> UC18
+User --> UC19
+User --> UC20
+
+Partner --> UC12
+Partner --> UC13
+Partner --> UC14
+Partner --> UC16
+Partner --> UC19
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC14 ..> UC16 : <<extend>>
+UC15 ..> UC17 : <<extend>>
+UC14 ..> UC18 : <<extend>>
+
+note right of UC14 : "Para planejamento:\nsalários, contas fixas"
+note right of UC15 : "Lançamento retroativo\npara manter histórico"
+note bottom of UC17 : "Sistema identifica\nautomaticamente atrasos"
+
+@enduml

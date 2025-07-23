@@ -1,0 +1,41 @@
+@startuml
+' Casos de Uso - Relatórios e Painéis
+
+actor "Usuário" as User
+
+package "Relatórios e Painéis" {
+  usecase "Visualizar Dashboard Principal" as UC47
+  usecase "Gerar Relatório de Gastos por Categoria" as UC48
+  usecase "Gerar Relatório de Evolução Patrimonial" as UC49
+  usecase "Visualizar Análise de Tendências" as UC50
+  usecase "Exportar Relatórios" as UC51
+  usecase "Configurar Alertas de Gastos" as UC52
+  usecase "Visualizar Comparativo de Períodos" as UC53
+  usecase "Gerar Relatório de Metas" as UC54
+}
+
+' === RELACIONAMENTOS ===
+User --> UC47
+User --> UC48
+User --> UC49
+User --> UC50
+User --> UC51
+User --> UC52
+User --> UC53
+User --> UC54
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC47 ..> UC48 : <<include>>
+UC47 ..> UC49 : <<include>>
+UC47 ..> UC50 : <<include>>
+UC48 ..> UC51 : <<extend>>
+UC49 ..> UC51 : <<extend>>
+UC50 ..> UC53 : <<include>>
+UC54 ..> UC51 : <<extend>>
+
+note right of UC47 : "Visão consolidada da\nsituação financeira"
+note right of UC48 : "Análise detalhada por\ncategorias de gastos"
+note right of UC50 : "Identificação de padrões\ne tendências de gastos"
+note bottom of UC52 : "Notificações proativas\nsobre limites"
+
+@enduml

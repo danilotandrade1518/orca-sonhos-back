@@ -1,0 +1,38 @@
+@startuml
+' Casos de Uso - Sistema de Envelopes (Reservas)
+
+actor "Usuário" as User
+
+package "Sistema de Envelopes (Reservas)" {
+  usecase "Criar Envelope" as UC39
+  usecase "Editar Envelope" as UC40
+  usecase "Excluir Envelope" as UC41
+  usecase "Fazer Aporte no Envelope" as UC42
+  usecase "Retirar Valor do Envelope" as UC43
+  usecase "Transferir Entre Envelopes" as UC44
+  usecase "Configurar Envelope Automático" as UC45
+  usecase "Visualizar Saldo dos Envelopes" as UC46
+}
+
+' === RELACIONAMENTOS ===
+User --> UC39
+User --> UC40
+User --> UC41
+User --> UC42
+User --> UC43
+User --> UC44
+User --> UC45
+User --> UC46
+
+' === RELACIONAMENTOS ENTRE CASOS DE USO ===
+UC39 ..> UC42 : <<include>>
+UC42 ..> UC46 : <<include>>
+UC43 ..> UC46 : <<include>>
+UC44 ..> UC46 : <<include>>
+
+note right of UC39 : "Reservas para gastos\nespecíficos futuros"
+note right of UC42 : "Aportes para construir\nreservas gradualmente"
+note right of UC44 : "Redistribuição entre\ndiferentes reservas"
+note bottom of UC45 : "Aportes automáticos\nbaseados em regras"
+
+@enduml
