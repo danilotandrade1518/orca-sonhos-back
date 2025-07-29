@@ -1,25 +1,20 @@
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
-import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
-import { InvalidTransactionDescriptionError } from '@domain/aggregates/transaction/errors/InvalidTransactionDescriptionError';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
 
-import { RepositoryError } from '../../../shared/errors/RepositoryError';
+import { InsufficientBalanceError } from '../../../../domain/aggregates/account/errors/InsufficientBalanceError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
+import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
-import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
-import { AccountsFromDifferentBudgetsError } from '../../../shared/errors/AccountsFromDifferentBudgetsError';
-import { InvalidTransferAmountError } from '../../../shared/errors/InvalidTransferAmountError';
-import { SameAccountTransferError } from '../../../shared/errors/SameAccountTransferError';
-import { TransferTransactionCreationFailedError } from '../../../shared/errors/TransferTransactionCreationFailedError';
-import { AddTransactionRepositoryStub } from '../../../shared/tests/stubs/AddTransactionRepositoryStub';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
+import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
+import { ITransferBetweenAccountsUnitOfWorkStub } from '../../../shared/tests/stubs/ITransferBetweenAccountsUnitOfWorkStub';
 import { TransferBetweenAccountsDto } from './TransferBetweenAccountsDto';
-process.env.TRANSFER_CATEGORY_ID = EntityId.create().value!.id;
 import { TransferBetweenAccountsUseCase } from './TransferBetweenAccountsUseCase';
+
+const TRANSFER_CATEGORY_ID = EntityId.create().value!.id;
 
 const createAccounts = (budgetId: string) => {
   const fromResult = Account.create({
@@ -43,7 +38,7 @@ const createAccounts = (budgetId: string) => {
 describe('TransferBetweenAccountsUseCase', () => {
   let useCase: TransferBetweenAccountsUseCase;
   let getAccountRepositoryStub: GetAccountRepositoryStub;
-  let addTransactionRepositoryStub: AddTransactionRepositoryStub;
+  let transferUnitOfWorkStub: ITransferBetweenAccountsUnitOfWorkStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
   let eventPublisherStub: EventPublisherStub;
   let fromAccount: Account;
@@ -53,14 +48,15 @@ describe('TransferBetweenAccountsUseCase', () => {
 
   beforeEach(() => {
     getAccountRepositoryStub = new GetAccountRepositoryStub();
-    addTransactionRepositoryStub = new AddTransactionRepositoryStub();
+    transferUnitOfWorkStub = new ITransferBetweenAccountsUnitOfWorkStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
     eventPublisherStub = new EventPublisherStub();
     useCase = new TransferBetweenAccountsUseCase(
       getAccountRepositoryStub,
-      addTransactionRepositoryStub,
+      transferUnitOfWorkStub,
       budgetAuthorizationServiceStub,
       eventPublisherStub,
+      TRANSFER_CATEGORY_ID,
     );
 
     const accounts = createAccounts(budgetId);
@@ -83,7 +79,7 @@ describe('TransferBetweenAccountsUseCase', () => {
     it('should transfer successfully between accounts of the same budget', async () => {
       mockRepositorySuccess();
 
-      const spyAdd = jest.spyOn(addTransactionRepositoryStub, 'execute');
+      const spyAdd = jest.spyOn(transferUnitOfWorkStub, 'executeTransfer');
       const dto: TransferBetweenAccountsDto = {
         userId,
         fromAccountId: fromAccount.id,
@@ -95,7 +91,7 @@ describe('TransferBetweenAccountsUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(result.hasData).toBe(true);
-      expect(spyAdd).toHaveBeenCalledTimes(2);
+      expect(spyAdd).toHaveBeenCalledTimes(1);
       expect(getAccountRepositoryStub.executeCalls).toEqual([
         fromAccount.id,
         toAccount.id,
@@ -148,56 +144,36 @@ describe('TransferBetweenAccountsUseCase', () => {
       expect(result.errors[0]).toEqual(new AccountNotFoundError());
     });
 
-    it('should return error when accounts belong to different budgets', async () => {
-      const otherBudgetAccounts = createAccounts(EntityId.create().value!.id);
-      toAccount = otherBudgetAccounts.to;
-      mockRepositorySuccess();
+    it('should return error when domain service validation fails', async () => {
+      // Create a savings account that doesn't allow negative balance
+      const accountWithInsufficientBalance = Account.create({
+        name: 'Conta Poupança com saldo insuficiente',
+        type: AccountTypeEnum.SAVINGS_ACCOUNT, // Savings account doesn't allow negative balance
+        budgetId,
+        initialBalance: 100, // Less than transfer amount
+      }).data!;
 
-      const dto: TransferBetweenAccountsDto = {
-        userId,
-        fromAccountId: fromAccount.id,
-        toAccountId: toAccount.id,
-        amount: 100,
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toEqual(new AccountsFromDifferentBudgetsError());
-    });
-
-    it('should return error when transferring to the same account', async () => {
       jest
         .spyOn(getAccountRepositoryStub, 'execute')
-        .mockResolvedValue(Either.success(fromAccount));
+        .mockImplementation(async (id: string) => {
+          getAccountRepositoryStub.executeCalls.push(id);
+          if (id === accountWithInsufficientBalance.id)
+            return Either.success(accountWithInsufficientBalance);
+          if (id === toAccount.id) return Either.success(toAccount);
+          return Either.success(null);
+        });
 
       const dto: TransferBetweenAccountsDto = {
         userId,
-        fromAccountId: fromAccount.id,
-        toAccountId: fromAccount.id,
-        amount: 100,
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toEqual(new SameAccountTransferError());
-    });
-
-    it('should return error when amount is invalid', async () => {
-      mockRepositorySuccess();
-
-      const dto: TransferBetweenAccountsDto = {
-        userId,
-        fromAccountId: fromAccount.id,
+        fromAccountId: accountWithInsufficientBalance.id,
         toAccountId: toAccount.id,
-        amount: 0,
+        amount: 200, // More than available balance
       };
 
       const result = await useCase.execute(dto);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toEqual(new InvalidTransferAmountError());
+      expect(result.errors[0]).toEqual(new InsufficientBalanceError());
     });
 
     it('should return error when user has no permission', async () => {
@@ -217,65 +193,11 @@ describe('TransferBetweenAccountsUseCase', () => {
       expect(result.errors[0]).toEqual(new InsufficientPermissionsError());
     });
 
-    it('should return error when creation of first transaction fails', async () => {
-      mockRepositorySuccess();
-      const createSpy = jest.spyOn(Transaction, 'create');
-      const executeSpy = jest.spyOn(addTransactionRepositoryStub, 'execute');
-      createSpy.mockReturnValueOnce(
-        Either.errors([new InvalidTransactionDescriptionError()]),
-      );
-
-      const dto: TransferBetweenAccountsDto = {
-        userId,
-        fromAccountId: fromAccount.id,
-        toAccountId: toAccount.id,
-        amount: 100,
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(
-        TransferTransactionCreationFailedError,
-      );
-      expect(executeSpy).not.toHaveBeenCalled();
-      createSpy.mockRestore();
-    });
-
-    it('should return error when creation of second transaction fails', async () => {
-      mockRepositorySuccess();
-      const originalCreate = Transaction.create.bind(Transaction);
-      const createSpy = jest.spyOn(Transaction, 'create');
-      const executeSpy = jest.spyOn(addTransactionRepositoryStub, 'execute');
-      createSpy.mockImplementationOnce(originalCreate);
-      createSpy.mockImplementationOnce(() =>
-        Either.errors([new InvalidTransactionDescriptionError()]),
-      );
-
-      const dto: TransferBetweenAccountsDto = {
-        userId,
-        fromAccountId: fromAccount.id,
-        toAccountId: toAccount.id,
-        amount: 100,
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(
-        TransferTransactionCreationFailedError,
-      );
-      expect(executeSpy).toHaveBeenCalledTimes(0);
-      createSpy.mockRestore();
-    });
-
     it('should return error when authorization service fails', async () => {
       mockRepositorySuccess();
       jest
         .spyOn(budgetAuthorizationServiceStub, 'canAccessBudget')
-        .mockResolvedValueOnce(
-          Either.errors([new RepositoryError('auth error')]),
-        );
+        .mockResolvedValueOnce(Either.errors([new AccountRepositoryError()]));
 
       const dto: TransferBetweenAccountsDto = {
         userId,
@@ -292,8 +214,8 @@ describe('TransferBetweenAccountsUseCase', () => {
     it('should return error when first transaction persistence fails', async () => {
       mockRepositorySuccess();
       jest
-        .spyOn(addTransactionRepositoryStub, 'execute')
-        .mockResolvedValueOnce(Either.error(new RepositoryError('fail')));
+        .spyOn(transferUnitOfWorkStub, 'executeTransfer')
+        .mockResolvedValueOnce(Either.error(new InsufficientBalanceError()));
 
       const dto: TransferBetweenAccountsDto = {
         userId,
@@ -305,28 +227,7 @@ describe('TransferBetweenAccountsUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toEqual(new TransactionPersistenceFailedError());
-    });
-
-    it('should return error when second transaction persistence fails', async () => {
-      mockRepositorySuccess();
-      const executeSpy = jest
-        .spyOn(addTransactionRepositoryStub, 'execute')
-        .mockResolvedValueOnce(Either.success())
-        .mockResolvedValueOnce(Either.error(new RepositoryError('fail')));
-
-      const dto: TransferBetweenAccountsDto = {
-        userId,
-        fromAccountId: fromAccount.id,
-        toAccountId: toAccount.id,
-        amount: 100,
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toEqual(new TransactionPersistenceFailedError());
-      expect(executeSpy).toHaveBeenCalledTimes(2);
+      expect(result.errors[0]).toEqual(new InsufficientBalanceError());
     });
 
     it('should publish events and clear them on success', async () => {
@@ -365,6 +266,29 @@ describe('TransferBetweenAccountsUseCase', () => {
 
       expect(result.hasData).toBe(true);
       consoleSpy.mockRestore();
+    });
+
+    it('should return error when transfer category ID is invalid', async () => {
+      // Create a new use case with an invalid transfer category ID
+      const invalidUseCase = new TransferBetweenAccountsUseCase(
+        getAccountRepositoryStub,
+        transferUnitOfWorkStub,
+        budgetAuthorizationServiceStub,
+        eventPublisherStub,
+        'invalid-category-id',
+      );
+
+      const dto: TransferBetweenAccountsDto = {
+        userId,
+        fromAccountId: fromAccount.id,
+        toAccountId: toAccount.id,
+        amount: 100,
+      };
+
+      const result = await invalidUseCase.execute(dto);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors.length).toBeGreaterThan(0);
     });
   });
 });

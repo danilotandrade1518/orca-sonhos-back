@@ -1,10 +1,11 @@
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { DeletedAccountError } from '../errors/DeletedAccountError';
 import { InvalidAccountTypeError } from '../errors/InvalidAccountTypeError';
 import { AccountTypeEnum } from '../value-objects/account-type/AccountType';
 import { InvalidBalanceError } from './../../../shared/errors/InvalidBalanceError';
 import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 import { Account, CreateAccountDTO } from './Account';
-import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 
 describe('Account', () => {
   const VALID_BUDGET_ID = '123e4567-e89b-12d3-a456-426614174000';
@@ -142,7 +143,6 @@ describe('Account', () => {
       const account = result.data!;
       const originalUpdatedAt = account.updatedAt;
 
-      // Wait a moment to ensure timestamp difference
       setTimeout(() => {
         const updateResult = account.updateName('Novo Nome');
 
@@ -165,7 +165,7 @@ describe('Account', () => {
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toEqual(new InvalidEntityNameError(''));
-      expect(account.name).toBe('Nome Original'); // Nome não deve ter mudado
+      expect(account.name).toBe('Nome Original');
     });
   });
 
@@ -235,7 +235,7 @@ describe('Account', () => {
 
         expect(result.hasError).toBe(true);
         expect(result.errors[0]).toEqual(new InvalidBalanceError(NaN));
-        expect(account.balance).toBe(1000); // Balance should not change
+        expect(account.balance).toBe(1000);
       });
     });
 
@@ -252,7 +252,7 @@ describe('Account', () => {
 
         expect(result.hasError).toBe(true);
         expect(result.errors[0]).toEqual(new InvalidBalanceError(NaN));
-        expect(account.balance).toBe(1000); // Balance should not change
+        expect(account.balance).toBe(1000);
       });
     });
 
@@ -269,7 +269,7 @@ describe('Account', () => {
 
         expect(result.hasError).toBe(true);
         expect(result.errors[0]).toEqual(new InvalidBalanceError(NaN));
-        expect(account.balance).toBe(1000); // Balance should not change
+        expect(account.balance).toBe(1000);
       });
     });
 
@@ -367,6 +367,134 @@ describe('Account', () => {
       });
 
       expect(result.hasError).toBe(true);
+    });
+  });
+
+  describe('Transfer Validation Methods', () => {
+    const validBudgetId = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+
+    describe('canTransfer', () => {
+      it('should return success for valid transfer amount in checking account', () => {
+        const account = Account.create({
+          name: 'Test Account',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        if (account.hasError) {
+          console.log('Account creation errors:', account.errors);
+        }
+
+        expect(account.hasError).toBe(false);
+
+        const canTransferResult = account.data!.canTransfer(100);
+        expect(canTransferResult.hasError).toBe(false);
+      });
+
+      it('should return error for zero amount', () => {
+        const account = Account.create({
+          name: 'Test Account',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        const canTransferResult = account.data!.canTransfer(0);
+        expect(canTransferResult.hasError).toBe(true);
+        expect(canTransferResult.errors[0].message).toBe(
+          'Transfer amount must be greater than zero',
+        );
+      });
+
+      it('should return error for negative amount', () => {
+        const account = Account.create({
+          name: 'Test Account',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        const canTransferResult = account.data!.canTransfer(-50);
+        expect(canTransferResult.hasError).toBe(true);
+        expect(canTransferResult.errors[0].message).toBe(
+          'Transfer amount must be greater than zero',
+        );
+      });
+
+      it('should allow overdraft in checking account', () => {
+        const account = Account.create({
+          name: 'Test Checking',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        const canTransferResult = account.data!.canTransfer(50000);
+        expect(canTransferResult.hasError).toBe(false);
+      });
+
+      it('should return error for insufficient balance in savings account', () => {
+        const account = Account.create({
+          name: 'Test Savings',
+          type: AccountTypeEnum.SAVINGS_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        const canTransferResult = account.data!.canTransfer(100);
+        expect(canTransferResult.hasError).toBe(true);
+      });
+    });
+
+    describe('canReceiveTransfer', () => {
+      it('should return success for valid transfer amount', () => {
+        const account = Account.create({
+          name: 'Test Account',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        const canReceiveResult = account.data!.canReceiveTransfer(100);
+        expect(canReceiveResult.hasError).toBe(false);
+      });
+
+      it('should return error for zero amount', () => {
+        const account = Account.create({
+          name: 'Test Account',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        const canReceiveResult = account.data!.canReceiveTransfer(0);
+        expect(canReceiveResult.hasError).toBe(true);
+        expect(canReceiveResult.errors[0].message).toBe(
+          'Transfer amount must be greater than zero',
+        );
+      });
+
+      it('should return error for negative amount', () => {
+        const account = Account.create({
+          name: 'Test Account',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        const canReceiveResult = account.data!.canReceiveTransfer(-50);
+        expect(canReceiveResult.hasError).toBe(true);
+        expect(canReceiveResult.errors[0].message).toBe(
+          'Transfer amount must be greater than zero',
+        );
+      });
+
+      it('should return error for deleted account', () => {
+        const account = Account.create({
+          name: 'Test Account',
+          type: AccountTypeEnum.CHECKING_ACCOUNT,
+          budgetId: validBudgetId,
+        });
+
+        account.data!.delete();
+
+        const canReceiveResult = account.data!.canReceiveTransfer(100);
+        expect(canReceiveResult.hasError).toBe(true);
+        expect(canReceiveResult.errors[0]).toEqual(new DeletedAccountError());
+      });
     });
   });
 });

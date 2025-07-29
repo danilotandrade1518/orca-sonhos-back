@@ -15,6 +15,7 @@ export enum AccountTypeEnum {
 
 export type AccountTypeValue = {
   type: AccountTypeEnum;
+  allowsNegativeBalance: boolean;
 };
 
 export class AccountType implements IValueObject<AccountTypeValue> {
@@ -50,6 +51,25 @@ export class AccountType implements IValueObject<AccountTypeValue> {
       return;
     }
 
-    this.either.setData({ type: this._type });
+    const allowsNegativeBalance = this.getAllowsNegativeBalance(this._type);
+    this.either.setData({
+      type: this._type,
+      allowsNegativeBalance,
+    });
+  }
+
+  private getAllowsNegativeBalance(type: AccountTypeEnum): boolean {
+    switch (type) {
+      case AccountTypeEnum.CHECKING_ACCOUNT:
+        return true;
+      case AccountTypeEnum.SAVINGS_ACCOUNT:
+      case AccountTypeEnum.PHYSICAL_WALLET:
+      case AccountTypeEnum.DIGITAL_WALLET:
+      case AccountTypeEnum.INVESTMENT_ACCOUNT:
+      case AccountTypeEnum.OTHER:
+        return false;
+      default:
+        return false;
+    }
   }
 }

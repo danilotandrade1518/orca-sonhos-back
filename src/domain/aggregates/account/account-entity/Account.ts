@@ -5,14 +5,17 @@ import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { BalanceVo } from '../../../shared/value-objects/balance-vo/BalanceVo';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { DeletedAccountError } from '../errors/DeletedAccountError';
+import { InsufficientBalanceError } from '../errors/InsufficientBalanceError';
+import { InvalidAccountDataError } from '../errors/InvalidAccountDataError';
+import { AccountDeletedEvent } from '../events/AccountDeletedEvent';
+import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
 import {
   AccountType,
   AccountTypeEnum,
 } from '../value-objects/account-type/AccountType';
 import { EntityName } from './../../../shared/value-objects/entity-name/EntityName';
-import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
-import { AccountDeletedEvent } from '../events/AccountDeletedEvent';
-import { InvalidAccountDataError } from '../errors/InvalidAccountDataError';
+import { InvalidTransferAmountError } from './errors/InvalidTransferAmountError';
 
 export interface CreateAccountDTO {
   name: string;
@@ -301,5 +304,37 @@ export class Account extends AggregateRoot implements IEntity {
 
     either.setData(account);
     return either;
+  }
+
+  canTransfer(amount: number): Either<DomainError, void> {
+    if (amount <= 0) {
+      return Either.errors<DomainError, void>([
+        new InvalidTransferAmountError(),
+      ]);
+    }
+
+    const currentBalance = this._balance.value?.cents ?? 0;
+    const allowsNegativeBalance =
+      this._type.value?.allowsNegativeBalance ?? false;
+
+    if (!allowsNegativeBalance && currentBalance < amount) {
+      return Either.errors<DomainError, void>([new InsufficientBalanceError()]);
+    }
+
+    return Either.success(undefined);
+  }
+
+  canReceiveTransfer(amount: number): Either<DomainError, void> {
+    if (amount <= 0) {
+      return Either.errors<DomainError, void>([
+        new InvalidTransferAmountError(),
+      ]);
+    }
+
+    if (this._isDeleted) {
+      return Either.errors<DomainError, void>([new DeletedAccountError()]);
+    }
+
+    return Either.success(undefined);
   }
 }
