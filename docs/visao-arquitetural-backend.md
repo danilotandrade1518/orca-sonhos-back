@@ -32,11 +32,11 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
 ## 3. Responsabilidades das Camadas
 
 - **Domain:** Agregados, entidades (dentro dos agregados), value objects (globais e específicos), domain events e regras de negócio puras, sem dependências externas.
-- **Use Cases:** Orquestram as regras de negócio, coordenando entidades e serviços. Use Cases sempre normalmente irão utilizar Repositories para acesso ao banco da dados e Event Publishers para comunicação entre agregados.
+- **Use Cases:** Orquestram as regras de negócio, coordenando entidades e serviços. Use Cases normalmente irão utilizar Repositories para acesso ao banco de dados, Unit of Work para operações transacionais complexas e Event Publishers para comunicação entre agregados.
 - **Event Handlers:** Tratam dos side-effects causados por Domain Events, mantendo a comunicação entre agregados desacoplada.
 - **Queries:** Tratam views do sistema. Query Handlers normalmente irão utilizar DAO's para acesso ao banco de dados.
 - **Web:** Pontos de entrada/saída HTTP, adapta dados para os casos de uso.
-- **Infra:** Implementação de repositórios, event publishers, integrações externas, persistência.
+- **Infra:** Implementação de repositórios, unit of work, event publishers, integrações externas, persistência.
 
 ## 4. Domain Events
 
@@ -57,53 +57,66 @@ Para implementação dos Domain Events, escolhemos a biblioteca **EventEmitter2*
 ### 4.3. Implementação
 
 #### Agregados como Event Accumulators
+
 ```typescript
 export class Transaction {
   private _events: IDomainEvent[] = [];
-  
+
   static create(dto: CreateTransactionDto): Either<DomainError, Transaction> {
     const transaction = new Transaction(/* ... */);
-    transaction.addEvent(new TransactionCreatedEvent(transaction.id, transaction.accountId));
+    transaction.addEvent(
+      new TransactionCreatedEvent(transaction.id, transaction.accountId),
+    );
     return Either.success(transaction);
   }
-  
+
   private addEvent(event: IDomainEvent): void {
     this._events.push(event);
   }
-  
-  getEvents(): IDomainEvent[] { return this._events; }
-  clearEvents(): void { this._events = []; }
+
+  getEvents(): IDomainEvent[] {
+    return this._events;
+  }
+  clearEvents(): void {
+    this._events = [];
+  }
 }
 ```
 
 #### Use Cases como Event Orchestrators
+
 ```typescript
 export class CreateTransactionUseCase {
   constructor(
     private transactionRepo: ITransactionRepository,
-    private eventPublisher: IEventPublisher
+    private eventPublisher: IEventPublisher,
   ) {}
 
-  async execute(dto: CreateTransactionDto): Promise<Either<ApplicationError, {id: string}>> {
+  async execute(
+    dto: CreateTransactionDto,
+  ): Promise<Either<ApplicationError, { id: string }>> {
     const transactionResult = Transaction.create(dto);
     if (transactionResult.hasError) return Either.error(/* ... */);
-    
+
     const transaction = transactionResult.data!;
     await this.transactionRepo.save(transaction);
-    
+
     // Publicar eventos após persistência bem-sucedida
     const events = transaction.getEvents();
     await this.eventPublisher.publishMany(events);
     transaction.clearEvents();
-    
+
     return Either.success({ id: transaction.id });
   }
 }
 ```
 
 #### Event Handlers
+
 ```typescript
-export class UpdateAccountBalanceHandler implements IEventHandler<TransactionCreatedEvent> {
+export class UpdateAccountBalanceHandler
+  implements IEventHandler<TransactionCreatedEvent>
+{
   constructor(private accountRepo: IAccountRepository) {}
 
   async handle(event: TransactionCreatedEvent): Promise<void> {
@@ -117,20 +130,21 @@ export class UpdateAccountBalanceHandler implements IEventHandler<TransactionCre
 ```
 
 #### EventEmitter2 Configuration
+
 ```typescript
 // Configuração recomendada para o EventEmitter2
 const emitter = new EventEmitter2({
-  wildcard: true,        // Habilita wildcards (*)
-  delimiter: '.',        // Separador para namespaces
-  newListener: false,    // Não emite evento para novos listeners
+  wildcard: true, // Habilita wildcards (*)
+  delimiter: '.', // Separador para namespaces
+  newListener: false, // Não emite evento para novos listeners
   removeListener: false, // Não emite evento ao remover listeners
-  maxListeners: 20,      // Máximo de listeners por evento
-  verboseMemoryLeak: true // Alertas de memory leak
+  maxListeners: 20, // Máximo de listeners por evento
+  verboseMemoryLeak: true, // Alertas de memory leak
 });
 
 // Exemplos de uso com wildcards e namespaces
-emitter.on('Transaction.*', handler);           // Todos eventos de Transaction
-emitter.on('*.Created', handler);               // Todos eventos Created
+emitter.on('Transaction.*', handler); // Todos eventos de Transaction
+emitter.on('*.Created', handler); // Todos eventos Created
 emitter.on('TransactionCreatedEvent', handler); // Evento específico
 ```
 
@@ -190,22 +204,268 @@ Esta abordagem visa simplicidade no início, permitindo evolução futura para s
 - **Repository:** Representa uma coleção de agregados (entidades) e encapsula regras de negócio relacionadas à persistência. Utilizado principalmente em operações de mutação (criação, atualização, remoção) e segue contratos definidos na camada de domínio.
 - **DAO (Data Access Object):** Focado em consultas (queries) e otimizado para leitura de dados. Utilizado em Query Handlers para buscar informações diretamente do PostgreSQL, podendo retornar dados em formatos específicos para views.
 
-## 8. Padrões de Nomenclatura
+## 8. Unit of Work Pattern
+
+### 8.1. Conceito
+
+O padrão **Unit of Work** mantém uma lista de objetos afetados por uma transação de negócio e coordena a escrita das mudanças, resolvendo problemas de concorrência. Em nosso contexto, é especialmente útil para operações que envolvem múltiplos agregados ou múltiplas operações que devem ser executadas atomicamente.
+
+### 8.2. Quando Utilizar
+
+O Unit of Work deve ser utilizado em cenários onde:
+
+- **Operações Atômicas Complexas**: Quando uma operação de negócio requer múltiplas escritas no banco que devem ser executadas como uma única transação
+- **Múltiplos Agregados**: Quando a operação envolve modificações em diferentes agregados que precisam ser consistentes
+- **Rollback Automático**: Quando é necessário garantir que falhas em qualquer etapa revertam todas as operações
+- **Operações de Transferência**: Como transferências entre contas, que envolvem débito em uma conta e crédito em outra
+
+### 8.3. Quando NÃO Utilizar
+
+Evite Unit of Work quando:
+
+- **Operações Simples**: Para operações que envolvem apenas um agregado
+- **Apenas Leitura**: Para operações de consulta (use Query Handlers)
+- **Operações Independentes**: Quando não há necessidade de atomicidade entre operações
+
+### 8.4. Implementação
+
+#### Interface Base
+
+```typescript
+export interface IUnitOfWork {
+  executeTransfer(
+    params: TransferParams,
+  ): Promise<Either<TransferExecutionError, void>>;
+}
+```
+
+#### Implementação Concreta
+
+```typescript
+export class TransferBetweenAccountsUnitOfWork implements IUnitOfWork {
+  private saveAccountRepository: SaveAccountRepository;
+  private addTransactionRepository: AddTransactionRepository;
+
+  constructor(private postgresConnectionAdapter: IPostgresConnectionAdapter) {
+    this.saveAccountRepository = new SaveAccountRepository(
+      postgresConnectionAdapter,
+    );
+    this.addTransactionRepository = new AddTransactionRepository(
+      postgresConnectionAdapter,
+    );
+  }
+
+  async executeTransfer(
+    params: TransferParams,
+  ): Promise<Either<TransferExecutionError, void>> {
+    let client: IDatabaseClient | undefined;
+
+    try {
+      // 1. Obter conexão e iniciar transação
+      client = await this.postgresConnectionAdapter.getClient();
+      await client.beginTransaction();
+
+      // 2. Executar operações usando a mesma conexão
+      const saveFromResult = await this.saveAccountRepository.executeWithClient(
+        client,
+        params.fromAccount,
+      );
+      if (saveFromResult.hasError)
+        throw new Error('Failed to save source account');
+
+      const saveToResult = await this.saveAccountRepository.executeWithClient(
+        client,
+        params.toAccount,
+      );
+      if (saveToResult.hasError)
+        throw new Error('Failed to save target account');
+
+      const addDebitResult =
+        await this.addTransactionRepository.executeWithClient(
+          client,
+          params.debitTransaction,
+        );
+      if (addDebitResult.hasError)
+        throw new Error('Failed to add debit transaction');
+
+      const addCreditResult =
+        await this.addTransactionRepository.executeWithClient(
+          client,
+          params.creditTransaction,
+        );
+      if (addCreditResult.hasError)
+        throw new Error('Failed to add credit transaction');
+
+      // 3. Commit da transação
+      await client.commitTransaction();
+      return Either.success(undefined);
+    } catch (error) {
+      // 4. Rollback em caso de erro
+      if (client) {
+        try {
+          await client.rollbackTransaction();
+        } catch (rollbackError) {
+          // Log rollback error but don't mask original error
+        }
+      }
+      return Either.error(new TransferExecutionError(error.message, error));
+    }
+  }
+}
+```
+
+### 8.5. Integração com Repositories
+
+Os repositories devem suportar execução com client específico para trabalhar com Unit of Work:
+
+```typescript
+export class SaveAccountRepository {
+  constructor(private postgresConnectionAdapter: IPostgresConnectionAdapter) {}
+
+  // Método padrão (obtém própria conexão)
+  async execute(account: Account): Promise<Either<RepositoryError, void>> {
+    const client = await this.postgresConnectionAdapter.getClient();
+    return this.executeWithClient(client, account);
+  }
+
+  // Método para Unit of Work (usa conexão fornecida)
+  async executeWithClient(
+    client: IDatabaseClient,
+    account: Account,
+  ): Promise<Either<RepositoryError, void>> {
+    try {
+      const accountDto = AccountMapper.domainToDto(account);
+      await client.query(UPDATE_ACCOUNT_QUERY, [
+        accountDto.name,
+        accountDto.accountType,
+        accountDto.id,
+      ]);
+      return Either.success(undefined);
+    } catch (error) {
+      return Either.error(new RepositoryError('Failed to save account', error));
+    }
+  }
+}
+```
+
+### 8.6. Uso em Use Cases
+
+```typescript
+export class TransferBetweenAccountsUseCase {
+  constructor(
+    private unitOfWork: TransferBetweenAccountsUnitOfWork,
+    private accountRepository: GetAccountRepository,
+  ) {}
+
+  async execute(
+    dto: TransferBetweenAccountsDto,
+  ): Promise<Either<ApplicationError, void>> {
+    // 1. Buscar contas
+    const fromAccount = await this.accountRepository.execute(dto.fromAccountId);
+    const toAccount = await this.accountRepository.execute(dto.toAccountId);
+
+    // 2. Aplicar regras de negócio
+    fromAccount.debit(dto.amount);
+    toAccount.credit(dto.amount);
+
+    // 3. Criar transações
+    const debitTransaction = Transaction.createDebit(/* ... */);
+    const creditTransaction = Transaction.createCredit(/* ... */);
+
+    // 4. Executar com Unit of Work
+    const result = await this.unitOfWork.executeTransfer({
+      fromAccount,
+      toAccount,
+      debitTransaction,
+      creditTransaction,
+    });
+
+    return result;
+  }
+}
+```
+
+### 8.7. Vantagens
+
+- **Atomicidade**: Garante que todas as operações sejam executadas ou nenhuma
+- **Consistência**: Mantém o estado consistente mesmo em operações complexas
+- **Isolamento**: Usa transações de banco para garantir isolamento
+- **Rollback Automático**: Falhas em qualquer etapa revertem toda a operação
+- **Reutilização**: Unit of Works podem ser reutilizados em diferentes Use Cases
+
+### 8.8. Organização no Projeto
+
+```
+/src/infrastructure/database/pg/unit-of-works/
+├── transfer-between-accounts/
+│   ├── TransferBetweenAccountsUnitOfWork.ts
+│   └── TransferBetweenAccountsUnitOfWork.spec.ts
+└── bulk-transaction-import/
+    ├── BulkTransactionImportUnitOfWork.ts
+    └── BulkTransactionImportUnitOfWork.spec.ts
+```
+
+### 8.9. Testes
+
+Unit of Works devem ter cobertura completa de testes, incluindo:
+
+- **Cenários de Sucesso**: Verificação de execução completa
+- **Cenários de Falha**: Simulação de falhas em cada etapa
+- **Rollback**: Verificação de rollback automático
+- **Ordem de Execução**: Validação da sequência correta das operações
+
+```typescript
+describe('TransferBetweenAccountsUnitOfWork', () => {
+  it('should execute transfer successfully', async () => {
+    // Arrange
+    mockSaveAccountRepository.executeWithClient.mockResolvedValue(
+      Either.success(undefined),
+    );
+    mockAddTransactionRepository.executeWithClient.mockResolvedValue(
+      Either.success(undefined),
+    );
+
+    // Act
+    const result = await unitOfWork.executeTransfer(transferParams);
+
+    // Assert
+    expect(result.hasError).toBe(false);
+    expect(mockClient.commitTransaction).toHaveBeenCalled();
+  });
+
+  it('should rollback when repository fails', async () => {
+    // Arrange
+    mockSaveAccountRepository.executeWithClient.mockResolvedValueOnce(
+      Either.error(new RepositoryError('Database error')),
+    );
+
+    // Act
+    const result = await unitOfWork.executeTransfer(transferParams);
+
+    // Assert
+    expect(result.hasError).toBe(true);
+    expect(mockClient.rollbackTransaction).toHaveBeenCalled();
+  });
+});
+```
+
+## 9. Padrões de Nomenclatura
 
 - Classes: PascalCase (ex: `CriarUsuarioUseCase`, `UsuarioRepository`, `TransactionCreatedEvent`)
 - Arquivos: PascalCase (ex: `CriarUsuarioUseCase.ts`, `UsuarioRepository.ts`, `TransactionCreatedEvent.ts`)
 - Métodos: camelCase (ex: `criarUsuario`, `buscarPorId`, `handle`)
-- Pastas: kebab-case (ex: `usecases`, `queries`, `infra`, `events`)
+- Pastas: kebab-case (ex: `usecases`, `queries`, `infra`, `events`, `unit-of-works`)
 - Interfaces: prefixo `I` (ex: `IUsuarioRepository`, `IEventPublisher`, `IEventHandler`)
 - Domain Events: sufixo `Event` (ex: `TransactionCreatedEvent`, `AccountBalanceUpdatedEvent`)
+- Unit of Work: sufixo `UnitOfWork` (ex: `TransferBetweenAccountsUnitOfWork`, `BulkTransactionImportUnitOfWork`)
 
-## 9. Tratamento de Erros
+## 10. Tratamento de Erros
 
 O tratamento de erros será realizado utilizando o padrão `Either`, evitando o uso de `throw/try/catch` exceto em situações explicitamente necessárias (ex: falhas inesperadas, integrações externas ou event handlers). Os métodos retornarão objetos do tipo `Either<Erro, Sucesso>`, facilitando o controle de fluxo e a previsibilidade dos resultados.
 
 Para Domain Events, falhas em Event Handlers devem ser tratadas de forma que não afetem o fluxo principal da operação, sendo logadas apropriadamente para monitoramento.
 
-## 10. Padrão de Imports e Path Alias
+## 11. Padrão de Imports e Path Alias
 
 Para manter a organização e a clareza do projeto, adotaremos o seguinte padrão para imports:
 
@@ -214,7 +474,7 @@ Para manter a organização e a clareza do projeto, adotaremos o seguinte padrã
 
 Este padrão visa facilitar a navegação, evitar ciclos de dependência e reforçar a separação entre as camadas da arquitetura.
 
-## 11. Padrão de Ordenação de Métodos em Classes
+## 12. Padrão de Ordenação de Métodos em Classes
 
 Para manter a legibilidade e padronização do código, todas as classes devem seguir a seguinte ordem de declaração de métodos:
 
@@ -224,7 +484,7 @@ Para manter a legibilidade e padronização do código, todas as classes devem s
 
 Este padrão deve ser seguido em todas as classes do domínio, value objects, entidades, use cases, etc.
 
-## 12. Organização dos Testes
+## 13. Organização dos Testes
 
 Os testes devem ser organizados seguindo a mesma estrutura do código de produção, mantendo a proximidade com o código testado:
 
