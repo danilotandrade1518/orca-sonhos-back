@@ -3,6 +3,7 @@ import { Transaction } from '@domain/aggregates/transaction/transaction-entity/T
 import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-objects/transaction-status/TransactionStatus';
 import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   TransactionMapper,
@@ -24,11 +25,7 @@ describe('SaveTransactionRepository', () => {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn(),
     };
 
     mockMapper = TransactionMapper as jest.Mocked<typeof TransactionMapper>;

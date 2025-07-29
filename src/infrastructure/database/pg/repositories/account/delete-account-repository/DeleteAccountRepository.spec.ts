@@ -1,4 +1,5 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
+
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { DeleteAccountRepository } from './DeleteAccountRepository';
 
@@ -9,15 +10,16 @@ describe('DeleteAccountRepository', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    const mockClient = {
+      query: jest.fn(),
+      release: jest.fn(),
+    };
+
     mockConnection = {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn().mockResolvedValue(mockClient),
     };
 
     repository = new DeleteAccountRepository(mockConnection);

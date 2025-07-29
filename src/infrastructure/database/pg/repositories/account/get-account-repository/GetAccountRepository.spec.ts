@@ -1,5 +1,6 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
+import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
@@ -7,7 +8,6 @@ import {
   AccountMapper,
   AccountRow,
 } from '../../../mappers/account/AccountMapper';
-import { DomainError } from '@domain/shared/DomainError';
 import { GetAccountRepository } from './GetAccountRepository';
 
 jest.mock('../../../mappers/account/AccountMapper');
@@ -24,11 +24,7 @@ describe('GetAccountRepository', () => {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn(),
     };
 
     mockMapper = AccountMapper as jest.Mocked<typeof AccountMapper>;

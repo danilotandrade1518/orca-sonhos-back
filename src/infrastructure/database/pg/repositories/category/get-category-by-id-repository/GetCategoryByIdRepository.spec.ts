@@ -1,8 +1,15 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Category } from '@domain/aggregates/category/category-entity/Category';
 import { CategoryTypeEnum } from '@domain/aggregates/category/value-objects/category-type/CategoryType';
+
 import { DomainError } from '../../../../../../domain/shared/DomainError';
 import { Either } from '../../../../../../shared/core/either';
+import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
+import {
+  CategoryMapper,
+  CategoryRow,
+} from '../../../mappers/category/CategoryMapper';
+import { GetCategoryByIdRepository } from './GetCategoryByIdRepository';
 
 class TestDomainError extends DomainError {
   constructor(message: string) {
@@ -10,13 +17,6 @@ class TestDomainError extends DomainError {
     this.name = 'TestDomainError';
   }
 }
-
-import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
-import {
-  CategoryMapper,
-  CategoryRow,
-} from '../../../mappers/category/CategoryMapper';
-import { GetCategoryByIdRepository } from './GetCategoryByIdRepository';
 
 jest.mock('../../../mappers/category/CategoryMapper');
 
@@ -32,11 +32,7 @@ describe('GetCategoryByIdRepository', () => {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn(),
     };
 
     mockCategoryMapper = CategoryMapper as jest.Mocked<typeof CategoryMapper>;

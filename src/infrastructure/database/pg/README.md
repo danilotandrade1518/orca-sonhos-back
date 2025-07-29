@@ -137,6 +137,4 @@ console.log('Pool size:', db.getPoolSize());
 console.log('Idle connections:', db.getIdleCount()); 
 console.log('Waiting connections:', db.getWaitingCount());
 
-// Health check
-const isHealthy = await db.healthCheck();
 ```

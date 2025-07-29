@@ -111,8 +111,6 @@ export class TransferBetweenAccountsUseCase
       toAccount,
       debitTransaction,
       creditTransaction,
-      fromAccountEvent,
-      toAccountEvent,
     });
 
     if (executeResult.hasError) {

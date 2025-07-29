@@ -3,30 +3,34 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { Either } from '@either';
 
-import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
-  AccountMapper,
-  AccountRow,
-} from '../../../mappers/account/AccountMapper';
+  IDatabaseClient,
+  IPostgresConnectionAdapter,
+} from '../../../../../adapters/IPostgresConnectionAdapter';
+import { AccountMapper } from '../../../mappers/account/AccountMapper';
 
 export class SaveAccountRepository implements ISaveAccountRepository {
-  constructor(private readonly connection: IPostgresConnectionAdapter) {}
+  constructor(
+    private readonly postgresConnectionAdapter: IPostgresConnectionAdapter,
+  ) {}
 
-  async execute(account: Account): Promise<Either<RepositoryError, void>> {
-    let row: AccountRow;
-    try {
-      row = AccountMapper.toRow(account);
-      row.updated_at = new Date();
-    } catch (error) {
-      return Either.error(
-        new RepositoryError(
-          `Failed to map account: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          error instanceof Error ? error : new Error('Unknown error'),
-        ),
-      );
-    }
+  public async execute(
+    account: Account,
+  ): Promise<Either<RepositoryError, void>> {
+    const client = await this.postgresConnectionAdapter.getClient();
+    const result = await this.executeWithClient(client, account);
+    client.release();
+    return result;
+  }
 
+  public async executeWithClient(
+    client: IDatabaseClient,
+    account: Account,
+  ): Promise<Either<RepositoryError, void>> {
     try {
+      const { id, name, type, budget_id, balance, is_deleted } =
+        AccountMapper.toRow(account);
+
       const query = `
         UPDATE accounts SET
           name = $2,
@@ -38,24 +42,19 @@ export class SaveAccountRepository implements ISaveAccountRepository {
         WHERE id = $1
       `;
 
-      const params = [
-        row.id,
-        row.name,
-        row.type,
-        row.budget_id,
-        row.balance,
-        row.is_deleted,
-        row.updated_at,
-      ];
+      await client.query(query, [
+        id,
+        name,
+        type,
+        budget_id,
+        balance,
+        is_deleted,
+      ]);
 
-      await this.connection.queryOne(query, params);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
-      return Either.error(
-        new RepositoryError(
-          'Database error',
-          error instanceof Error ? error : new Error('Unknown error'),
-        ),
+      return Either.error<RepositoryError, void>(
+        new RepositoryError('Failed to save account', error as Error),
       );
     }
   }

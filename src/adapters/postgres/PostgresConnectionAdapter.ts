@@ -1,8 +1,28 @@
-import { Pool, QueryResult, QueryResultRow } from 'pg';
+import { Pool, PoolClient, QueryResult } from 'pg';
+
 import {
-  IPostgresConnectionAdapter,
   DatabaseConfig,
+  IDatabaseClient,
+  IPostgresConnectionAdapter,
+  QueryResultRow,
 } from '../../infrastructure/adapters/IPostgresConnectionAdapter';
+
+class DatabaseClientAdapter implements IDatabaseClient {
+  constructor(private poolClient: PoolClient) {}
+
+  async query<T = QueryResultRow>(
+    text: string,
+    params?: unknown[],
+  ): Promise<T[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result: any = await this.poolClient.query(text, params);
+    return result.rows;
+  }
+
+  release(): void {
+    this.poolClient.release();
+  }
+}
 
 export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
   private pool: Pool;
@@ -38,11 +58,12 @@ export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
     }
   }
 
-  async queryOne<T extends QueryResultRow = QueryResultRow>(
+  async queryOne<T = QueryResultRow>(
     text: string,
     params?: unknown[],
   ): Promise<T | null> {
-    const rows = await this.query<T>(text, params);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows = await this.query<any>(text, params);
     return rows.length > 0 ? rows[0] : null;
   }
 
@@ -61,28 +82,8 @@ export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
     }
   }
 
-  async healthCheck(): Promise<boolean> {
-    try {
-      await this.query('SELECT 1');
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  async close(): Promise<void> {
-    await this.pool.end();
-  }
-
-  getPoolSize(): number {
-    return this.pool.totalCount;
-  }
-
-  getIdleCount(): number {
-    return this.pool.idleCount;
-  }
-
-  getWaitingCount(): number {
-    return this.pool.waitingCount;
+  async getClient(): Promise<IDatabaseClient> {
+    const poolClient = await this.pool.connect();
+    return new DatabaseClientAdapter(poolClient);
   }
 }

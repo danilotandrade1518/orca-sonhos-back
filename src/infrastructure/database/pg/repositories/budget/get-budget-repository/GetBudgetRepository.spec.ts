@@ -31,11 +31,7 @@ describe('GetBudgetRepository', () => {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn(),
     };
 
     mockBudgetMapper = BudgetMapper as jest.Mocked<typeof BudgetMapper>;

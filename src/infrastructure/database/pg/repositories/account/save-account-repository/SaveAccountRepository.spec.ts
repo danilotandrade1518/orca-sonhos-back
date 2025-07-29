@@ -16,19 +16,21 @@ describe('SaveAccountRepository', () => {
   let repository: SaveAccountRepository;
   let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
   let mockMapper: jest.Mocked<typeof AccountMapper>;
+  let mockClient: jest.Mocked<{ query: jest.Mock; release: jest.Mock }>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockClient = {
+      query: jest.fn(),
+      release: jest.fn(),
+    };
 
     mockConnection = {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn().mockResolvedValue(mockClient),
     };
 
     mockMapper = AccountMapper as jest.Mocked<typeof AccountMapper>;
@@ -57,37 +59,34 @@ describe('SaveAccountRepository', () => {
 
     it('should update account successfully', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute(account);
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockClient.query).toHaveBeenCalledWith(expect.any(String), [
         row.id,
         row.name,
         row.type,
         row.budget_id,
         row.balance,
         row.is_deleted,
-        expect.any(Date), // updated_at é atualizado dinamicamente
       ]);
+      expect(mockClient.release).toHaveBeenCalled();
     });
 
     it('should update existing account', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(account);
-      const query = mockConnection.queryOne.mock.calls[0][0];
+      const query = mockClient.query.mock.calls[0][0];
       expect(query).toContain('UPDATE accounts SET');
       expect(query).toContain('WHERE id = $1');
     });
 
     it('should call UPDATE with correct parameters', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
 
       await repository.execute(account);
-      const params = mockConnection.queryOne.mock.calls[0][1];
+      const params = mockClient.query.mock.calls[0][1];
       expect(params).toEqual([
         row.id,
         row.name,
@@ -95,14 +94,13 @@ describe('SaveAccountRepository', () => {
         row.budget_id,
         row.balance,
         row.is_deleted,
-        expect.any(Date), // updated_at é atualizado dinamicamente
       ]);
     });
 
     it('should return error when database query fails', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       const dbErr = new Error('db');
-      mockConnection.queryOne.mockRejectedValue(dbErr);
+      mockClient.query.mockRejectedValue(dbErr);
 
       const result = await repository.execute(account);
       expect(result.hasError).toBe(true);
@@ -117,7 +115,7 @@ describe('SaveAccountRepository', () => {
       const result = await repository.execute(account);
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(RepositoryError);
-      expect(result.errors[0].message).toContain('Failed to map account');
+      expect(result.errors[0].message).toContain('Failed to save account');
     });
   });
 });

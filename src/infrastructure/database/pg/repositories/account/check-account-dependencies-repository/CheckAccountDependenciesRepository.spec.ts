@@ -1,4 +1,5 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
+
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { CheckAccountDependenciesRepository } from './CheckAccountDependenciesRepository';
 
@@ -13,11 +14,7 @@ describe('CheckAccountDependenciesRepository', () => {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn(),
     };
 
     repository = new CheckAccountDependenciesRepository(mockConnection);

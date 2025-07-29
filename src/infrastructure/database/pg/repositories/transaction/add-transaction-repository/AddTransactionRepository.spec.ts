@@ -21,15 +21,16 @@ describe('AddTransactionRepository', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    const mockClient = {
+      query: jest.fn(),
+      release: jest.fn(),
+    };
+
     mockConnection = {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      healthCheck: jest.fn(),
-      close: jest.fn(),
-      getPoolSize: jest.fn(),
-      getIdleCount: jest.fn(),
-      getWaitingCount: jest.fn(),
+      getClient: jest.fn().mockResolvedValue(mockClient),
     };
 
     mockMapper = TransactionMapper as jest.Mocked<typeof TransactionMapper>;
@@ -65,18 +66,20 @@ describe('AddTransactionRepository', () => {
 
     it('should add transaction successfully', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      const mockClient = await mockConnection.getClient();
+      (mockClient.query as jest.Mock).mockResolvedValue({});
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
+      expect(mockClient.query).toHaveBeenCalledTimes(1);
     });
 
     it('should return error when transaction already exists', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       const err = new Error('dup') as Error & { code?: string };
       err.code = '23505';
-      mockConnection.queryOne.mockRejectedValue(err);
+      const mockClient = await mockConnection.getClient();
+      (mockClient.query as jest.Mock).mockRejectedValue(err);
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(true);
@@ -86,7 +89,8 @@ describe('AddTransactionRepository', () => {
     it('should return error on connection fail', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       const err = new Error('fail');
-      mockConnection.queryOne.mockRejectedValue(err);
+      const mockClient = await mockConnection.getClient();
+      (mockClient.query as jest.Mock).mockRejectedValue(err);
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(true);
