@@ -206,16 +206,30 @@ describe('CreditCardBill', () => {
     });
 
     describe('reopen', () => {
-      it('deve reabrir fatura paga e emitir evento', () => {
+      it('deve reabrir fatura paga e emitir evento com justificativa', () => {
         bill.markAsPaid();
         bill.clearEvents();
-        const result = bill.reopen();
+        const result = bill.reopen('Justificativa válida');
         expect(result.hasError).toBe(false);
         expect(bill.status).toBe(BillStatusEnum.OPEN);
         expect(bill.paidAt).toBeUndefined();
         const events = bill.getEvents();
         expect(events).toHaveLength(1);
         expect(events[0]).toBeInstanceOf(CreditCardBillReopenedEvent);
+      });
+
+      it('deve retornar erro se fatura não estiver paga', () => {
+        const result = bill.reopen('Justificativa válida');
+
+        expect(result.hasError).toBe(true);
+      });
+
+      it('deve retornar erro se prazo para reabrir expirou', () => {
+        bill.markAsPaid();
+        (bill as any)._paidAt = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000);
+        const result = bill.reopen('Justificativa válida');
+
+        expect(result.hasError).toBe(true);
       });
     });
   });

@@ -17,6 +17,9 @@ import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
 import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
 import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
 import { CreditCardBillUpdatedEvent } from '../events/CreditCardBillUpdatedEvent';
+import { CreditCardBillNotPaidError } from '../errors/CreditCardBillNotPaidError';
+import { ReopeningPeriodExpiredError } from '../errors/ReopeningPeriodExpiredError';
+import { ReopeningJustification } from '../value-objects/reopening-justification/ReopeningJustification';
 
 export interface CreateCreditCardBillDTO {
   creditCardId: string;
@@ -151,17 +154,24 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     return Either.success<DomainError, void>();
   }
 
-  reopen(): Either<DomainError, void> {
+  reopen(justification: string): Either<DomainError, void> {
     if (this._isDeleted)
       return Either.error<DomainError, void>(
         new CreditCardBillAlreadyDeletedError(),
       );
 
-    if (this.status !== BillStatusEnum.PAID)
+    if (this.status !== BillStatusEnum.PAID || !this._paidAt)
+      return Either.error<DomainError, void>(new CreditCardBillNotPaidError());
+
+    const justificationVo = ReopeningJustification.create(justification);
+    if (justificationVo.hasError)
+      return Either.errors<DomainError, void>(justificationVo.errors);
+
+    const diffDays =
+      (new Date().getTime() - this._paidAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (diffDays > 30)
       return Either.error<DomainError, void>(
-        new CreditCardBillCannotBeUpdatedError(
-          'Only paid bills can be reopened',
-        ),
+        new ReopeningPeriodExpiredError(),
       );
 
     const openStatus = BillStatus.create(BillStatusEnum.OPEN);
@@ -172,7 +182,13 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     this._paidAt = undefined;
     this._updatedAt = new Date();
 
-    this.addEvent(new CreditCardBillReopenedEvent(this.id, this.creditCardId));
+    this.addEvent(
+      new CreditCardBillReopenedEvent(
+        this.id,
+        this.creditCardId,
+        justificationVo.value!.justification,
+      ),
+    );
 
     return Either.success<DomainError, void>();
   }
