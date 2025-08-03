@@ -1,5 +1,6 @@
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
+import { InvalidTransactionDateError } from '../errors/InvalidTransactionDateError';
 import { TransactionStatusEnum } from '../value-objects/transaction-status/TransactionStatus';
 import { TransactionTypeEnum } from '../value-objects/transaction-type/TransactionType';
 import {
@@ -127,6 +128,59 @@ describe('Transaction', () => {
 
       expect(result.hasError).toBe(true);
       expect(result.errors.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('createPastTransaction', () => {
+    it('deve criar transação passada válida', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 10);
+
+      const result = Transaction.createPastTransaction({
+        ...validTransactionData,
+        transactionDate: pastDate,
+      });
+
+      expect(result.hasError).toBe(false);
+      expect(result.data!.status).toBe(TransactionStatusEnum.COMPLETED);
+      expect(result.data!.transactionDate).toEqual(pastDate);
+    });
+
+    it('deve retornar erro se data for futura', () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 1);
+
+      const result = Transaction.createPastTransaction({
+        ...validTransactionData,
+        transactionDate: futureDate,
+      });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidTransactionDateError);
+    });
+
+    it('deve retornar erro se data for mais antiga que 1 ano', () => {
+      const oldDate = new Date();
+      oldDate.setFullYear(oldDate.getFullYear() - 2);
+
+      const result = Transaction.createPastTransaction({
+        ...validTransactionData,
+        transactionDate: oldDate,
+      });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidTransactionDateError);
+    });
+
+    it('deve retornar erro se data inválida', () => {
+      const result = Transaction.createPastTransaction({
+        ...validTransactionData,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        transactionDate: new Date('invalid' as any),
+      });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidTransactionDateError);
     });
   });
 
