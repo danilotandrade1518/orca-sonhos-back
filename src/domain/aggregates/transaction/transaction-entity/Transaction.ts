@@ -7,6 +7,7 @@ import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
 import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
+import { InvalidTransactionDateError } from '../errors/InvalidTransactionDateError';
 import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
 import { TransactionDeletedEvent } from '../events/TransactionDeletedEvent';
 import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
@@ -330,6 +331,32 @@ export class Transaction extends AggregateRoot implements IEntity {
     );
 
     return Either.success<DomainError, Transaction>(transaction);
+  }
+
+  static createPastTransaction(
+    data: CreateTransactionDTO,
+  ): Either<DomainError, Transaction> {
+    const date = data.transactionDate;
+    if (!(date instanceof Date) || isNaN(date.getTime()))
+      return Either.error(new InvalidTransactionDateError());
+
+    const now = new Date();
+    if (date > now)
+      return Either.error(
+        new InvalidTransactionDateError('Transaction date cannot be in the future'),
+      );
+
+    const limit = new Date();
+    limit.setFullYear(limit.getFullYear() - 1);
+    if (date < limit)
+      return Either.error(
+        new InvalidTransactionDateError('Transaction date is too far in the past'),
+      );
+
+    return Transaction.create({
+      ...data,
+      status: TransactionStatusEnum.COMPLETED,
+    });
   }
 
   static restore(data: {

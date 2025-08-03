@@ -534,8 +534,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC016: Registrar Transação Passada
-**Status**: Não Implementado
+### ✅ UC016: Registrar Transação Passada
+**Status**: Implementado
+**Arquivo**: [`RegisterPastTransactionUseCase.ts`](../src/application/use-cases/transaction/register-past-transaction/RegisterPastTransactionUseCase.ts)
 
 **Descrição**: Permite registrar uma transação que ocorreu no passado.
 

@@ -1,5 +1,6 @@
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
+import { InvalidTransactionDateError } from '../errors/InvalidTransactionDateError';
 import { TransactionStatusEnum } from '../value-objects/transaction-status/TransactionStatus';
 import { TransactionTypeEnum } from '../value-objects/transaction-type/TransactionType';
 import {
@@ -1147,6 +1148,64 @@ describe('Transaction', () => {
       expect(restoredTransaction.type).toBe(createdTransaction.type);
       expect(restoredTransaction.status).toBe(createdTransaction.status);
       expect(restoredTransaction.isDeleted).toBe(createdTransaction.isDeleted);
+    });
+  });
+
+  describe('createPastTransaction', () => {
+    const baseData = {
+      description: 'Compra Mercado',
+      amount: 1000,
+      type: TransactionTypeEnum.EXPENSE,
+      categoryId: EntityId.create().value!.id,
+      budgetId: EntityId.create().value!.id,
+      accountId: EntityId.create().value!.id,
+    };
+
+    it('deve criar transação passada válida', () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 10);
+      const result = Transaction.createPastTransaction({
+        ...baseData,
+        transactionDate: date,
+      });
+
+      expect(result.hasError).toBe(false);
+      expect(result.data!.status).toBe(TransactionStatusEnum.COMPLETED);
+    });
+
+    it('deve retornar erro para data futura', () => {
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+      const result = Transaction.createPastTransaction({
+        ...baseData,
+        transactionDate: date,
+      });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidTransactionDateError);
+    });
+
+    it('deve retornar erro para data muito antiga', () => {
+      const date = new Date();
+      date.setFullYear(date.getFullYear() - 2);
+      const result = Transaction.createPastTransaction({
+        ...baseData,
+        transactionDate: date,
+      });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidTransactionDateError);
+    });
+
+    it('deve retornar erro para data inválida', () => {
+      const result = Transaction.createPastTransaction({
+        ...baseData,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        transactionDate: new Date('invalid' as any),
+      });
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidTransactionDateError);
     });
   });
 });
