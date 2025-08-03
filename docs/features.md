@@ -1096,8 +1096,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC032: Reabrir Fatura
-**Status**: Não Implementado
+### ✅ UC032: Reabrir Fatura
+**Status**: Implementado
+**Arquivo**: [`ReopenCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/reopen-bill/ReopenCreditCardBillUseCase.ts)
 
 **Descrição**: Reabre uma fatura que foi marcada como paga por engano.
 
@@ -1119,9 +1120,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Apenas faturas recentes podem ser reabertas
-- ❌ Transação de pagamento é estornada
-- ❌ Justificativa é obrigatória
+- ✅ Apenas faturas recentes podem ser reabertas
+- ✅ Transação de pagamento é estornada
+- ✅ Justificativa é obrigatória
 
 **Domain Events**:
 - `CreditCardBillReopenedEvent`

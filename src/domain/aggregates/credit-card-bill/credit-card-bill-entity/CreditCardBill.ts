@@ -17,6 +17,9 @@ import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
 import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
 import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
 import { CreditCardBillUpdatedEvent } from '../events/CreditCardBillUpdatedEvent';
+import { CreditCardBillNotPaidError } from '../errors/CreditCardBillNotPaidError';
+import { ReopeningPeriodExpiredError } from '../errors/ReopeningPeriodExpiredError';
+import { ReopeningJustification } from '../value-objects/reopening-justification/ReopeningJustification';
 
 export interface CreateCreditCardBillDTO {
   creditCardId: string;
@@ -151,17 +154,23 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     return Either.success<DomainError, void>();
   }
 
-  reopen(): Either<DomainError, void> {
+  reopen(justification: ReopeningJustification): Either<DomainError, void> {
     if (this._isDeleted)
       return Either.error<DomainError, void>(
         new CreditCardBillAlreadyDeletedError(),
       );
 
     if (this.status !== BillStatusEnum.PAID)
+      return Either.error<DomainError, void>(new CreditCardBillNotPaidError());
+
+    if (!this._paidAt)
+      return Either.error<DomainError, void>(new CreditCardBillNotPaidError());
+
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    if (now - this._paidAt.getTime() > thirtyDaysMs)
       return Either.error<DomainError, void>(
-        new CreditCardBillCannotBeUpdatedError(
-          'Only paid bills can be reopened',
-        ),
+        new ReopeningPeriodExpiredError(),
       );
 
     const openStatus = BillStatus.create(BillStatusEnum.OPEN);
@@ -172,7 +181,13 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     this._paidAt = undefined;
     this._updatedAt = new Date();
 
-    this.addEvent(new CreditCardBillReopenedEvent(this.id, this.creditCardId));
+    this.addEvent(
+      new CreditCardBillReopenedEvent(
+        this.id,
+        this.creditCardId,
+        justification.value!.justification,
+      ),
+    );
 
     return Either.success<DomainError, void>();
   }
