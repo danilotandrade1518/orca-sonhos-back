@@ -14,19 +14,19 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 ## 📁 **Arquivos a Implementar**
 
 ### **Domain Layer**
-- [ ] `src/domain/aggregates/transaction/value-objects/cancellation-reason/CancellationReason.ts`
-- [ ] `src/domain/aggregates/transaction/value-objects/cancellation-reason/CancellationReason.spec.ts`
-- [ ] `src/domain/aggregates/transaction/events/ScheduledTransactionCancelledEvent.ts`
-- [ ] Extensão: `src/domain/aggregates/transaction/transaction-entity/Transaction.ts` (método `cancel()`)
-- [ ] Testes: `src/domain/aggregates/transaction/transaction-entity/Transaction.spec.ts`
+- [x] `src/domain/aggregates/transaction/value-objects/cancellation-reason/CancellationReason.ts`
+- [x] `src/domain/aggregates/transaction/value-objects/cancellation-reason/CancellationReason.spec.ts`
+- [x] `src/domain/aggregates/transaction/events/ScheduledTransactionCancelledEvent.ts`
+- [x] Extensão: `src/domain/aggregates/transaction/transaction-entity/Transaction.ts` (método `cancel()`)
+- [x] Testes: `src/domain/aggregates/transaction/transaction-entity/Transaction.spec.ts`
 
 ### **Application Layer**
-- [ ] `src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.ts`
-- [ ] `src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionDto.ts`
-- [ ] `src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.spec.ts`
+- [x] `src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.ts`
+- [x] `src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionDto.ts`
+- [x] `src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.spec.ts`
 
 ### **Contracts (Repositories)**
-- [ ] `src/application/contracts/repositories/transaction/ICancelScheduledTransactionRepository.ts`
+- [x] `src/application/contracts/repositories/transaction/ICancelScheduledTransactionRepository.ts`
 
 ## 🧱 **Domain Objects Detalhados**
 
@@ -63,12 +63,12 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 ```
 
 ### **Validações Obrigatórias**
-- [ ] Usuário deve ter acesso ao orçamento
-- [ ] Transação deve existir e estar agendada
-- [ ] Transação deve pertencer ao orçamento
-- [ ] Motivo do cancelamento deve ser válido
-- [ ] Transação não pode ter sido executada
-- [ ] Data de execução deve ser futura
+- [x] Usuário deve ter acesso ao orçamento
+- [x] Transação deve existir e estar agendada
+- [x] Transação deve pertencer ao orçamento
+- [x] Motivo do cancelamento deve ser válido
+- [x] Transação não pode ter sido executada
+- [x] Data de execução deve ser futura
 
 ### **Fluxo Principal**
 1. Validar autorização do usuário no orçamento
@@ -81,38 +81,38 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 8. Retornar confirmação
 
 ### **Business Rules**
-- [ ] Apenas transações SCHEDULED podem ser canceladas
-- [ ] Transação não pode ter sido executada
-- [ ] Data de execução deve ser futura
-- [ ] Motivo é obrigatório para auditoria
-- [ ] Cancelamento é irreversível
-- [ ] Operação atômica via Unit of Work
+- [x] Apenas transações SCHEDULED podem ser canceladas
+- [x] Transação não pode ter sido executada
+- [x] Data de execução deve ser futura
+- [x] Motivo é obrigatório para auditoria
+- [x] Cancelamento é irreversível
+- [x] Operação atômica via Unit of Work
 
 ## 🚫 **Error Scenarios**
-- [ ] `ScheduledTransactionNotFoundError` - Transação não encontrada
-- [ ] `TransactionNotScheduledError` - Transação não está agendada
-- [ ] `TransactionAlreadyExecutedError` - Transação já foi executada
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
-- [ ] `InvalidCancellationReasonError` - Motivo inválido
-- [ ] `TransactionCannotBeCancelledError` - Transação não pode ser cancelada
+- [x] `ScheduledTransactionNotFoundError` - Transação não encontrada
+- [x] `TransactionNotScheduledError` - Transação não está agendada
+- [x] `TransactionAlreadyExecutedError` - Transação já foi executada
+- [x] `InsufficientPermissionsError` - Usuário sem permissão
+- [x] `InvalidCancellationReasonError` - Motivo inválido
+- [x] `TransactionCannotBeCancelledError` - Transação não pode ser cancelada
 
 ## 🧪 **Test Cases**
 
 ### **Domain Tests**
-- [ ] CancellationReason com textos válidos
-- [ ] CancellationReason com textos inválidos
-- [ ] Transaction.cancel() com transação agendada válida
-- [ ] Transaction.cancel() com transação não agendada (erro)
-- [ ] Transaction.cancel() com transação já executada (erro)
+- [x] CancellationReason com textos válidos
+- [x] CancellationReason com textos inválidos
+- [x] Transaction.cancel() com transação agendada válida
+- [x] Transaction.cancel() com transação não agendada (erro)
+- [x] Transaction.cancel() com transação já executada (erro)
 
 ### **Use Case Tests**
-- [ ] Cancelamento bem-sucedido com dados válidos
-- [ ] Falha por transação não encontrada
-- [ ] Falha por transação não agendada
-- [ ] Falha por transação já executada
-- [ ] Falha por motivo inválido
-- [ ] Falha por falta de permissão
-- [ ] Falha por data de execução passada
+- [x] Cancelamento bem-sucedido com dados válidos
+- [x] Falha por transação não encontrada
+- [x] Falha por transação não agendada
+- [x] Falha por transação já executada
+- [x] Falha por motivo inválido
+- [x] Falha por falta de permissão
+- [x] Falha por data de execução passada
 
 ## 🔗 **Dependencies**
 - ✅ Transaction aggregate (já implementado)
@@ -122,23 +122,23 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 - ✅ Transaction scheduling system
 
 ## 📊 **Acceptance Criteria**
-- [ ] Usuário pode cancelar transações agendadas
-- [ ] Sistema valida se transação está agendada
-- [ ] Transações executadas não podem ser canceladas
-- [ ] Motivo do cancelamento é obrigatório
-- [ ] Status muda para CANCELLED
-- [ ] Evento de cancelamento é disparado
-- [ ] Transação não será mais executada automaticamente
+- [x] Usuário pode cancelar transações agendadas
+- [x] Sistema valida se transação está agendada
+- [x] Transações executadas não podem ser canceladas
+- [x] Motivo do cancelamento é obrigatório
+- [x] Status muda para CANCELLED
+- [x] Evento de cancelamento é disparado
+- [x] Transação não será mais executada automaticamente
 
 ## 🚀 **Definition of Done**
-- [ ] Todos os domain objects implementados e testados
-- [ ] Use case implementado com validações completas
-- [ ] Integração com Unit of Work funcionando
-- [ ] Cobertura de testes > 90%
-- [ ] Documentação atualizada
-- [ ] Code review aprovado
-- [ ] Testes de integração passando
-- [ ] Sem breaking changes em APIs existentes
+- [x] Todos os domain objects implementados e testados
+- [x] Use case implementado com validações completas
+- [x] Integração com Unit of Work funcionando
+- [x] Cobertura de testes > 90%
+- [x] Documentação atualizada
+- [x] Code review aprovado
+- [x] Testes de integração passando
+- [x] Sem breaking changes em APIs existentes
 
 ## 📝 **Notes**
 - Cancelamento é irreversível - considerar confirmação no frontend

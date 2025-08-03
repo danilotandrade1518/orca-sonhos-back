@@ -630,8 +630,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC019: Cancelar Transação Agendada
-**Status**: Não Implementado
+### ✅ UC019: Cancelar Transação Agendada
+**Status**: Implementado
+**Arquivo**: [`CancelScheduledTransactionUseCase.ts`](../src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.ts)
 
 **Descrição**: Permite cancelar uma transação que foi agendada para o futuro.
 
@@ -653,9 +654,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Apenas transações não executadas podem ser canceladas
-- ❌ Motivo do cancelamento é registrado
-- ❌ Histórico preserva o cancelamento
+- ✅ Apenas transações não executadas podem ser canceladas
+- ✅ Motivo do cancelamento é registrado
+- ✅ Histórico preserva o cancelamento
 
 **Domain Events**:
 - `ScheduledTransactionCancelledEvent`
