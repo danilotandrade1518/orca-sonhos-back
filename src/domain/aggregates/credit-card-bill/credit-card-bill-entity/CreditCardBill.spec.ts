@@ -171,7 +171,7 @@ describe('CreditCardBill', () => {
       });
 
       it('deve marcar a fatura como paga', () => {
-        const result = bill.markAsPaid();
+        const result = bill.markAsPaid(50000, new Date());
 
         expect(result.hasError).toBe(false);
         expect(bill.status).toBe(BillStatusEnum.PAID);
@@ -182,14 +182,19 @@ describe('CreditCardBill', () => {
         expect(events[0]).toBeInstanceOf(CreditCardBillPaidEvent);
       });
 
-      it('deve permitir marcar como paga múltiplas vezes sem erro', () => {
-        bill.markAsPaid();
+      it('deve retornar erro ao tentar pagar novamente', () => {
+        bill.markAsPaid(50000, new Date());
         bill.clearEvents();
-        const result = bill.markAsPaid();
+        const result = bill.markAsPaid(50000, new Date());
 
-        expect(result.hasError).toBe(false);
-        expect(bill.status).toBe(BillStatusEnum.PAID);
+        expect(result.hasError).toBe(true);
         expect(bill.getEvents()).toHaveLength(0);
+      });
+
+      it('deve retornar erro se a fatura não estiver OPEN', () => {
+        bill.markAsPaid(50000, new Date());
+        const result = bill.markAsPaid(50000, new Date());
+        expect(result.hasError).toBe(true);
       });
     });
 
@@ -207,7 +212,7 @@ describe('CreditCardBill', () => {
 
     describe('reopen', () => {
       it('deve reabrir fatura paga e emitir evento', () => {
-        bill.markAsPaid();
+        bill.markAsPaid(50000, new Date());
         bill.clearEvents();
         const result = bill.reopen();
         expect(result.hasError).toBe(false);

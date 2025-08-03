@@ -17,6 +17,10 @@ import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
 import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
 import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
 import { CreditCardBillUpdatedEvent } from '../events/CreditCardBillUpdatedEvent';
+import { InvalidPaymentDateError } from '../errors/InvalidPaymentDateError';
+import { CreditCardBillAlreadyPaidError } from '../errors/CreditCardBillAlreadyPaidError';
+import { PaymentAmount } from '../value-objects/payment-amount/PaymentAmount';
+import { PaymentDate } from '../value-objects/payment-date/PaymentDate';
 
 export interface CreateCreditCardBillDTO {
   creditCardId: string;
@@ -122,33 +126,49 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     return !this._isDeleted && this.status !== BillStatusEnum.PAID;
   }
 
-  markAsPaid(): Either<DomainError, void> {
+  markAsPaid(amount: number, paymentDate: Date): Either<DomainError, void> {
+    const either = new Either<DomainError, void>();
+
     if (this._isDeleted)
-      return Either.error<DomainError, void>(
-        new CreditCardBillAlreadyDeletedError(),
-      );
+      return Either.error(new CreditCardBillAlreadyDeletedError());
 
     if (this.status === BillStatusEnum.PAID)
-      return Either.success<DomainError, void>();
+      return Either.error(new CreditCardBillAlreadyPaidError());
+
+    if (this.status !== BillStatusEnum.OPEN)
+      return Either.error(
+        new CreditCardBillCannotBeUpdatedError('Credit card bill must be OPEN to be paid'),
+      );
+
+    const amountVo = PaymentAmount.create(amount);
+    const dateVo = PaymentDate.create(paymentDate);
+
+    if (amountVo.hasError) either.addManyErrors(amountVo.errors);
+    if (dateVo.hasError) either.addManyErrors(dateVo.errors);
+
+    if (dateVo.value && dateVo.value.date < this._closingDate)
+      either.addError(new InvalidPaymentDateError());
+
+    if (either.hasError) return either;
 
     const paidStatus = BillStatus.create(BillStatusEnum.PAID);
-    if (paidStatus.hasError)
-      return Either.errors<DomainError, void>(paidStatus.errors);
+    if (paidStatus.hasError) return Either.errors(paidStatus.errors);
 
     this._status = paidStatus;
-    this._paidAt = new Date();
+    this._paidAt = dateVo.value!.date;
     this._updatedAt = new Date();
 
     this.addEvent(
       new CreditCardBillPaidEvent(
         this.id,
         this.creditCardId,
-        this.amount,
+        amountVo.value!.cents,
         this._paidAt,
       ),
     );
 
-    return Either.success<DomainError, void>();
+    either.setData();
+    return either;
   }
 
   reopen(): Either<DomainError, void> {
