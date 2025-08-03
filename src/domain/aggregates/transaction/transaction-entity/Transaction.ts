@@ -10,6 +10,7 @@ import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleE
 import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
 import { TransactionDeletedEvent } from '../events/TransactionDeletedEvent';
 import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
+import { TransactionMarkedAsLateEvent } from '../events/TransactionMarkedAsLateEvent';
 import { TransactionDescription } from '../value-objects/transaction-description/TransactionDescription';
 import {
   TransactionStatus,
@@ -135,6 +136,10 @@ export class Transaction extends AggregateRoot implements IEntity {
     return this.status === TransactionStatusEnum.CANCELLED;
   }
 
+  get isLate(): boolean {
+    return this.status === TransactionStatusEnum.LATE;
+  }
+
   complete(): Either<DomainError, void> {
     if (this.isCancelled)
       return Either.error<DomainError, void>(
@@ -188,6 +193,28 @@ export class Transaction extends AggregateRoot implements IEntity {
 
     this._status = TransactionStatus.create(TransactionStatusEnum.OVERDUE);
     this._updatedAt = new Date();
+
+    return Either.success<DomainError, void>();
+  }
+
+  markAsLate(): Either<DomainError, void> {
+    if (this.isLate) return Either.success<DomainError, void>();
+
+    if (!this.isScheduled)
+      return Either.error<DomainError, void>(
+        new TransactionBusinessRuleError('Only scheduled transactions can be marked as late'),
+      );
+
+    const now = new Date();
+    if (this._transactionDate >= now)
+      return Either.error<DomainError, void>(
+        new TransactionBusinessRuleError('Cannot mark future transaction as late'),
+      );
+
+    this._status = TransactionStatus.create(TransactionStatusEnum.LATE);
+    this._updatedAt = new Date();
+
+    this.addEvent(new TransactionMarkedAsLateEvent(this.id));
 
     return Either.success<DomainError, void>();
   }
