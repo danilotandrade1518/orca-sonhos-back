@@ -10,12 +10,15 @@ import { InsufficientBalanceError } from '../errors/InsufficientBalanceError';
 import { InvalidAccountDataError } from '../errors/InvalidAccountDataError';
 import { AccountDeletedEvent } from '../events/AccountDeletedEvent';
 import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
+import { AccountReconciledEvent } from '../events/AccountReconciledEvent';
 import {
   AccountType,
   AccountTypeEnum,
 } from '../value-objects/account-type/AccountType';
 import { EntityName } from './../../../shared/value-objects/entity-name/EntityName';
 import { InvalidTransferAmountError } from './errors/InvalidTransferAmountError';
+import { ReconciliationAmount } from '../value-objects/reconciliation-amount/ReconciliationAmount';
+import { ReconciliationJustification } from '../value-objects/reconciliation-justification/ReconciliationJustification';
 
 export interface CreateAccountDTO {
   name: string;
@@ -303,6 +306,44 @@ export class Account extends AggregateRoot implements IEntity {
     account._isDeleted = data.isDeleted;
 
     either.setData(account);
+    return either;
+  }
+
+  reconcile(
+    newBalance: number,
+    justification: string,
+  ): Either<DomainError, void> {
+    const either = new Either<DomainError, void>();
+
+    const newBalanceVo = BalanceVo.create(newBalance);
+    if (newBalanceVo.hasError) either.addManyErrors(newBalanceVo.errors);
+
+    const difference =
+      newBalance - (this._balance.value?.cents ?? 0);
+    const amountVo = ReconciliationAmount.create(difference);
+    if (amountVo.hasError) either.addManyErrors(amountVo.errors);
+
+    const justificationVo = ReconciliationJustification.create(justification);
+    if (justificationVo.hasError)
+      either.addManyErrors(justificationVo.errors);
+
+    if (either.hasError) return either;
+
+    const previousBalance = this.balance!;
+    this._balance = newBalanceVo;
+    this._updatedAt = new Date();
+
+    this.addEvent(
+      new AccountReconciledEvent(
+        this.id,
+        this.budgetId!,
+        previousBalance,
+        newBalance,
+        difference,
+        justification,
+      ),
+    );
+
     return either;
   }
 

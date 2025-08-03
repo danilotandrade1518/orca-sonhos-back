@@ -5,6 +5,7 @@ import { AccountTypeEnum } from '../value-objects/account-type/AccountType';
 import { InvalidBalanceError } from './../../../shared/errors/InvalidBalanceError';
 import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
+import { AccountReconciledEvent } from '../events/AccountReconciledEvent';
 import { Account, CreateAccountDTO } from './Account';
 
 describe('Account', () => {
@@ -281,6 +282,35 @@ describe('Account', () => {
 
       it('should return false when insufficient balance', () => {
         expect(account.canSubtract(1500)).toBe(false);
+      });
+    });
+
+    describe('reconcile', () => {
+      it('should reconcile balance and emit event', () => {
+        const result = account.reconcile(1200, 'Ajuste banc\u00e1rio');
+
+        expect(result.hasError).toBe(false);
+        expect(account.balance).toBe(1200);
+
+        const events = account.getEvents();
+        expect(events[0]).toBeInstanceOf(AccountReconciledEvent);
+        const event = events[0] as AccountReconciledEvent;
+        expect(event.previousBalance).toBe(1000);
+        expect(event.newBalance).toBe(1200);
+        expect(event.difference).toBe(200);
+        expect(event.justification).toBe('Ajuste banc\u00e1rio');
+      });
+
+      it('should return error when new balance is same as current', () => {
+        const result = account.reconcile(1000, 'Sem mudan\u00e7a');
+
+        expect(result.hasError).toBe(true);
+      });
+
+      it('should return error when justification is invalid', () => {
+        const result = account.reconcile(900, 'short');
+
+        expect(result.hasError).toBe(true);
       });
     });
   });
