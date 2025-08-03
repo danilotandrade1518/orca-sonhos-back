@@ -8,11 +8,12 @@ export class SaveTransactionRepositoryStub
   implements ISaveTransactionRepository
 {
   public shouldFail = false;
+  public executeCalls: Transaction[] = [];
 
   async execute(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     transaction: Transaction,
   ): Promise<Either<RepositoryError, void>> {
+    this.executeCalls.push(transaction);
     if (this.shouldFail) {
       return Either.error(new RepositoryError('Repository failure'));
     }

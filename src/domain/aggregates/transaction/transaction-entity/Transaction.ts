@@ -9,6 +9,7 @@ import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDele
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
 import { TransactionDeletedEvent } from '../events/TransactionDeletedEvent';
+import { ScheduledTransactionCancelledEvent } from '../events/ScheduledTransactionCancelledEvent';
 import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
 import { TransactionDescription } from '../value-objects/transaction-description/TransactionDescription';
 import {
@@ -19,6 +20,9 @@ import {
   TransactionType,
   TransactionTypeEnum,
 } from '../value-objects/transaction-type/TransactionType';
+import { CancellationReason } from '../value-objects/cancellation-reason/CancellationReason';
+import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
+import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExecutedError';
 
 export interface CreateTransactionDTO {
   description: string;
@@ -47,6 +51,8 @@ export class Transaction extends AggregateRoot implements IEntity {
 
   private _updatedAt: Date;
   private _isDeleted: boolean = false;
+  private _cancellationReason?: CancellationReason;
+  private _cancelledAt?: Date;
 
   private constructor(
     private readonly _description: TransactionDescription,
@@ -59,12 +65,16 @@ export class Transaction extends AggregateRoot implements IEntity {
     private _status: TransactionStatus,
     private readonly _creditCardId?: EntityId,
     private readonly _existingId?: EntityId,
+    cancellationReason?: CancellationReason,
+    cancelledAt?: Date,
   ) {
     super();
 
     this._id = this._existingId || EntityId.create();
     this._createdAt = new Date();
     this._updatedAt = new Date();
+    this._cancellationReason = cancellationReason;
+    this._cancelledAt = cancelledAt;
   }
 
   get id(): string {
@@ -135,6 +145,14 @@ export class Transaction extends AggregateRoot implements IEntity {
     return this.status === TransactionStatusEnum.CANCELLED;
   }
 
+  get cancellationReason(): string | null {
+    return this._cancellationReason?.value?.reason ?? null;
+  }
+
+  get cancelledAt(): Date | null {
+    return this._cancelledAt ?? null;
+  }
+
   complete(): Either<DomainError, void> {
     if (this.isCancelled)
       return Either.error<DomainError, void>(
@@ -149,25 +167,46 @@ export class Transaction extends AggregateRoot implements IEntity {
     return Either.success<DomainError, void>();
   }
 
-  cancel(): Either<DomainError, void> {
+  cancel(reason: CancellationReason): Either<DomainError, void> {
+    if (reason.hasError) return Either.errors<DomainError, void>(reason.errors);
     if (this.isCompleted)
-      return Either.error<DomainError, void>(
-        new TransactionBusinessRuleError(
-          'Cannot cancel a completed transaction',
-        ),
-      );
+      return Either.error(new TransactionAlreadyExecutedError());
 
     if (this.isCancelled)
-      return Either.error<DomainError, void>(
+      return Either.error(
         new TransactionBusinessRuleError(
           'Cannot cancel a cancelled transaction',
         ),
       );
 
+    if (!this.isScheduled)
+      return Either.error(new TransactionNotScheduledError());
+
+    const now = new Date();
+    if (this._transactionDate <= now)
+      return Either.error(new TransactionAlreadyExecutedError());
+
     this._status = TransactionStatus.create(TransactionStatusEnum.CANCELLED);
+    this._cancellationReason = reason;
+    this._cancelledAt = new Date();
     this._updatedAt = new Date();
 
-    return Either.success<DomainError, void>();
+    this.addEvent(
+      new ScheduledTransactionCancelledEvent(
+        this.id,
+        this.accountId,
+        this.budgetId,
+        this.amount,
+        this.type,
+        reason.value!.reason,
+        this._cancelledAt,
+        this.categoryId,
+        this.creditCardId || undefined,
+        this.transactionDate,
+      ),
+    );
+
+    return Either.success();
   }
 
   markAsOverdue(): Either<DomainError, void> {
@@ -256,6 +295,8 @@ export class Transaction extends AggregateRoot implements IEntity {
       this._status,
       this._creditCardId,
       this._id,
+      this._cancellationReason,
+      this._cancelledAt,
     );
 
     if (accountChanged || amountChanged || typeChanged) {
@@ -317,6 +358,9 @@ export class Transaction extends AggregateRoot implements IEntity {
       accountId,
       status,
       creditCardId,
+      undefined,
+      undefined,
+      undefined,
     );
 
     transaction.addEvent(
@@ -345,6 +389,8 @@ export class Transaction extends AggregateRoot implements IEntity {
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
+    cancellationReason?: string;
+    cancelledAt?: Date;
   }): Either<DomainError, Transaction> {
     const either = new Either<DomainError, Transaction>();
 
@@ -356,6 +402,9 @@ export class Transaction extends AggregateRoot implements IEntity {
     const categoryId = EntityId.fromString(data.categoryId);
     const status = TransactionStatus.create(data.status);
     const idVo = EntityId.fromString(data.id);
+    const reasonVo = data.cancellationReason
+      ? CancellationReason.create(data.cancellationReason)
+      : undefined;
 
     if (description.hasError) either.addManyErrors(description.errors);
     if (amount.hasError) either.addManyErrors(amount.errors);
@@ -365,6 +414,7 @@ export class Transaction extends AggregateRoot implements IEntity {
     if (categoryId.hasError) either.addManyErrors(categoryId.errors);
     if (status.hasError) either.addManyErrors(status.errors);
     if (idVo.hasError) either.addManyErrors(idVo.errors);
+    if (reasonVo?.hasError) either.addManyErrors(reasonVo.errors);
 
     if (either.hasError) return either;
 
@@ -379,6 +429,8 @@ export class Transaction extends AggregateRoot implements IEntity {
       status,
       undefined,
       idVo,
+      reasonVo?.value ? reasonVo : undefined,
+      data.cancelledAt,
     );
 
     Object.defineProperty(transaction, '_createdAt', {

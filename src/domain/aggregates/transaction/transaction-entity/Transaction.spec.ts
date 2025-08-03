@@ -7,6 +7,10 @@ import {
   Transaction,
   UpdateTransactionDTO,
 } from './Transaction';
+import { CancellationReason } from '../value-objects/cancellation-reason/CancellationReason';
+import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
+import { InvalidCancellationReasonError } from '../errors/InvalidCancellationReasonError';
+import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExecutedError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 
 describe('Transaction', () => {
@@ -14,7 +18,7 @@ describe('Transaction', () => {
     description: 'Supermercado ABC',
     amount: 5000, // R$ 50,00 em centavos
     type: TransactionTypeEnum.EXPENSE,
-    transactionDate: new Date('2024-01-15'),
+    transactionDate: new Date(Date.now() + 86400000),
     categoryId: '123e4567-e89b-12d3-a456-426614174000',
     budgetId: '123e4567-e89b-12d3-a456-426614174001',
     accountId: '123e4567-e89b-12d3-a456-426614174002',
@@ -179,23 +183,23 @@ describe('Transaction', () => {
         status: TransactionStatusEnum.SCHEDULED,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel(CancellationReason.create('Motivo'));
 
       expect(result.hasError).toBe(false);
       expect(transaction.status).toBe(TransactionStatusEnum.CANCELLED);
       expect(transaction.isCancelled).toBe(true);
     });
 
-    it('deve cancelar uma transação em atraso', () => {
+    it('deve retornar erro ao cancelar uma transação em atraso', () => {
       const transaction = Transaction.create({
         ...validTransactionData,
         status: TransactionStatusEnum.OVERDUE,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel(CancellationReason.create('Motivo'));
 
-      expect(result.hasError).toBe(false);
-      expect(transaction.status).toBe(TransactionStatusEnum.CANCELLED);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(TransactionNotScheduledError);
     });
 
     it('deve retornar erro ao tentar cancelar transação completada', () => {
@@ -204,13 +208,10 @@ describe('Transaction', () => {
         status: TransactionStatusEnum.COMPLETED,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel(CancellationReason.create('Motivo'));
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(TransactionBusinessRuleError);
-      expect(result.errors[0].message).toBe(
-        'Cannot cancel a completed transaction',
-      );
+      expect(result.errors[0]).toBeInstanceOf(TransactionAlreadyExecutedError);
     });
   });
 
@@ -834,13 +835,41 @@ describe('Transaction', () => {
         status: TransactionStatusEnum.CANCELLED,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel(CancellationReason.create('Motivo'));
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(TransactionBusinessRuleError);
       expect(result.errors[0].message).toBe(
         'Cannot cancel a cancelled transaction',
       );
+    });
+
+    it('deve retornar erro se motivo for inválido', () => {
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.cancel(CancellationReason.create('  '));
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toEqual(new InvalidCancellationReasonError());
+    });
+
+    it('deve retornar erro se data de execução já passou', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 1);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.cancel(CancellationReason.create('Motivo'));
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(TransactionAlreadyExecutedError);
     });
 
     it('deve atualizar updatedAt quando cancelar', () => {
@@ -852,7 +881,7 @@ describe('Transaction', () => {
 
       // Aguardar um pouco para garantir diferença de tempo
       setTimeout(() => {
-        transaction.cancel();
+        transaction.cancel(CancellationReason.create('Motivo'));
         expect(transaction.updatedAt).not.toEqual(originalUpdatedAt);
       }, 1);
     });
@@ -1109,7 +1138,7 @@ describe('Transaction', () => {
 
       // Cancelar transação
       const newTransaction = Transaction.create(validTransactionData).data!;
-      newTransaction.cancel();
+      newTransaction.cancel(CancellationReason.create('Motivo'));
       expect(newTransaction.id).toBeDefined();
       expect(newTransaction.createdAt).toBeInstanceOf(Date);
       expect(newTransaction.budgetId).toBe(validTransactionData.budgetId);
