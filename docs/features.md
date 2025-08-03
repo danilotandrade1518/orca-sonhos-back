@@ -14,8 +14,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 📊 **Resumo Geral**
 
 - **Total de Use Cases**: 60
-- **Implementados**: 25 (42%)
-- **Não Implementados**: 35 (58%)
+- **Implementados**: 26 (43%)
+- **Não Implementados**: 34 (57%)
 
 ---
 
@@ -1064,8 +1064,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC031: Marcar Fatura como Paga
-**Status**: Não Implementado
+### ✅ UC031: Marcar Fatura como Paga
+**Status**: Implementado
+**Arquivo**: [`MarkCreditCardBillAsPaidUseCase.ts`](../src/application/use-cases/credit-card-bill/mark-bill-as-paid/MarkCreditCardBillAsPaidUseCase.ts)
 
 **Descrição**: Marca uma fatura do cartão como paga e registra o pagamento.
 
@@ -1497,8 +1498,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 25 use cases (42%)
-- **❌ Não Implementados**: 35 use cases (58%)
+- **✅ Implementados**: 26 use cases (43%)
+- **❌ Não Implementados**: 34 use cases (57%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 

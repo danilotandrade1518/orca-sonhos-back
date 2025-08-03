@@ -6,6 +6,7 @@ import { CreditCardBillCreatedEvent } from '../events/CreditCardBillCreatedEvent
 import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
 import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
 import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
+import { CreditCardBillAlreadyPaidError } from '../errors/CreditCardBillAlreadyPaidError';
 import { CreateCreditCardBillDTO, CreditCardBill } from './CreditCardBill';
 
 const makeValidDTO = (
@@ -171,25 +172,23 @@ describe('CreditCardBill', () => {
       });
 
       it('deve marcar a fatura como paga', () => {
-        const result = bill.markAsPaid();
+        const result = bill.markAsPaid(1000, new Date('2025-01-20'));
 
         expect(result.hasError).toBe(false);
         expect(bill.status).toBe(BillStatusEnum.PAID);
-        expect(bill.paidAt).toBeDefined();
-        expect(bill.paidAt).toBeInstanceOf(Date);
+        expect(bill.paidAt).toEqual(new Date('2025-01-20'));
         const events = bill.getEvents();
         expect(events).toHaveLength(1);
         expect(events[0]).toBeInstanceOf(CreditCardBillPaidEvent);
       });
 
-      it('deve permitir marcar como paga múltiplas vezes sem erro', () => {
-        bill.markAsPaid();
+      it('deve retornar erro se já estiver paga', () => {
+        bill.markAsPaid(1000, new Date('2025-01-20'));
         bill.clearEvents();
-        const result = bill.markAsPaid();
+        const result = bill.markAsPaid(1000, new Date('2024-01-21'));
 
-        expect(result.hasError).toBe(false);
-        expect(bill.status).toBe(BillStatusEnum.PAID);
-        expect(bill.getEvents()).toHaveLength(0);
+        expect(result.hasError).toBe(true);
+        expect(result.errors[0]).toBeInstanceOf(CreditCardBillAlreadyPaidError);
       });
     });
 
@@ -207,7 +206,7 @@ describe('CreditCardBill', () => {
 
     describe('reopen', () => {
       it('deve reabrir fatura paga e emitir evento', () => {
-        bill.markAsPaid();
+        bill.markAsPaid(1000, new Date('2025-01-20'));
         bill.clearEvents();
         const result = bill.reopen();
         expect(result.hasError).toBe(false);

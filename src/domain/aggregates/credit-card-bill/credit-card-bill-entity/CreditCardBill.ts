@@ -12,11 +12,14 @@ import {
 } from '../value-objects/bill-status/BillStatus';
 import { CreditCardBillAlreadyDeletedError } from '../errors/CreditCardBillAlreadyDeletedError';
 import { CreditCardBillCannotBeUpdatedError } from '../errors/CreditCardBillCannotBeUpdatedError';
+import { CreditCardBillAlreadyPaidError } from '../errors/CreditCardBillAlreadyPaidError';
 import { CreditCardBillCreatedEvent } from '../events/CreditCardBillCreatedEvent';
 import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
 import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
 import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
 import { CreditCardBillUpdatedEvent } from '../events/CreditCardBillUpdatedEvent';
+import { PaymentAmount } from '../value-objects/payment-amount/PaymentAmount';
+import { PaymentDate } from '../value-objects/payment-date/PaymentDate';
 
 export interface CreateCreditCardBillDTO {
   creditCardId: string;
@@ -122,28 +125,39 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     return !this._isDeleted && this.status !== BillStatusEnum.PAID;
   }
 
-  markAsPaid(): Either<DomainError, void> {
+  markAsPaid(amount: number, date: Date): Either<DomainError, void> {
     if (this._isDeleted)
       return Either.error<DomainError, void>(
         new CreditCardBillAlreadyDeletedError(),
       );
 
     if (this.status === BillStatusEnum.PAID)
-      return Either.success<DomainError, void>();
+      return Either.error<DomainError, void>(
+        new CreditCardBillAlreadyPaidError(),
+      );
+
+    const paymentAmount = PaymentAmount.create(amount);
+    const paymentDate = PaymentDate.create(date, this._closingDate);
+
+    if (paymentAmount.hasError || paymentDate.hasError)
+      return Either.errors<DomainError, void>([
+        ...paymentAmount.errors,
+        ...paymentDate.errors,
+      ]);
 
     const paidStatus = BillStatus.create(BillStatusEnum.PAID);
     if (paidStatus.hasError)
       return Either.errors<DomainError, void>(paidStatus.errors);
 
     this._status = paidStatus;
-    this._paidAt = new Date();
+    this._paidAt = paymentDate.value!.date;
     this._updatedAt = new Date();
 
     this.addEvent(
       new CreditCardBillPaidEvent(
         this.id,
         this.creditCardId,
-        this.amount,
+        paymentAmount.value!.amount,
         this._paidAt,
       ),
     );
