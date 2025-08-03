@@ -287,6 +287,71 @@ describe('Transaction', () => {
     });
   });
 
+  describe('markAsLate', () => {
+    it('deve marcar transação agendada como late', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(false);
+      expect(transaction.status).toBe(TransactionStatusEnum.LATE);
+      expect(transaction.isLate).toBe(true);
+    });
+
+    it('deve ser idempotente se já estiver late', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.LATE,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(false);
+      expect(transaction.status).toBe(TransactionStatusEnum.LATE);
+    });
+
+    it('deve retornar erro se status diferente de scheduled', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.COMPLETED,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(true);
+    });
+
+    it('deve retornar erro se data nao passou', () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: futureDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(true);
+    });
+  });
+
   describe('status helpers', () => {
     it('deve identificar corretamente transação agendada', () => {
       const transaction = Transaction.create({
@@ -333,6 +398,19 @@ describe('Transaction', () => {
       expect(transaction.isCancelled).toBe(true);
       expect(transaction.isScheduled).toBe(false);
       expect(transaction.isCompleted).toBe(false);
+      expect(transaction.isOverdue).toBe(false);
+    });
+
+    it('deve identificar corretamente transação late', () => {
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        status: TransactionStatusEnum.LATE,
+      }).data!;
+
+      expect(transaction.isLate).toBe(true);
+      expect(transaction.isScheduled).toBe(false);
+      expect(transaction.isCompleted).toBe(false);
+      expect(transaction.isCancelled).toBe(false);
       expect(transaction.isOverdue).toBe(false);
     });
   });
@@ -500,6 +578,7 @@ describe('Transaction', () => {
         TransactionStatusEnum.COMPLETED,
         TransactionStatusEnum.OVERDUE,
         TransactionStatusEnum.CANCELLED,
+        TransactionStatusEnum.LATE,
       ];
 
       statuses.forEach((status) => {
@@ -1023,6 +1102,7 @@ describe('Transaction', () => {
           { name: 'isCompleted', value: transaction.isCompleted },
           { name: 'isOverdue', value: transaction.isOverdue },
           { name: 'isCancelled', value: transaction.isCancelled },
+          { name: 'isLate', value: transaction.isLate },
         ];
 
         const trueHelpers = helpers.filter((h) => h.value);
@@ -1041,6 +1121,9 @@ describe('Transaction', () => {
             break;
           case TransactionStatusEnum.CANCELLED:
             expect(transaction.isCancelled).toBe(true);
+            break;
+          case TransactionStatusEnum.LATE:
+            expect(transaction.isLate).toBe(true);
             break;
         }
       });
@@ -1073,6 +1156,22 @@ describe('Transaction', () => {
       const events = transaction.getEvents();
       expect(events).toHaveLength(1);
       expect(events[0].constructor.name).toBe('TransactionDeletedEvent');
+    });
+
+    it('deve emitir TransactionMarkedAsLateEvent ao marcar como late', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+      transaction.clearEvents();
+
+      transaction.markAsLate();
+
+      const events = transaction.getEvents();
+      expect(events[0].constructor.name).toBe('TransactionMarkedAsLateEvent');
     });
 
     it('deve emitir TransactionUpdatedEvent ao atualizar propriedades relevantes', () => {
