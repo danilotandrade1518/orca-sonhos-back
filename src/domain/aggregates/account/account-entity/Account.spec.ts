@@ -497,4 +497,48 @@ describe('Account', () => {
       });
     });
   });
+
+  describe('reconcile', () => {
+    const budgetId = EntityId.create().value!.id;
+
+    it('should reconcile with positive difference', () => {
+      const acc = Account.create({
+        name: 'Conta Teste',
+        type: AccountTypeEnum.CHECKING_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = acc.reconcile(1500, 'Ajuste de deposito');
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBe(500);
+      expect(acc.balance).toBe(1500);
+    });
+
+    it('should reconcile with negative difference', () => {
+      const acc = Account.create({
+        name: 'Conta',
+        type: AccountTypeEnum.CHECKING_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = acc.reconcile(800, 'Tarifa bancaria');
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBe(-200);
+      expect(acc.balance).toBe(800);
+    });
+
+    it('should return error when difference below threshold', () => {
+      const acc = Account.create({
+        name: 'Conta',
+        type: AccountTypeEnum.CHECKING_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = acc.reconcile(1000, 'Sem diferenca');
+      expect(result.hasError).toBe(true);
+    });
+  });
 });
