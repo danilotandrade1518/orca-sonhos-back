@@ -1,4 +1,5 @@
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
 
@@ -41,6 +42,7 @@ describe('AddParticipantToBudgetUseCase', () => {
       name: 'Test Budget',
       ownerId: userId,
       participantIds: [],
+      type: BudgetTypeEnum.SHARED,
     });
 
     if (budgetResult.hasError) {
@@ -196,15 +198,9 @@ describe('AddParticipantToBudgetUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(result.hasData).toBe(true);
-      const events = validBudget.getEvents();
-      if (events.length > 0) {
-        expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-        expect(eventPublisherStub.publishManyCalls[0]).toHaveLength(
-          events.length,
-        );
-      } else {
-        expect(eventPublisherStub.publishManyCalls).toHaveLength(0);
-      }
+      // Events are cleared after publishing, so we check if publishMany was called
+      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
+      expect(eventPublisherStub.publishManyCalls[0].length).toBeGreaterThan(0);
     });
 
     it('should handle event publishing errors gracefully', async () => {

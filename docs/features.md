@@ -14,8 +14,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 📊 **Resumo Geral**
 
 - **Total de Use Cases**: 49
-- **Implementados**: 30 (61%)
-- **Não Implementados**: 19 (39%)
+- **Implementados**: 31 (63%)
+- **Não Implementados**: 18 (37%)
 
 ---
 
@@ -82,37 +82,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC003: Adicionar Usuário ao Orçamento
-**Status**: Não Implementado
-
-**Descrição**: Permite ao usuário adicionar diretamente outro usuário ao orçamento compartilhado.
-
-**Ator**: Usuário participante do orçamento
-
-**Precondições**:
-- Usuário logado no sistema
-- Usuário tem acesso ao orçamento
-- Orçamento do tipo SHARED
-- Usuário a ser adicionado existe no sistema
-
-**Fluxo Principal**:
-1. Usuário acessa gestão de participantes
-2. Clica em "Adicionar Usuário"
-3. Busca usuário por email ou nome
-4. Seleciona usuário desejado
-5. Confirma adição
-6. Sistema valida dados
-7. Sistema adiciona usuário ao orçamento
-8. Sistema notifica usuário adicionado
-
-**Critérios de Aceitação**:
-- ❌ Usuário deve existir no sistema
-- ❌ Usuário não pode já estar no orçamento
-- ❌ Todo usuário adicionado tem acesso total ao orçamento
-- ❌ Sistema notifica usuário sobre adição ao orçamento
-
----
-
 ### ✅ UC003: Adicionar Usuário ao Orçamento
 **Status**: Implementado  
 **Arquivo**: [`AddParticipantToBudgetUseCase.ts`](../src/application/use-cases/budget/add-participant/AddParticipantToBudgetUseCase.ts)
@@ -139,11 +108,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Critérios de Aceitação**:
 - ✅ Usuário não pode já estar no orçamento
+- ✅ Apenas orçamentos SHARED podem receber participantes
 - ✅ Todo usuário adicionado tem acesso total ao orçamento
-- ✅ Sistema notifica usuário sobre adição ao orçamento
+- ✅ Sistema valida tipos de orçamento automaticamente
+- ✅ Domain events são disparados para auditoria
 
 **Domain Events**:
 - `ParticipantAddedToBudgetEvent`
+
+**Domain Components**:
+- `BudgetType` - Value Object para tipos PERSONAL/SHARED
+- `BudgetNotSharedError` - Erro quando tenta adicionar a orçamento pessoal
+- `ParticipantAlreadyExistsError` - Erro quando participante já existe
 
 ---
 
@@ -1353,24 +1329,24 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 24 use cases (46%)
-- **❌ Não Implementados**: 28 use cases (54%)
+- **✅ Implementados**: 25 use cases (48%)
+- **❌ Não Implementados**: 27 use cases (52%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
-   - UC031: Marcar Fatura como Paga
-   - UC033: Controlar Limite do Cartão
+   - UC030: Marcar Fatura como Paga
+   - UC032: Controlar Limite do Cartão
 
 2. **Média Prioridade** (Features Importantes):
+   - Sistema de Envelopes (UC037-UC043)
    - UC023: Personalizar Categorias por Orçamento
-   - Sistema de Envelopes (UC040-046)
 
 3. **Baixa Prioridade** (Features Avançadas):
-   - Alertas e Notificações (UC047-053)
+   - Alertas e Notificações (UC044-UC049, UC052)
 
 **Observação**: Use cases de visualização, relatórios e dashboards serão tratados separadamente em camadas específicas de apresentação e não fazem parte desta documentação focada em mutação de dados.
 
 ---
 
-**Este documento foi atualizado em Dezembro/2024 baseado na análise completa do código implementado vs documentação. Foram removidas duplicatas desnecessárias e adicionados Use Cases implementados que não estavam documentados.**
+**Última Atualização**: Agosto/2025 - UC003 (Adicionar Usuário ao Orçamento) implementado com arquitetura completa incluindo BudgetType value object, domain events, domain errors e validações de tipo de orçamento. Implementação inclui 51 testes automatizados cobrindo todas as camadas (Domain, Application, Infrastructure).

@@ -8,12 +8,20 @@ import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { BudgetParticipants } from '../budget-participants-entity/BudgetParticipants';
 import { BudgetAlreadyDeletedError } from '../errors/BudgetAlreadyDeletedError';
+import { BudgetNotSharedError } from '../errors/BudgetNotSharedError';
+import { ParticipantAlreadyExistsError } from '../errors/ParticipantAlreadyExistsError';
 import { BudgetDeletedEvent } from '../events/BudgetDeletedEvent';
+import { ParticipantAddedToBudgetEvent } from '../events/ParticipantAddedToBudgetEvent';
+import {
+  BudgetType,
+  BudgetTypeEnum,
+} from '../value-objects/budget-type/BudgetType';
 
 export interface CreateBudgetDTO {
   name: string;
   ownerId: string;
   participantIds?: string[];
+  type?: BudgetTypeEnum;
 }
 
 export class Budget extends AggregateRoot implements IEntity {
@@ -27,6 +35,7 @@ export class Budget extends AggregateRoot implements IEntity {
     private _name: EntityName,
     private readonly _ownerId: EntityId,
     private readonly _participants: BudgetParticipants,
+    private readonly _type: BudgetType,
     existingId?: EntityId,
   ) {
     super();
@@ -49,6 +58,9 @@ export class Budget extends AggregateRoot implements IEntity {
   get participants(): string[] {
     return this._participants.participants;
   }
+  get type(): BudgetType {
+    return this._type;
+  }
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -68,13 +80,26 @@ export class Budget extends AggregateRoot implements IEntity {
   }
 
   addParticipant(userId: string): Either<DomainError, void> {
-    const entityIdVo = EntityId.fromString(userId);
+    if (!this._type.isShared()) {
+      return Either.error<DomainError, void>(new BudgetNotSharedError());
+    }
 
+    const entityIdVo = EntityId.fromString(userId);
     if (entityIdVo.hasError)
       return Either.errors<DomainError, void>(entityIdVo.errors);
 
+    if (this.isParticipant(userId)) {
+      return Either.error<DomainError, void>(
+        new ParticipantAlreadyExistsError(userId),
+      );
+    }
+
     const result = this._participants.addParticipant(userId);
     if (result.hasError) return Either.errors<DomainError, void>(result.errors);
+
+    this.addEvent(
+      new ParticipantAddedToBudgetEvent(this.id, this.id, userId, this.ownerId),
+    );
 
     this._updatedAt = new Date();
     return Either.success<DomainError, void>();
@@ -146,9 +171,21 @@ export class Budget extends AggregateRoot implements IEntity {
     if (participantsResult.hasError)
       return Either.errors<DomainError, Budget>(participantsResult.errors);
 
-    const budget = new Budget(nameVo, ownerIdVo, participantsResult.data!);
+    const hasParticipants =
+      data.participantIds && data.participantIds.length > 0;
+    const budgetType = BudgetType.create(
+      data.type ||
+        (hasParticipants ? BudgetTypeEnum.SHARED : BudgetTypeEnum.PERSONAL),
+    );
 
-    const addOwnerResult = budget.addParticipant(data.ownerId);
+    const budget = new Budget(
+      nameVo,
+      ownerIdVo,
+      participantsResult.data!,
+      budgetType,
+    );
+
+    const addOwnerResult = budget._participants.addParticipant(data.ownerId);
     if (addOwnerResult.hasError)
       return Either.errors<DomainError, Budget>(addOwnerResult.errors);
 
@@ -161,6 +198,7 @@ export class Budget extends AggregateRoot implements IEntity {
     name: string;
     ownerId: string;
     participantIds: string[];
+    type?: BudgetTypeEnum;
     createdAt: Date;
     updatedAt: Date;
     isDeleted: boolean;
@@ -185,10 +223,13 @@ export class Budget extends AggregateRoot implements IEntity {
     if (participantsResult.hasError)
       return Either.errors<DomainError, Budget>(participantsResult.errors);
 
+    const budgetType = BudgetType.create(data.type || BudgetTypeEnum.PERSONAL);
+
     const budget = new Budget(
       nameVo,
       ownerIdVo,
       participantsResult.data!,
+      budgetType,
       idVo,
     );
 
