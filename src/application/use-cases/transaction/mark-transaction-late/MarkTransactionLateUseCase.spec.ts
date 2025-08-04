@@ -6,7 +6,7 @@ import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
-import { MarkTransactionLateRepositoryStub } from '../../../shared/tests/stubs/MarkTransactionLateRepositoryStub';
+import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { MarkTransactionLateDto } from './MarkTransactionLateDto';
 import { MarkTransactionLateUseCase } from './MarkTransactionLateUseCase';
@@ -14,13 +14,13 @@ import { MarkTransactionLateUseCase } from './MarkTransactionLateUseCase';
 describe('MarkTransactionLateUseCase', () => {
   let useCase: MarkTransactionLateUseCase;
   let getTransactionRepositoryStub: GetTransactionRepositoryStub;
-  let saveTransactionRepositoryStub: MarkTransactionLateRepositoryStub;
+  let saveTransactionRepositoryStub: SaveTransactionRepositoryStub;
   let eventPublisherStub: EventPublisherStub;
   let transaction: Transaction;
 
   beforeEach(() => {
     getTransactionRepositoryStub = new GetTransactionRepositoryStub();
-    saveTransactionRepositoryStub = new MarkTransactionLateRepositoryStub();
+    saveTransactionRepositoryStub = new SaveTransactionRepositoryStub();
     eventPublisherStub = new EventPublisherStub();
 
     const txResult = Transaction.create({

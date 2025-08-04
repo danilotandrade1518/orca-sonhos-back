@@ -38,6 +38,27 @@ Não teremos inicialmente de forma obrigatória, projeção de views, apenas ire
 - **Web:** Pontos de entrada/saída HTTP, adapta dados para os casos de uso.
 - **Infra:** Implementação de repositórios, unit of work, event publishers, integrações externas, persistência.
 
+### 3.1. Princípio da Granularidade Adequada
+
+#### Repositories: Genéricos por Operação
+- **IAddRepository**: Criação de entidades (INSERT)
+- **ISaveRepository**: Atualização de entidades (UPDATE)  
+- **IGetRepository**: Busca por ID específico
+- **IFindRepository**: Consultas específicas de negócio
+- **IDeleteRepository**: Remoção de entidades (DELETE)
+
+#### Use Cases: Específicos por Regra de Negócio
+- **CreateTransactionUseCase**: Criar nova transação
+- **MarkTransactionLateUseCase**: Marcar transação como atrasada
+- **CancelScheduledTransactionUseCase**: Cancelar transação agendada
+- **ReconcileAccountUseCase**: Reconciliar saldo da conta
+
+Esta separação garante que:
+- **Repositories** focam apenas em persistência
+- **Use Cases** expressam claramente a operação de negócio
+- **Entidades** encapsulam as regras de domínio
+- **Maior reutilização** e **menor acoplamento**
+
 ## 4. Domain Events
 
 ### 4.1. Conceito
@@ -88,7 +109,7 @@ export class Transaction {
 ```typescript
 export class CreateTransactionUseCase {
   constructor(
-    private transactionRepo: ITransactionRepository,
+    private addTransactionRepository: IAddTransactionRepository,
     private eventPublisher: IEventPublisher,
   ) {}
 
@@ -99,7 +120,7 @@ export class CreateTransactionUseCase {
     if (transactionResult.hasError) return Either.error(/* ... */);
 
     const transaction = transactionResult.data!;
-    await this.transactionRepo.save(transaction);
+    await this.addTransactionRepository.execute(transaction);
 
     // Publicar eventos após persistência bem-sucedida
     const events = transaction.getEvents();
@@ -117,13 +138,13 @@ export class CreateTransactionUseCase {
 export class UpdateAccountBalanceHandler
   implements IEventHandler<TransactionCreatedEvent>
 {
-  constructor(private accountRepo: IAccountRepository) {}
+  constructor(private saveAccountRepository: ISaveAccountRepository) {}
 
   async handle(event: TransactionCreatedEvent): Promise<void> {
-    const account = await this.accountRepo.findById(event.accountId);
+    const account = await this.getAccountRepository.execute(event.accountId);
     if (account) {
       account.updateBalance(event.amount, event.type);
-      await this.accountRepo.save(account);
+      await this.saveAccountRepository.execute(account);
     }
   }
 }
@@ -187,7 +208,7 @@ Esta abordagem visa simplicidade no início, permitindo evolução futura para s
 2. O controller na camada web recebe a requisição e transforma os dados.
 3. O controller chama o UseCase `CreateTransactionUseCase`.
 4. O UseCase cria a entidade `Transaction`, que gera um `TransactionCreatedEvent`.
-5. O UseCase persiste a transação usando o `TransactionRepository`.
+5. O UseCase persiste a transação usando o `IAddTransactionRepository` (para criação) ou `ISaveTransactionRepository` (para atualização).
 6. O UseCase publica o `TransactionCreatedEvent` via `IEventPublisher`.
 7. O `UpdateAccountBalanceHandler` recebe o evento e atualiza o saldo da conta.
 8. O resultado é retornado ao controller e, em seguida, ao usuário.
@@ -203,6 +224,134 @@ Esta abordagem visa simplicidade no início, permitindo evolução futura para s
 
 - **Repository:** Representa uma coleção de agregados (entidades) e encapsula regras de negócio relacionadas à persistência. Utilizado principalmente em operações de mutação (criação, atualização, remoção) e segue contratos definidos na camada de domínio.
 - **DAO (Data Access Object):** Focado em consultas (queries) e otimizado para leitura de dados. Utilizado em Query Handlers para buscar informações diretamente do PostgreSQL, podendo retornar dados em formatos específicos para views.
+
+### 7.1. Padrão Repository Refinado: Separação de Responsabilidades
+
+Para garantir melhor aderência ao **Single Responsibility Principle** e maior clareza arquitetural, adotamos uma separação específica entre diferentes tipos de operações de repository:
+
+#### Add vs Save Repositories
+
+- **IAddRepository**: Interface para **criação** de novos agregados no sistema
+  - Utilizado quando se trata de persistir entidades completamente novas
+  - Exemplo: `IAddTransactionRepository` para criar novas transações
+  - Use Cases típicos: `CreateTransactionUseCase`, `CreateAccountUseCase`
+
+- **ISaveRepository**: Interface para **atualização** de agregados existentes
+  - Utilizado quando se trata de modificar o estado de entidades já persistidas
+  - Exemplo: `ISaveTransactionRepository` para atualizar transações existentes
+  - Use Cases típicos: `MarkTransactionLateUseCase`, `CancelScheduledTransactionUseCase`
+
+#### Exemplo de Implementação
+
+```typescript
+// Interface para criação de novas transações
+export interface IAddTransactionRepository {
+  execute(transaction: Transaction): Promise<Either<RepositoryError, void>>;
+}
+
+// Interface para atualização de transações existentes
+export interface ISaveTransactionRepository {
+  execute(transaction: Transaction): Promise<Either<RepositoryError, void>>;
+}
+
+// Use Case de criação utiliza Add Repository
+export class CreateTransactionUseCase {
+  constructor(
+    private readonly addTransactionRepository: IAddTransactionRepository,
+    private readonly eventPublisher: IEventPublisher,
+  ) {}
+
+  async execute(dto: CreateTransactionDto) {
+    const transaction = Transaction.create(dto);
+    await this.addTransactionRepository.execute(transaction);
+    // ... resto da implementação
+  }
+}
+
+// Use Case de atualização utiliza Save Repository
+export class MarkTransactionLateUseCase {
+  constructor(
+    private readonly getTransactionRepository: IGetTransactionRepository,
+    private readonly saveTransactionRepository: ISaveTransactionRepository,
+    private readonly eventPublisher: IEventPublisher,
+  ) {}
+
+  async execute(dto: MarkTransactionLateDto) {
+    const transaction = await this.getTransactionRepository.execute(dto.transactionId);
+    transaction.markAsLate();
+    await this.saveTransactionRepository.execute(transaction);
+    // ... resto da implementação
+  }
+}
+```
+
+#### Vantagens da Separação
+
+1. **Clareza de Intenção**: Fica explícito se a operação é de criação ou atualização
+2. **Single Responsibility**: Cada interface tem uma responsabilidade específica
+3. **Testabilidade**: Stubs de teste mais específicos e focados
+4. **Evolução**: Permite implementações diferentes para criação vs atualização se necessário
+5. **Documentação Viva**: O código serve como documentação da intenção arquitetural
+
+#### Repositórios de Consulta
+
+- **IGetRepository**: Interface para busca de agregados específicos
+  - Exemplo: `IGetTransactionRepository`, `IGetAccountRepository`
+  - Retorna entidades completas do domínio
+  
+- **IFindRepository**: Interface para consultas específicas de negócio
+  - Exemplo: `IFindOverdueScheduledTransactionsRepository`
+  - Pode retornar listas filtradas ou consultas complexas
+
+Esta organização garante que cada repository tenha uma responsabilidade bem definida e que os Use Cases expressem claramente suas intenções através dos tipos de repository que utilizam.
+
+### 7.2. Diretrizes Importantes
+
+#### ⚠️ EVITAR: Repositories de Mutação Específicos
+
+Não crie repositories para operações específicas de domínio:
+
+```typescript
+// ❌ EVITAR - Repository muito específico
+export interface IMarkTransactionLateRepository {
+  execute(transactionId: string): Promise<Either<RepositoryError, void>>;
+}
+
+// ❌ EVITAR - Repository assumindo lógica de domínio
+export interface ICancelScheduledTransactionRepository {
+  execute(transactionId: string, reason: string): Promise<Either<RepositoryError, void>>;
+}
+```
+
+**Problemas:**
+- Explosão de interfaces para cada operação específica
+- Repository assumindo responsabilidades de domínio
+- Violação do Single Responsibility Principle
+- Dificuldade de manutenção e teste
+
+#### ✅ PREFERIR: Use Cases Específicos + Repositories Genéricos
+
+```typescript
+// ✅ CORRETO: Use Case específico + Repositories genéricos
+export class MarkTransactionLateUseCase {
+  constructor(
+    private readonly getTransactionRepository: IGetTransactionRepository,
+    private readonly saveTransactionRepository: ISaveTransactionRepository,
+  ) {}
+
+  async execute(dto: MarkTransactionLateDto) {
+    const transaction = await this.getTransactionRepository.execute(dto.transactionId);
+    transaction.markAsLate(); // ← Regra de domínio na entidade
+    await this.saveTransactionRepository.execute(transaction); // ← Persistência genérica
+  }
+}
+```
+
+**Vantagens:**
+- Repositories focados apenas em persistência
+- Use Cases expressam claramente a operação de negócio
+- Entidades encapsulam as regras de domínio
+- Maior reutilização e menor acoplamento
 
 ## 8. Unit of Work Pattern
 

@@ -1,14 +1,16 @@
 import { IEventPublisher } from '../../contracts/events/IEventPublisher';
-import { IMarkTransactionLateRepository } from '../../contracts/repositories/transaction/IMarkTransactionLateRepository';
+import { IFindOverdueScheduledTransactionsRepository } from '../../contracts/repositories/transaction/IFindOverdueScheduledTransactionsRepository';
+import { ISaveTransactionRepository } from '../../contracts/repositories/transaction/ISaveTransactionRepository';
 
 export class TransactionSchedulerService {
   constructor(
-    private readonly repository: IMarkTransactionLateRepository,
+    private readonly findOverdueRepository: IFindOverdueScheduledTransactionsRepository,
+    private readonly saveTransactionRepository: ISaveTransactionRepository,
     private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async processLateTransactions(date: Date = new Date()) {
-    const overdueResult = await this.repository.findOverdue(date);
+    const overdueResult = await this.findOverdueRepository.execute(date);
     if (overdueResult.hasError || !overdueResult.data) {
       return { processed: [] as string[] };
     }
@@ -18,7 +20,7 @@ export class TransactionSchedulerService {
       const markResult = tx.markAsLate();
       if (markResult.hasError) continue;
 
-      const saveResult = await this.repository.save(tx);
+      const saveResult = await this.saveTransactionRepository.execute(tx);
       if (saveResult.hasError) continue;
 
       const events = tx.getEvents();

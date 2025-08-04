@@ -3,7 +3,7 @@ import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-obje
 import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { CancelScheduledTransactionRepositoryStub } from '../../../shared/tests/stubs/CancelScheduledTransactionRepositoryStub';
+import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
 import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
@@ -36,7 +36,7 @@ const createTransaction = (status: TransactionStatusEnum, dateOffset = 1) => {
 describe('CancelScheduledTransactionUseCase', () => {
   let useCase: CancelScheduledTransactionUseCase;
   let getTransactionRepo: GetTransactionRepositoryStub;
-  let cancelRepo: CancelScheduledTransactionRepositoryStub;
+  let cancelRepo: SaveTransactionRepositoryStub;
   let authService: BudgetAuthorizationServiceStub;
   let eventPublisher: EventPublisherStub;
   let transaction: Transaction;
@@ -45,7 +45,7 @@ describe('CancelScheduledTransactionUseCase', () => {
 
   beforeEach(() => {
     getTransactionRepo = new GetTransactionRepositoryStub();
-    cancelRepo = new CancelScheduledTransactionRepositoryStub();
+    cancelRepo = new SaveTransactionRepositoryStub();
     authService = new BudgetAuthorizationServiceStub();
     eventPublisher = new EventPublisherStub();
     useCase = new CancelScheduledTransactionUseCase(

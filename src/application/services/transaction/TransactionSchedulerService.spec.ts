@@ -4,18 +4,26 @@ import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-object
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
 import { EventPublisherStub } from '../../shared/tests/stubs/EventPublisherStub';
-import { MarkTransactionLateRepositoryStub } from '../../shared/tests/stubs/MarkTransactionLateRepositoryStub';
+import { FindOverdueScheduledTransactionsRepositoryStub } from '../../shared/tests/stubs/FindOverdueScheduledTransactionsRepositoryStub';
+import { SaveTransactionRepositoryStub } from '../../shared/tests/stubs/SaveTransactionRepositoryStub';
 import { TransactionSchedulerService } from './TransactionSchedulerService';
 
 describe('TransactionSchedulerService', () => {
-  let repository: MarkTransactionLateRepositoryStub;
+  let findOverdueRepository: FindOverdueScheduledTransactionsRepositoryStub;
+  let saveTransactionRepository: SaveTransactionRepositoryStub;
   let eventPublisher: EventPublisherStub;
   let service: TransactionSchedulerService;
 
   beforeEach(() => {
-    repository = new MarkTransactionLateRepositoryStub();
+    findOverdueRepository =
+      new FindOverdueScheduledTransactionsRepositoryStub();
+    saveTransactionRepository = new SaveTransactionRepositoryStub();
     eventPublisher = new EventPublisherStub();
-    service = new TransactionSchedulerService(repository, eventPublisher);
+    service = new TransactionSchedulerService(
+      findOverdueRepository,
+      saveTransactionRepository,
+      eventPublisher,
+    );
   });
 
   it('should mark overdue transactions as late', async () => {
@@ -29,13 +37,13 @@ describe('TransactionSchedulerService', () => {
       accountId: EntityId.create().value!.id,
       status: TransactionStatusEnum.SCHEDULED,
     }).data!;
-    repository.overdueTransactions = [tx];
+    findOverdueRepository.transactions = [tx];
 
     const result = await service.processLateTransactions();
 
     expect(result.processed).toHaveLength(1);
     expect(tx.status).toBe(TransactionStatusEnum.LATE);
-    expect(repository.saveCalls).toHaveLength(1);
+    expect(saveTransactionRepository.executeCalls).toHaveLength(1);
     expect(eventPublisher.publishManyCalls).toHaveLength(1);
   });
 
@@ -50,12 +58,12 @@ describe('TransactionSchedulerService', () => {
       accountId: EntityId.create().value!.id,
       status: TransactionStatusEnum.SCHEDULED,
     }).data!;
-    repository.overdueTransactions = [tx];
+    findOverdueRepository.transactions = [tx];
 
     const result = await service.processLateTransactions();
 
     expect(result.processed).toHaveLength(0);
-    expect(repository.saveCalls).toHaveLength(0);
+    expect(saveTransactionRepository.executeCalls).toHaveLength(0);
     expect(eventPublisher.publishManyCalls).toHaveLength(0);
   });
 });

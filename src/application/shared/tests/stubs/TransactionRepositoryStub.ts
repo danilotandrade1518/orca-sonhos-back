@@ -1,14 +1,16 @@
 import { Either } from '@either';
 
-import { ITransactionRepository } from '../../../contracts/repositories/transaction/ITransactionRepository';
+import { IHasTransactionByEnvelopeRepository } from '../../../contracts/repositories/transaction/IHasTransactionByEnvelopeRepository';
 import { RepositoryError } from '../../errors/RepositoryError';
 
-export class TransactionRepositoryStub implements ITransactionRepository {
+export class TransactionRepositoryStub
+  implements IHasTransactionByEnvelopeRepository
+{
   public shouldFail = false;
   public hasTransactionsResult = false;
   public hasByEnvelopeCalls: string[] = [];
 
-  async hasByEnvelope(
+  async hasTransactionByEnvelope(
     envelopeId: string,
   ): Promise<Either<RepositoryError, boolean>> {
     this.hasByEnvelopeCalls.push(envelopeId);

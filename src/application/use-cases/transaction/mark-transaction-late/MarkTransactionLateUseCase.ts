@@ -3,7 +3,7 @@ import { Either } from '@either';
 
 import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
-import { IMarkTransactionLateRepository } from '../../../contracts/repositories/transaction/IMarkTransactionLateRepository';
+import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
@@ -15,7 +15,7 @@ export class MarkTransactionLateUseCase
 {
   constructor(
     private readonly getTransactionRepository: IGetTransactionRepository,
-    private readonly markTransactionLateRepository: IMarkTransactionLateRepository,
+    private readonly saveTransactionRepository: ISaveTransactionRepository,
     private readonly eventPublisher: IEventPublisher,
   ) {}
 
@@ -38,7 +38,7 @@ export class MarkTransactionLateUseCase
     }
 
     const saveResult =
-      await this.markTransactionLateRepository.save(transaction);
+      await this.saveTransactionRepository.execute(transaction);
     if (saveResult.hasError) {
       return Either.errors<ApplicationError | DomainError, UseCaseResponse>([
         new TransactionPersistenceFailedError(),

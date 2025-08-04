@@ -2,7 +2,7 @@ import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
 import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
-import { ICancelScheduledTransactionRepository } from '../../../contracts/repositories/transaction/ICancelScheduledTransactionRepository';
+import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
@@ -17,7 +17,7 @@ export class CancelScheduledTransactionUseCase
 {
   constructor(
     private readonly getTransactionRepository: IGetTransactionRepository,
-    private readonly cancelRepository: ICancelScheduledTransactionRepository,
+    private readonly saveTransactionRepository: ISaveTransactionRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
     private readonly eventPublisher: IEventPublisher,
   ) {}
@@ -55,7 +55,8 @@ export class CancelScheduledTransactionUseCase
       return Either.errors(cancelResult.errors);
     }
 
-    const repoResult = await this.cancelRepository.execute(transaction);
+    const repoResult =
+      await this.saveTransactionRepository.execute(transaction);
     if (repoResult.hasError) {
       return Either.error(new TransactionPersistenceFailedError());
     }
