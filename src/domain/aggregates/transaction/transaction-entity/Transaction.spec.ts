@@ -1,5 +1,9 @@
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
+import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
+import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExecutedError';
+import { InvalidCancellationReasonError } from '../errors/InvalidCancellationReasonError';
+import { TransactionCannotBeCancelledError } from '../errors/TransactionCannotBeCancelledError';
 import { TransactionStatusEnum } from '../value-objects/transaction-status/TransactionStatus';
 import { TransactionTypeEnum } from '../value-objects/transaction-type/TransactionType';
 import {
@@ -14,7 +18,7 @@ describe('Transaction', () => {
     description: 'Supermercado ABC',
     amount: 5000, // R$ 50,00 em centavos
     type: TransactionTypeEnum.EXPENSE,
-    transactionDate: new Date('2024-01-15'),
+    transactionDate: new Date(Date.now() + 86400000),
     categoryId: '123e4567-e89b-12d3-a456-426614174000',
     budgetId: '123e4567-e89b-12d3-a456-426614174001',
     accountId: '123e4567-e89b-12d3-a456-426614174002',
@@ -179,23 +183,25 @@ describe('Transaction', () => {
         status: TransactionStatusEnum.SCHEDULED,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel('Mudança de planos');
 
       expect(result.hasError).toBe(false);
       expect(transaction.status).toBe(TransactionStatusEnum.CANCELLED);
       expect(transaction.isCancelled).toBe(true);
+      expect(transaction.cancellationReason).toBe('Mudança de planos');
+      expect(transaction.cancelledAt).toBeInstanceOf(Date);
     });
 
-    it('deve cancelar uma transação em atraso', () => {
+    it('deve retornar erro ao tentar cancelar transação em atraso', () => {
       const transaction = Transaction.create({
         ...validTransactionData,
         status: TransactionStatusEnum.OVERDUE,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel('reason');
 
-      expect(result.hasError).toBe(false);
-      expect(transaction.status).toBe(TransactionStatusEnum.CANCELLED);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(TransactionNotScheduledError);
     });
 
     it('deve retornar erro ao tentar cancelar transação completada', () => {
@@ -204,12 +210,38 @@ describe('Transaction', () => {
         status: TransactionStatusEnum.COMPLETED,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel('reason');
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(TransactionBusinessRuleError);
-      expect(result.errors[0].message).toBe(
-        'Cannot cancel a completed transaction',
+      expect(result.errors[0]).toBeInstanceOf(TransactionAlreadyExecutedError);
+    });
+
+    it('deve retornar erro quando motivo for inválido', () => {
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.cancel('  ');
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidCancellationReasonError);
+    });
+
+    it('deve retornar erro quando data de execução não for futura', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 1);
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.cancel('reason');
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(
+        TransactionCannotBeCancelledError,
       );
     });
   });
@@ -287,6 +319,71 @@ describe('Transaction', () => {
     });
   });
 
+  describe('markAsLate', () => {
+    it('deve marcar transação agendada como late', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(false);
+      expect(transaction.status).toBe(TransactionStatusEnum.LATE);
+      expect(transaction.isLate).toBe(true);
+    });
+
+    it('deve ser idempotente se já estiver late', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.LATE,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(false);
+      expect(transaction.status).toBe(TransactionStatusEnum.LATE);
+    });
+
+    it('deve retornar erro se status diferente de scheduled', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.COMPLETED,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(true);
+    });
+
+    it('deve retornar erro se data nao passou', () => {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 2);
+
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: futureDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+
+      const result = transaction.markAsLate();
+
+      expect(result.hasError).toBe(true);
+    });
+  });
+
   describe('status helpers', () => {
     it('deve identificar corretamente transação agendada', () => {
       const transaction = Transaction.create({
@@ -333,6 +430,19 @@ describe('Transaction', () => {
       expect(transaction.isCancelled).toBe(true);
       expect(transaction.isScheduled).toBe(false);
       expect(transaction.isCompleted).toBe(false);
+      expect(transaction.isOverdue).toBe(false);
+    });
+
+    it('deve identificar corretamente transação late', () => {
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        status: TransactionStatusEnum.LATE,
+      }).data!;
+
+      expect(transaction.isLate).toBe(true);
+      expect(transaction.isScheduled).toBe(false);
+      expect(transaction.isCompleted).toBe(false);
+      expect(transaction.isCancelled).toBe(false);
       expect(transaction.isOverdue).toBe(false);
     });
   });
@@ -500,6 +610,7 @@ describe('Transaction', () => {
         TransactionStatusEnum.COMPLETED,
         TransactionStatusEnum.OVERDUE,
         TransactionStatusEnum.CANCELLED,
+        TransactionStatusEnum.LATE,
       ];
 
       statuses.forEach((status) => {
@@ -834,13 +945,10 @@ describe('Transaction', () => {
         status: TransactionStatusEnum.CANCELLED,
       }).data!;
 
-      const result = transaction.cancel();
+      const result = transaction.cancel('reason');
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(TransactionBusinessRuleError);
-      expect(result.errors[0].message).toBe(
-        'Cannot cancel a cancelled transaction',
-      );
+      expect(result.errors[0]).toBeInstanceOf(TransactionNotScheduledError);
     });
 
     it('deve atualizar updatedAt quando cancelar', () => {
@@ -849,12 +957,10 @@ describe('Transaction', () => {
         status: TransactionStatusEnum.SCHEDULED,
       }).data!;
       const originalUpdatedAt = transaction.updatedAt;
-
-      // Aguardar um pouco para garantir diferença de tempo
-      setTimeout(() => {
-        transaction.cancel();
-        expect(transaction.updatedAt).not.toEqual(originalUpdatedAt);
-      }, 1);
+      transaction.cancel('reason');
+      expect(transaction.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        originalUpdatedAt.getTime(),
+      );
     });
   });
 
@@ -1023,6 +1129,7 @@ describe('Transaction', () => {
           { name: 'isCompleted', value: transaction.isCompleted },
           { name: 'isOverdue', value: transaction.isOverdue },
           { name: 'isCancelled', value: transaction.isCancelled },
+          { name: 'isLate', value: transaction.isLate },
         ];
 
         const trueHelpers = helpers.filter((h) => h.value);
@@ -1041,6 +1148,9 @@ describe('Transaction', () => {
             break;
           case TransactionStatusEnum.CANCELLED:
             expect(transaction.isCancelled).toBe(true);
+            break;
+          case TransactionStatusEnum.LATE:
+            expect(transaction.isLate).toBe(true);
             break;
         }
       });
@@ -1073,6 +1183,22 @@ describe('Transaction', () => {
       const events = transaction.getEvents();
       expect(events).toHaveLength(1);
       expect(events[0].constructor.name).toBe('TransactionDeletedEvent');
+    });
+
+    it('deve emitir TransactionMarkedAsLateEvent ao marcar como late', () => {
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 2);
+      const transaction = Transaction.create({
+        ...validTransactionData,
+        transactionDate: pastDate,
+        status: TransactionStatusEnum.SCHEDULED,
+      }).data!;
+      transaction.clearEvents();
+
+      transaction.markAsLate();
+
+      const events = transaction.getEvents();
+      expect(events[0].constructor.name).toBe('TransactionMarkedAsLateEvent');
     });
 
     it('deve emitir TransactionUpdatedEvent ao atualizar propriedades relevantes', () => {
@@ -1109,7 +1235,7 @@ describe('Transaction', () => {
 
       // Cancelar transação
       const newTransaction = Transaction.create(validTransactionData).data!;
-      newTransaction.cancel();
+      newTransaction.cancel('reason');
       expect(newTransaction.id).toBeDefined();
       expect(newTransaction.createdAt).toBeInstanceOf(Date);
       expect(newTransaction.budgetId).toBe(validTransactionData.budgetId);

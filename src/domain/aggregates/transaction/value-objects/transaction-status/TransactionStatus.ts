@@ -9,6 +9,7 @@ export enum TransactionStatusEnum {
   COMPLETED = 'COMPLETED',
   OVERDUE = 'OVERDUE',
   CANCELLED = 'CANCELLED',
+  LATE = 'LATE',
 }
 
 export type TransactionStatusValue = {

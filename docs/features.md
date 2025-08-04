@@ -14,8 +14,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 📊 **Resumo Geral**
 
 - **Total de Use Cases**: 60
-- **Implementados**: 25 (42%)
-- **Não Implementados**: 35 (58%)
+- **Implementados**: 26 (43%)
+- **Não Implementados**: 34 (57%)
 
 ---
 
@@ -385,8 +385,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC012: Reconciliar Saldo
-**Status**: Não Implementado
+### ✅ UC012: Reconciliar Saldo
+**Status**: Implementado
+**Arquivo**: [`ReconcileAccountUseCase.ts`](../src/application/use-cases/account/reconcile-account/ReconcileAccountUseCase.ts)
 
 **Descrição**: Permite ajustar o saldo da conta baseado no extrato bancário real.
 
@@ -408,9 +409,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Diferença deve ser justificada
-- ❌ Transação de ajuste é claramente identificada
-- ❌ Histórico de reconciliações é mantido
+- ✅ Diferença deve ser justificada
+- ✅ Transação de ajuste é claramente identificada
+- ✅ Histórico de reconciliações é mantido
 
 **Domain Events**:
 - `AccountReconciledEvent`
@@ -630,8 +631,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC019: Cancelar Transação Agendada
-**Status**: Não Implementado
+### ✅ UC019: Cancelar Transação Agendada
+**Status**: Implementado
+**Arquivo**: [`CancelScheduledTransactionUseCase.ts`](../src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.ts)
 
 **Descrição**: Permite cancelar uma transação que foi agendada para o futuro.
 
@@ -653,9 +655,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Apenas transações não executadas podem ser canceladas
-- ❌ Motivo do cancelamento é registrado
-- ❌ Histórico preserva o cancelamento
+- ✅ Apenas transações não executadas podem ser canceladas
+- ✅ Motivo do cancelamento é registrado
+- ✅ Histórico preserva o cancelamento
 
 **Domain Events**:
 - `ScheduledTransactionCancelledEvent`
@@ -1096,8 +1098,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC032: Reabrir Fatura
-**Status**: Não Implementado
+### ✅ UC032: Reabrir Fatura
+**Status**: Implementado
+**Arquivo**: [`ReopenCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/reopen-bill/ReopenCreditCardBillUseCase.ts)
 
 **Descrição**: Reabre uma fatura que foi marcada como paga por engano.
 
@@ -1119,9 +1122,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Apenas faturas recentes podem ser reabertas
-- ❌ Transação de pagamento é estornada
-- ❌ Justificativa é obrigatória
+- ✅ Apenas faturas recentes podem ser reabertas
+- ✅ Transação de pagamento é estornada
+- ✅ Justificativa é obrigatória
 
 **Domain Events**:
 - `CreditCardBillReopenedEvent`
@@ -1497,8 +1500,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 25 use cases (42%)
-- **❌ Não Implementados**: 35 use cases (58%)
+- **✅ Implementados**: 26 use cases (43%)
+- **❌ Não Implementados**: 34 use cases (57%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 

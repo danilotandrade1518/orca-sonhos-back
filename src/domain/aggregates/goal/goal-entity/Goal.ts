@@ -14,6 +14,9 @@ import { GoalUpdatedEvent } from '../events/GoalUpdatedEvent';
 import { GoalDeletedEvent } from '../events/GoalDeletedEvent';
 import { GoalAmountAddedEvent } from '../events/GoalAmountAddedEvent';
 import { GoalAchievedEvent } from '../events/GoalAchievedEvent';
+import { AutomaticContribution } from '../value-objects/automatic-contribution/AutomaticContribution';
+import { AutomaticContributionConfiguredEvent } from '../events/AutomaticContributionConfiguredEvent';
+import { AutomaticContributionAlreadyConfiguredError } from '../errors/AutomaticContributionAlreadyConfiguredError';
 
 export interface CreateGoalDTO {
   name: string;
@@ -58,6 +61,7 @@ export class Goal extends AggregateRoot implements IEntity {
     private _deadline: Date | undefined,
     private readonly _budgetId: EntityId,
     private _accumulatedAmount: MoneyVo,
+    private _automaticContribution?: AutomaticContribution,
     existingId?: EntityId,
   ) {
     super();
@@ -84,6 +88,9 @@ export class Goal extends AggregateRoot implements IEntity {
   }
   get budgetId(): string {
     return this._budgetId.value?.id ?? '';
+  }
+  get automaticContribution(): AutomaticContribution | undefined {
+    return this._automaticContribution;
   }
   get createdAt(): Date {
     return this._createdAt;
@@ -192,6 +199,35 @@ export class Goal extends AggregateRoot implements IEntity {
     return Either.success();
   }
 
+  configureAutomaticContribution(
+    contribution: AutomaticContribution,
+  ): Either<DomainError, void> {
+    if (this._isDeleted)
+      return Either.error<DomainError, void>(new GoalAlreadyDeletedError());
+    if (this.isAchieved())
+      return Either.error<DomainError, void>(new GoalAlreadyAchievedError());
+
+    if (this._automaticContribution)
+      return Either.error(new AutomaticContributionAlreadyConfiguredError());
+
+    if (contribution.hasError) return Either.errors(contribution.errors);
+
+    this._automaticContribution = contribution;
+    this._updatedAt = new Date();
+
+    this.addEvent(
+      new AutomaticContributionConfiguredEvent(
+        this.id,
+        contribution.value!.amount,
+        contribution.value!.frequency.value!.type,
+        contribution.value!.frequency.value!.executionDay,
+        contribution.value!.frequency.value!.nextExecutionDate,
+      ),
+    );
+
+    return Either.success();
+  }
+
   delete(): Either<DomainError, void> {
     if (this._isDeleted)
       return Either.error<DomainError, void>(new GoalAlreadyDeletedError());
@@ -261,6 +297,7 @@ export class Goal extends AggregateRoot implements IEntity {
       data.deadline,
       budgetIdVo,
       accumulatedAmountVo,
+      undefined,
     );
 
     goal.addEvent(
@@ -305,6 +342,7 @@ export class Goal extends AggregateRoot implements IEntity {
       data.deadline,
       budgetIdVo,
       accumulatedAmountVo,
+      undefined,
       idVo,
     );
 

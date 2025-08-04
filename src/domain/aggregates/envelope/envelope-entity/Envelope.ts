@@ -10,8 +10,12 @@ import { EnvelopeAlreadyDeletedError } from '../errors/EnvelopeAlreadyDeletedErr
 import { EnvelopeHasBalanceError } from '../errors/EnvelopeHasBalanceError';
 import { EnvelopeHasPendingContributionsError } from '../errors/EnvelopeHasPendingContributionsError';
 import { EnvelopeHasTransactionsError } from '../errors/EnvelopeHasTransactionsError';
-import { EnvelopeDeletedEvent } from '../events/EnvelopeDeletedEvent';
+import { InactiveEnvelopeError } from '../errors/InactiveEnvelopeError';
+import { EnvelopeContributionMadeEvent } from '../events/EnvelopeContributionMadeEvent';
 import { EnvelopeDeactivatedEvent } from '../events/EnvelopeDeactivatedEvent';
+import { EnvelopeDeletedEvent } from '../events/EnvelopeDeletedEvent';
+import { ContributionSource } from '../value-objects/ContributionSource';
+import { EnvelopeContribution } from '../value-objects/EnvelopeContribution';
 import { EnvelopeStatus } from './EnvelopeStatus';
 
 export interface RestoreEnvelopeDTO {
@@ -20,10 +24,16 @@ export interface RestoreEnvelopeDTO {
   budgetId: string;
   balance: number;
   status: EnvelopeStatus;
-  hasTransactions?: boolean;
-  hasPendingContributions?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  hasPendingContributions?: boolean;
+  hasTransactions?: boolean;
+}
+
+export interface CreateEnvelopeDTO {
+  budgetId: string;
+  name: string;
+  balance: number;
 }
 
 export class Envelope extends AggregateRoot implements IEntity {
@@ -37,20 +47,21 @@ export class Envelope extends AggregateRoot implements IEntity {
   private _hasPendingContributions = false;
   private readonly _budgetId: EntityId;
   private _name: EntityName;
+  private _contributions: EnvelopeContribution[] = [];
 
   private constructor(
-    name: EntityName,
     budgetId: EntityId,
+    name: EntityName,
     balance: MoneyVo,
-    status: EnvelopeStatus,
+    status?: EnvelopeStatus,
     existingId?: EntityId,
   ) {
     super();
+    this._id = existingId || EntityId.create();
     this._name = name;
     this._budgetId = budgetId;
     this._balance = balance;
-    this._status = status;
-    this._id = existingId || EntityId.create();
+    this._status = status || EnvelopeStatus.ACTIVE;
     this._createdAt = new Date();
     this._updatedAt = new Date();
   }
@@ -79,6 +90,9 @@ export class Envelope extends AggregateRoot implements IEntity {
   get isDeleted(): boolean {
     return this._isDeleted;
   }
+  get contributions(): EnvelopeContribution[] {
+    return this._contributions;
+  }
 
   setHasTransactions(value: boolean): void {
     this._hasTransactions = value;
@@ -96,7 +110,9 @@ export class Envelope extends AggregateRoot implements IEntity {
       return Either.error<DomainError, void>(new EnvelopeHasBalanceError());
 
     if (this._hasTransactions)
-      return Either.error<DomainError, void>(new EnvelopeHasTransactionsError());
+      return Either.error<DomainError, void>(
+        new EnvelopeHasTransactionsError(),
+      );
 
     if (this._hasPendingContributions)
       return Either.error<DomainError, void>(
@@ -121,6 +137,65 @@ export class Envelope extends AggregateRoot implements IEntity {
     return Either.success();
   }
 
+  makeContribution(params: {
+    amount: number;
+    source: ContributionSource;
+    description?: string;
+  }): Either<DomainError, EnvelopeContribution> {
+    if (this._status !== EnvelopeStatus.ACTIVE) {
+      return Either.error(new InactiveEnvelopeError());
+    }
+
+    const contribution = EnvelopeContribution.create({
+      amount: params.amount,
+      source: params.source,
+      description: params.description,
+    });
+
+    if (contribution.hasError) {
+      return Either.errors(contribution.errors);
+    }
+
+    const newBalance = MoneyVo.create(this.balance + params.amount);
+    if (newBalance.hasError) {
+      return Either.errors(newBalance.errors);
+    }
+
+    this._balance = newBalance;
+    this._updatedAt = new Date();
+    this._contributions.push(contribution);
+
+    this.addEvent(
+      new EnvelopeContributionMadeEvent(
+        this.id,
+        params.amount,
+        this.balance,
+        params.source,
+        params.description,
+      ),
+    );
+
+    return Either.success(contribution);
+  }
+
+  static create(data: CreateEnvelopeDTO): Either<DomainError, Envelope> {
+    const nameVo = EntityName.create(data.name);
+    const budgetIdVo = EntityId.fromString(data.budgetId);
+    const balanceVo = MoneyVo.create(data.balance);
+
+    const either = new Either<DomainError, Envelope>();
+
+    if (nameVo.hasError) either.addManyErrors(nameVo.errors);
+    if (budgetIdVo.hasError) either.addManyErrors(budgetIdVo.errors);
+    if (balanceVo.hasError) either.addManyErrors(balanceVo.errors);
+
+    if (either.hasError) return either;
+
+    const envelope = new Envelope(budgetIdVo, nameVo, balanceVo);
+    either.setData(envelope);
+    return either;
+  }
+
   static restore(data: RestoreEnvelopeDTO): Either<DomainError, Envelope> {
     const either = new Either<DomainError, Envelope>();
 
@@ -137,8 +212,8 @@ export class Envelope extends AggregateRoot implements IEntity {
     if (either.hasError) return either;
 
     const envelope = new Envelope(
-      nameVo,
       budgetIdVo,
+      nameVo,
       balanceVo,
       data.status,
       idVo,

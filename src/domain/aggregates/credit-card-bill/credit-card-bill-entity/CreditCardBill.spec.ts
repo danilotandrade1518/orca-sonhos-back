@@ -6,6 +6,9 @@ import { CreditCardBillCreatedEvent } from '../events/CreditCardBillCreatedEvent
 import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
 import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
 import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
+import { ReopeningJustification } from '../value-objects/reopening-justification/ReopeningJustification';
+import { CreditCardBillNotPaidError } from '../errors/CreditCardBillNotPaidError';
+import { ReopeningPeriodExpiredError } from '../errors/ReopeningPeriodExpiredError';
 import { CreateCreditCardBillDTO, CreditCardBill } from './CreditCardBill';
 
 const makeValidDTO = (
@@ -209,13 +212,36 @@ describe('CreditCardBill', () => {
       it('deve reabrir fatura paga e emitir evento', () => {
         bill.markAsPaid();
         bill.clearEvents();
-        const result = bill.reopen();
+        const justification = ReopeningJustification.create(
+          'Pagamento incorreto',
+        );
+        const result = bill.reopen(justification);
         expect(result.hasError).toBe(false);
         expect(bill.status).toBe(BillStatusEnum.OPEN);
         expect(bill.paidAt).toBeUndefined();
         const events = bill.getEvents();
         expect(events).toHaveLength(1);
         expect(events[0]).toBeInstanceOf(CreditCardBillReopenedEvent);
+      });
+
+      it('deve retornar erro se fatura não estiver paga', () => {
+        const justification = ReopeningJustification.create('Reabrir teste');
+        const result = bill.reopen(justification);
+        expect(result.hasError).toBe(true);
+        expect(result.errors[0]).toEqual(new CreditCardBillNotPaidError());
+      });
+
+      it('deve retornar erro se prazo de 30 dias expirou', () => {
+        bill.markAsPaid();
+        const pastDate = new Date();
+        pastDate.setDate(pastDate.getDate() - 40);
+        Object.defineProperty(bill, '_paidAt', { value: pastDate });
+        const justification = ReopeningJustification.create(
+          'Motivo qualquer válido',
+        );
+        const result = bill.reopen(justification);
+        expect(result.hasError).toBe(true);
+        expect(result.errors[0]).toEqual(new ReopeningPeriodExpiredError());
       });
     });
   });
