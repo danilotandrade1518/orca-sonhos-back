@@ -1,7 +1,7 @@
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IGetGoalByIdRepository } from '../../../contracts/repositories/goal/IGetGoalByIdRepository';
+import { IGetGoalRepository } from '../../../contracts/repositories/goal/IGetGoalRepository';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { GoalNotFoundError } from '../../../shared/errors/GoalNotFoundError';
 import { IUseCase, UseCaseResponse } from './../../../shared/IUseCase';
@@ -10,7 +10,7 @@ import { UpdateGoalDto } from './UpdateGoalDto';
 
 export class UpdateGoalUseCase implements IUseCase<UpdateGoalDto> {
   constructor(
-    private readonly getGoalByIdRepository: IGetGoalByIdRepository,
+    private readonly getGoalByIdRepository: IGetGoalRepository,
     private readonly saveGoalRepository: ISaveGoalRepository,
   ) {}
 

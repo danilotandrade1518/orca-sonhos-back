@@ -1,4 +1,4 @@
-import { IGetGoalByIdRepository } from '@application/contracts/repositories/goal/IGetGoalByIdRepository';
+import { IGetGoalRepository } from '@application/contracts/repositories/goal/IGetGoalRepository';
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Goal } from '@domain/aggregates/goal/goal-entity/Goal';
 import { Either } from '@either';
@@ -6,7 +6,7 @@ import { Either } from '@either';
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { GoalMapper, GoalRow } from '../../../mappers/goal/GoalMapper';
 
-export class GetGoalByIdRepository implements IGetGoalByIdRepository {
+export class GetGoalByIdRepository implements IGetGoalRepository {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(id: string): Promise<Either<RepositoryError, Goal | null>> {

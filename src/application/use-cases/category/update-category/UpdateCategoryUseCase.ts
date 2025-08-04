@@ -5,13 +5,13 @@ import { DomainError } from '../../../../domain/shared/DomainError';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { CategoryNotFoundError } from '../../../shared/errors/CategoryNotFoundError';
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
-import { IGetCategoryByIdRepository } from '../../../contracts/repositories/category/IGetCategoryByIdRepository';
+import { IGetCategoryRepository } from '../../../contracts/repositories/category/IGetCategoryRepository';
 import { ISaveCategoryRepository } from '../../../contracts/repositories/category/ISaveCategoryRepository';
 import { UpdateCategoryDto } from './UpdateCategoryDto';
 
 export class UpdateCategoryUseCase implements IUseCase<UpdateCategoryDto> {
   constructor(
-    private readonly getCategoryByIdRepository: IGetCategoryByIdRepository,
+    private readonly getCategoryByIdRepository: IGetCategoryRepository,
     private readonly saveCategoryRepository: ISaveCategoryRepository,
   ) {}
 

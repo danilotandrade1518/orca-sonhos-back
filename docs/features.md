@@ -13,9 +13,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📊 **Resumo Geral**
 
-- **Total de Use Cases**: 52
-- **Implementados**: 24 (46%)
-- **Não Implementados**: 28 (54%)
+- **Total de Use Cases**: 51
+- **Implementados**: 24 (47%)
+- **Não Implementados**: 27 (53%)
 
 ---
 
@@ -781,37 +781,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Domain Events**:
 - `CategoryDeletedEvent`
-
----
-
-### ❌ UC025: Personalizar Categorias por Orçamento
-**Status**: Não Implementado
-
-**Descrição**: Permite customizar categorias específicas para cada orçamento.
-
-**Ator**: Usuário administrador do orçamento
-
-**Precondições**:
-- Usuário logado no sistema
-- Usuário é administrador do orçamento
-
-**Fluxo Principal**:
-1. Usuário acessa configurações do orçamento
-2. Seleciona "Personalizar Categorias"
-3. Escolhe categorias padrão a incluir
-4. Cria categorias específicas
-5. Define ordem de exibição
-6. Confirma configuração
-7. Sistema aplica personalização
-8. Sistema exibe confirmação
-
-**Critérios de Aceitação**:
-- ❌ Categorias padrão ficam disponíveis
-- ❌ Categorias específicas só aparecem no orçamento
-- ❌ Configuração é por orçamento
-
-**Domain Events**:
-- `BudgetCategoriesCustomizedEvent`
 
 ---
 

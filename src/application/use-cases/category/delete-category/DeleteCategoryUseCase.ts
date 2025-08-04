@@ -6,14 +6,14 @@ import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { CategoryDeletionFailedError } from '../../../shared/errors/CategoryDeletionFailedError';
 import { CategoryNotFoundError } from '../../../shared/errors/CategoryNotFoundError';
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
-import { IGetCategoryByIdRepository } from '../../../contracts/repositories/category/IGetCategoryByIdRepository';
+import { IGetCategoryRepository } from '../../../contracts/repositories/category/IGetCategoryRepository';
 import { ICheckCategoryDependenciesRepository } from '../../../contracts/repositories/category/ICheckCategoryDependenciesRepository';
 import { IDeleteCategoryRepository } from '../../../contracts/repositories/category/IDeleteCategoryRepository';
 import { DeleteCategoryDto } from './DeleteCategoryDto';
 
 export class DeleteCategoryUseCase implements IUseCase<DeleteCategoryDto> {
   constructor(
-    private readonly getCategoryByIdRepository: IGetCategoryByIdRepository,
+    private readonly getCategoryByIdRepository: IGetCategoryRepository,
     private readonly checkCategoryDependenciesRepository: ICheckCategoryDependenciesRepository,
     private readonly deleteCategoryRepository: IDeleteCategoryRepository,
   ) {}

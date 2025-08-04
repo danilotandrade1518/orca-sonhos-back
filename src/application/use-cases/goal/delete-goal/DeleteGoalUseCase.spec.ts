@@ -2,14 +2,14 @@ import { Goal } from '../../../../domain/aggregates/goal/goal-entity/Goal';
 import { GoalNotFoundError } from '../../../shared/errors/GoalNotFoundError';
 import { GoalDeletionFailedError } from '../../../shared/errors/GoalDeletionFailedError';
 import { Either } from '../../../../shared/core/either';
-import { IGetGoalByIdRepository } from '../../../contracts/repositories/goal/IGetGoalByIdRepository';
+import { IGetGoalRepository } from '../../../contracts/repositories/goal/IGetGoalRepository';
 import { IDeleteGoalRepository } from '../../../contracts/repositories/goal/IDeleteGoalRepository';
 import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { DeleteGoalDto } from './DeleteGoalDto';
 import { DeleteGoalUseCase } from './DeleteGoalUseCase';
 import { GoalAlreadyDeletedError } from '../../../../domain/aggregates/goal/errors/GoalAlreadyDeletedError';
 
-class GetGoalByIdRepositoryStub implements IGetGoalByIdRepository {
+class GetGoalByIdRepositoryStub implements IGetGoalRepository {
   private goal: Goal | null = null;
 
   setGoal(goal: Goal | null) {
@@ -22,7 +22,7 @@ class GetGoalByIdRepositoryStub implements IGetGoalByIdRepository {
   }
 }
 
-class GetGoalByIdRepositoryFailureStub implements IGetGoalByIdRepository {
+class GetGoalByIdRepositoryFailureStub implements IGetGoalRepository {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async execute(_id: string): Promise<Either<RepositoryError, Goal | null>> {
     return Either.error<RepositoryError, Goal | null>(

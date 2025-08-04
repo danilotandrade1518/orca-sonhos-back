@@ -4,14 +4,14 @@ import { Either } from '../../../../shared/core/either';
 
 import { CategoryNotFoundError } from '../../../shared/errors/CategoryNotFoundError';
 import { RepositoryError } from '../../../shared/errors/RepositoryError';
-import { IGetCategoryByIdRepository } from '../../../contracts/repositories/category/IGetCategoryByIdRepository';
+import { IGetCategoryRepository } from '../../../contracts/repositories/category/IGetCategoryRepository';
 import { ISaveCategoryRepository } from '../../../contracts/repositories/category/ISaveCategoryRepository';
 import { UpdateCategoryUseCase } from './UpdateCategoryUseCase';
 import { UpdateCategoryDto } from './UpdateCategoryDto';
 
 describe('UpdateCategoryUseCase', () => {
   let updateCategoryUseCase: UpdateCategoryUseCase;
-  let mockGetCategoryByIdRepository: jest.Mocked<IGetCategoryByIdRepository>;
+  let mockGetCategoryByIdRepository: jest.Mocked<IGetCategoryRepository>;
   let mockSaveCategoryRepository: jest.Mocked<ISaveCategoryRepository>;
 
   beforeEach(() => {

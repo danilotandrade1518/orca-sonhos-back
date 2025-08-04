@@ -61,7 +61,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
   - **50%**: Necessidades (moradia, alimentação, transporte)
   - **30%**: Estilo de vida (lazer, assinaturas)
   - **20%**: Prioridades financeiras (reserva, investimento, dívidas)
-- Podem ser personalizadas por orçamento.
+- Usuários podem criar suas próprias categorias conforme necessidade.
 
 ### 🎯 Metas (Objetivos Financeiros)
 - São o coração do OrçaSonhos: **transformar sonhos em planos de ação financeiros.**

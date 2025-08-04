@@ -1,4 +1,4 @@
-import { IGetCategoryByIdRepository } from '@application/contracts/repositories/category/IGetCategoryByIdRepository';
+import { IGetCategoryRepository } from '@application/contracts/repositories/category/IGetCategoryRepository';
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Category } from '@domain/aggregates/category/category-entity/Category';
 import { Either } from '@either';
@@ -9,7 +9,7 @@ import {
   CategoryRow,
 } from '../../../mappers/category/CategoryMapper';
 
-export class GetCategoryByIdRepository implements IGetCategoryByIdRepository {
+export class GetCategoryByIdRepository implements IGetCategoryRepository {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(id: string): Promise<Either<RepositoryError, Category | null>> {

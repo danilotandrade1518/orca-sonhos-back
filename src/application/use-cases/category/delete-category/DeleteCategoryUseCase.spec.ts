@@ -4,7 +4,7 @@ import { Either } from '../../../../shared/core/either';
 
 import { CategoryNotFoundError } from '../../../shared/errors/CategoryNotFoundError';
 import { CategoryDeletionFailedError } from '../../../shared/errors/CategoryDeletionFailedError';
-import { IGetCategoryByIdRepository } from '../../../contracts/repositories/category/IGetCategoryByIdRepository';
+import { IGetCategoryRepository } from '../../../contracts/repositories/category/IGetCategoryRepository';
 import { ICheckCategoryDependenciesRepository } from '../../../contracts/repositories/category/ICheckCategoryDependenciesRepository';
 import { IDeleteCategoryRepository } from '../../../contracts/repositories/category/IDeleteCategoryRepository';
 import { DeleteCategoryUseCase } from './DeleteCategoryUseCase';
@@ -12,7 +12,7 @@ import { DeleteCategoryDto } from './DeleteCategoryDto';
 
 describe('DeleteCategoryUseCase', () => {
   let deleteCategoryUseCase: DeleteCategoryUseCase;
-  let mockGetCategoryByIdRepository: jest.Mocked<IGetCategoryByIdRepository>;
+  let mockGetCategoryByIdRepository: jest.Mocked<IGetCategoryRepository>;
   let mockCheckCategoryDependenciesRepository: jest.Mocked<ICheckCategoryDependenciesRepository>;
   let mockDeleteCategoryRepository: jest.Mocked<IDeleteCategoryRepository>;
 

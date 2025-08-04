@@ -1,10 +1,10 @@
 import { Goal } from '@domain/aggregates/goal/goal-entity/Goal';
 import { Either } from '@either';
 
-import { IGetGoalByIdRepository } from '../../../contracts/repositories/goal/IGetGoalByIdRepository';
+import { IGetGoalRepository } from '../../../contracts/repositories/goal/IGetGoalRepository';
 import { RepositoryError } from '../../errors/RepositoryError';
 
-export class GetGoalByIdRepositoryStub implements IGetGoalByIdRepository {
+export class GetGoalByIdRepositoryStub implements IGetGoalRepository {
   public shouldFail = false;
   public shouldReturnNull = false;
   public executeCalls: string[] = [];
