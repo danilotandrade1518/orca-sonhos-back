@@ -8,7 +8,9 @@ export type ReconciliationJustificationValue = {
   justification: string;
 };
 
-export class ReconciliationJustification implements IValueObject<ReconciliationJustificationValue> {
+export class ReconciliationJustification
+  implements IValueObject<ReconciliationJustificationValue>
+{
   private either = new Either<DomainError, ReconciliationJustificationValue>();
   private static readonly MIN_LENGTH = 10;
   private static readonly MAX_LENGTH = 500;

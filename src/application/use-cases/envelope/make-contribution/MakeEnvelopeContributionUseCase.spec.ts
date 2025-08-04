@@ -3,13 +3,12 @@ import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/accoun
 import { Envelope } from '@domain/aggregates/envelope/envelope-entity/Envelope';
 import { ContributionSource } from '@domain/aggregates/envelope/value-objects/ContributionSource';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
-import { Either } from '@either';
 
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
+import { EnvelopeRepositoryStub } from '../../../shared/tests/stubs/EnvelopeRepositoryStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { SaveAccountRepositoryStub } from '../../../shared/tests/stubs/SaveAccountRepositoryStub';
-import { EnvelopeRepositoryStub } from '../../../shared/tests/stubs/EnvelopeRepositoryStub';
 import { MakeEnvelopeContributionDto } from './MakeEnvelopeContributionDto';
 import { MakeEnvelopeContributionUseCase } from './MakeEnvelopeContributionUseCase';
 
@@ -25,8 +24,7 @@ const makeAccount = (budgetId: string) => {
 };
 
 const makeEnvelope = (budgetId: string) => {
-  const result = Envelope.create({ budgetId, name: 'Env' });
-  if (result.hasError) throw new Error('invalid envelope');
+  const result = Envelope.create({ budgetId, name: 'Env', balance: 100 });
   return result.data!;
 };
 
@@ -59,7 +57,7 @@ describe('MakeEnvelopeContributionUseCase', () => {
     };
     const result = await sut.execute(dto);
     expect(result.hasError).toBe(false);
-    expect(envelope.balance).toBe(100);
+    expect(envelope.balance).toBe(200);
     expect(account.balance).toBe(900);
     expect(publisher.publishManyCalls.length).toBe(1);
   });

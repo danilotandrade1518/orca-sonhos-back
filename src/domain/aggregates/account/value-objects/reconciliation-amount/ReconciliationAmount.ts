@@ -8,7 +8,9 @@ export type ReconciliationAmountValue = {
   amount: number;
 };
 
-export class ReconciliationAmount implements IValueObject<ReconciliationAmountValue> {
+export class ReconciliationAmount
+  implements IValueObject<ReconciliationAmountValue>
+{
   private either = new Either<DomainError, ReconciliationAmountValue>();
 
   private constructor(private _amount: number) {
@@ -32,11 +34,18 @@ export class ReconciliationAmount implements IValueObject<ReconciliationAmountVa
   }
 
   equals(vo: this): boolean {
-    return vo instanceof ReconciliationAmount && vo.value?.amount === this.value?.amount;
+    return (
+      vo instanceof ReconciliationAmount &&
+      vo.value?.amount === this.value?.amount
+    );
   }
 
   private validate() {
-    if (typeof this._amount !== 'number' || isNaN(this._amount) || !isFinite(this._amount)) {
+    if (
+      typeof this._amount !== 'number' ||
+      isNaN(this._amount) ||
+      !isFinite(this._amount)
+    ) {
       this.either.addError(new InvalidReconciliationAmountError(this._amount));
       return;
     }

@@ -11,7 +11,6 @@ export class CancelScheduledTransactionRepositoryStub
   public executeCalls: Transaction[] = [];
 
   async execute(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     transaction: Transaction,
   ): Promise<Either<RepositoryError, void>> {
     this.executeCalls.push(transaction);

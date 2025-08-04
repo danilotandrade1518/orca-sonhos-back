@@ -15,7 +15,9 @@ export class EnvelopeRepositoryStub implements IEnvelopeRepository {
     if (this.shouldFail) {
       return Either.error(new RepositoryError('fail'));
     }
-    return Either.success(this.envelope && this.envelope.id === id ? this.envelope : null);
+    return Either.success(
+      this.envelope && this.envelope.id === id ? this.envelope : null,
+    );
   }
 
   async save(_envelope: Envelope): Promise<Either<RepositoryError, void>> {

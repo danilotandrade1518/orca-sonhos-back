@@ -28,13 +28,14 @@ export class ReopenCreditCardBillUseCase
       dto.creditCardBillId,
     );
 
-    if (billResult.hasError)
-      return Either.errors(billResult.errors);
+    if (billResult.hasError) return Either.errors(billResult.errors);
 
     const bill = billResult.data;
     if (!bill) return Either.error(new CreditCardBillNotFoundError());
 
-    const cardResult = await this.getCreditCardRepository.execute(bill.creditCardId);
+    const cardResult = await this.getCreditCardRepository.execute(
+      bill.creditCardId,
+    );
     if (cardResult.hasError) return Either.errors(cardResult.errors);
     const card = cardResult.data;
     if (!card) return Either.error(new CreditCardBillNotFoundError());
@@ -47,8 +48,7 @@ export class ReopenCreditCardBillUseCase
     if (!auth.data) return Either.error(new InsufficientPermissionsError());
 
     const justificationVo = ReopeningJustification.create(dto.justification);
-    if (justificationVo.hasError)
-      return Either.errors(justificationVo.errors);
+    if (justificationVo.hasError) return Either.errors(justificationVo.errors);
 
     const reopenResult = bill.reopen(justificationVo);
     if (reopenResult.hasError) return Either.errors(reopenResult.errors);

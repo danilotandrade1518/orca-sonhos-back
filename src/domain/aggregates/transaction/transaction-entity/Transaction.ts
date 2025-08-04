@@ -6,12 +6,16 @@ import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
 import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
+import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExecutedError';
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
+import { TransactionCannotBeCancelledError } from '../errors/TransactionCannotBeCancelledError';
+import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
+import { ScheduledTransactionCancelledEvent } from '../events/ScheduledTransactionCancelledEvent';
 import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
 import { TransactionDeletedEvent } from '../events/TransactionDeletedEvent';
-import { ScheduledTransactionCancelledEvent } from '../events/ScheduledTransactionCancelledEvent';
-import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
 import { TransactionMarkedAsLateEvent } from '../events/TransactionMarkedAsLateEvent';
+import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
+import { CancellationReason } from '../value-objects/cancellation-reason/CancellationReason';
 import { TransactionDescription } from '../value-objects/transaction-description/TransactionDescription';
 import {
   TransactionStatus,
@@ -21,11 +25,6 @@ import {
   TransactionType,
   TransactionTypeEnum,
 } from '../value-objects/transaction-type/TransactionType';
-import { CancellationReason } from '../value-objects/cancellation-reason/CancellationReason';
-import { InvalidCancellationReasonError } from '../errors/InvalidCancellationReasonError';
-import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
-import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExecutedError';
-import { TransactionCannotBeCancelledError } from '../errors/TransactionCannotBeCancelledError';
 
 export interface CreateTransactionDTO {
   description: string;
@@ -224,13 +223,17 @@ export class Transaction extends AggregateRoot implements IEntity {
 
     if (!this.isScheduled)
       return Either.error<DomainError, void>(
-        new TransactionBusinessRuleError('Only scheduled transactions can be marked as late'),
+        new TransactionBusinessRuleError(
+          'Only scheduled transactions can be marked as late',
+        ),
       );
 
     const now = new Date();
     if (this._transactionDate >= now)
       return Either.error<DomainError, void>(
-        new TransactionBusinessRuleError('Cannot mark future transaction as late'),
+        new TransactionBusinessRuleError(
+          'Cannot mark future transaction as late',
+        ),
       );
 
     this._status = TransactionStatus.create(TransactionStatusEnum.LATE);

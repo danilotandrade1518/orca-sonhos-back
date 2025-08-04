@@ -3,7 +3,9 @@ import { ReopeningJustification } from './ReopeningJustification';
 
 describe('ReopeningJustification', () => {
   it('deve criar uma justificativa válida', () => {
-    const vo = ReopeningJustification.create('Pagamento efetuado incorretamente');
+    const vo = ReopeningJustification.create(
+      'Pagamento efetuado incorretamente',
+    );
     expect(vo.hasError).toBe(false);
     expect(vo.value?.justification).toBe('Pagamento efetuado incorretamente');
   });

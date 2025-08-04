@@ -240,7 +240,9 @@ describe('Transaction', () => {
       const result = transaction.cancel('reason');
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(TransactionCannotBeCancelledError);
+      expect(result.errors[0]).toBeInstanceOf(
+        TransactionCannotBeCancelledError,
+      );
     });
   });
 

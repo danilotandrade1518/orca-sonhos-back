@@ -1,4 +1,3 @@
-import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
@@ -39,7 +38,9 @@ export class CancelScheduledTransactionUseCase
       return Either.error(new InsufficientPermissionsError());
     }
 
-    const txResult = await this.getTransactionRepository.execute(dto.transactionId);
+    const txResult = await this.getTransactionRepository.execute(
+      dto.transactionId,
+    );
     if (txResult.hasError || !txResult.data) {
       return Either.error(new ScheduledTransactionNotFoundError());
     }

@@ -1,14 +1,17 @@
-import { CreditCard } from '@domain/aggregates/credit-card/credit-card-entity/CreditCard';
-import { CreditCardBill, RestoreCreditCardBillDTO } from '@domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill';
-import { BillStatusEnum } from '@domain/aggregates/credit-card-bill/value-objects/bill-status/BillStatus';
-import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { CreditCardBillNotFoundError } from '@application/shared/errors/CreditCardBillNotFoundError';
-import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
 import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { GetCreditCardBillRepositoryStub } from '@application/shared/tests/stubs/GetCreditCardBillRepositoryStub';
-import { ReopenCreditCardBillRepositoryStub } from '@application/shared/tests/stubs/ReopenCreditCardBillRepositoryStub';
 import { GetCreditCardRepositoryStub } from '@application/shared/tests/stubs/GetCreditCardRepositoryStub';
+import { ReopenCreditCardBillRepositoryStub } from '@application/shared/tests/stubs/ReopenCreditCardBillRepositoryStub';
+import {
+  CreditCardBill,
+  RestoreCreditCardBillDTO,
+} from '@domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill';
+import { BillStatusEnum } from '@domain/aggregates/credit-card-bill/value-objects/bill-status/BillStatus';
+import { CreditCard } from '@domain/aggregates/credit-card/credit-card-entity/CreditCard';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
+
 import { ReopenCreditCardBillDto } from './ReopenCreditCardBillDto';
 import { ReopenCreditCardBillUseCase } from './ReopenCreditCardBillUseCase';
 
@@ -101,9 +104,7 @@ describe('ReopenCreditCardBillUseCase', () => {
     const bill = makeBill();
     getBillRepo.setCreditCardBill(bill);
     const card = makeCard('other-budget');
-    jest
-      .spyOn(getCardRepo, 'execute')
-      .mockResolvedValue(Either.success(card));
+    jest.spyOn(getCardRepo, 'execute').mockResolvedValue(Either.success(card));
     authService.mockHasAccess = false;
 
     const dto: ReopenCreditCardBillDto = {

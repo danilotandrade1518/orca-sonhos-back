@@ -5,9 +5,12 @@ import { Transaction } from '@domain/aggregates/transaction/transaction-entity/T
 import { IReconcileAccountRepository } from '../../../contracts/repositories/account/IReconcileAccountRepository';
 import { RepositoryError } from '../../errors/RepositoryError';
 
-export class ReconcileAccountRepositoryStub implements IReconcileAccountRepository {
+export class ReconcileAccountRepositoryStub
+  implements IReconcileAccountRepository
+{
   public shouldFail = false;
-  public executeCalls: Array<{ account: Account; transaction: Transaction }> = [];
+  public executeCalls: Array<{ account: Account; transaction: Transaction }> =
+    [];
 
   async execute(params: {
     account: Account;

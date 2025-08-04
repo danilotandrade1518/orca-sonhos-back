@@ -208,12 +208,9 @@ export class Goal extends AggregateRoot implements IEntity {
       return Either.error<DomainError, void>(new GoalAlreadyAchievedError());
 
     if (this._automaticContribution)
-      return Either.error(
-        new AutomaticContributionAlreadyConfiguredError(),
-      );
+      return Either.error(new AutomaticContributionAlreadyConfiguredError());
 
-    if (contribution.hasError)
-      return Either.errors(contribution.errors);
+    if (contribution.hasError) return Either.errors(contribution.errors);
 
     this._automaticContribution = contribution;
     this._updatedAt = new Date();

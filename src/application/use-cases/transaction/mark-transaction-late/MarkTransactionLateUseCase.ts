@@ -1,4 +1,3 @@
-import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
@@ -11,7 +10,9 @@ import { TransactionPersistenceFailedError } from '../../../shared/errors/Transa
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { MarkTransactionLateDto } from './MarkTransactionLateDto';
 
-export class MarkTransactionLateUseCase implements IUseCase<MarkTransactionLateDto> {
+export class MarkTransactionLateUseCase
+  implements IUseCase<MarkTransactionLateDto>
+{
   constructor(
     private readonly getTransactionRepository: IGetTransactionRepository,
     private readonly markTransactionLateRepository: IMarkTransactionLateRepository,
@@ -19,7 +20,9 @@ export class MarkTransactionLateUseCase implements IUseCase<MarkTransactionLateD
   ) {}
 
   async execute(dto: MarkTransactionLateDto) {
-    const txResult = await this.getTransactionRepository.execute(dto.transactionId);
+    const txResult = await this.getTransactionRepository.execute(
+      dto.transactionId,
+    );
     if (txResult.hasError || !txResult.data) {
       return Either.errors<ApplicationError | DomainError, UseCaseResponse>([
         new TransactionNotFoundError(),
@@ -29,10 +32,13 @@ export class MarkTransactionLateUseCase implements IUseCase<MarkTransactionLateD
     const transaction = txResult.data;
     const markResult = transaction.markAsLate();
     if (markResult.hasError) {
-      return Either.errors<ApplicationError | DomainError, UseCaseResponse>(markResult.errors);
+      return Either.errors<ApplicationError | DomainError, UseCaseResponse>(
+        markResult.errors,
+      );
     }
 
-    const saveResult = await this.markTransactionLateRepository.save(transaction);
+    const saveResult =
+      await this.markTransactionLateRepository.save(transaction);
     if (saveResult.hasError) {
       return Either.errors<ApplicationError | DomainError, UseCaseResponse>([
         new TransactionPersistenceFailedError(),

@@ -4,13 +4,18 @@ import { Either } from '@either';
 import { IMarkTransactionLateRepository } from '../../../contracts/repositories/transaction/IMarkTransactionLateRepository';
 import { RepositoryError } from '../../errors/RepositoryError';
 
-export class MarkTransactionLateRepositoryStub implements IMarkTransactionLateRepository {
+export class MarkTransactionLateRepositoryStub
+  implements IMarkTransactionLateRepository
+{
   public overdueTransactions: Transaction[] = [];
   public shouldFail = false;
   public findCalls = 0;
   public saveCalls: Transaction[] = [];
 
-  async findOverdue(date: Date): Promise<Either<RepositoryError, Transaction[]>> {
+  async findOverdue(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    date: Date,
+  ): Promise<Either<RepositoryError, Transaction[]>> {
     this.findCalls++;
     if (this.shouldFail) {
       return Either.error(new RepositoryError('Repository failure'));

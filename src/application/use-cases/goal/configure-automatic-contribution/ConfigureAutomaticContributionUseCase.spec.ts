@@ -1,15 +1,16 @@
-import { Goal } from '@domain/aggregates/goal/goal-entity/Goal';
+import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { FrequencyType } from '@domain/aggregates/goal/enums/FrequencyType';
+import { Goal } from '@domain/aggregates/goal/goal-entity/Goal';
 
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
-import { GoalNotFoundError } from '../../../shared/errors/GoalNotFoundError';
 import { GoalNotActiveError } from '../../../shared/errors/GoalNotActiveError';
+import { GoalNotFoundError } from '../../../shared/errors/GoalNotFoundError';
 import { InvalidContributionAmountError } from '../../../shared/errors/InvalidContributionAmountError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
-import { GetGoalByIdRepositoryStub } from '../../../shared/tests/stubs/GetGoalByIdRepositoryStub';
-import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { ConfigureAutomaticContributionRepositoryStub } from '../../../shared/tests/stubs/ConfigureAutomaticContributionRepositoryStub';
+import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
+import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
+import { GetGoalByIdRepositoryStub } from '../../../shared/tests/stubs/GetGoalByIdRepositoryStub';
 import { ConfigureAutomaticContributionDto } from './ConfigureAutomaticContributionDto';
 import { ConfigureAutomaticContributionUseCase } from './ConfigureAutomaticContributionUseCase';
 
@@ -51,10 +52,9 @@ describe('ConfigureAutomaticContributionUseCase', () => {
     validGoal.clearEvents();
     getGoalRepository.mockGoal = validGoal;
     getAccountRepository.mockAccount = {
-      ...({} as any),
       id: accountId,
       budgetId: validGoal.budgetId,
-    } as any;
+    } as Account;
     budgetAuthService.mockHasAccess = true;
   });
 

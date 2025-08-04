@@ -4,7 +4,9 @@ import { Either } from '@either';
 import { IConfigureAutomaticContributionRepository } from '../../../contracts/repositories/goal/IConfigureAutomaticContributionRepository';
 import { RepositoryError } from '../../errors/RepositoryError';
 
-export class ConfigureAutomaticContributionRepositoryStub implements IConfigureAutomaticContributionRepository {
+export class ConfigureAutomaticContributionRepositoryStub
+  implements IConfigureAutomaticContributionRepository
+{
   public shouldFail = false;
   public executeCalls: Goal[] = [];
 

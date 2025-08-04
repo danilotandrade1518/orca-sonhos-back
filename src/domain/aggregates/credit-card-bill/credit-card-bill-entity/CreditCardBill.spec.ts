@@ -212,8 +212,9 @@ describe('CreditCardBill', () => {
       it('deve reabrir fatura paga e emitir evento', () => {
         bill.markAsPaid();
         bill.clearEvents();
-        const justification =
-          ReopeningJustification.create('Pagamento incorreto');
+        const justification = ReopeningJustification.create(
+          'Pagamento incorreto',
+        );
         const result = bill.reopen(justification);
         expect(result.hasError).toBe(false);
         expect(bill.status).toBe(BillStatusEnum.OPEN);
@@ -224,8 +225,7 @@ describe('CreditCardBill', () => {
       });
 
       it('deve retornar erro se fatura não estiver paga', () => {
-        const justification =
-          ReopeningJustification.create('Reabrir teste');
+        const justification = ReopeningJustification.create('Reabrir teste');
         const result = bill.reopen(justification);
         expect(result.hasError).toBe(true);
         expect(result.errors[0]).toEqual(new CreditCardBillNotPaidError());
@@ -236,8 +236,9 @@ describe('CreditCardBill', () => {
         const pastDate = new Date();
         pastDate.setDate(pastDate.getDate() - 40);
         Object.defineProperty(bill, '_paidAt', { value: pastDate });
-        const justification =
-          ReopeningJustification.create('Motivo qualquer válido');
+        const justification = ReopeningJustification.create(
+          'Motivo qualquer válido',
+        );
         const result = bill.reopen(justification);
         expect(result.hasError).toBe(true);
         expect(result.errors[0]).toEqual(new ReopeningPeriodExpiredError());

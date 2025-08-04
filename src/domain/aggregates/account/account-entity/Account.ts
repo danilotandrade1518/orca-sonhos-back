@@ -346,8 +346,7 @@ export class Account extends AggregateRoot implements IEntity {
     realBalance: number,
     justification: string,
   ): Either<DomainError, number> {
-    const justificationVo =
-      ReconciliationJustification.create(justification);
+    const justificationVo = ReconciliationJustification.create(justification);
     const balanceVo = BalanceVo.create(realBalance);
 
     const either = new Either<DomainError, number>();

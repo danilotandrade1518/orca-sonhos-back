@@ -1,26 +1,25 @@
-import { Goal } from '@domain/aggregates/goal/goal-entity/Goal';
+import { InvalidContributionAmountError as DomainInvalidContributionAmountError } from '@domain/aggregates/goal/errors/InvalidContributionAmountError';
+import { InvalidStartDateError as DomainInvalidStartDateError } from '@domain/aggregates/goal/errors/InvalidStartDateError';
 import { AutomaticContribution } from '@domain/aggregates/goal/value-objects/automatic-contribution/AutomaticContribution';
 import { ContributionFrequency } from '@domain/aggregates/goal/value-objects/contribution-frequency/ContributionFrequency';
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
 import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
-import { IGetGoalByIdRepository } from '../../../contracts/repositories/goal/IGetGoalByIdRepository';
 import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { IConfigureAutomaticContributionRepository } from '../../../contracts/repositories/goal/IConfigureAutomaticContributionRepository';
+import { IGetGoalByIdRepository } from '../../../contracts/repositories/goal/IGetGoalByIdRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
+import { AutomaticContributionAlreadyConfiguredError } from '../../../shared/errors/AutomaticContributionAlreadyConfiguredError';
+import { GoalNotActiveError } from '../../../shared/errors/GoalNotActiveError';
 import { GoalNotFoundError } from '../../../shared/errors/GoalNotFoundError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
-import { RepositoryError } from '../../../shared/errors/RepositoryError';
-import { GoalNotActiveError } from '../../../shared/errors/GoalNotActiveError';
 import { InvalidContributionAmountError } from '../../../shared/errors/InvalidContributionAmountError';
-import { InvalidContributionAmountError as DomainInvalidContributionAmountError } from '@domain/aggregates/goal/errors/InvalidContributionAmountError';
 import { InvalidFrequencyConfigurationError } from '../../../shared/errors/InvalidFrequencyConfigurationError';
 import { InvalidStartDateError } from '../../../shared/errors/InvalidStartDateError';
-import { InvalidStartDateError as DomainInvalidStartDateError } from '@domain/aggregates/goal/errors/InvalidStartDateError';
-import { AutomaticContributionAlreadyConfiguredError } from '../../../shared/errors/AutomaticContributionAlreadyConfiguredError';
+import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { ConfigureAutomaticContributionDto } from './ConfigureAutomaticContributionDto';
 

@@ -169,9 +169,7 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
     const now = Date.now();
     if (now - this._paidAt.getTime() > thirtyDaysMs)
-      return Either.error<DomainError, void>(
-        new ReopeningPeriodExpiredError(),
-      );
+      return Either.error<DomainError, void>(new ReopeningPeriodExpiredError());
 
     const openStatus = BillStatus.create(BillStatusEnum.OPEN);
     if (openStatus.hasError)

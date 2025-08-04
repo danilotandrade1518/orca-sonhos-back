@@ -26,7 +26,9 @@ export type AutomaticContributionProps = {
   isActive: boolean;
 };
 
-export class AutomaticContribution implements IValueObject<AutomaticContributionValue> {
+export class AutomaticContribution
+  implements IValueObject<AutomaticContributionValue>
+{
   private either = new Either<DomainError, AutomaticContributionValue>();
 
   private constructor(private props: AutomaticContributionProps) {

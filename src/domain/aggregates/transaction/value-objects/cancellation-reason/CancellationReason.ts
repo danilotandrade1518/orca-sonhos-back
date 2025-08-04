@@ -8,7 +8,9 @@ export type CancellationReasonValue = {
   reason: string;
 };
 
-export class CancellationReason implements IValueObject<CancellationReasonValue> {
+export class CancellationReason
+  implements IValueObject<CancellationReasonValue>
+{
   private either = new Either<DomainError, CancellationReasonValue>();
 
   private constructor(private _reason: string) {
@@ -28,7 +30,10 @@ export class CancellationReason implements IValueObject<CancellationReasonValue>
   }
 
   equals(vo: this): boolean {
-    return vo instanceof CancellationReason && vo.value?.reason === this.value?.reason;
+    return (
+      vo instanceof CancellationReason &&
+      vo.value?.reason === this.value?.reason
+    );
   }
 
   static create(reason: string): CancellationReason {

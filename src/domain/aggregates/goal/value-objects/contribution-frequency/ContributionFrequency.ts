@@ -19,7 +19,9 @@ export type ContributionFrequencyProps = {
   startDate: Date;
 };
 
-export class ContributionFrequency implements IValueObject<ContributionFrequencyValue> {
+export class ContributionFrequency
+  implements IValueObject<ContributionFrequencyValue>
+{
   private either = new Either<DomainError, ContributionFrequencyValue>();
 
   private constructor(private props: ContributionFrequencyProps) {

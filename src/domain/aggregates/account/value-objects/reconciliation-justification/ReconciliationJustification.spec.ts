@@ -3,7 +3,9 @@ import { InvalidReconciliationJustificationError } from '../../errors/InvalidRec
 
 describe('ReconciliationJustification', () => {
   it('should create valid justification', () => {
-    const vo = ReconciliationJustification.create('Ajuste devido a tarifa bancária');
+    const vo = ReconciliationJustification.create(
+      'Ajuste devido a tarifa bancária',
+    );
     expect(vo.hasError).toBe(false);
     expect(vo.value?.justification).toBe('Ajuste devido a tarifa bancária');
   });

@@ -23,7 +23,10 @@ export interface EnvelopeContributionValue {
 }
 
 export class EnvelopeContribution {
-  private readonly either = new Either<DomainError, EnvelopeContributionValue>();
+  private readonly either = new Either<
+    DomainError,
+    EnvelopeContributionValue
+  >();
 
   private constructor(private readonly props: EnvelopeContributionProps) {
     this.validate();

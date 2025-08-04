@@ -32,7 +32,9 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
   async execute(
     dto: ReconcileAccountDto,
   ): Promise<Either<DomainError | ApplicationError, { id: string }>> {
-    const accountResult = await this.getAccountRepository.execute(dto.accountId);
+    const accountResult = await this.getAccountRepository.execute(
+      dto.accountId,
+    );
 
     if (accountResult.hasError) {
       return Either.errors([new AccountRepositoryError()]);
@@ -59,7 +61,9 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
 
     const diff = dto.realBalance - (account.balance ?? 0);
     const diffVo = ReconciliationAmount.create(diff);
-    const justificationVo = ReconciliationJustification.create(dto.justification);
+    const justificationVo = ReconciliationJustification.create(
+      dto.justification,
+    );
 
     const either = new Either<DomainError | ApplicationError, { id: string }>();
     if (diffVo.hasError) either.addManyErrors(diffVo.errors);
@@ -105,10 +109,7 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
       return Either.errors([new TransactionPersistenceFailedError()]);
     }
 
-    const events = [
-      ...account.getEvents(),
-      ...transaction.getEvents(),
-    ];
+    const events = [...account.getEvents(), ...transaction.getEvents()];
     if (events.length > 0) {
       try {
         await this.eventPublisher.publishMany(events);
