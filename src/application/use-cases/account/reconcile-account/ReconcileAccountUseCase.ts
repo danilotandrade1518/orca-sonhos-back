@@ -57,8 +57,6 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
       return Either.errors([new InsufficientPermissionsError()]);
     }
 
-    const diff = dto.realBalance - (account.balance ?? 0);
-
     const reconcileResult = account.reconcile(
       dto.realBalance,
       dto.justification,
@@ -67,6 +65,8 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
     if (reconcileResult.hasError) {
       return Either.errors(reconcileResult.errors);
     }
+
+    const diff: number = reconcileResult.data!;
 
     const transactionResult = Transaction.create({
       description: 'Ajuste de Reconciliação',

@@ -2,7 +2,7 @@ import { CreditCardBillNotFoundError } from '@application/shared/errors/CreditCa
 import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { GetCreditCardBillRepositoryStub } from '@application/shared/tests/stubs/GetCreditCardBillRepositoryStub';
 import { GetCreditCardRepositoryStub } from '@application/shared/tests/stubs/GetCreditCardRepositoryStub';
-import { ReopenCreditCardBillRepositoryStub } from '@application/shared/tests/stubs/ReopenCreditCardBillRepositoryStub';
+import { SaveCreditCardBillRepositoryStub } from '@application/shared/tests/stubs/SaveCreditCardBillRepositoryStub';
 import {
   CreditCardBill,
   RestoreCreditCardBillDTO,
@@ -47,7 +47,7 @@ const makeCard = (budgetId: string): CreditCard => {
 describe('ReopenCreditCardBillUseCase', () => {
   let useCase: ReopenCreditCardBillUseCase;
   let getBillRepo: GetCreditCardBillRepositoryStub;
-  let saveBillRepo: ReopenCreditCardBillRepositoryStub;
+  let saveBillRepo: SaveCreditCardBillRepositoryStub;
   let getCardRepo: GetCreditCardRepositoryStub;
   let authService: BudgetAuthorizationServiceStub;
   const userId = EntityId.create().value!.id;
@@ -55,7 +55,7 @@ describe('ReopenCreditCardBillUseCase', () => {
 
   beforeEach(() => {
     getBillRepo = new GetCreditCardBillRepositoryStub();
-    saveBillRepo = new ReopenCreditCardBillRepositoryStub();
+    saveBillRepo = new SaveCreditCardBillRepositoryStub();
     getCardRepo = new GetCreditCardRepositoryStub();
     authService = new BudgetAuthorizationServiceStub();
     useCase = new ReopenCreditCardBillUseCase(

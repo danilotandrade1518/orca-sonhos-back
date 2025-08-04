@@ -8,18 +8,16 @@ import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { DeletedAccountError } from '../errors/DeletedAccountError';
 import { InsufficientBalanceError } from '../errors/InsufficientBalanceError';
 import { InvalidAccountDataError } from '../errors/InvalidAccountDataError';
+import { ReconciliationNotNecessaryError } from '../errors/ReconciliationNotNecessaryError';
 import { AccountDeletedEvent } from '../events/AccountDeletedEvent';
-import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
 import { AccountReconciledEvent } from '../events/AccountReconciledEvent';
+import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
 import {
   AccountType,
   AccountTypeEnum,
 } from '../value-objects/account-type/AccountType';
 import { EntityName } from './../../../shared/value-objects/entity-name/EntityName';
 import { InvalidTransferAmountError } from './errors/InvalidTransferAmountError';
-import { ReconciliationAmount } from '../value-objects/reconciliation-amount/ReconciliationAmount';
-import { ReconciliationJustification } from '../value-objects/reconciliation-justification/ReconciliationJustification';
-import { ReconciliationNotNecessaryError } from '../errors/ReconciliationNotNecessaryError';
 
 export interface CreateAccountDTO {
   name: string;
@@ -346,16 +344,14 @@ export class Account extends AggregateRoot implements IEntity {
     realBalance: number,
     justification: string,
   ): Either<DomainError, number> {
-    const justificationVo = ReconciliationJustification.create(justification);
     const balanceVo = BalanceVo.create(realBalance);
 
     const either = new Either<DomainError, number>();
-    if (justificationVo.hasError) either.addManyErrors(justificationVo.errors);
     if (balanceVo.hasError) either.addManyErrors(balanceVo.errors);
 
     const current = this._balance.value?.cents ?? 0;
     const diff = parseFloat((realBalance - current).toFixed(2));
-    const diffVo = ReconciliationAmount.create(diff);
+    const diffVo = BalanceVo.create(diff);
     if (diffVo.hasError) either.addManyErrors(diffVo.errors);
 
     if (either.hasError) return either;
@@ -376,7 +372,7 @@ export class Account extends AggregateRoot implements IEntity {
         current,
         realBalance,
         diff,
-        justificationVo.value!.justification,
+        justification,
       ),
     );
 

@@ -1,14 +1,15 @@
-import { Either } from '@either';
-import { IUseCase, UseCaseResponse } from '@application/shared/IUseCase';
+import { IGetCreditCardBillRepository } from '@application/contracts/repositories/credit-card-bill/IGetCreditCardBillRepository';
+import { ISaveCreditCardBillRepository } from '@application/contracts/repositories/credit-card-bill/ISaveCreditCardBillRepository';
+import { IGetCreditCardRepository } from '@application/contracts/repositories/credit-card/IGetCreditCardRepository';
+import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { CreditCardBillNotFoundError } from '@application/shared/errors/CreditCardBillNotFoundError';
 import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
-import { IGetCreditCardBillRepository } from '@application/contracts/repositories/credit-card-bill/IGetCreditCardBillRepository';
-import { IReopenCreditCardBillRepository } from '@application/contracts/repositories/credit-card-bill/IReopenCreditCardBillRepository';
-import { IGetCreditCardRepository } from '@application/contracts/repositories/credit-card/IGetCreditCardRepository';
-import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
-import { DomainError } from '@domain/shared/DomainError';
+import { IUseCase, UseCaseResponse } from '@application/shared/IUseCase';
 import { ReopeningJustification } from '@domain/aggregates/credit-card-bill/value-objects/reopening-justification/ReopeningJustification';
+import { DomainError } from '@domain/shared/DomainError';
+import { Either } from '@either';
+
 import { ReopenCreditCardBillDto } from './ReopenCreditCardBillDto';
 
 export class ReopenCreditCardBillUseCase
@@ -16,7 +17,7 @@ export class ReopenCreditCardBillUseCase
 {
   constructor(
     private readonly getCreditCardBillRepository: IGetCreditCardBillRepository,
-    private readonly reopenCreditCardBillRepository: IReopenCreditCardBillRepository,
+    private readonly saveCreditCardBillRepository: ISaveCreditCardBillRepository,
     private readonly getCreditCardRepository: IGetCreditCardRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
   ) {}
@@ -53,7 +54,7 @@ export class ReopenCreditCardBillUseCase
     const reopenResult = bill.reopen(justificationVo);
     if (reopenResult.hasError) return Either.errors(reopenResult.errors);
 
-    const saveResult = await this.reopenCreditCardBillRepository.execute(bill);
+    const saveResult = await this.saveCreditCardBillRepository.execute(bill);
     if (saveResult.hasError) return Either.errors(saveResult.errors);
 
     return Either.success({ id: bill.id });
