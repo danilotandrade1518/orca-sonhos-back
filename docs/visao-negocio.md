@@ -71,7 +71,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
   - Valor total necessário
   - Valor acumulado
   - Prazo desejado
-  - Aportes manuais ou automáticos
+  - Aportes manuais
 
 ### 💰 Envelopes (Orçamento Mensal por Categoria)
 - Definem limites de gastos por categoria.
@@ -170,7 +170,7 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - **Despesas fixas**: Contas de luz, água, internet com vencimento futuro  
 - **Planejamento de gastos**: Aniversários, viagens, compras planejadas
 - **Parcelas e financiamentos**: Controlar prestações futuras
-- **Gestão de metas**: Calcular quando objetivos serão atingidos com aportes futuros
+- **Gestão de metas**: Calcular quando objetivos serão atingidos com aportes manuais
 
 ### 📅 Transações Passadas - Casos de Uso
 - **Lançamento retroativo**: Cadastrar gastos esquecidos com data correta

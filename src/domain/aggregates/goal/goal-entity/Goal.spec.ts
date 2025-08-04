@@ -5,10 +5,6 @@ import { Goal } from './Goal';
 import { GoalAlreadyDeletedError } from '../errors/GoalAlreadyDeletedError';
 import { GoalAlreadyAchievedError } from '../errors/GoalAlreadyAchievedError';
 import { InvalidGoalAmountError } from '../errors/InvalidGoalAmountError';
-import { ContributionFrequency } from '../value-objects/contribution-frequency/ContributionFrequency';
-import { FrequencyType } from '../enums/FrequencyType';
-import { AutomaticContribution } from '../value-objects/automatic-contribution/AutomaticContribution';
-import { AutomaticContributionAlreadyConfiguredError } from '../errors/AutomaticContributionAlreadyConfiguredError';
 
 const validName = 'Minha Meta';
 const validTotal = 1000;
@@ -103,51 +99,6 @@ describe('Goal', () => {
       const result = goal.delete();
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(GoalAlreadyDeletedError);
-    });
-  });
-
-  describe('configureAutomaticContribution', () => {
-    const makeContribution = () => {
-      const freq = ContributionFrequency.create({
-        type: FrequencyType.MONTHLY,
-        executionDay: 5,
-        interval: 1,
-        startDate: new Date(Date.now() + 86400000),
-      });
-      return AutomaticContribution.create({
-        amount: 100,
-        frequency: freq,
-        sourceAccountId: EntityId.create().value!.id,
-        startDate: new Date(Date.now() + 86400000),
-        isActive: true,
-      });
-    };
-
-    it('deve configurar aporte se meta ativa', () => {
-      const goal = Goal.create(makeDTO()).data!;
-      const contrib = makeContribution();
-      const result = goal.configureAutomaticContribution(contrib);
-      expect(result.hasError).toBe(false);
-      expect(goal.automaticContribution).toBeDefined();
-    });
-
-    it('deve falhar se meta ja configurada', () => {
-      const goal = Goal.create(makeDTO()).data!;
-      const contrib = makeContribution();
-      goal.configureAutomaticContribution(contrib);
-      const result = goal.configureAutomaticContribution(contrib);
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(
-        AutomaticContributionAlreadyConfiguredError,
-      );
-    });
-
-    it('deve falhar se meta deletada', () => {
-      const goal = Goal.create(makeDTO()).data!;
-      goal.delete();
-      const contrib = makeContribution();
-      const result = goal.configureAutomaticContribution(contrib);
-      expect(result.hasError).toBe(true);
     });
   });
 });

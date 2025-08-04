@@ -13,9 +13,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📊 **Resumo Geral**
 
-- **Total de Use Cases**: 60
-- **Implementados**: 26 (43%)
-- **Não Implementados**: 34 (57%)
+- **Total de Use Cases**: 59
+- **Implementados**: 25 (42%)
+- **Não Implementados**: 34 (58%)
 
 ---
 
@@ -1299,39 +1299,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC038: Configurar Aporte Automático
-**Status**: Não Implementado
-
-**Descrição**: Configura aportes automáticos recorrentes para uma meta.
-
-**Ator**: Usuário com permissão no orçamento
-
-**Precondições**:
-- Usuário logado no sistema
-- Meta existe e está ativa
-- Conta origem está definida
-
-**Fluxo Principal**:
-1. Usuário seleciona meta
-2. Clica em "Configurar Aporte Automático"
-3. Define valor do aporte recorrente
-4. Seleciona frequência (mensal, quinzenal, etc.)
-5. Define data do primeiro aporte
-6. Confirma configuração
-7. Sistema valida dados
-8. Sistema programa aportes automáticos
-9. Sistema exibe confirmação
-
-**Critérios de Aceitação**:
-- ❌ Frequência pode ser configurável
-- ❌ Sistema executa automaticamente
-- ❌ Usuário é notificado de cada aporte
-
-**Domain Events**:
-- `AutomaticContributionConfiguredEvent`
-
----
-
 ## 💰 **Sistema de Envelopes**
 
 ### ❌ UC039: Criar Envelope
@@ -1500,14 +1467,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 26 use cases (43%)
-- **❌ Não Implementados**: 34 use cases (57%)
+- **✅ Implementados**: 25 use cases (42%)
+- **❌ Não Implementados**: 34 use cases (58%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
    - UC015: Agendar Transação Futura
-   - UC038: Configurar Aporte Automático
    - UC031: Marcar Fatura como Paga
 
 2. **Média Prioridade** (Features Importantes):
