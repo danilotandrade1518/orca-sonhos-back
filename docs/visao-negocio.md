@@ -1,6 +1,21 @@
-# 📘 Visão de Negócio – OrçaSonhos
+# 📘 Visão de Negócio – Or### 💡 Orçamento (Budget)
+- Representa um agrupamento de finanças com um objetivo ou perfil comum.
+- Pode ser **compartilhado** (ex: "Casa") ou **pessoal** (ex: "Viagem solo").
+- O usuário pode alternar entre diferentes orçamentos.
+- Cada orçamento tem:
+  - Categorias próprias (ou herdadas de presets)
+  - Transações
+  - Metas vinculadas
+  - Saldo e controle por envelope
 
-> Ferramenta de gestão financeira familiar simples, prática e com foco em metas reais.
+#### 👥 Compartilhamento Simplificado
+- **Orçamentos compartilhados** permitem colaboração entre usuários.
+- **Adição direta**: Qualquer participante pode adicionar outros usuários ao orçamento sem necessidade de convites ou aprovações.
+- **Acesso total**: Todo usuário adicionado tem acesso completo ao orçamento (sem níveis de permissão).
+- **Notificação**: Sistema notifica usuários quando são adicionados a novos orçamentos.
+- **Remoção**: Participantes podem ser removidos do orçamento (exceto o criador).
+
+### 💸 Transações (Receitas e Despesas) Ferramenta de gestão financeira familiar simples, prática e com foco em metas reais.
 
 ---
 
@@ -17,7 +32,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 - **Multi-orçamento:** Usuário pode criar orçamentos distintos (ex: orçamento pessoal, familiar, metas específicas).
 - **Foco em metas:** Tudo gira em torno de ajudar o usuário a atingir seus objetivos.
 - **Controle visual:** O usuário precisa ver claramente para onde vai seu dinheiro.
-- **Compartilhável:** Casais e famílias podem cooperar em orçamentos comuns.
+- **Compartilhável:** Casais e famílias podem cooperar em orçamentos comuns através de adição direta de usuários.
 - **Evolutivo:** Começa simples e pode crescer com o usuário.
 
 ---
@@ -149,8 +164,10 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 
 ### 👥 Gestão Familiar
 - Criar um orçamento compartilhado com parceiro(a)
+- Adicionar parceiro(a) diretamente ao orçamento (sem convites)
 - Definir metas comuns (ex: reforma da casa)
 - Controlar contas da casa, supermercado, etc.
+- Ambos participantes têm acesso total para lançar transações e gerenciar o orçamento
 
 ### 👤 Gestão Individual
 - Orçamento pessoal separado (ex: hobbies, presentes, cursos)
