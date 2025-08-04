@@ -71,7 +71,7 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 - [ ] Conta original deve existir
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar fatura do cartão
 3. Validar se fatura pode ser reaberta
 4. Validar prazo para reabertura
@@ -93,7 +93,7 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 - [ ] `CreditCardBillNotFoundError` - Fatura não encontrada
 - [ ] `CreditCardBillNotPaidError` - Fatura não está paga
 - [ ] `ReopeningPeriodExpiredError` - Prazo para reabertura expirado
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `InvalidReopeningJustificationError` - Justificativa inválida
 - [ ] `PaymentTransactionNotFoundError` - Transação de pagamento não encontrada
 
@@ -112,7 +112,7 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 - [ ] Falha por fatura não paga
 - [ ] Falha por prazo expirado
 - [ ] Falha por justificativa inválida
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 - [ ] Falha por transação não encontrada
 
 ## 🔗 **Dependencies**

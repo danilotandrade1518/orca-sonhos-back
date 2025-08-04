@@ -86,7 +86,7 @@ enum ContributionSource {
 - [ ] Se sourceTransactionId informado, transação deve existir
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar envelope no repositório
 3. Validar dados do aporte
 4. Verificar conta origem (se informada)
@@ -108,7 +108,7 @@ enum ContributionSource {
 ## 🚫 **Error Scenarios**
 - [ ] `EnvelopeNotFoundError` - Envelope não encontrado
 - [ ] `InactiveEnvelopeError` - Envelope inativo
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `InvalidContributionAmountError` - Valor inválido (zero ou negativo)
 - [ ] `InvalidContributionSourceError` - Origem inválida
 - [ ] `AccountNotFoundError` - Conta origem não encontrada
@@ -135,7 +135,7 @@ enum ContributionSource {
 - [ ] Falha por origem inválida
 - [ ] Falha por conta origem não encontrada
 - [ ] Falha por saldo insuficiente
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 
 ### **Integration Tests**
 - [ ] Saldo do envelope é persistido corretamente

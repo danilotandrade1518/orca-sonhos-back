@@ -79,7 +79,7 @@ EXECUTED = 'EXECUTED'
 - [ ] Conta deve ter saldo suficiente (para DEBIT)
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar transação agendada
 3. Validar se transação pode ser executada
 4. Validar data de execução
@@ -105,7 +105,7 @@ EXECUTED = 'EXECUTED'
 - [ ] `TransactionAlreadyExecutedError` - Transação já foi executada
 - [ ] `InvalidExecutionDateError` - Data de execução inválida
 - [ ] `InsufficientBalanceError` - Saldo insuficiente para débito
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `AccountNotFoundError` - Conta não encontrada
 
 ## 🧪 **Test Cases**
@@ -125,7 +125,7 @@ EXECUTED = 'EXECUTED'
 - [ ] Falha por transação já executada
 - [ ] Falha por data de execução inválida
 - [ ] Falha por saldo insuficiente
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 
 ## 🔗 **Dependencies**
 - ✅ Transaction aggregate (já implementado)

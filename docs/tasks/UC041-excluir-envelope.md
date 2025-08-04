@@ -72,7 +72,7 @@ enum EnvelopeStatus {
 - [ ] Se forceDelete=true, permitir desativação
 
 ### **Fluxo Principal - Exclusão Física**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar envelope no repositório
 3. Verificar se envelope pode ser excluído fisicamente:
    - Saldo deve ser zero
@@ -84,7 +84,7 @@ enum EnvelopeStatus {
 7. Retornar confirmação
 
 ### **Fluxo Alternativo - Desativação**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar envelope no repositório
 3. Se envelope possui saldo ou transações:
 4. Desativar envelope (domain)
@@ -102,7 +102,7 @@ enum EnvelopeStatus {
 
 ## 🚫 **Error Scenarios**
 - [ ] `EnvelopeNotFoundError` - Envelope não encontrado
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `EnvelopeHasBalanceError` - Envelope possui saldo (para exclusão física)
 - [ ] `EnvelopeHasTransactionsError` - Envelope possui transações (para exclusão física)
 - [ ] `EnvelopeHasPendingContributionsError` - Envelope possui contribuições futuras
@@ -122,7 +122,7 @@ enum EnvelopeStatus {
 - [ ] Desativação bem-sucedida de envelope com saldo
 - [ ] Desativação bem-sucedida de envelope com transações
 - [ ] Falha por envelope não encontrado
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 - [ ] Falha por tentar excluir envelope com saldo
 - [ ] Falha por tentar excluir envelope com transações
 - [ ] forceDelete=false usa lógica inteligente (física vs desativação)

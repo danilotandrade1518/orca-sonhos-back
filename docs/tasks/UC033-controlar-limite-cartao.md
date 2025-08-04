@@ -95,7 +95,7 @@ Monitorar automaticamente o uso do limite do cartão de crédito, enviando alert
 - [ ] Cartão deve ter limite configurado
 
 ### **Fluxo Principal (CheckLimitUsage)**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar cartão de crédito
 3. Calcular uso atual do limite
 4. Verificar thresholds configurados
@@ -103,7 +103,7 @@ Monitorar automaticamente o uso do limite do cartão de crédito, enviando alert
 6. Retornar status do limite
 
 ### **Fluxo Principal (ConfigureLimitAlerts)**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar cartão de crédito
 3. Validar thresholds informados
 4. Configurar alertas no cartão
@@ -120,7 +120,7 @@ Monitorar automaticamente o uso do limite do cartão de crédito, enviando alert
 
 ## 🚫 **Error Scenarios**
 - [ ] `CreditCardNotFoundError` - Cartão não encontrado
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `InvalidThresholdError` - Threshold inválido (fora de 0-100)
 - [ ] `ThresholdOrderError` - Critical menor que warning
 - [ ] `NoLimitConfiguredError` - Cartão sem limite configurado
@@ -145,7 +145,7 @@ Monitorar automaticamente o uso do limite do cartão de crédito, enviando alert
 - [ ] Configuração de alertas bem-sucedida
 - [ ] Falha por cartão não encontrado
 - [ ] Falha por thresholds inválidos
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 
 ## 🔗 **Dependencies**
 - ✅ CreditCard aggregate (já implementado)

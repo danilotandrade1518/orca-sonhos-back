@@ -75,7 +75,7 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 - [ ] Pelo menos um campo deve ser informado para atualização
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar envelope no repositório
 3. Validar dados informados para atualização
 4. Verificar unicidade do nome (se alterado)
@@ -95,7 +95,7 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 
 ## 🚫 **Error Scenarios**
 - [ ] `EnvelopeNotFoundError` - Envelope não encontrado
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `DuplicateEnvelopeNameError` - Nome já existe no orçamento
 - [ ] `InvalidEnvelopeNameError` - Nome inválido
 - [ ] `InvalidMonthlyAllocationError` - Alocação mensal inválida
@@ -122,7 +122,7 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 - [ ] Falha por alocação mensal inválida
 - [ ] Falha por categoria não encontrada
 - [ ] Falha por nenhum campo informado
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 
 ## 🔗 **Dependencies**
 - ✅ Envelope aggregate (criado em UC039)

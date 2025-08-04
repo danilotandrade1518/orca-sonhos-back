@@ -80,7 +80,7 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 - [ ] Diferença deve ser significativa (> 0.01)
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar conta no repositório
 3. Calcular diferença entre saldo atual e real
 4. Validar se reconciliação é necessária
@@ -97,7 +97,7 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 
 ## 🚫 **Error Scenarios**
 - [ ] `AccountNotFoundError` - Conta não encontrada
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `InvalidReconciliationAmountError` - Valor inválido
 - [ ] `ReconciliationNotNecessaryError` - Saldos já conferem
 - [ ] `AccountRepositoryError` - Erro de persistência
@@ -117,7 +117,7 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 - [ ] Reconciliação bem-sucedida com diferença positiva
 - [ ] Reconciliação bem-sucedida com diferença negativa
 - [ ] Falha por conta inexistente
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 - [ ] Falha por valor inválido
 - [ ] Falha por justificativa inválida
 

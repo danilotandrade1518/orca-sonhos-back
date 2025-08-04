@@ -91,7 +91,7 @@ PAID = 'PAID'
 - [ ] Fatura deve pertencer ao orçamento
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar fatura do cartão
 3. Validar se fatura pode ser paga
 4. Buscar conta de origem
@@ -112,7 +112,7 @@ PAID = 'PAID'
 ## 🚫 **Error Scenarios**
 - [ ] `CreditCardBillNotFoundError` - Fatura não encontrada
 - [ ] `CreditCardBillAlreadyPaidError` - Fatura já paga
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `InvalidPaymentAmountError` - Valor de pagamento inválido
 - [ ] `InvalidPaymentDateError` - Data de pagamento inválida
 - [ ] `InsufficientBalanceError` - Saldo insuficiente na conta
@@ -135,7 +135,7 @@ PAID = 'PAID'
 - [ ] Falha por valor inválido
 - [ ] Falha por data inválida
 - [ ] Falha por saldo insuficiente
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 
 ## 🔗 **Dependencies**
 - ✅ CreditCardBill aggregate (já implementado)

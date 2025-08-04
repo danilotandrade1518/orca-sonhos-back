@@ -13,9 +13,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📊 **Resumo Geral**
 
-- **Total de Use Cases**: 51
-- **Implementados**: 31 (61%)
-- **Não Implementados**: 20 (39%)
+- **Total de Use Cases**: 50
+- **Implementados**: 30 (60%)
+- **Não Implementados**: 20 (40%)
 
 ---
 
@@ -45,7 +45,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Critérios de Aceitação**:
 - ✅ Nome deve ter entre 2-100 caracteres
 - ✅ Tipo deve ser PERSONAL ou SHARED
-- ✅ Usuário automaticamente vira administrador
 - ✅ Orçamento criado deve aparecer na lista
 
 **Domain Events**:
@@ -59,24 +58,22 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Descrição**: Permite ao usuário alterar dados de um orçamento existente.
 
-**Ator**: Usuário com permissão de administrador
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
-- Usuário tem permissão no orçamento
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona orçamento
 2. Clica em "Editar"
 3. Modifica dados permitidos
 4. Confirma alteração
-5. Sistema valida permissões
-6. Sistema valida dados
-7. Sistema atualiza orçamento
-8. Sistema exibe confirmação
+5. Sistema valida dados
+6. Sistema atualiza orçamento
+7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ✅ Apenas administradores podem alterar
 - ✅ Nome deve ser único para o usuário
 - ✅ Alterações devem ser propagadas para participantes
 
@@ -90,26 +87,25 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Descrição**: Permite ao usuário compartilhar um orçamento com outros usuários.
 
-**Ator**: Usuário administrador do orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
-- Usuário é administrador do orçamento
+- Usuário tem acesso ao orçamento
 - Orçamento do tipo SHARED
 
 **Fluxo Principal**:
 1. Usuário acessa orçamento compartilhado
 2. Clica em "Compartilhar"
 3. Gera link de convite ou digita email
-4. Define permissões do convite
-5. Envia convite
-6. Sistema registra convite pendente
-7. Sistema notifica convidado
+4. Envia convite
+5. Sistema registra convite pendente
+6. Sistema notifica convidado
 
 **Critérios de Aceitação**:
 - ❌ Link de convite deve expirar em 7 dias
 - ❌ Convidado deve confirmar participação
-- ❌ Administrador pode cancelar convites
+- ❌ Usuário pode cancelar convites
 
 **Domain Events**:
 - `BudgetShareRequestCreatedEvent`
@@ -122,27 +118,25 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Descrição**: Adiciona um participante a um orçamento compartilhado.
 
-**Ator**: Usuário administrador do orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
-- Usuário é administrador do orçamento
+- Usuário tem acesso ao orçamento
 - Orçamento do tipo SHARED
 
 **Fluxo Principal**:
-1. Administrador acessa gestão de participantes
+1. Usuário acessa gestão de participantes
 2. Clica em "Adicionar Participante"
 3. Informa dados do novo participante
-4. Define permissões iniciais
-5. Confirma adição
-6. Sistema valida dados
-7. Sistema adiciona participante
-8. Sistema notifica novo participante
+4. Confirma adição
+5. Sistema valida dados
+6. Sistema adiciona participante
+7. Sistema notifica novo participante
 
 **Critérios de Aceitação**:
 - ✅ Participante não pode já estar no orçamento
-- ✅ Apenas administradores podem adicionar
-- ✅ Permissões padrão aplicadas automaticamente
+- ✅ Todo participante tem acesso total ao orçamento
 
 **Domain Events**:
 - `ParticipantAddedToBudgetEvent`
@@ -155,25 +149,24 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Descrição**: Remove um participante de um orçamento compartilhado.
 
-**Ator**: Usuário administrador do orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
-- Usuário é administrador do orçamento
+- Usuário tem acesso ao orçamento
 - Participante existe no orçamento
 
 **Fluxo Principal**:
-1. Administrador acessa lista de participantes
-2. Seleciona participante a remover
+1. Usuário acessa lista de participantes
+2. Seleciona participante
 3. Clica em "Remover"
 4. Confirma remoção
-5. Sistema valida permissões
+5. Sistema valida dados
 6. Sistema remove participante
-7. Sistema notifica participante removido
+7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
 - ✅ Não pode remover o criador do orçamento
-- ✅ Apenas administradores podem remover
 - ✅ Dados do participante são preservados no histórico
 
 **Domain Events**:
@@ -181,39 +174,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC006: Definir Permissões
-**Status**: Não Implementado
-
-**Descrição**: Define permissões específicas para participantes do orçamento.
-
-**Ator**: Usuário administrador do orçamento
-
-**Precondições**:
-- Usuário logado no sistema
-- Usuário é administrador do orçamento
-- Participante existe no orçamento
-
-**Fluxo Principal**:
-1. Administrador acessa gestão de participantes
-2. Seleciona participante
-3. Clica em "Definir Permissões"
-4. Configura permissões específicas
-5. Confirma alterações
-6. Sistema valida permissões
-7. Sistema atualiza permissões
-8. Sistema notifica participante
-
-**Critérios de Aceitação**:
-- ❌ Permissões incluem: visualizar, editar, administrar
-- ❌ Administrador sempre tem todas as permissões
-- ❌ Mudanças são aplicadas imediatamente
-
-**Domain Events**:
-- `ParticipantPermissionsUpdatedEvent`
-
----
-
-### ✅ UC007: Excluir Orçamento
+### ✅ UC006: Excluir Orçamento
 **Status**: Implementado  
 **Arquivo**: [`DeleteBudgetUseCase.ts`](../src/application/use-cases/budget/delete-budget/DeleteBudgetUseCase.ts)
 
@@ -233,7 +194,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 3. Sistema verifica dependências
 4. Sistema solicita confirmação
 5. Usuário confirma exclusão
-6. Sistema valida permissões
+6. Sistema valida propriedade
 7. Sistema remove orçamento
 8. Sistema exibe confirmação
 
@@ -248,15 +209,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-## 🏦 **Gestão de Contas**
+## 💰 **Gestão de Contas**
 
-### ✅ UC008: Criar Conta
+### ✅ UC007: Criar Conta
 **Status**: Implementado  
 **Arquivo**: [`CreateAccountUseCase.ts`](../src/application/use-cases/account/create-account/CreateAccountUseCase.ts)
 
 **Descrição**: Permite ao usuário criar uma nova conta bancária ou financeira.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -284,13 +245,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC009: Editar Conta
+### ✅ UC007: Editar Conta
 **Status**: Implementado  
 **Arquivo**: [`UpdateAccountUseCase.ts`](../src/application/use-cases/account/update-account/UpdateAccountUseCase.ts)
 
 **Descrição**: Permite ao usuário editar dados de uma conta existente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -316,13 +277,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC010: Excluir Conta
+### ✅ UC009: Excluir Conta
 **Status**: Implementado  
 **Arquivo**: [`DeleteAccountUseCase.ts`](../src/application/use-cases/account/delete-account/DeleteAccountUseCase.ts)
 
 **Descrição**: Permite ao usuário excluir uma conta financeira.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -335,7 +296,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 2. Clica em "Excluir"
 3. Sistema verifica dependências
 4. Usuário confirma exclusão
-5. Sistema valida permissões
+5. Sistema valida acesso
 6. Sistema marca conta como excluída
 7. Sistema exibe confirmação
 
@@ -349,13 +310,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC011: Transferir entre Contas
+### ✅ UC010: Transferir entre Contas
 **Status**: Implementado  
 **Arquivo**: [`TransferBetweenAccountsUseCase.ts`](../src/application/use-cases/account/transfer-between-accounts/TransferBetweenAccountsUseCase.ts)
 
 **Descrição**: Permite transferir valores entre contas do mesmo orçamento.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -385,13 +346,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC012: Reconciliar Saldo
+### ✅ UC011: Reconciliar Saldo
 **Status**: Implementado
 **Arquivo**: [`ReconcileAccountUseCase.ts`](../src/application/use-cases/account/reconcile-account/ReconcileAccountUseCase.ts)
 
 **Descrição**: Permite ajustar o saldo da conta baseado no extrato bancário real.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -420,13 +381,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 💸 **Gestão de Transações**
 
-### ✅ UC013: Lançar Receita
+### ✅ UC012: Lançar Receita
 **Status**: Implementado (via CreateTransactionUseCase)  
 **Arquivo**: [`CreateTransactionUseCase.ts`](../src/application/use-cases/transaction/create-transaction/CreateTransactionUseCase.ts)
 
 **Descrição**: Permite ao usuário registrar uma receita (entrada de dinheiro).
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -459,13 +420,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC014: Lançar Despesa
+### ✅ UC013: Lançar Despesa
 **Status**: Implementado (via CreateTransactionUseCase)  
 **Arquivo**: [`CreateTransactionUseCase.ts`](../src/application/use-cases/transaction/create-transaction/CreateTransactionUseCase.ts)
 
 **Descrição**: Permite ao usuário registrar uma despesa (saída de dinheiro).
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -501,13 +462,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC015: Registrar Transação (Qualquer Data)
+### ✅ UC014: Registrar Transação (Qualquer Data)
 **Status**: Implementado (via CreateTransactionUseCase)
 **Arquivo**: [`CreateTransactionUseCase.ts`](../src/application/use-cases/transaction/create-transaction/CreateTransactionUseCase.ts)
 
 **Descrição**: Permite registrar transações com data passada, presente ou futura, com status determinado automaticamente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -537,21 +498,21 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC016: Agendar Transação Futura
+### ❌ UC015: Agendar Transação Futura
 **Status**: Não Implementado (Desnecessário - coberto por UC015)
 
 **Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data futura.
 
 ---
 
-### ❌ UC017: Registrar Transação Passada
+### ❌ UC016: Registrar Transação Passada
 **Status**: Não Implementado (Desnecessário - coberto por UC015)
 
 **Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data passada.
 
 ---
 
-### ✅ UC018: Marcar Transação como Atrasada
+### ✅ UC017: Marcar Transação como Atrasada
 **Status**: Implementado
 **Arquivo**: [`MarkTransactionLateUseCase.ts`](../src/application/use-cases/transaction/mark-transaction-late/MarkTransactionLateUseCase.ts)
 
@@ -583,13 +544,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC019: Cancelar Transação Agendada
+### ✅ UC018: Cancelar Transação Agendada
 **Status**: Implementado
 **Arquivo**: [`CancelScheduledTransactionUseCase.ts`](../src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.ts)
 
 **Descrição**: Permite cancelar uma transação que foi agendada para o futuro.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -601,7 +562,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 2. Seleciona transação a cancelar
 3. Clica em "Cancelar"
 4. Confirma cancelamento
-5. Sistema valida permissões
+5. Sistema valida acesso
 6. Sistema cancela agendamento
 7. Sistema registra cancelamento
 8. Sistema exibe confirmação
@@ -616,18 +577,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC020: Editar Transação
+### ✅ UC019: Editar Transação
 **Status**: Implementado  
 **Arquivo**: [`UpdateTransactionUseCase.ts`](../src/application/use-cases/transaction/update-transaction/UpdateTransactionUseCase.ts)
 
 **Descrição**: Permite editar dados de uma transação existente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Transação existe
-- Usuário tem permissão para editar
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona transação
@@ -649,24 +610,24 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC021: Excluir Transação
+### ✅ UC020: Excluir Transação
 **Status**: Implementado  
 **Arquivo**: [`DeleteTransactionUseCase.ts`](../src/application/use-cases/transaction/delete-transaction/DeleteTransactionUseCase.ts)
 
 **Descrição**: Permite excluir uma transação existente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Transação existe
-- Usuário tem permissão para excluir
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona transação
 2. Clica em "Excluir"
 3. Confirma exclusão
-4. Sistema valida permissões
+4. Sistema valida acesso
 5. Sistema remove transação
 6. Sistema ajusta saldos
 7. Sistema exibe confirmação
@@ -683,13 +644,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📂 **Gestão de Categorias**
 
-### ✅ UC022: Criar Categoria
+### ✅ UC021: Criar Categoria
 **Status**: Implementado  
 **Arquivo**: [`CreateCategoryUseCase.ts`](../src/application/use-cases/category/create-category/CreateCategoryUseCase.ts)
 
 **Descrição**: Permite ao usuário criar uma nova categoria para classificar transações.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -718,18 +679,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC023: Editar Categoria
+### ✅ UC022: Editar Categoria
 **Status**: Implementado  
 **Arquivo**: [`UpdateCategoryUseCase.ts`](../src/application/use-cases/category/update-category/UpdateCategoryUseCase.ts)
 
 **Descrição**: Permite editar dados de uma categoria existente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Categoria existe no orçamento
-- Usuário tem permissão para editar
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona categoria
@@ -751,26 +712,26 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC024: Excluir Categoria
+### ✅ UC023: Excluir Categoria
 **Status**: Implementado  
 **Arquivo**: [`DeleteCategoryUseCase.ts`](../src/application/use-cases/category/delete-category/DeleteCategoryUseCase.ts)
 
 **Descrição**: Permite excluir uma categoria que não está sendo utilizada.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Categoria existe no orçamento
 - Categoria não possui transações associadas
-- Usuário tem permissão para excluir
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona categoria
 2. Clica em "Excluir"
 3. Sistema verifica dependências
 4. Usuário confirma exclusão
-5. Sistema valida permissões
+5. Sistema valida acesso
 6. Sistema remove categoria
 7. Sistema exibe confirmação
 
@@ -786,13 +747,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 💳 **Gestão de Cartões de Crédito**
 
-### ✅ UC026: Cadastrar Cartão de Crédito
+### ✅ UC025: Cadastrar Cartão de Crédito
 **Status**: Implementado  
 **Arquivo**: [`CreateCreditCardUseCase.ts`](../src/application/use-cases/credit-card/create-credit-card/CreateCreditCardUseCase.ts)
 
 **Descrição**: Permite cadastrar um novo cartão de crédito para controle de gastos.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -820,18 +781,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC027: Editar Cartão de Crédito
+### ✅ UC026: Editar Cartão de Crédito
 **Status**: Implementado  
 **Arquivo**: [`UpdateCreditCardUseCase.ts`](../src/application/use-cases/credit-card/update-credit-card/UpdateCreditCardUseCase.ts)
 
 **Descrição**: Permite editar dados de um cartão de crédito existente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Cartão existe no orçamento
-- Usuário tem permissão para editar
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona cartão
@@ -852,26 +813,26 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC028: Excluir Cartão de Crédito
+### ✅ UC027: Excluir Cartão de Crédito
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardUseCase.ts`](../src/application/use-cases/credit-card/delete-credit-card/DeleteCreditCardUseCase.ts)
 
 **Descrição**: Permite excluir um cartão de crédito que não possui faturas pendentes.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Cartão existe no orçamento
 - Cartão não possui faturas em aberto
-- Usuário tem permissão para excluir
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona cartão
 2. Clica em "Excluir"
 3. Sistema verifica dependências
 4. Usuário confirma exclusão
-5. Sistema valida permissões
+5. Sistema valida acesso
 6. Sistema remove cartão
 7. Sistema exibe confirmação
 
@@ -885,18 +846,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC029: Criar Fatura do Cartão
+### ✅ UC028: Criar Fatura do Cartão
 **Status**: Implementado  
 **Arquivo**: [`CreateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/create-credit-card-bill/CreateCreditCardBillUseCase.ts)
 
 **Descrição**: Cria uma nova fatura para o cartão de crédito com base nas transações do período.
 
-**Ator**: Sistema automático ou Usuário com permissão no orçamento
+**Ator**: Sistema automático ou Usuário participante do orçamento
 
 **Precondições**:
 - Cartão existe no orçamento
 - Período da fatura está definido
-- Usuário tem permissão no orçamento
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Sistema ou usuário solicita criação da fatura
@@ -919,18 +880,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC030: Atualizar Fatura do Cartão
+### ✅ UC029: Atualizar Fatura do Cartão
 **Status**: Implementado  
 **Arquivo**: [`UpdateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/update-credit-card-bill/UpdateCreditCardBillUseCase.ts)
 
 **Descrição**: Atualiza dados de uma fatura do cartão de crédito existente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Fatura existe no sistema
-- Usuário tem permissão no orçamento
+- Usuário tem acesso ao orçamento
 - Fatura ainda pode ser alterada
 
 **Fluxo Principal**:
@@ -953,26 +914,26 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC031: Excluir Fatura do Cartão
+### ✅ UC030: Excluir Fatura do Cartão
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/delete-credit-card-bill/DeleteCreditCardBillUseCase.ts)
 
 **Descrição**: Exclui uma fatura do cartão de crédito que ainda não foi paga.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Fatura existe no sistema
 - Fatura não está paga
-- Usuário tem permissão no orçamento
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona fatura
 2. Clica em "Excluir Fatura"
 3. Sistema verifica status
 4. Usuário confirma exclusão
-5. Sistema valida permissões
+5. Sistema valida acesso
 6. Sistema remove fatura
 7. Sistema libera transações associadas
 8. Sistema exibe confirmação
@@ -987,17 +948,17 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC032: Marcar Fatura como Paga
+### ❌ UC031: Marcar Fatura como Paga
 **Status**: Não Implementado
 
 **Descrição**: Marca uma fatura do cartão como paga e registra o pagamento.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Fatura existe e está em aberto
-- Usuário tem permissão
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário acessa fatura em aberto
@@ -1019,13 +980,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC033: Reabrir Fatura
+### ✅ UC032: Reabrir Fatura
 **Status**: Implementado
 **Arquivo**: [`ReopenCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/reopen-bill/ReopenCreditCardBillUseCase.ts)
 
 **Descrição**: Reabre uma fatura que foi marcada como paga por engano.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -1037,7 +998,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 2. Seleciona fatura paga
 3. Clica em "Reabrir"
 4. Confirma reabertura
-5. Sistema valida permissões
+5. Sistema valida acesso
 6. Sistema reverte pagamento
 7. Sistema atualiza status
 8. Sistema exibe confirmação
@@ -1052,7 +1013,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC034: Controlar Limite do Cartão
+### ❌ UC033: Controlar Limite do Cartão
 **Status**: Não Implementado
 
 **Descrição**: Monitora e controla o uso do limite do cartão de crédito.
@@ -1084,13 +1045,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 🎯 **Gestão de Metas**
 
-### ✅ UC035: Criar Meta
+### ✅ UC034: Criar Meta
 **Status**: Implementado  
 **Arquivo**: [`CreateGoalUseCase.ts`](../src/application/use-cases/goal/create-goal/CreateGoalUseCase.ts)
 
 **Descrição**: Permite criar uma meta financeira com valor objetivo e prazo.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -1119,18 +1080,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC036: Editar Meta
+### ✅ UC035: Editar Meta
 **Status**: Implementado  
 **Arquivo**: [`UpdateGoalUseCase.ts`](../src/application/use-cases/goal/update-goal/UpdateGoalUseCase.ts)
 
 **Descrição**: Permite editar dados de uma meta existente.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Meta existe no orçamento
-- Usuário tem permissão para editar
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona meta
@@ -1152,24 +1113,24 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC037: Excluir Meta
+### ✅ UC036: Excluir Meta
 **Status**: Implementado  
 **Arquivo**: [`DeleteGoalUseCase.ts`](../src/application/use-cases/goal/delete-goal/DeleteGoalUseCase.ts)
 
 **Descrição**: Permite excluir uma meta financeira.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
 - Meta existe no orçamento
-- Usuário tem permissão para excluir
+- Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
 1. Usuário seleciona meta
 2. Clica em "Excluir"
 3. Confirma exclusão
-4. Sistema valida permissões
+4. Sistema valida acesso
 5. Sistema remove meta
 6. Sistema preserva histórico de aportes
 7. Sistema exibe confirmação
@@ -1184,13 +1145,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC038: Fazer Aporte Manual
+### ✅ UC037: Fazer Aporte Manual
 **Status**: Implementado  
 **Arquivo**: [`AddAmountToGoalUseCase.ts`](../src/application/use-cases/goal/add-amount-to-goal/AddAmountToGoalUseCase.ts)
 
 **Descrição**: Permite fazer um aporte manual para uma meta específica.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -1222,12 +1183,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 💰 **Sistema de Envelopes**
 
-### ❌ UC039: Criar Envelope
+### ❌ UC038: Criar Envelope
 **Status**: Não Implementado
 
 **Descrição**: Cria um envelope para alocação de valores por categoria.
 
-**Ator**: Usuário com permissão no orçamento
+**Ator**: Usuário participante do orçamento
 
 **Precondições**:
 - Usuário logado no sistema
@@ -1254,7 +1215,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC040: Editar Envelope
+### ❌ UC039: Editar Envelope
 **Status**: Não Implementado
 
 **Descrição**: Edita configurações de um envelope existente.
@@ -1264,7 +1225,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC041: Excluir Envelope
+### ❌ UC040: Excluir Envelope
 **Status**: Não Implementado
 
 **Descrição**: Exclui um envelope que não possui saldo.
@@ -1274,7 +1235,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC042: Fazer Aporte no Envelope
+### ❌ UC041: Fazer Aporte no Envelope
 **Status**: Não Implementado
 
 **Descrição**: Adiciona valor a um envelope específico.
@@ -1284,7 +1245,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC043: Retirar Valor do Envelope
+### ❌ UC042: Retirar Valor do Envelope
 **Status**: Não Implementado
 
 **Descrição**: Retira valor de um envelope para uso.
@@ -1294,7 +1255,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC044: Transferir Entre Envelopes
+### ❌ UC043: Transferir Entre Envelopes
 **Status**: Não Implementado
 
 **Descrição**: Transfere valor entre diferentes envelopes.
@@ -1304,7 +1265,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC045: Configurar Envelope Automático
+### ❌ UC044: Configurar Envelope Automático
 **Status**: Não Implementado
 
 **Descrição**: Configura aporte automático mensal para envelope.
@@ -1316,7 +1277,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 🔔 **Alertas e Notificações**
 
-### ❌ UC046: Configurar Alerta de Orçamento
+### ❌ UC045: Configurar Alerta de Orçamento
 **Status**: Não Implementado
 
 **Descrição**: Configura alertas quando gastos se aproximam do limite.
@@ -1326,7 +1287,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC047: Configurar Alerta de Meta
+### ❌ UC046: Configurar Alerta de Meta
 **Status**: Não Implementado
 
 **Descrição**: Configura alertas relacionados ao progresso das metas.
@@ -1336,7 +1297,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC048: Configurar Lembrete de Vencimento
+### ❌ UC047: Configurar Lembrete de Vencimento
 **Status**: Não Implementado
 
 **Descrição**: Configura lembretes para datas de vencimento.
@@ -1346,7 +1307,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC049: Receber Notificação de Limite
+### ❌ UC048: Receber Notificação de Limite
 **Status**: Não Implementado
 
 **Descrição**: Recebe notificação quando limites são atingidos.
@@ -1356,7 +1317,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC050: Receber Alerta de Oportunidade
+### ❌ UC049: Receber Alerta de Oportunidade
 **Status**: Não Implementado
 
 **Descrição**: Recebe alertas sobre oportunidades de economia.
@@ -1366,7 +1327,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC051: Personalizar Canais de Notificação
+### ❌ UC050: Personalizar Canais de Notificação
 **Status**: Não Implementado
 
 **Descrição**: Configura como e onde receber notificações.
@@ -1394,11 +1355,11 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
-   - UC033: Marcar Fatura como Paga
-   - UC035: Controlar Limite do Cartão
+   - UC032: Marcar Fatura como Paga
+   - UC034: Controlar Limite do Cartão
 
 2. **Média Prioridade** (Features Importantes):
-   - UC025: Personalizar Categorias por Orçamento
+   - UC024: Personalizar Categorias por Orçamento
    - Sistema de Envelopes (UC040-046)
 
 3. **Baixa Prioridade** (Features Avançadas):

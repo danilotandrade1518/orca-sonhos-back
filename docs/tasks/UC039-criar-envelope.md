@@ -111,7 +111,7 @@ enum EnvelopeStatus {
 - [ ] Orçamento deve existir e estar ativo
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Validar dados do envelope
 3. Verificar unicidade do nome no orçamento
 4. Validar categorias associadas (se informadas)
@@ -129,7 +129,7 @@ enum EnvelopeStatus {
 - [ ] Operação atômica via Unit of Work
 
 ## 🚫 **Error Scenarios**
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `BudgetNotFoundError` - Orçamento não encontrado
 - [ ] `DuplicateEnvelopeNameError` - Nome já existe no orçamento
 - [ ] `InvalidEnvelopeNameError` - Nome inválido
@@ -156,7 +156,7 @@ enum EnvelopeStatus {
 - [ ] Falha por nome inválido
 - [ ] Falha por valor mensal inválido
 - [ ] Falha por categoria não encontrada
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 - [ ] Falha por orçamento não encontrado
 
 ## 🔗 **Dependencies**

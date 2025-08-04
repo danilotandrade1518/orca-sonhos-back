@@ -62,7 +62,7 @@ Permitir que o usuário registre transações que já aconteceram em datas passa
 - [ ] Tipo de transação válido
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Validar data da transação (passado, dentro do limite)
 3. Buscar e validar conta
 4. Buscar e validar categoria
@@ -83,7 +83,7 @@ Permitir que o usuário registre transações que já aconteceram em datas passa
 - [ ] `InvalidTransactionDateError` - Data inválida (futura ou muito antiga)
 - [ ] `AccountNotFoundError` - Conta não encontrada
 - [ ] `CategoryNotFoundError` - Categoria não encontrada
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `InvalidAmountError` - Valor inválido
 - [ ] `RequiredFieldError` - Campo obrigatório vazio
 
@@ -102,7 +102,7 @@ Permitir que o usuário registre transações que já aconteceram em datas passa
 - [ ] Falha por conta não encontrada
 - [ ] Falha por categoria não encontrada
 - [ ] Falha por valor inválido
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 - [ ] Verificação de aplicação no saldo da conta
 
 ## 🔗 **Dependencies**

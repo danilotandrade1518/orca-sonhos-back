@@ -111,7 +111,7 @@ SCHEDULED = 'SCHEDULED'
 - [ ] Se recorrente, padrão deve ser válido
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Validar data de agendamento (futura)
 3. Buscar e validar conta
 4. Buscar e validar categoria
@@ -134,7 +134,7 @@ SCHEDULED = 'SCHEDULED'
 - [ ] `InvalidScheduledDateError` - Data não é futura
 - [ ] `AccountNotFoundError` - Conta não encontrada
 - [ ] `CategoryNotFoundError` - Categoria não encontrada
-- [ ] `InsufficientPermissionsError` - Usuário sem permissão
+- [ ] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [ ] `InvalidAmountError` - Valor inválido
 - [ ] `InvalidRecurrencePatternError` - Padrão de recorrência inválido
 - [ ] `RequiredFieldError` - Campo obrigatório vazio
@@ -156,7 +156,7 @@ SCHEDULED = 'SCHEDULED'
 - [ ] Falha por conta não encontrada
 - [ ] Falha por categoria não encontrada
 - [ ] Falha por padrão de recorrência inválido
-- [ ] Falha por falta de permissão
+- [ ] Falha por falta de acesso
 
 ## 🔗 **Dependencies**
 - ✅ Transaction aggregate (já implementado)

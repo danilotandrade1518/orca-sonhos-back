@@ -71,7 +71,7 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 - [x] Data de execução deve ser futura
 
 ### **Fluxo Principal**
-1. Validar autorização do usuário no orçamento
+1. Validar acesso do usuário ao orçamento
 2. Buscar transação agendada
 3. Validar se transação pode ser cancelada
 4. Validar motivo do cancelamento
@@ -92,7 +92,7 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 - [x] `ScheduledTransactionNotFoundError` - Transação não encontrada
 - [x] `TransactionNotScheduledError` - Transação não está agendada
 - [x] `TransactionAlreadyExecutedError` - Transação já foi executada
-- [x] `InsufficientPermissionsError` - Usuário sem permissão
+- [x] `UnauthorizedAccessError` - Usuário sem acesso ao orçamento
 - [x] `InvalidCancellationReasonError` - Motivo inválido
 - [x] `TransactionCannotBeCancelledError` - Transação não pode ser cancelada
 
@@ -111,7 +111,7 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 - [x] Falha por transação não agendada
 - [x] Falha por transação já executada
 - [x] Falha por motivo inválido
-- [x] Falha por falta de permissão
+- [x] Falha por falta de acesso
 - [x] Falha por data de execução passada
 
 ## 🔗 **Dependencies**
