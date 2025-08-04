@@ -8,14 +8,14 @@ import { TransactionPersistenceFailedError } from '../../../shared/errors/Transa
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
-import { ReconcileAccountRepositoryStub } from '../../../shared/tests/stubs/ReconcileAccountRepositoryStub';
+import { IReconcileAccountUnitOfWorkStub } from '../../../shared/tests/stubs/IReconcileAccountUnitOfWorkStub';
 import { ReconcileAccountDto } from './ReconcileAccountDto';
 import { ReconcileAccountUseCase } from './ReconcileAccountUseCase';
 
 describe('ReconcileAccountUseCase', () => {
   let useCase: ReconcileAccountUseCase;
   let getAccountRepositoryStub: GetAccountRepositoryStub;
-  let reconcileAccountRepositoryStub: ReconcileAccountRepositoryStub;
+  let reconcileAccountRepositoryStub: IReconcileAccountUnitOfWorkStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
   let eventPublisherStub: EventPublisherStub;
   let account: Account;
@@ -24,7 +24,7 @@ describe('ReconcileAccountUseCase', () => {
 
   beforeEach(() => {
     getAccountRepositoryStub = new GetAccountRepositoryStub();
-    reconcileAccountRepositoryStub = new ReconcileAccountRepositoryStub();
+    reconcileAccountRepositoryStub = new IReconcileAccountUnitOfWorkStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
     eventPublisherStub = new EventPublisherStub();
     useCase = new ReconcileAccountUseCase(
