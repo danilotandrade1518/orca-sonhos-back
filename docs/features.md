@@ -14,8 +14,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 📊 **Resumo Geral**
 
 - **Total de Use Cases**: 51
-- **Implementados**: 24 (47%)
-- **Não Implementados**: 27 (53%)
+- **Implementados**: 31 (61%)
+- **Não Implementados**: 20 (39%)
 
 ---
 
