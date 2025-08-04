@@ -13,9 +13,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📊 **Resumo Geral**
 
-- **Total de Use Cases**: 59
-- **Implementados**: 25 (42%)
-- **Não Implementados**: 34 (58%)
+- **Total de Use Cases**: 52
+- **Implementados**: 24 (46%)
+- **Não Implementados**: 28 (54%)
 
 ---
 
@@ -501,44 +501,11 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC015: Agendar Transação Futura
-**Status**: Não Implementado
+### ✅ UC015: Registrar Transação (Qualquer Data)
+**Status**: Implementado (via CreateTransactionUseCase)
+**Arquivo**: [`CreateTransactionUseCase.ts`](../src/application/use-cases/transaction/create-transaction/CreateTransactionUseCase.ts)
 
-**Descrição**: Permite agendar uma transação para ser executada em data futura.
-
-**Ator**: Usuário com permissão no orçamento
-
-**Precondições**:
-- Usuário logado no sistema
-- Usuário tem acesso ao orçamento
-- Conta existe
-- Categoria existe
-
-**Fluxo Principal**:
-1. Usuário acessa agendamento
-2. Preenche dados da transação
-3. Define data futura de execução
-4. Configura recorrência (opcional)
-5. Confirma agendamento
-6. Sistema valida dados
-7. Sistema cria transação agendada
-8. Sistema programa execução
-9. Sistema exibe confirmação
-
-**Critérios de Aceitação**:
-- ❌ Data deve ser futura
-- ❌ Recorrência pode ser diária, semanal, mensal
-- ❌ Sistema executa automaticamente na data
-
-**Domain Events**:
-- `TransactionScheduledEvent`
-
----
-
-### ❌ UC016: Registrar Transação Passada
-**Status**: Não Implementado
-
-**Descrição**: Permite registrar uma transação que ocorreu no passado.
+**Descrição**: Permite registrar transações com data passada, presente ou futura, com status determinado automaticamente.
 
 **Ator**: Usuário com permissão no orçamento
 
@@ -549,82 +516,67 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 - Categoria existe
 
 **Fluxo Principal**:
-1. Usuário acessa lançamento retroativo
+1. Usuário acessa lançamento de transações
 2. Preenche dados da transação
-3. Define data passada
-4. Justifica lançamento retroativo
-5. Confirma registro
-6. Sistema valida dados
+3. Define data (passada, presente ou futura)
+4. Confirma registro
+5. Sistema valida dados
+6. Sistema determina status baseado na data
 7. Sistema cria transação
-8. Sistema atualiza histórico
+8. Sistema atualiza saldo (se aplicável)
 9. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Data deve ser passada
-- ❌ Justificativa é obrigatória
-- ❌ Relatórios refletem a data real
+- ✅ Data futura → Status SCHEDULED
+- ✅ Data presente/passada → Status COMPLETED
+- ✅ Transações passadas afetam histórico
+- ✅ Transações futuras não afetam saldo atual
 
 **Domain Events**:
-- `TransactionRegisteredRetroactivelyEvent`
+- `TransactionCreatedEvent`
 
 ---
 
-### ❌ UC017: Marcar Transação como Realizada
-**Status**: Não Implementado
+### ❌ UC016: Agendar Transação Futura
+**Status**: Não Implementado (Desnecessário - coberto por UC015)
 
-**Descrição**: Marca uma transação agendada como executada/realizada.
-
-**Ator**: Usuário com permissão no orçamento
-
-**Precondições**:
-- Usuário logado no sistema
-- Transação está agendada
-- Data de execução chegou ou passou
-
-**Fluxo Principal**:
-1. Sistema lista transações pendentes
-2. Usuário seleciona transação
-3. Clica em "Marcar como Realizada"
-4. Confirma execução
-5. Sistema valida permissões
-6. Sistema executa transação
-7. Sistema atualiza status
-8. Sistema exibe confirmação
-
-**Critérios de Aceitação**:
-- ❌ Apenas transações agendadas podem ser marcadas
-- ❌ Saldo é atualizado na marcação
-- ❌ Data de execução é registrada
-
-**Domain Events**:
-- `ScheduledTransactionExecutedEvent`
+**Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data futura.
 
 ---
 
-### ❌ UC018: Marcar Transação como Atrasada
-**Status**: Não Implementado
+### ❌ UC017: Registrar Transação Passada
+**Status**: Não Implementado (Desnecessário - coberto por UC015)
 
-**Descrição**: Sistema marca automaticamente transações como atrasadas.
+**Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data passada.
 
-**Ator**: Sistema automático
+---
+
+### ✅ UC018: Marcar Transação como Atrasada
+**Status**: Implementado
+**Arquivo**: [`MarkTransactionLateUseCase.ts`](../src/application/use-cases/transaction/mark-transaction-late/MarkTransactionLateUseCase.ts)
+
+**Descrição**: Marca transações agendadas como atrasadas quando a data passou e não foram executadas.
+
+**Ator**: Sistema automático ou Usuário
 
 **Precondições**:
-- Transação está agendada
+- Transação está agendada (SCHEDULED)
 - Data de execução passou
 - Transação não foi executada
 
 **Fluxo Principal**:
-1. Sistema executa verificação diária
-2. Identifica transações vencidas
-3. Marca como atrasadas
-4. Registra no histórico
-5. Notifica usuário
-6. Atualiza dashboards
+1. Sistema ou usuário identifica transação vencida
+2. Sistema valida se pode ser marcada como atrasada
+3. Sistema marca transação como LATE
+4. Sistema registra alteração
+5. Sistema publica evento
+6. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Verificação automática diária
-- ❌ Notificação ao usuário responsável
-- ❌ Status visível nos relatórios
+- ✅ Apenas transações SCHEDULED podem ser marcadas
+- ✅ Data deve ter passado
+- ✅ Status muda para LATE
+- ✅ Evento é disparado
 
 **Domain Events**:
 - `TransactionMarkedAsLateEvent`
@@ -931,7 +883,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC027: Excluir Cartão de Crédito
+### ✅ UC028: Excluir Cartão de Crédito
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardUseCase.ts`](../src/application/use-cases/credit-card/delete-credit-card/DeleteCreditCardUseCase.ts)
 
@@ -964,7 +916,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC028: Criar Fatura do Cartão
+### ✅ UC029: Criar Fatura do Cartão
 **Status**: Implementado  
 **Arquivo**: [`CreateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/create-credit-card-bill/CreateCreditCardBillUseCase.ts)
 
@@ -998,7 +950,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC029: Atualizar Fatura do Cartão
+### ✅ UC030: Atualizar Fatura do Cartão
 **Status**: Implementado  
 **Arquivo**: [`UpdateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/update-credit-card-bill/UpdateCreditCardBillUseCase.ts)
 
@@ -1032,7 +984,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC030: Excluir Fatura do Cartão
+### ✅ UC031: Excluir Fatura do Cartão
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/delete-credit-card-bill/DeleteCreditCardBillUseCase.ts)
 
@@ -1066,7 +1018,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC031: Marcar Fatura como Paga
+### ❌ UC032: Marcar Fatura como Paga
 **Status**: Não Implementado
 
 **Descrição**: Marca uma fatura do cartão como paga e registra o pagamento.
@@ -1098,7 +1050,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC032: Reabrir Fatura
+### ✅ UC033: Reabrir Fatura
 **Status**: Implementado
 **Arquivo**: [`ReopenCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/reopen-bill/ReopenCreditCardBillUseCase.ts)
 
@@ -1131,7 +1083,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC033: Controlar Limite do Cartão
+### ❌ UC034: Controlar Limite do Cartão
 **Status**: Não Implementado
 
 **Descrição**: Monitora e controla o uso do limite do cartão de crédito.
@@ -1163,7 +1115,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 🎯 **Gestão de Metas**
 
-### ✅ UC034: Criar Meta
+### ✅ UC035: Criar Meta
 **Status**: Implementado  
 **Arquivo**: [`CreateGoalUseCase.ts`](../src/application/use-cases/goal/create-goal/CreateGoalUseCase.ts)
 
@@ -1198,7 +1150,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC035: Editar Meta
+### ✅ UC036: Editar Meta
 **Status**: Implementado  
 **Arquivo**: [`UpdateGoalUseCase.ts`](../src/application/use-cases/goal/update-goal/UpdateGoalUseCase.ts)
 
@@ -1231,7 +1183,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC036: Excluir Meta
+### ✅ UC037: Excluir Meta
 **Status**: Implementado  
 **Arquivo**: [`DeleteGoalUseCase.ts`](../src/application/use-cases/goal/delete-goal/DeleteGoalUseCase.ts)
 
@@ -1263,7 +1215,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC037: Fazer Aporte Manual
+### ✅ UC038: Fazer Aporte Manual
 **Status**: Implementado  
 **Arquivo**: [`AddAmountToGoalUseCase.ts`](../src/application/use-cases/goal/add-amount-to-goal/AddAmountToGoalUseCase.ts)
 
@@ -1467,26 +1419,24 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 25 use cases (42%)
-- **❌ Não Implementados**: 34 use cases (58%)
+- **✅ Implementados**: 24 use cases (46%)
+- **❌ Não Implementados**: 28 use cases (54%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
-   - UC015: Agendar Transação Futura
-   - UC031: Marcar Fatura como Paga
+   - UC033: Marcar Fatura como Paga
+   - UC035: Controlar Limite do Cartão
 
 2. **Média Prioridade** (Features Importantes):
    - UC025: Personalizar Categorias por Orçamento
-   - UC032-033: Funcionalidades restantes de Cartões
-   - UC012: Reconciliar Saldo
+   - Sistema de Envelopes (UC040-046)
 
 3. **Baixa Prioridade** (Features Avançadas):
-   - Sistema de Envelopes (UC039-045)
-   - Alertas e Notificações (UC046-052)
+   - Alertas e Notificações (UC047-053)
 
 **Observação**: Use cases de visualização, relatórios e dashboards serão tratados separadamente em camadas específicas de apresentação e não fazem parte desta documentação focada em mutação de dados.
 
 ---
 
-**Este documento será atualizado conforme novas features são implementadas ou modificadas.**
+**Este documento foi atualizado em Dezembro/2024 baseado na análise completa do código implementado vs documentação. Foram removidas duplicatas desnecessárias e adicionados Use Cases implementados que não estavam documentados.**

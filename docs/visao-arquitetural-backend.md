@@ -300,7 +300,7 @@ export class MarkTransactionLateUseCase {
   - Retorna entidades completas do domínio
   
 - **IFindRepository**: Interface para consultas específicas de negócio
-  - Exemplo: `IFindOverdueScheduledTransactionsRepository`
+  - Exemplo: `IAddTransactionRepository`
   - Pode retornar listas filtradas ou consultas complexas
 
 Esta organização garante que cada repository tenha uma responsabilidade bem definida e que os Use Cases expressem claramente suas intenções através dos tipos de repository que utilizam.
