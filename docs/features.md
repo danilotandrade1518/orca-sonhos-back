@@ -13,9 +13,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📊 **Resumo Geral**
 
-- **Total de Use Cases**: 49
-- **Implementados**: 32 (65%)
-- **Não Implementados**: 17 (35%)
+- **Total de Use Cases**: 48
+- **Implementados**: 32 (67%)
+- **Não Implementados**: 16 (33%)
 
 ---
 
@@ -1028,35 +1028,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC032: Controlar Limite do Cartão
-
-**Status**: Não Implementado
-
-**Descrição**: Monitora e controla o uso do limite do cartão de crédito.
-
-**Ator**: Sistema automático + Usuário
-
-**Precondições**:
-
-- Cartão está cadastrado
-- Transações estão sendo registradas
-
-**Fluxo Principal**:
-
-1. Sistema monitora transações
-2. Calcula limite utilizado
-3. Verifica percentual de uso
-4. Alerta quando próximo do limite
-5. Bloqueia se necessário
-6. Notifica usuário
-
-**Critérios de Aceitação**:
-
-- ❌ Alertas em 80% e 95% do limite
-- ❌ Usuário pode configurar alertas
-- ❌ Histórico de uso é mantido
-
-
 ---
 
 ## 🎯 **Gestão de Metas**
@@ -1344,19 +1315,19 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 32 use cases (65%)
-- **❌ Não Implementados**: 17 use cases (35%)
+- **✅ Implementados**: 32 use cases (67%)
+- **❌ Não Implementados**: 16 use cases (33%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
 
-   - UC032: Controlar Limite do Cartão
+   - UC014: Editar Categoria
+   - UC015: Excluir Categoria
 
 2. **Média Prioridade** (Features Importantes):
 
    - Sistema de Envelopes (UC037-UC043)
-   - UC023: Personalizar Categorias por Orçamento
 
 3. **Baixa Prioridade** (Features Avançadas):
    - Alertas e Notificações (UC044-UC049, UC052)
