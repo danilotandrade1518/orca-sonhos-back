@@ -1,16 +1,15 @@
 import { Either } from '@either';
 
+import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
+import { ISaveAccountRepository } from '../../../contracts/repositories/account/ISaveAccountRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
-import { IUseCase } from '../../../shared/IUseCase';
-import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountPersistenceFailedError } from '../../../shared/errors/AccountPersistenceFailedError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
 import { AccountUpdateFailedError } from '../../../shared/errors/AccountUpdateFailedError';
+import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
-import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
-import { ISaveAccountRepository } from '../../../contracts/repositories/account/ISaveAccountRepository';
+import { IUseCase } from '../../../shared/IUseCase';
 import { UpdateAccountDto } from './UpdateAccountDto';
 
 export class UpdateAccountUseCase implements IUseCase<UpdateAccountDto> {
@@ -18,7 +17,6 @@ export class UpdateAccountUseCase implements IUseCase<UpdateAccountDto> {
     private readonly getAccountRepository: IGetAccountRepository,
     private readonly saveAccountRepository: ISaveAccountRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -66,16 +64,6 @@ export class UpdateAccountUseCase implements IUseCase<UpdateAccountDto> {
 
     if (saveResult.hasError) {
       return Either.error(new AccountPersistenceFailedError());
-    }
-
-    const events = updatedAccount.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        updatedAccount.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: updatedAccount.id });

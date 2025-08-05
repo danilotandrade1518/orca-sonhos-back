@@ -14,7 +14,6 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 ## 📁 **Arquivos a Implementar**
 
 ### **Domain Layer**
-- [ ] `src/domain/aggregates/envelope/events/EnvelopeUpdatedEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/envelope/envelope-entity/Envelope.ts` (método `update()`)
 - [ ] Testes: `src/domain/aggregates/envelope/envelope-entity/Envelope.spec.ts`
 
@@ -35,7 +34,6 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 - Valida se nome continua único no orçamento
 - Atualiza propriedades modificáveis
 - Preserva saldo atual e histórico
-- Dispara EnvelopeUpdatedEvent
 ```
 
 ### **Campos Editáveis**
@@ -82,7 +80,6 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 5. Validar categorias associadas (se alteradas)
 6. Atualizar envelope (domain)
 7. Persistir alterações via Unit of Work
-8. Publicar evento de atualização
 9. Retornar dados atualizados do envelope
 
 ### **Business Rules**
@@ -129,7 +126,6 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 - ✅ Category aggregate (para validar associações)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 
 ## 📊 **Acceptance Criteria**
 - [ ] Usuário pode editar nome do envelope (mantendo unicidade)
@@ -137,7 +133,6 @@ Permitir editar configurações de um envelope existente, como nome, descrição
 - [ ] Usuário pode modificar categorias associadas
 - [ ] Saldo atual do envelope é preservado
 - [ ] Histórico de transações é mantido
-- [ ] Evento de atualização é disparado
 - [ ] Validações impedem dados inválidos
 - [ ] Pelo menos um campo deve ser alterado
 

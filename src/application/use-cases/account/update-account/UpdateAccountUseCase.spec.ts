@@ -1,5 +1,4 @@
 import { Account } from '@domain/aggregates/account/account-entity/Account';
-import { AccountUpdatedEvent } from '@domain/aggregates/account/events/AccountUpdatedEvent';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
@@ -9,7 +8,6 @@ import { AccountRepositoryError } from '../../../shared/errors/AccountRepository
 import { AccountUpdateFailedError } from '../../../shared/errors/AccountUpdateFailedError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { SaveAccountRepositoryStub } from '../../../shared/tests/stubs/SaveAccountRepositoryStub';
 import { UpdateAccountDto } from './UpdateAccountDto';
@@ -20,7 +18,6 @@ describe('UpdateAccountUseCase', () => {
   let getAccountRepositoryStub: GetAccountRepositoryStub;
   let saveAccountRepositoryStub: SaveAccountRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let mockAccount: Account;
   let budgetId: string;
 
@@ -28,7 +25,6 @@ describe('UpdateAccountUseCase', () => {
     getAccountRepositoryStub = new GetAccountRepositoryStub();
     saveAccountRepositoryStub = new SaveAccountRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
 
     budgetId = EntityId.create().value!.id;
 
@@ -47,7 +43,6 @@ describe('UpdateAccountUseCase', () => {
     }
 
     mockAccount = accountResult.data!;
-    mockAccount.clearEvents();
     getAccountRepositoryStub.mockAccount = mockAccount;
     budgetAuthorizationServiceStub.mockHasAccess = true;
 
@@ -55,7 +50,6 @@ describe('UpdateAccountUseCase', () => {
       getAccountRepositoryStub,
       saveAccountRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
     );
   });
 
@@ -88,7 +82,7 @@ describe('UpdateAccountUseCase', () => {
       expect(result.data!.id).toBe(mockAccount.id);
     });
 
-    it('should update account initial balance and emit event', async () => {
+    it('should update account initial balance', async () => {
       const dto: UpdateAccountDto = {
         id: mockAccount.id,
         userId: 'authorized-user',
@@ -100,20 +94,9 @@ describe('UpdateAccountUseCase', () => {
       expect(result.hasData).toBe(true);
       expect(result.hasError).toBe(false);
       expect(result.data!.id).toBe(mockAccount.id);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-
-      const events = eventPublisherStub.publishManyCalls[0];
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(AccountUpdatedEvent);
-
-      const event = events[0] as AccountUpdatedEvent;
-      expect(event.aggregateId).toBe(mockAccount.id);
-      expect(event.budgetId).toBe(budgetId);
-      expect(event.previousInitialBalance).toBe(1000);
-      expect(event.newInitialBalance).toBe(2000);
     });
 
-    it('should update multiple fields and emit single event', async () => {
+    it('should update multiple fields', async () => {
       const dto: UpdateAccountDto = {
         id: mockAccount.id,
         userId: 'authorized-user',
@@ -125,30 +108,6 @@ describe('UpdateAccountUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(result.hasData).toBe(true);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-
-      const events = eventPublisherStub.publishManyCalls[0];
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(AccountUpdatedEvent);
-
-      const event = events[0] as AccountUpdatedEvent;
-      expect(event.previousName).toBe('Original Account');
-      expect(event.newName).toBe('New Name');
-      expect(event.previousInitialBalance).toBe(1000);
-      expect(event.newInitialBalance).toBe(1500);
-    });
-
-    it('should not emit events when only description changes', async () => {
-      const dto: UpdateAccountDto = {
-        id: mockAccount.id,
-        userId: 'authorized-user',
-        description: 'Only description change',
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(0);
     });
 
     it('should return account id after successful update', async () => {

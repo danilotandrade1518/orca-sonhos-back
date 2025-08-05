@@ -3,19 +3,18 @@ import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-obje
 import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
-import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
-import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
-import { ScheduledTransactionNotFoundError } from '../../../shared/errors/ScheduledTransactionNotFoundError';
+import { InvalidCancellationReasonError } from '../../../../domain/aggregates/transaction/errors/InvalidCancellationReasonError';
+import { TransactionAlreadyExecutedError } from '../../../../domain/aggregates/transaction/errors/TransactionAlreadyExecutedError';
+import { TransactionCannotBeCancelledError } from '../../../../domain/aggregates/transaction/errors/TransactionCannotBeCancelledError';
+import { TransactionNotScheduledError } from '../../../../domain/aggregates/transaction/errors/TransactionNotScheduledError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
+import { ScheduledTransactionNotFoundError } from '../../../shared/errors/ScheduledTransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
+import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
+import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
+import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
 import { CancelScheduledTransactionDto } from './CancelScheduledTransactionDto';
 import { CancelScheduledTransactionUseCase } from './CancelScheduledTransactionUseCase';
-import { TransactionNotScheduledError } from '../../../../domain/aggregates/transaction/errors/TransactionNotScheduledError';
-import { TransactionAlreadyExecutedError } from '../../../../domain/aggregates/transaction/errors/TransactionAlreadyExecutedError';
-import { InvalidCancellationReasonError } from '../../../../domain/aggregates/transaction/errors/InvalidCancellationReasonError';
-import { TransactionCannotBeCancelledError } from '../../../../domain/aggregates/transaction/errors/TransactionCannotBeCancelledError';
 
 const createTransaction = (status: TransactionStatusEnum, dateOffset = 1) => {
   const data = {
@@ -38,7 +37,6 @@ describe('CancelScheduledTransactionUseCase', () => {
   let getTransactionRepo: GetTransactionRepositoryStub;
   let cancelRepo: SaveTransactionRepositoryStub;
   let authService: BudgetAuthorizationServiceStub;
-  let eventPublisher: EventPublisherStub;
   let transaction: Transaction;
   const userId = EntityId.create().value!.id;
   const budgetId = EntityId.create().value!.id;
@@ -47,12 +45,10 @@ describe('CancelScheduledTransactionUseCase', () => {
     getTransactionRepo = new GetTransactionRepositoryStub();
     cancelRepo = new SaveTransactionRepositoryStub();
     authService = new BudgetAuthorizationServiceStub();
-    eventPublisher = new EventPublisherStub();
     useCase = new CancelScheduledTransactionUseCase(
       getTransactionRepo,
       cancelRepo,
       authService,
-      eventPublisher,
     );
 
     transaction = createTransaction(TransactionStatusEnum.SCHEDULED, 2);
@@ -71,7 +67,6 @@ describe('CancelScheduledTransactionUseCase', () => {
 
     expect(result.hasData).toBe(true);
     expect(cancelRepo.executeCalls.length).toBe(1);
-    expect(eventPublisher.publishManyCalls.length).toBe(1);
     expect(transaction.isCancelled).toBe(true);
   });
 

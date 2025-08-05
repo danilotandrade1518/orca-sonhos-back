@@ -1,4 +1,3 @@
-import { IEventPublisher } from '../../contracts/events/IEventPublisher';
 import { IFindOverdueScheduledTransactionsRepository } from '../../contracts/repositories/transaction/IFindOverdueScheduledTransactionsRepository';
 import { ISaveTransactionRepository } from '../../contracts/repositories/transaction/ISaveTransactionRepository';
 
@@ -6,7 +5,6 @@ export class TransactionSchedulerService {
   constructor(
     private readonly findOverdueRepository: IFindOverdueScheduledTransactionsRepository,
     private readonly saveTransactionRepository: ISaveTransactionRepository,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async processLateTransactions(date: Date = new Date()) {
@@ -23,15 +21,6 @@ export class TransactionSchedulerService {
       const saveResult = await this.saveTransactionRepository.execute(tx);
       if (saveResult.hasError) continue;
 
-      const events = tx.getEvents();
-      if (events.length > 0) {
-        try {
-          await this.eventPublisher.publishMany(events);
-          tx.clearEvents();
-        } catch (error) {
-          console.error('Failed to publish events:', error);
-        }
-      }
       processed.push(tx.id);
     }
 

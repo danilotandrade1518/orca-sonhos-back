@@ -18,7 +18,6 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 - [ ] `src/domain/aggregates/account/value-objects/reconciliation-amount/ReconciliationAmount.spec.ts`
 - [ ] `src/domain/aggregates/account/value-objects/reconciliation-justification/ReconciliationJustification.ts`
 - [ ] `src/domain/aggregates/account/value-objects/reconciliation-justification/ReconciliationJustification.spec.ts`
-- [ ] `src/domain/aggregates/account/events/AccountReconciledEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/account/account-entity/Account.ts` (método `reconcile()`)
 - [ ] Testes: `src/domain/aggregates/account/account-entity/Account.spec.ts` (casos de reconciliação)
 
@@ -56,7 +55,6 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 - Calcula diferença entre saldo atual e valor real
 - Cria transação de ajuste se houver diferença
 - Atualiza saldo da conta
-- Dispara AccountReconciledEvent
 ```
 
 ## 📋 **Use Case Specifications**
@@ -86,8 +84,7 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 4. Validar se reconciliação é necessária
 5. Executar reconciliação no domain
 6. Persistir alterações
-7. Publicar evento de reconciliação
-8. Retornar confirmação
+7. Retornar confirmação
 
 ### **Business Rules**
 - [ ] Apenas contas ativas podem ser reconciliadas
@@ -125,7 +122,6 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 - ✅ Account aggregate (já implementado)
 - ✅ Budget authorization service (já implementado)
 - ✅ Transaction aggregate (para criar ajuste)
-- ✅ Event publisher (já implementado)
 
 ## 📊 **Acceptance Criteria**
 - [ ] Usuário pode reconciliar conta informando saldo real
@@ -133,7 +129,6 @@ Permitir ajustar o saldo da conta baseado no extrato bancário real, criando uma
 - [ ] Transação de ajuste é criada quando necessário
 - [ ] Saldo da conta é atualizado corretamente
 - [ ] Justificativa é obrigatória e válida
-- [ ] Evento de reconciliação é disparado
 - [ ] Histórico de reconciliações é mantido
 
 ## 🚀 **Definition of Done**

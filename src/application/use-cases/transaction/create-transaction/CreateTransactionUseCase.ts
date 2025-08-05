@@ -2,18 +2,16 @@ import { Transaction } from '@domain/aggregates/transaction/transaction-entity/T
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
-import { IAddTransactionRepository } from '../../../contracts/repositories/transaction/IAddTransactionRepository';
 import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
+import { IAddTransactionRepository } from '../../../contracts/repositories/transaction/IAddTransactionRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
-import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
+import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { TransactionCreationFailedError } from '../../../shared/errors/TransactionCreationFailedError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
-import { IUseCase } from '../../../shared/IUseCase';
-import { UseCaseResponse } from '../../../shared/IUseCase';
+import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { CreateTransactionDto } from './CreateTransactionDto';
 
 export class CreateTransactionUseCase
@@ -23,7 +21,6 @@ export class CreateTransactionUseCase
     private readonly addTransactionRepository: IAddTransactionRepository,
     private readonly getAccountRepository: IGetAccountRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -89,16 +86,6 @@ export class CreateTransactionUseCase
       return Either.errors<DomainError | ApplicationError, UseCaseResponse>([
         new TransactionPersistenceFailedError(),
       ]);
-    }
-
-    const events = transaction.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        transaction.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success<DomainError | ApplicationError, UseCaseResponse>({

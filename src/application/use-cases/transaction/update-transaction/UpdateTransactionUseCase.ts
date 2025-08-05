@@ -1,18 +1,17 @@
 import { Either } from '@either';
 
-import { IUseCase } from '../../../shared/IUseCase';
-import { ApplicationError } from '../../../shared/errors/ApplicationError';
+import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
+import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
+import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
+import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
+import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { TransactionUpdateFailedError } from '../../../shared/errors/TransactionUpdateFailedError';
-import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
-import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
-import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
-import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
+import { IUseCase } from '../../../shared/IUseCase';
 import { UpdateTransactionDto } from './UpdateTransactionDto';
 
 export class UpdateTransactionUseCase
@@ -23,7 +22,6 @@ export class UpdateTransactionUseCase
     private saveTransactionRepository: ISaveTransactionRepository,
     private getAccountRepository: IGetAccountRepository,
     private budgetAuthorizationService: IBudgetAuthorizationService,
-    private eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -42,7 +40,6 @@ export class UpdateTransactionUseCase
 
     const existingTransaction = transactionResult.data;
 
-    // Buscar a conta para obter o budgetId
     const accountResult = await this.getAccountRepository.execute(
       existingTransaction.accountId,
     );
@@ -104,16 +101,6 @@ export class UpdateTransactionUseCase
       await this.saveTransactionRepository.execute(updatedTransaction);
     if (saveResult.hasError) {
       return Either.error(new TransactionPersistenceFailedError());
-    }
-
-    const events = updatedTransaction.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        updatedTransaction.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: updatedTransaction.id });

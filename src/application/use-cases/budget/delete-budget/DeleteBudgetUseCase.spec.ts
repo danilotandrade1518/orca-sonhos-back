@@ -1,18 +1,16 @@
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
-import { BudgetDeletedEvent } from '@domain/aggregates/budget/events/BudgetDeletedEvent';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
+import { BudgetDeletionFailedError } from '../../../shared/errors/BudgetDeletionFailedError';
 import { BudgetNotFoundError } from '../../../shared/errors/BudgetNotFoundError';
 import { BudgetRepositoryError } from '../../../shared/errors/BudgetRepositoryError';
-import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { CannotDeleteBudgetWithAccountsError } from '../../../shared/errors/CannotDeleteBudgetWithAccountsError';
 import { CannotDeleteBudgetWithTransactionsError } from '../../../shared/errors/CannotDeleteBudgetWithTransactionsError';
+import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { OnlyOwnerCanDeleteBudgetError } from '../../../shared/errors/OnlyOwnerCanDeleteBudgetError';
-import { BudgetDeletionFailedError } from '../../../shared/errors/BudgetDeletionFailedError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { DeleteBudgetRepositoryStub } from '../../../shared/tests/stubs/DeleteBudgetRepositoryStub';
 import { CheckBudgetDependenciesRepositoryStub } from '../../../shared/tests/stubs/CheckBudgetDependenciesRepositoryStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
+import { DeleteBudgetRepositoryStub } from '../../../shared/tests/stubs/DeleteBudgetRepositoryStub';
 import { GetBudgetRepositoryStub } from '../../../shared/tests/stubs/GetBudgetRepositoryStub';
 import { DeleteBudgetDto } from './DeleteBudgetDto';
 import { DeleteBudgetUseCase } from './DeleteBudgetUseCase';
@@ -23,7 +21,6 @@ describe('DeleteBudgetUseCase', () => {
   let deleteBudgetRepositoryStub: DeleteBudgetRepositoryStub;
   let checkDependenciesRepositoryStub: CheckBudgetDependenciesRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let mockBudget: Budget;
   let ownerId: string;
 
@@ -33,7 +30,6 @@ describe('DeleteBudgetUseCase', () => {
     checkDependenciesRepositoryStub =
       new CheckBudgetDependenciesRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
 
     ownerId = EntityId.create().value!.id;
     const budgetResult = Budget.create({
@@ -49,7 +45,6 @@ describe('DeleteBudgetUseCase', () => {
     }
 
     mockBudget = budgetResult.data!;
-    mockBudget.clearEvents();
     getBudgetRepositoryStub.mockBudget = mockBudget;
     budgetAuthorizationServiceStub.mockHasAccess = true;
 
@@ -58,7 +53,6 @@ describe('DeleteBudgetUseCase', () => {
       deleteBudgetRepositoryStub,
       checkDependenciesRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
     );
   });
 
@@ -71,10 +65,6 @@ describe('DeleteBudgetUseCase', () => {
       expect(result.hasData).toBe(true);
       expect(result.data).toEqual({ id: mockBudget.id });
       expect(deleteBudgetRepositoryStub.executeCalls).toContain(mockBudget.id);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-      const event = eventPublisherStub
-        .publishManyCalls[0][0] as BudgetDeletedEvent;
-      expect(event.aggregateId).toBe(mockBudget.id);
     });
 
     it('should return error when user is not owner', async () => {
@@ -190,21 +180,6 @@ describe('DeleteBudgetUseCase', () => {
       expect(getBudgetRepositoryStub.executeCalls[0]).toBe(mockBudget.id);
       expect(deleteBudgetRepositoryStub.executeCalls).toHaveLength(1);
       expect(deleteBudgetRepositoryStub.executeCalls[0]).toBe(mockBudget.id);
-    });
-
-    it('should handle event publishing errors gracefully', async () => {
-      jest
-        .spyOn(eventPublisherStub, 'publishMany')
-        .mockRejectedValueOnce(new Error('fail'));
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      const dto: DeleteBudgetDto = { userId: ownerId, budgetId: mockBudget.id };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-
-      consoleSpy.mockRestore();
     });
   });
 });

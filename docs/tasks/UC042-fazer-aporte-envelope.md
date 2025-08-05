@@ -16,7 +16,6 @@ Permitir fazer aportes manuais ou automáticos em um envelope, aumentando seu sa
 ### **Domain Layer**
 - [ ] `src/domain/aggregates/envelope/value-objects/EnvelopeContribution.ts`
 - [ ] `src/domain/aggregates/envelope/value-objects/ContributionSource.ts`
-- [ ] `src/domain/aggregates/envelope/events/EnvelopeContributionMadeEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/envelope/envelope-entity/Envelope.ts` (método `makeContribution()`)
 - [ ] Testes: `src/domain/aggregates/envelope/envelope-entity/Envelope.spec.ts`
 
@@ -58,7 +57,6 @@ enum ContributionSource {
 - Cria EnvelopeContribution
 - Adiciona ao histórico de contribuições
 - Atualiza saldo atual do envelope
-- Dispara EnvelopeContributionMadeEvent
 ```
 
 ## 📋 **Use Case Specifications**
@@ -93,7 +91,6 @@ enum ContributionSource {
 5. Criar contribuição no envelope (domain)
 6. Criar transação relacionada (se necessário)
 7. Atualizar saldos via Unit of Work
-8. Publicar evento de contribuição
 9. Retornar detalhes da contribuição
 
 ### **Business Rules**
@@ -122,7 +119,6 @@ enum ContributionSource {
 - [ ] EnvelopeContribution com valor inválido (erro)
 - [ ] Envelope.makeContribution() atualiza saldo corretamente
 - [ ] Envelope.makeContribution() adiciona ao histórico
-- [ ] Envelope.makeContribution() dispara evento correto
 - [ ] ContributionSource enum com valores corretos
 
 ### **Use Case Tests**
@@ -141,7 +137,6 @@ enum ContributionSource {
 - [ ] Saldo do envelope é persistido corretamente
 - [ ] Transação relacionada é criada quando necessário
 - [ ] Saldo da conta origem é decrementado
-- [ ] Evento é publicado para listeners
 - [ ] Histórico de contribuições é mantido
 
 ## 🔗 **Dependencies**
@@ -151,7 +146,6 @@ enum ContributionSource {
 - ✅ Money value object
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 
 ## 📊 **Acceptance Criteria**
 - [ ] Usuário pode fazer aporte manual informando conta origem
@@ -160,7 +154,6 @@ enum ContributionSource {
 - [ ] Conta origem tem saldo decrementado (se aplicável)
 - [ ] Histórico de contribuições é mantido
 - [ ] Transação relacionada é criada quando necessário
-- [ ] Eventos são disparados para integração
 - [ ] Validações impedem aportes inválidos
 
 ## 🚀 **Definition of Done**

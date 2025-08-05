@@ -14,8 +14,6 @@ Permitir excluir um envelope existente, verificando se pode ser removido (não p
 ## 📁 **Arquivos a Implementar**
 
 ### **Domain Layer**
-- [ ] `src/domain/aggregates/envelope/events/EnvelopeDeletedEvent.ts`
-- [ ] `src/domain/aggregates/envelope/events/EnvelopeDeactivatedEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/envelope/envelope-entity/Envelope.ts` (métodos `delete()` e `deactivate()`)
 - [ ] `src/domain/aggregates/envelope/envelope-entity/EnvelopeStatus.ts` (enum)
 - [ ] Testes: `src/domain/aggregates/envelope/envelope-entity/Envelope.spec.ts`
@@ -45,12 +43,10 @@ enum EnvelopeStatus {
 // Envelope.delete() - Exclusão física
 - Verifica se pode ser excluído (sem saldo/transações)
 - Remove envelope permanentemente
-- Dispara EnvelopeDeletedEvent
 
 // Envelope.deactivate() - Exclusão lógica
 - Marca envelope como inativo
 - Preserva dados históricos
-- Dispara EnvelopeDeactivatedEvent
 ```
 
 ## 📋 **Use Case Specifications**
@@ -80,7 +76,6 @@ enum EnvelopeStatus {
    - Não deve ter contribuições futuras agendadas
 4. Excluir envelope (domain)
 5. Remover do repositório via Unit of Work
-6. Publicar evento de exclusão
 7. Retornar confirmação
 
 ### **Fluxo Alternativo - Desativação**
@@ -89,7 +84,6 @@ enum EnvelopeStatus {
 3. Se envelope possui saldo ou transações:
 4. Desativar envelope (domain)
 5. Atualizar status via Unit of Work
-6. Publicar evento de desativação
 7. Retornar status de desativação
 
 ### **Business Rules**
@@ -115,7 +109,6 @@ enum EnvelopeStatus {
 - [ ] Envelope.delete() com transações associadas (erro)
 - [ ] Envelope.deactivate() marca status como INACTIVE
 - [ ] Envelope.deactivate() preserva dados existentes
-- [ ] Eventos corretos são disparados para cada operação
 
 ### **Use Case Tests**
 - [ ] Exclusão física bem-sucedida de envelope vazio
@@ -139,7 +132,6 @@ enum EnvelopeStatus {
 - ✅ Transaction repository (para verificar associações)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 
 ## 📊 **Acceptance Criteria**
 - [ ] Envelope vazio pode ser excluído fisicamente

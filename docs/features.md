@@ -22,6 +22,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 🏦 **Gestão de Orçamentos**
 
 ### ✅ UC001: Criar Orçamento
+
 **Status**: Implementado  
 **Arquivo**: [`CreateBudgetUseCase.ts`](../src/application/use-cases/budget/create-budget/CreateBudgetUseCase.ts)
 
@@ -30,9 +31,11 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário autenticado
 
 **Precondições**:
+
 - Usuário logado no sistema
 
 **Fluxo Principal**:
+
 1. Usuário acessa seção de orçamentos
 2. Clica em "Novo Orçamento"
 3. Preenche nome do orçamento
@@ -43,16 +46,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ter entre 2-100 caracteres
 - ✅ Tipo deve ser PERSONAL ou SHARED
 - ✅ Orçamento criado deve aparecer na lista
 
-**Domain Events**:
-- `BudgetCreatedEvent`
-
 ---
 
 ### ✅ UC002: Alternar Orçamento
+
 **Status**: Implementado  
 **Arquivo**: [`UpdateBudgetUseCase.ts`](../src/application/use-cases/budget/update-budget/UpdateBudgetUseCase.ts)
 
@@ -61,10 +63,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona orçamento
 2. Clica em "Editar"
 3. Modifica dados permitidos
@@ -74,15 +78,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ser único para o usuário
 - ✅ Alterações devem ser propagadas para participantes
-
-**Domain Events**:
-- `BudgetUpdatedEvent`
 
 ---
 
 ### ✅ UC003: Adicionar Usuário ao Orçamento
+
 **Status**: Implementado  
 **Arquivo**: [`AddParticipantToBudgetUseCase.ts`](../src/application/use-cases/budget/add-participant/AddParticipantToBudgetUseCase.ts)
 
@@ -91,12 +94,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Orçamento do tipo SHARED
 - Usuário a ser adicionado existe no sistema
 
 **Fluxo Principal**:
+
 1. Usuário acessa gestão de participantes
 2. Clica em "Adicionar Usuário"
 3. Busca usuário por email ou ID
@@ -107,16 +112,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema notifica usuário adicionado
 
 **Critérios de Aceitação**:
+
 - ✅ Usuário não pode já estar no orçamento
 - ✅ Apenas orçamentos SHARED podem receber participantes
 - ✅ Todo usuário adicionado tem acesso total ao orçamento
 - ✅ Sistema valida tipos de orçamento automaticamente
-- ✅ Domain events são disparados para auditoria
-
-**Domain Events**:
-- `ParticipantAddedToBudgetEvent`
 
 **Domain Components**:
+
 - `BudgetType` - Value Object para tipos PERSONAL/SHARED
 - `BudgetNotSharedError` - Erro quando tenta adicionar a orçamento pessoal
 - `ParticipantAlreadyExistsError` - Erro quando participante já existe
@@ -124,6 +127,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ---
 
 ### ✅ UC004: Remover Participante
+
 **Status**: Implementado  
 **Arquivo**: [`RemoveParticipantFromBudgetUseCase.ts`](../src/application/use-cases/budget/remove-participant/RemoveParticipantFromBudgetUseCase.ts)
 
@@ -132,11 +136,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Participante existe no orçamento
 
 **Fluxo Principal**:
+
 1. Usuário acessa lista de participantes
 2. Seleciona participante
 3. Clica em "Remover"
@@ -146,15 +152,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Não pode remover o criador do orçamento
 - ✅ Dados do participante são preservados no histórico
-
-**Domain Events**:
-- `ParticipantRemovedFromBudgetEvent`
 
 ---
 
 ### ✅ UC005: Excluir Orçamento
+
 **Status**: Implementado  
 **Arquivo**: [`DeleteBudgetUseCase.ts`](../src/application/use-cases/budget/delete-budget/DeleteBudgetUseCase.ts)
 
@@ -163,12 +168,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário proprietário do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário é proprietário do orçamento
 - Orçamento não possui contas ativas
 - Orçamento não possui transações
 
 **Fluxo Principal**:
+
 1. Usuário acessa configurações do orçamento
 2. Clica em "Excluir Orçamento"
 3. Sistema verifica dependências
@@ -179,19 +186,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Apenas proprietário pode excluir
 - ✅ Não pode excluir orçamento com contas ativas
 - ✅ Não pode excluir orçamento com transações
 - ✅ Exclusão é permanente
-
-**Domain Events**:
-- `BudgetDeletedEvent`
 
 ---
 
 ## 💰 **Gestão de Contas**
 
 ### ✅ UC006: Criar Conta
+
 **Status**: Implementado  
 **Arquivo**: [`CreateAccountUseCase.ts`](../src/application/use-cases/account/create-account/CreateAccountUseCase.ts)
 
@@ -200,10 +206,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário acessa seção de contas
 2. Clica em "Nova Conta"
 3. Preenche dados da conta
@@ -215,17 +223,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 9. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ter entre 2-50 caracteres
 - ✅ Tipo deve ser válido (CHECKING, SAVINGS, etc.)
 - ✅ Saldo inicial pode ser zero ou positivo
 - ✅ Conta criada deve aparecer na lista
 
-**Domain Events**:
-- `AccountCreatedEvent`
-
 ---
 
 ### ✅ UC006: Editar Conta
+
 **Status**: Implementado  
 **Arquivo**: [`UpdateAccountUseCase.ts`](../src/application/use-cases/account/update-account/UpdateAccountUseCase.ts)
 
@@ -234,11 +241,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Conta existe no orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona conta
 2. Clica em "Editar"
 3. Modifica dados permitidos
@@ -248,16 +257,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ser único no orçamento
 - ✅ Tipo pode ser alterado se não houver restrições
 - ✅ Saldo não pode ser alterado diretamente
 
-**Domain Events**:
-- `AccountUpdatedEvent`
-
 ---
 
 ### ✅ UC008: Excluir Conta
+
 **Status**: Implementado  
 **Arquivo**: [`DeleteAccountUseCase.ts`](../src/application/use-cases/account/delete-account/DeleteAccountUseCase.ts)
 
@@ -266,12 +274,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Conta existe no orçamento
 - Conta não possui transações pendentes
 
 **Fluxo Principal**:
+
 1. Usuário seleciona conta
 2. Clica em "Excluir"
 3. Sistema verifica dependências
@@ -281,16 +291,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Não pode excluir conta com saldo diferente de zero
 - ✅ Não pode excluir conta com transações ativas
 - ✅ Exclusão é lógica (soft delete)
 
-**Domain Events**:
-- `AccountDeletedEvent`
 
 ---
 
 ### ✅ UC009: Transferir entre Contas
+
 **Status**: Implementado  
 **Arquivo**: [`TransferBetweenAccountsUseCase.ts`](../src/application/use-cases/account/transfer-between-accounts/TransferBetweenAccountsUseCase.ts)
 
@@ -299,12 +309,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Ambas as contas existem no orçamento
 - Conta origem tem saldo suficiente
 
 **Fluxo Principal**:
+
 1. Usuário acessa transferências
 2. Seleciona conta de origem
 3. Seleciona conta de destino
@@ -316,17 +328,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 9. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Valor deve ser positivo
 - ✅ Conta origem deve ter saldo suficiente
 - ✅ Operação deve ser atômica (Unit of Work)
 - ✅ Duas transações são criadas (débito e crédito)
 
-**Domain Events**:
-- `TransferBetweenAccountsExecutedEvent`
-
 ---
 
 ### ✅ UC010: Reconciliar Saldo
+
 **Status**: Implementado
 **Arquivo**: [`ReconcileAccountUseCase.ts`](../src/application/use-cases/account/reconcile-account/ReconcileAccountUseCase.ts)
 
@@ -335,11 +346,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Conta existe no orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona conta
 2. Clica em "Reconciliar"
 3. Informa saldo real da conta
@@ -350,18 +363,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Diferença deve ser justificada
 - ✅ Transação de ajuste é claramente identificada
 - ✅ Histórico de reconciliações é mantido
 
-**Domain Events**:
-- `AccountReconciledEvent`
 
 ---
 
 ## 💸 **Gestão de Transações**
 
 ### ✅ UC011: Lançar Receita
+
 **Status**: Implementado (via CreateTransactionUseCase)  
 **Arquivo**: [`CreateTransactionUseCase.ts`](../src/application/use-cases/transaction/create-transaction/CreateTransactionUseCase.ts)
 
@@ -370,12 +383,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Conta de destino existe
 - Categoria de receita existe
 
 **Fluxo Principal**:
+
 1. Usuário acessa lançamento de transações
 2. Seleciona "Receita"
 3. Preenche descrição
@@ -390,17 +405,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 12. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Valor deve ser positivo
 - ✅ Descrição obrigatória (min 2 caracteres)
 - ✅ Categoria deve ser do tipo INCOME
 - ✅ Saldo da conta é incrementado
 
-**Domain Events**:
-- `TransactionCreatedEvent`
-
 ---
 
 ### ✅ UC012: Lançar Despesa
+
 **Status**: Implementado (via CreateTransactionUseCase)  
 **Arquivo**: [`CreateTransactionUseCase.ts`](../src/application/use-cases/transaction/create-transaction/CreateTransactionUseCase.ts)
 
@@ -409,6 +423,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Conta de origem existe
@@ -416,6 +431,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 - Categoria de despesa existe
 
 **Fluxo Principal**:
+
 1. Usuário acessa lançamento de transações
 2. Seleciona "Despesa"
 3. Preenche descrição
@@ -431,18 +447,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 13. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Valor deve ser positivo
 - ✅ Descrição obrigatória (min 2 caracteres)
 - ✅ Categoria deve ser do tipo EXPENSE
 - ✅ Conta deve ter saldo suficiente
 - ✅ Saldo da conta é decrementado
 
-**Domain Events**:
-- `TransactionCreatedEvent`
 
 ---
 
 ### ✅ UC013: Registrar Transação (Qualquer Data)
+
 **Status**: Implementado (via CreateTransactionUseCase)
 **Arquivo**: [`CreateTransactionUseCase.ts`](../src/application/use-cases/transaction/create-transaction/CreateTransactionUseCase.ts)
 
@@ -451,12 +467,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 - Conta existe
 - Categoria existe
 
 **Fluxo Principal**:
+
 1. Usuário acessa lançamento de transações
 2. Preenche dados da transação
 3. Define data (passada, presente ou futura)
@@ -468,17 +486,17 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 9. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Data futura → Status SCHEDULED
 - ✅ Data presente/passada → Status COMPLETED
 - ✅ Transações passadas afetam histórico
 - ✅ Transações futuras não afetam saldo atual
 
-**Domain Events**:
-- `TransactionCreatedEvent`
 
 ---
 
 ### ❌ UC014: Agendar Transação Futura
+
 **Status**: Não Implementado (Desnecessário - coberto por UC015)
 
 **Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data futura.
@@ -486,6 +504,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ---
 
 ### ❌ UC015: Registrar Transação Passada
+
 **Status**: Não Implementado (Desnecessário - coberto por UC015)
 
 **Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data passada.
@@ -493,6 +512,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ---
 
 ### ✅ UC016: Marcar Transação como Atrasada
+
 **Status**: Implementado
 **Arquivo**: [`MarkTransactionLateUseCase.ts`](../src/application/use-cases/transaction/mark-transaction-late/MarkTransactionLateUseCase.ts)
 
@@ -501,30 +521,29 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Sistema automático ou Usuário
 
 **Precondições**:
+
 - Transação está agendada (SCHEDULED)
 - Data de execução passou
 - Transação não foi executada
 
 **Fluxo Principal**:
+
 1. Sistema ou usuário identifica transação vencida
 2. Sistema valida se pode ser marcada como atrasada
 3. Sistema marca transação como LATE
 4. Sistema registra alteração
-5. Sistema publica evento
-6. Sistema exibe confirmação
+5. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Apenas transações SCHEDULED podem ser marcadas
 - ✅ Data deve ter passado
 - ✅ Status muda para LATE
-- ✅ Evento é disparado
-
-**Domain Events**:
-- `TransactionMarkedAsLateEvent`
 
 ---
 
 ### ✅ UC017: Cancelar Transação Agendada
+
 **Status**: Implementado
 **Arquivo**: [`CancelScheduledTransactionUseCase.ts`](../src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.ts)
 
@@ -533,11 +552,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Transação está agendada
 - Transação ainda não foi executada
 
 **Fluxo Principal**:
+
 1. Usuário acessa transações agendadas
 2. Seleciona transação a cancelar
 3. Clica em "Cancelar"
@@ -548,16 +569,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Apenas transações não executadas podem ser canceladas
 - ✅ Motivo do cancelamento é registrado
 - ✅ Histórico preserva o cancelamento
 
-**Domain Events**:
-- `ScheduledTransactionCancelledEvent`
-
 ---
 
 ### ✅ UC018: Editar Transação
+
 **Status**: Implementado  
 **Arquivo**: [`UpdateTransactionUseCase.ts`](../src/application/use-cases/transaction/update-transaction/UpdateTransactionUseCase.ts)
 
@@ -566,11 +586,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Transação existe
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona transação
 2. Clica em "Editar"
 3. Modifica dados permitidos
@@ -581,16 +603,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Alterações de valor recalculam saldos
 - ✅ Histórico de alterações é mantido
 - ✅ Validações são reaplicadas
 
-**Domain Events**:
-- `TransactionUpdatedEvent`
-
 ---
 
 ### ✅ UC019: Excluir Transação
+
 **Status**: Implementado  
 **Arquivo**: [`DeleteTransactionUseCase.ts`](../src/application/use-cases/transaction/delete-transaction/DeleteTransactionUseCase.ts)
 
@@ -599,11 +620,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Transação existe
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona transação
 2. Clica em "Excluir"
 3. Confirma exclusão
@@ -613,18 +636,17 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Saldos são recalculados automaticamente
 - ✅ Exclusão é registrada no histórico
 - ✅ Operação é reversível por período limitado
-
-**Domain Events**:
-- `TransactionDeletedEvent`
 
 ---
 
 ## 📂 **Gestão de Categorias**
 
 ### ✅ UC020: Criar Categoria
+
 **Status**: Implementado  
 **Arquivo**: [`CreateCategoryUseCase.ts`](../src/application/use-cases/category/create-category/CreateCategoryUseCase.ts)
 
@@ -633,10 +655,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário acessa seção de categorias
 2. Clica em "Nova Categoria"
 3. Preenche nome da categoria
@@ -649,17 +673,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 10. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ter entre 2-50 caracteres
 - ✅ Tipo deve ser INCOME ou EXPENSE
 - ✅ Não pode haver duplicatas no mesmo orçamento
 - ✅ Categoria criada deve aparecer nas listas
 
-**Domain Events**:
-- `CategoryCreatedEvent`
-
 ---
 
 ### ✅ UC021: Editar Categoria
+
 **Status**: Implementado  
 **Arquivo**: [`UpdateCategoryUseCase.ts`](../src/application/use-cases/category/update-category/UpdateCategoryUseCase.ts)
 
@@ -668,11 +691,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Categoria existe no orçamento
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona categoria
 2. Clica em "Editar"
 3. Modifica dados permitidos
@@ -683,16 +708,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ser único no orçamento
 - ✅ Tipo não pode ser alterado se houver transações
 - ✅ Alterações refletem em transações existentes
 
-**Domain Events**:
-- `CategoryUpdatedEvent`
-
 ---
 
 ### ✅ UC022: Excluir Categoria
+
 **Status**: Implementado  
 **Arquivo**: [`DeleteCategoryUseCase.ts`](../src/application/use-cases/category/delete-category/DeleteCategoryUseCase.ts)
 
@@ -701,12 +725,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Categoria existe no orçamento
 - Categoria não possui transações associadas
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona categoria
 2. Clica em "Excluir"
 3. Sistema verifica dependências
@@ -716,18 +742,17 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Não pode excluir categoria com transações
 - ✅ Sistema sugere migração de transações
 - ✅ Exclusão é registrada no histórico
-
-**Domain Events**:
-- `CategoryDeletedEvent`
 
 ---
 
 ## 💳 **Gestão de Cartões de Crédito**
 
 ### ✅ UC024: Cadastrar Cartão de Crédito
+
 **Status**: Implementado  
 **Arquivo**: [`CreateCreditCardUseCase.ts`](../src/application/use-cases/credit-card/create-credit-card/CreateCreditCardUseCase.ts)
 
@@ -736,10 +761,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário acessa seção de cartões
 2. Clica em "Novo Cartão"
 3. Preenche dados do cartão
@@ -751,17 +778,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 9. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ser único no orçamento
 - ✅ Limite deve ser positivo
 - ✅ Datas devem ser válidas e consistentes
 - ✅ Cartão criado deve aparecer na lista
 
-**Domain Events**:
-- `CreditCardCreatedEvent`
-
 ---
 
 ### ✅ UC025: Editar Cartão de Crédito
+
 **Status**: Implementado  
 **Arquivo**: [`UpdateCreditCardUseCase.ts`](../src/application/use-cases/credit-card/update-credit-card/UpdateCreditCardUseCase.ts)
 
@@ -770,11 +796,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Cartão existe no orçamento
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona cartão
 2. Clica em "Editar"
 3. Modifica dados permitidos
@@ -784,16 +812,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Alteração de limite afeta disponível
 - ✅ Mudanças de datas afetam próximas faturas
 - ✅ Histórico de alterações é mantido
 
-**Domain Events**:
-- `CreditCardUpdatedEvent`
-
 ---
 
 ### ✅ UC026: Excluir Cartão de Crédito
+
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardUseCase.ts`](../src/application/use-cases/credit-card/delete-credit-card/DeleteCreditCardUseCase.ts)
 
@@ -802,12 +829,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Cartão existe no orçamento
 - Cartão não possui faturas em aberto
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona cartão
 2. Clica em "Excluir"
 3. Sistema verifica dependências
@@ -817,16 +846,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Não pode excluir cartão com faturas abertas
 - ✅ Histórico de transações é preservado
 - ✅ Exclusão é registrada
 
-**Domain Events**:
-- `CreditCardDeletedEvent`
-
 ---
 
 ### ✅ UC027: Criar Fatura do Cartão
+
 **Status**: Implementado  
 **Arquivo**: [`CreateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/create-credit-card-bill/CreateCreditCardBillUseCase.ts)
 
@@ -835,11 +863,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Sistema automático ou Usuário participante do orçamento
 
 **Precondições**:
+
 - Cartão existe no orçamento
 - Período da fatura está definido
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Sistema ou usuário solicita criação da fatura
 2. Sistema calcula período da fatura
 3. Sistema coleta transações do período
@@ -850,17 +880,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Fatura agrega transações do período correto
 - ✅ Valor total está correto
 - ✅ Datas de vencimento e fechamento são respeitadas
 - ✅ Status inicial é "ABERTA"
 
-**Domain Events**:
-- `CreditCardBillCreatedEvent`
-
 ---
 
 ### ✅ UC028: Atualizar Fatura do Cartão
+
 **Status**: Implementado  
 **Arquivo**: [`UpdateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/update-credit-card-bill/UpdateCreditCardBillUseCase.ts)
 
@@ -869,12 +898,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Fatura existe no sistema
 - Usuário tem acesso ao orçamento
 - Fatura ainda pode ser alterada
 
 **Fluxo Principal**:
+
 1. Usuário seleciona fatura
 2. Clica em "Editar Fatura"
 3. Modifica dados permitidos
@@ -885,16 +916,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Apenas faturas não pagas podem ser alteradas
 - ✅ Alterações recalculam totais automaticamente
 - ✅ Datas devem ser consistentes
 
-**Domain Events**:
-- `CreditCardBillUpdatedEvent`
-
 ---
 
 ### ✅ UC029: Excluir Fatura do Cartão
+
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/delete-credit-card-bill/DeleteCreditCardBillUseCase.ts)
 
@@ -903,12 +933,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Fatura existe no sistema
 - Fatura não está paga
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona fatura
 2. Clica em "Excluir Fatura"
 3. Sistema verifica status
@@ -919,16 +951,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Apenas faturas não pagas podem ser excluídas
 - ✅ Transações associadas são liberadas
 - ✅ Exclusão é registrada no histórico
 
-**Domain Events**:
-- `CreditCardBillDeletedEvent`
-
 ---
 
 ### ✅ UC030: Marcar Fatura como Paga
+
 **Status**: Implementado
 **Arquivo**: [`PayCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/pay-credit-card-bill/PayCreditCardBillUseCase.ts)
 
@@ -937,11 +968,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Fatura existe e está em aberto
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário acessa fatura em aberto
 2. Clica em "Marcar como Paga"
 3. Informa dados do pagamento
@@ -952,18 +985,17 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Valor do pagamento deve ser informado
 - ✅ Data do pagamento é registrada
 - ✅ Saldo da conta é debitado
 - ✅ Validação de orçamento realizada no domain service
 - ✅ Unit of Work garante atomicidade da operação
 
-**Domain Events**:
-- `CreditCardBillPaidEvent`
-
 ---
 
 ### ✅ UC031: Reabrir Fatura
+
 **Status**: Implementado
 **Arquivo**: [`ReopenCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/reopen-bill/ReopenCreditCardBillUseCase.ts)
 
@@ -972,11 +1004,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Fatura está marcada como paga
 - Reabrir é permitido (prazo)
 
 **Fluxo Principal**:
+
 1. Usuário acessa histórico de faturas
 2. Seleciona fatura paga
 3. Clica em "Reabrir"
@@ -987,16 +1021,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Apenas faturas recentes podem ser reabertas
 - ✅ Transação de pagamento é estornada
 - ✅ Justificativa é obrigatória
 
-**Domain Events**:
-- `CreditCardBillReopenedEvent`
-
 ---
 
 ### ❌ UC032: Controlar Limite do Cartão
+
 **Status**: Não Implementado
 
 **Descrição**: Monitora e controla o uso do limite do cartão de crédito.
@@ -1004,10 +1037,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Sistema automático + Usuário
 
 **Precondições**:
+
 - Cartão está cadastrado
 - Transações estão sendo registradas
 
 **Fluxo Principal**:
+
 1. Sistema monitora transações
 2. Calcula limite utilizado
 3. Verifica percentual de uso
@@ -1016,19 +1051,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 6. Notifica usuário
 
 **Critérios de Aceitação**:
+
 - ❌ Alertas em 80% e 95% do limite
 - ❌ Usuário pode configurar alertas
 - ❌ Histórico de uso é mantido
 
-**Domain Events**:
-- `CreditCardLimitWarningEvent`
-- `CreditCardLimitExceededEvent`
 
 ---
 
 ## 🎯 **Gestão de Metas**
 
 ### ✅ UC033: Criar Meta
+
 **Status**: Implementado  
 **Arquivo**: [`CreateGoalUseCase.ts`](../src/application/use-cases/goal/create-goal/CreateGoalUseCase.ts)
 
@@ -1037,10 +1071,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário acessa seção de metas
 2. Clica em "Nova Meta"
 3. Preenche dados da meta
@@ -1053,17 +1089,16 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 10. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Nome deve ter entre 2-100 caracteres
 - ✅ Valor objetivo deve ser positivo
 - ✅ Prazo deve ser futuro
 - ✅ Conta vinculada deve existir
 
-**Domain Events**:
-- `GoalCreatedEvent`
-
 ---
 
 ### ✅ UC034: Editar Meta
+
 **Status**: Implementado  
 **Arquivo**: [`UpdateGoalUseCase.ts`](../src/application/use-cases/goal/update-goal/UpdateGoalUseCase.ts)
 
@@ -1072,11 +1107,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Meta existe no orçamento
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona meta
 2. Clica em "Editar"
 3. Modifica dados permitidos
@@ -1087,16 +1124,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Alterações recalculam automaticamente o progresso
 - ✅ Histórico de alterações é mantido
 - ✅ Prazo não pode ser passado
 
-**Domain Events**:
-- `GoalUpdatedEvent`
-
 ---
 
 ### ✅ UC035: Excluir Meta
+
 **Status**: Implementado  
 **Arquivo**: [`DeleteGoalUseCase.ts`](../src/application/use-cases/goal/delete-goal/DeleteGoalUseCase.ts)
 
@@ -1105,11 +1141,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Meta existe no orçamento
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário seleciona meta
 2. Clica em "Excluir"
 3. Confirma exclusão
@@ -1119,16 +1157,15 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 7. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Histórico de aportes é preservado
 - ✅ Exclusão é registrada no histórico
 - ✅ Aportes podem ser transferidos para conta
 
-**Domain Events**:
-- `GoalDeletedEvent`
-
 ---
 
 ### ✅ UC036: Fazer Aporte Manual
+
 **Status**: Implementado  
 **Arquivo**: [`AddAmountToGoalUseCase.ts`](../src/application/use-cases/goal/add-amount-to-goal/AddAmountToGoalUseCase.ts)
 
@@ -1137,11 +1174,13 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Meta existe e está ativa
 - Conta origem tem saldo suficiente
 
 **Fluxo Principal**:
+
 1. Usuário seleciona meta
 2. Clica em "Fazer Aporte"
 3. Informa valor do aporte
@@ -1154,19 +1193,18 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 10. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ✅ Valor deve ser positivo
 - ✅ Conta origem deve ter saldo suficiente
 - ✅ Progresso da meta é atualizado automaticamente
 - ✅ Histórico de aportes é mantido
-
-**Domain Events**:
-- `ManualContributionAddedToGoalEvent`
 
 ---
 
 ## 💰 **Sistema de Envelopes**
 
 ### ❌ UC037: Criar Envelope
+
 **Status**: Não Implementado
 
 **Descrição**: Cria um envelope para alocação de valores por categoria.
@@ -1174,10 +1212,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 **Ator**: Usuário participante do orçamento
 
 **Precondições**:
+
 - Usuário logado no sistema
 - Usuário tem acesso ao orçamento
 
 **Fluxo Principal**:
+
 1. Usuário acessa sistema de envelopes
 2. Clica em "Novo Envelope"
 3. Preenche dados do envelope
@@ -1189,144 +1229,116 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 9. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
+
 - ❌ Nome deve ser único no orçamento
 - ❌ Valor mensal deve ser positivo
 - ❌ Pode ser associado a múltiplas categorias
 
-**Domain Events**:
-- `EnvelopeCreatedEvent`
-
 ---
 
 ### ❌ UC038: Editar Envelope
+
 **Status**: Não Implementado
 
 **Descrição**: Edita configurações de um envelope existente.
 
-**Domain Events**:
-- `EnvelopeUpdatedEvent`
-
 ---
 
 ### ❌ UC039: Excluir Envelope
+
 **Status**: Não Implementado
 
 **Descrição**: Exclui um envelope que não possui saldo.
 
-**Domain Events**:
-- `EnvelopeDeletedEvent`
-
 ---
 
 ### ❌ UC040: Fazer Aporte no Envelope
+
 **Status**: Não Implementado
 
 **Descrição**: Adiciona valor a um envelope específico.
 
-**Domain Events**:
-- `EnvelopeContributionAddedEvent`
-
 ---
 
 ### ❌ UC041: Retirar Valor do Envelope
+
 **Status**: Não Implementado
 
 **Descrição**: Retira valor de um envelope para uso.
 
-**Domain Events**:
-- `EnvelopeWithdrawalEvent`
-
 ---
 
 ### ❌ UC042: Transferir Entre Envelopes
+
 **Status**: Não Implementado
 
 **Descrição**: Transfere valor entre diferentes envelopes.
 
-**Domain Events**:
-- `EnvelopeTransferEvent`
-
 ---
 
 ### ❌ UC043: Configurar Envelope Automático
+
 **Status**: Não Implementado
 
 **Descrição**: Configura aporte automático mensal para envelope.
-
-**Domain Events**:
-- `AutomaticEnvelopeConfiguredEvent`
 
 ---
 
 ## 🔔 **Alertas e Notificações**
 
 ### ❌ UC044: Configurar Alerta de Orçamento
+
 **Status**: Não Implementado
 
 **Descrição**: Configura alertas quando gastos se aproximam do limite.
 
-**Domain Events**:
-- `BudgetAlertConfiguredEvent`
-
 ---
 
 ### ❌ UC045: Configurar Alerta de Meta
+
 **Status**: Não Implementado
 
 **Descrição**: Configura alertas relacionados ao progresso das metas.
 
-**Domain Events**:
-- `GoalAlertConfiguredEvent`
-
 ---
 
 ### ❌ UC046: Configurar Lembrete de Vencimento
+
 **Status**: Não Implementado
 
 **Descrição**: Configura lembretes para datas de vencimento.
 
-**Domain Events**:
-- `DueDateReminderConfiguredEvent`
-
 ---
 
 ### ❌ UC047: Receber Notificação de Limite
+
 **Status**: Não Implementado
 
 **Descrição**: Recebe notificação quando limites são atingidos.
 
-**Domain Events**:
-- `LimitNotificationSentEvent`
-
 ---
 
 ### ❌ UC048: Receber Alerta de Oportunidade
+
 **Status**: Não Implementado
 
 **Descrição**: Recebe alertas sobre oportunidades de economia.
 
-**Domain Events**:
-- `OpportunityAlertSentEvent`
-
 ---
 
 ### ❌ UC049: Personalizar Canais de Notificação
+
 **Status**: Não Implementado
 
 **Descrição**: Configura como e onde receber notificações.
 
-**Domain Events**:
-- `NotificationChannelsConfiguredEvent`
-
 ---
 
 ### ❌ UC052: Configurar Frequência de Alertas
+
 **Status**: Não Implementado
 
 **Descrição**: Define com que frequência receber cada tipo de alerta.
-
-**Domain Events**:
-- `AlertFrequencyConfiguredEvent`
 
 ---
 
@@ -1338,9 +1350,11 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
+
    - UC032: Controlar Limite do Cartão
 
 2. **Média Prioridade** (Features Importantes):
+
    - Sistema de Envelopes (UC037-UC043)
    - UC023: Personalizar Categorias por Orçamento
 
@@ -1351,4 +1365,4 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-**Última Atualização**: Agosto/2025 - UC003 (Adicionar Usuário ao Orçamento) implementado com arquitetura completa incluindo BudgetType value object, domain events, domain errors e validações de tipo de orçamento. Implementação inclui 51 testes automatizados cobrindo todas as camadas (Domain, Application, Infrastructure).
+**Última Atualização**: Agosto/2025 - UC003 (Adicionar Usuário ao Orçamento) implementado com arquitetura completa incluindo BudgetType value object, domain errors e validações de tipo de orçamento. Implementação inclui 51 testes automatizados cobrindo todas as camadas (Domain, Application, Infrastructure).

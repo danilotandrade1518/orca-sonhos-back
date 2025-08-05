@@ -1,16 +1,15 @@
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetBudgetRepository } from '../../../contracts/repositories/budget/IGetBudgetRepository';
 import { ISaveBudgetRepository } from '../../../contracts/repositories/budget/ISaveBudgetRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { BudgetNotFoundError } from '../../../shared/errors/BudgetNotFoundError';
+import { BudgetPersistenceFailedError } from '../../../shared/errors/BudgetPersistenceFailedError';
 import { BudgetRepositoryError } from '../../../shared/errors/BudgetRepositoryError';
+import { BudgetUpdateFailedError } from '../../../shared/errors/BudgetUpdateFailedError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
-import { BudgetPersistenceFailedError } from '../../../shared/errors/BudgetPersistenceFailedError';
-import { BudgetUpdateFailedError } from '../../../shared/errors/BudgetUpdateFailedError';
 import { RemoveParticipantFromBudgetDto } from './RemoveParticipantFromBudgetDto';
 
 export class RemoveParticipantFromBudgetUseCase
@@ -20,7 +19,6 @@ export class RemoveParticipantFromBudgetUseCase
     private getBudgetRepository: IGetBudgetRepository,
     private saveBudgetRepository: ISaveBudgetRepository,
     private budgetAuthorizationService: IBudgetAuthorizationService,
-    private eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -64,16 +62,6 @@ export class RemoveParticipantFromBudgetUseCase
 
     if (saveResult.hasError) {
       return Either.error(new BudgetPersistenceFailedError());
-    }
-
-    const events = budget.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        budget.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: budget.id });

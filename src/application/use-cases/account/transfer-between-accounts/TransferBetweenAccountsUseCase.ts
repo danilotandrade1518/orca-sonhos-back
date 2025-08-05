@@ -3,7 +3,6 @@ import { TransferBetweenAccountsDomainService } from '@domain/aggregates/account
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { ITransferBetweenAccountsUnitOfWork } from '../../../contracts/unit-of-works/ITransferBetweenAccountsUnitOfWork';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
@@ -23,7 +22,6 @@ export class TransferBetweenAccountsUseCase
     private readonly getAccountRepository: IGetAccountRepository,
     private readonly transferUnitOfWork: ITransferBetweenAccountsUnitOfWork,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
     private readonly transferCategoryId: string,
   ) {
     this.transferBetweenAccountsDomainService =
@@ -99,12 +97,8 @@ export class TransferBetweenAccountsUseCase
       );
     }
 
-    const {
-      debitTransaction,
-      creditTransaction,
-      fromAccountEvent,
-      toAccountEvent,
-    } = transferOperationResult.data!;
+    const { debitTransaction, creditTransaction } =
+      transferOperationResult.data!;
 
     const executeResult = await this.transferUnitOfWork.executeTransfer({
       fromAccount,
@@ -117,12 +111,6 @@ export class TransferBetweenAccountsUseCase
       return Either.errors<DomainError | ApplicationError, UseCaseResponse>(
         executeResult.errors,
       );
-    }
-
-    try {
-      await this.eventPublisher.publishMany([fromAccountEvent, toAccountEvent]);
-    } catch (error) {
-      console.error('Failed to publish domain events:', error);
     }
 
     return Either.success<DomainError | ApplicationError, UseCaseResponse>({

@@ -16,7 +16,6 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 ### **Domain Layer**
 - [x] `src/domain/aggregates/transaction/value-objects/cancellation-reason/CancellationReason.ts`
 - [x] `src/domain/aggregates/transaction/value-objects/cancellation-reason/CancellationReason.spec.ts`
-- [x] `src/domain/aggregates/transaction/events/ScheduledTransactionCancelledEvent.ts`
 - [x] Extensão: `src/domain/aggregates/transaction/transaction-entity/Transaction.ts` (método `cancel()`)
 - [x] Testes: `src/domain/aggregates/transaction/transaction-entity/Transaction.spec.ts`
 
@@ -47,7 +46,6 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 - Valida se não foi executada ainda
 - Atualiza status para CANCELLED
 - Registra data e motivo do cancelamento
-- Dispara ScheduledTransactionCancelledEvent
 ```
 
 ## 📋 **Use Case Specifications**
@@ -77,7 +75,6 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 4. Validar motivo do cancelamento
 5. Cancelar transação (domain)
 6. Persistir alterações via Unit of Work
-7. Publicar evento de cancelamento
 8. Retornar confirmação
 
 ### **Business Rules**
@@ -118,7 +115,6 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 - ✅ Transaction aggregate (já implementado)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 - ✅ Transaction scheduling system
 
 ## 📊 **Acceptance Criteria**
@@ -127,7 +123,6 @@ Permitir que o usuário cancele transações que foram agendadas para datas futu
 - [x] Transações executadas não podem ser canceladas
 - [x] Motivo do cancelamento é obrigatório
 - [x] Status muda para CANCELLED
-- [x] Evento de cancelamento é disparado
 - [x] Transação não será mais executada automaticamente
 
 ## 🚀 **Definition of Done**

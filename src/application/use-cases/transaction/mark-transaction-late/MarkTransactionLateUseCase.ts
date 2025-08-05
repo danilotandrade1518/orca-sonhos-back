@@ -1,7 +1,6 @@
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
 import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
@@ -16,7 +15,6 @@ export class MarkTransactionLateUseCase
   constructor(
     private readonly getTransactionRepository: IGetTransactionRepository,
     private readonly saveTransactionRepository: ISaveTransactionRepository,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(dto: MarkTransactionLateDto) {
@@ -43,16 +41,6 @@ export class MarkTransactionLateUseCase
       return Either.errors<ApplicationError | DomainError, UseCaseResponse>([
         new TransactionPersistenceFailedError(),
       ]);
-    }
-
-    const events = transaction.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        transaction.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success<ApplicationError | DomainError, UseCaseResponse>({

@@ -1,7 +1,6 @@
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IDeleteTransactionRepository } from '../../../contracts/repositories/transaction/IDeleteTransactionRepository';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
@@ -19,7 +18,6 @@ export class DeleteTransactionUseCase
     private readonly getTransactionRepository: IGetTransactionRepository,
     private readonly deleteTransactionRepository: IDeleteTransactionRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(dto: DeleteTransactionDto) {
@@ -74,16 +72,6 @@ export class DeleteTransactionUseCase
       return Either.errors<ApplicationError, UseCaseResponse>([
         new TransactionPersistenceFailedError(),
       ]);
-    }
-
-    const events = deletedTransaction.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        deletedTransaction.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success<ApplicationError, UseCaseResponse>({

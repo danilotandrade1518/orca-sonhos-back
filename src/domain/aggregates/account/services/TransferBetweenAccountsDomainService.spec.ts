@@ -16,7 +16,7 @@ describe('TransferBetweenAccountsDomainService', () => {
   });
 
   describe('createTransferOperation', () => {
-    it('should create transfer operation with proper transactions and events', () => {
+    it('should create transfer operation with proper transactions', () => {
       const fromAccount = Account.create({
         name: 'From Account',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
@@ -45,8 +45,6 @@ describe('TransferBetweenAccountsDomainService', () => {
       expect(result.hasError).toBe(false);
       expect(result.data!.debitTransaction).toBeDefined();
       expect(result.data!.creditTransaction).toBeDefined();
-      expect(result.data!.fromAccountEvent).toBeDefined();
-      expect(result.data!.toAccountEvent).toBeDefined();
     });
 
     it('should return error when accounts belong to different budgets', async () => {

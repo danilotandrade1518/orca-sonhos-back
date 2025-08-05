@@ -69,8 +69,7 @@ Permitir que o usuário registre transações que já aconteceram em datas passa
 5. Criar transação com data passada
 6. Aplicar transação na conta (atualizar saldo)
 7. Persistir via Unit of Work
-8. Publicar evento de transação criada
-9. Retornar dados da transação
+8. Retornar dados da transação
 
 ### **Business Rules**
 - [ ] Data máxima no passado: 1 ano
@@ -111,14 +110,12 @@ Permitir que o usuário registre transações que já aconteceram em datas passa
 - ✅ Category aggregate (já implementado)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 
 ## 📊 **Acceptance Criteria**
 - [ ] Usuário pode registrar transações com data passada
 - [ ] Sistema valida limite de 1 ano no passado
 - [ ] Data futura é rejeitada
 - [ ] Transação é aplicada no saldo atual da conta
-- [ ] Evento de transação criada é disparado
 - [ ] Transação aparece no histórico com data correta
 - [ ] Validações normais são aplicadas
 

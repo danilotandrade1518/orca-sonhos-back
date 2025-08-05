@@ -3,5 +3,4 @@ export interface ReconcileAccountDto {
   budgetId: string;
   accountId: string;
   realBalance: number;
-  justification: string;
 }

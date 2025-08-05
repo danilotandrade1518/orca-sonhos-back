@@ -509,7 +509,7 @@ describe('Account', () => {
         initialBalance: 1000,
       }).data!;
 
-      const result = acc.reconcile(1500, 'Ajuste de deposito');
+      const result = acc.reconcile(1500);
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(500);
       expect(acc.balance).toBe(1500);
@@ -523,7 +523,7 @@ describe('Account', () => {
         initialBalance: 1000,
       }).data!;
 
-      const result = acc.reconcile(800, 'Tarifa bancaria');
+      const result = acc.reconcile(800);
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(-200);
       expect(acc.balance).toBe(800);
@@ -537,7 +537,7 @@ describe('Account', () => {
         initialBalance: 1000,
       }).data!;
 
-      const result = acc.reconcile(1000, 'Sem diferenca');
+      const result = acc.reconcile(1000);
       expect(result.hasError).toBe(true);
     });
   });

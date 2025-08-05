@@ -9,11 +9,6 @@ import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
 import { GoalAlreadyAchievedError } from '../errors/GoalAlreadyAchievedError';
 import { GoalAlreadyDeletedError } from '../errors/GoalAlreadyDeletedError';
 import { InvalidGoalAmountError } from '../errors/InvalidGoalAmountError';
-import { GoalCreatedEvent } from '../events/GoalCreatedEvent';
-import { GoalUpdatedEvent } from '../events/GoalUpdatedEvent';
-import { GoalDeletedEvent } from '../events/GoalDeletedEvent';
-import { GoalAmountAddedEvent } from '../events/GoalAmountAddedEvent';
-import { GoalAchievedEvent } from '../events/GoalAchievedEvent';
 
 export interface CreateGoalDTO {
   name: string;
@@ -115,28 +110,6 @@ export class Goal extends AggregateRoot implements IEntity {
     this._accumulatedAmount = newAccumulatedVo;
     this._updatedAt = new Date();
 
-    this.addEvent(
-      new GoalAmountAddedEvent(
-        this.id,
-        amount,
-        this.accumulatedAmount,
-        this.budgetId,
-      ),
-    );
-
-    const achievedNow = this.isAchieved();
-    if (achievedNow) {
-      this.addEvent(
-        new GoalAchievedEvent(
-          this.id,
-          this.name,
-          this.totalAmount,
-          new Date(),
-          this.budgetId,
-        ),
-      );
-    }
-
     return Either.success();
   }
 
@@ -156,10 +129,6 @@ export class Goal extends AggregateRoot implements IEntity {
     if (data.totalAmount < this.accumulatedAmount)
       return Either.error<DomainError, void>(new InvalidGoalAmountError());
 
-    const prevName = this.name;
-    const prevTotal = this.totalAmount;
-    const prevDeadline = this.deadline;
-
     let changed = false;
     if (nameVo.value!.name !== this.name) {
       this._name = nameVo;
@@ -174,20 +143,7 @@ export class Goal extends AggregateRoot implements IEntity {
       changed = true;
     }
 
-    if (changed) {
-      this._updatedAt = new Date();
-      this.addEvent(
-        new GoalUpdatedEvent(
-          this.id,
-          prevName,
-          this.name,
-          prevTotal,
-          this.totalAmount,
-          prevDeadline,
-          this._deadline,
-        ),
-      );
-    }
+    if (changed) this._updatedAt = new Date();
 
     return Either.success();
   }
@@ -198,8 +154,6 @@ export class Goal extends AggregateRoot implements IEntity {
 
     this._isDeleted = true;
     this._updatedAt = new Date();
-
-    this.addEvent(new GoalDeletedEvent(this.id, this.name, this.budgetId));
 
     return Either.success();
   }
@@ -261,16 +215,6 @@ export class Goal extends AggregateRoot implements IEntity {
       data.deadline,
       budgetIdVo,
       accumulatedAmountVo,
-    );
-
-    goal.addEvent(
-      new GoalCreatedEvent(
-        goal.id,
-        goal.name,
-        goal.totalAmount,
-        goal.deadline,
-        goal.budgetId,
-      ),
     );
 
     return Either.success<DomainError, Goal>(goal);

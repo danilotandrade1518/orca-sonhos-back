@@ -7,7 +7,6 @@ import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotF
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
 import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { MarkTransactionLateDto } from './MarkTransactionLateDto';
 import { MarkTransactionLateUseCase } from './MarkTransactionLateUseCase';
 
@@ -15,13 +14,11 @@ describe('MarkTransactionLateUseCase', () => {
   let useCase: MarkTransactionLateUseCase;
   let getTransactionRepositoryStub: GetTransactionRepositoryStub;
   let saveTransactionRepositoryStub: SaveTransactionRepositoryStub;
-  let eventPublisherStub: EventPublisherStub;
   let transaction: Transaction;
 
   beforeEach(() => {
     getTransactionRepositoryStub = new GetTransactionRepositoryStub();
     saveTransactionRepositoryStub = new SaveTransactionRepositoryStub();
-    eventPublisherStub = new EventPublisherStub();
 
     const txResult = Transaction.create({
       description: 'test',
@@ -34,13 +31,11 @@ describe('MarkTransactionLateUseCase', () => {
       status: TransactionStatusEnum.SCHEDULED,
     });
     transaction = txResult.data!;
-    transaction.clearEvents();
     getTransactionRepositoryStub.mockTransaction = transaction;
 
     useCase = new MarkTransactionLateUseCase(
       getTransactionRepositoryStub,
       saveTransactionRepositoryStub,
-      eventPublisherStub,
     );
   });
 
@@ -51,7 +46,6 @@ describe('MarkTransactionLateUseCase', () => {
     expect(result.hasError).toBe(false);
     expect(saveTransactionRepositoryStub.shouldFail).toBeFalsy();
     expect(transaction.status).toBe(TransactionStatusEnum.LATE);
-    expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
   });
 
   it('should return error when transaction not found', async () => {

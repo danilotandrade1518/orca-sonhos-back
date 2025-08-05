@@ -1,17 +1,16 @@
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { ICheckAccountDependenciesRepository } from '../../../contracts/repositories/account/ICheckAccountDependenciesRepository';
 import { IDeleteAccountRepository } from '../../../contracts/repositories/account/IDeleteAccountRepository';
 import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
-import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
-import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { AccountDeletionFailedError } from '../../../shared/errors/AccountDeletionFailedError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
+import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { CannotDeleteAccountWithTransactionsError } from '../../../shared/errors/CannotDeleteAccountWithTransactionsError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
+import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { DeleteAccountDto } from './DeleteAccountDto';
 
 export class DeleteAccountUseCase implements IUseCase<DeleteAccountDto> {
@@ -20,7 +19,6 @@ export class DeleteAccountUseCase implements IUseCase<DeleteAccountDto> {
     private readonly deleteAccountRepository: IDeleteAccountRepository,
     private readonly checkAccountDependenciesRepository: ICheckAccountDependenciesRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -76,16 +74,6 @@ export class DeleteAccountUseCase implements IUseCase<DeleteAccountDto> {
 
     if (deleteResult.hasError) {
       return Either.error(new AccountDeletionFailedError());
-    }
-
-    const events = account.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        account.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: account.id });

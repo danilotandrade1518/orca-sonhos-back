@@ -1,14 +1,9 @@
 import { InvalidEntityIdError } from '../../../shared/errors/InvalidEntityIdError';
 import { InvalidMoneyError } from '../../../shared/errors/InvalidMoneyError';
-import { InvalidCreditCardBillDateError } from '../errors/InvalidCreditCardBillDateError';
-import { BillStatusEnum } from '../value-objects/bill-status/BillStatus';
-import { CreditCardBillCreatedEvent } from '../events/CreditCardBillCreatedEvent';
-import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
-import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
-import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
-import { ReopeningJustification } from '../value-objects/reopening-justification/ReopeningJustification';
 import { CreditCardBillNotPaidError } from '../errors/CreditCardBillNotPaidError';
+import { InvalidCreditCardBillDateError } from '../errors/InvalidCreditCardBillDateError';
 import { ReopeningPeriodExpiredError } from '../errors/ReopeningPeriodExpiredError';
+import { BillStatusEnum } from '../value-objects/bill-status/BillStatus';
 import { CreateCreditCardBillDTO, CreditCardBill } from './CreditCardBill';
 
 const makeValidDTO = (
@@ -39,10 +34,6 @@ describe('CreditCardBill', () => {
       expect(result.data?.dueDate).toEqual(dto.dueDate);
       expect(result.data?.amount).toBe(50000);
       expect(result.data?.status).toBe(BillStatusEnum.OPEN);
-      expect(result.data?.getEvents()).toHaveLength(1);
-      expect(result.data?.getEvents()[0]).toBeInstanceOf(
-        CreditCardBillCreatedEvent,
-      );
     });
 
     it('deve criar uma fatura com status padrão "OPEN"', () => {
@@ -169,10 +160,6 @@ describe('CreditCardBill', () => {
     });
 
     describe('markAsPaid', () => {
-      beforeEach(() => {
-        bill.clearEvents();
-      });
-
       it('deve marcar a fatura como paga', () => {
         const result = bill.markAsPaid();
 
@@ -180,53 +167,37 @@ describe('CreditCardBill', () => {
         expect(bill.status).toBe(BillStatusEnum.PAID);
         expect(bill.paidAt).toBeDefined();
         expect(bill.paidAt).toBeInstanceOf(Date);
-        const events = bill.getEvents();
-        expect(events).toHaveLength(1);
-        expect(events[0]).toBeInstanceOf(CreditCardBillPaidEvent);
       });
 
       it('deve permitir marcar como paga múltiplas vezes sem erro', () => {
         bill.markAsPaid();
-        bill.clearEvents();
         const result = bill.markAsPaid();
 
         expect(result.hasError).toBe(false);
         expect(bill.status).toBe(BillStatusEnum.PAID);
-        expect(bill.getEvents()).toHaveLength(0);
       });
     });
 
     describe('delete', () => {
-      it('deve deletar fatura e emitir evento', () => {
+      it('deve deletar fatura', () => {
         const result = bill.delete();
         expect(result.hasError).toBe(false);
         expect(bill.isDeleted).toBe(true);
-        const events = bill.getEvents();
-        expect(events[events.length - 1]).toBeInstanceOf(
-          CreditCardBillDeletedEvent,
-        );
       });
     });
 
     describe('reopen', () => {
-      it('deve reabrir fatura paga e emitir evento', () => {
+      it('deve reabrir fatura paga', () => {
         bill.markAsPaid();
-        bill.clearEvents();
-        const justification = ReopeningJustification.create(
-          'Pagamento incorreto',
-        );
-        const result = bill.reopen(justification);
+
+        const result = bill.reopen();
         expect(result.hasError).toBe(false);
         expect(bill.status).toBe(BillStatusEnum.OPEN);
         expect(bill.paidAt).toBeUndefined();
-        const events = bill.getEvents();
-        expect(events).toHaveLength(1);
-        expect(events[0]).toBeInstanceOf(CreditCardBillReopenedEvent);
       });
 
       it('deve retornar erro se fatura não estiver paga', () => {
-        const justification = ReopeningJustification.create('Reabrir teste');
-        const result = bill.reopen(justification);
+        const result = bill.reopen();
         expect(result.hasError).toBe(true);
         expect(result.errors[0]).toEqual(new CreditCardBillNotPaidError());
       });
@@ -236,10 +207,8 @@ describe('CreditCardBill', () => {
         const pastDate = new Date();
         pastDate.setDate(pastDate.getDate() - 40);
         Object.defineProperty(bill, '_paidAt', { value: pastDate });
-        const justification = ReopeningJustification.create(
-          'Motivo qualquer válido',
-        );
-        const result = bill.reopen(justification);
+
+        const result = bill.reopen();
         expect(result.hasError).toBe(true);
         expect(result.errors[0]).toEqual(new ReopeningPeriodExpiredError());
       });

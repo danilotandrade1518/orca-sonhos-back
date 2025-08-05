@@ -1,14 +1,12 @@
 import { Either } from '@either';
 
 import { DomainError } from '../../../shared/DomainError';
-import { TransferDirection } from '../../../shared/enums/TransferDirection';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { Transaction } from '../../transaction/transaction-entity/Transaction';
 import { TransactionTypeEnum } from '../../transaction/value-objects/transaction-type/TransactionType';
 import { Account } from '../account-entity/Account';
 import { AccountsFromDifferentBudgetsError } from '../errors/AccountsFromDifferentBudgetsError';
 import { SameAccountTransferError } from '../errors/SameAccountTransferError';
-import { AccountTransferredEvent } from '../events/AccountTransferredEvent';
 
 export class TransferBetweenAccountsDomainService {
   createTransferOperation(
@@ -21,8 +19,6 @@ export class TransferBetweenAccountsDomainService {
     {
       debitTransaction: Transaction;
       creditTransaction: Transaction;
-      fromAccountEvent: AccountTransferredEvent;
-      toAccountEvent: AccountTransferredEvent;
     }
   > {
     const validationResult = this.canTransfer(fromAccount, toAccount, amount);
@@ -32,8 +28,6 @@ export class TransferBetweenAccountsDomainService {
         {
           debitTransaction: Transaction;
           creditTransaction: Transaction;
-          fromAccountEvent: AccountTransferredEvent;
-          toAccountEvent: AccountTransferredEvent;
         }
       >(validationResult.errors);
     }
@@ -46,8 +40,6 @@ export class TransferBetweenAccountsDomainService {
         {
           debitTransaction: Transaction;
           creditTransaction: Transaction;
-          fromAccountEvent: AccountTransferredEvent;
-          toAccountEvent: AccountTransferredEvent;
         }
       >(transferCategoryIdVO.errors);
     }
@@ -68,8 +60,6 @@ export class TransferBetweenAccountsDomainService {
         {
           debitTransaction: Transaction;
           creditTransaction: Transaction;
-          fromAccountEvent: AccountTransferredEvent;
-          toAccountEvent: AccountTransferredEvent;
         }
       >(debitTransactionResult.errors);
     }
@@ -90,31 +80,13 @@ export class TransferBetweenAccountsDomainService {
         {
           debitTransaction: Transaction;
           creditTransaction: Transaction;
-          fromAccountEvent: AccountTransferredEvent;
-          toAccountEvent: AccountTransferredEvent;
         }
       >(creditTransactionResult.errors);
     }
 
-    const fromAccountEvent = new AccountTransferredEvent(
-      fromAccount.id,
-      toAccount.id,
-      amount,
-      TransferDirection.DEBIT,
-    );
-
-    const toAccountEvent = new AccountTransferredEvent(
-      toAccount.id,
-      fromAccount.id,
-      amount,
-      TransferDirection.CREDIT,
-    );
-
     return Either.success({
       debitTransaction: debitTransactionResult.data!,
       creditTransaction: creditTransactionResult.data!,
-      fromAccountEvent,
-      toAccountEvent,
     });
   }
 

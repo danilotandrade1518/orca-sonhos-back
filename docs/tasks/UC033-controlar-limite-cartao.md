@@ -18,8 +18,6 @@ Monitorar automaticamente o uso do limite do cartão de crédito, enviando alert
 - [ ] `src/domain/aggregates/credit-card/value-objects/limit-usage/LimitUsage.spec.ts`
 - [ ] `src/domain/aggregates/credit-card/value-objects/limit-threshold/LimitThreshold.ts`
 - [ ] `src/domain/aggregates/credit-card/value-objects/limit-threshold/LimitThreshold.spec.ts`
-- [ ] `src/domain/aggregates/credit-card/events/CreditCardLimitWarningEvent.ts`
-- [ ] `src/domain/aggregates/credit-card/events/CreditCardLimitExceededEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/credit-card/credit-card-entity/CreditCard.ts` (métodos de controle de limite)
 - [ ] Testes: `src/domain/aggregates/credit-card/credit-card-entity/CreditCard.spec.ts`
 
@@ -151,14 +149,12 @@ Monitorar automaticamente o uso do limite do cartão de crédito, enviando alert
 - ✅ CreditCard aggregate (já implementado)
 - ✅ Transaction aggregate (para calcular uso)
 - ✅ Budget authorization service
-- ✅ Event publisher
 - ❌ Sistema de notificações (para alertas)
 
 ## 📊 **Acceptance Criteria**
 - [ ] Sistema monitora uso do limite automaticamente
 - [ ] Alertas em 80% e 95% por padrão
 - [ ] Usuário pode personalizar thresholds
-- [ ] Eventos são disparados quando thresholds são atingidos
 - [ ] Cálculo baseado na fatura atual
 - [ ] Bloqueio opcional quando limite excedido
 - [ ] Histórico de alertas é mantido
@@ -166,7 +162,6 @@ Monitorar automaticamente o uso do limite do cartão de crédito, enviando alert
 ## 🚀 **Definition of Done**
 - [ ] Todos os domain objects implementados e testados
 - [ ] Use cases implementados com validações completas
-- [ ] Integração com sistema de eventos funcionando
 - [ ] Cálculo de limite funcionando corretamente
 - [ ] Cobertura de testes > 90%
 - [ ] Documentação atualizada

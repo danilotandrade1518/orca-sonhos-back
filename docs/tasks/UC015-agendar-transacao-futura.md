@@ -1,6 +1,7 @@
 # UC015: Agendar Transação Futura - Implementation Checklist
 
 ## 📋 **Informações Gerais**
+
 - **Use Case**: UC015 - Agendar Transação Futura
 - **Priority**: Média
 - **Complexity**: Média
@@ -9,32 +10,36 @@
 - **Estimated Effort**: 2-3 dias
 
 ## 🎯 **Objetivo**
+
 Permitir que o usuário agende transações para serem executadas automaticamente em datas futuras, com opção de recorrência, facilitando o controle de gastos e receitas regulares.
 
 ## 📁 **Arquivos a Implementar**
 
 ### **Domain Layer**
+
 - [ ] `src/domain/aggregates/transaction/value-objects/scheduled-date/ScheduledDate.ts`
 - [ ] `src/domain/aggregates/transaction/value-objects/scheduled-date/ScheduledDate.spec.ts`
 - [ ] `src/domain/aggregates/transaction/value-objects/recurrence-pattern/RecurrencePattern.ts`
 - [ ] `src/domain/aggregates/transaction/value-objects/recurrence-pattern/RecurrencePattern.spec.ts`
 - [ ] `src/domain/aggregates/transaction/enums/TransactionStatus.ts` (adicionar SCHEDULED)
 - [ ] `src/domain/aggregates/transaction/enums/RecurrenceType.ts`
-- [ ] `src/domain/aggregates/transaction/events/TransactionScheduledEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/transaction/transaction-entity/Transaction.ts` (factory `createScheduled()`)
 - [ ] Testes: `src/domain/aggregates/transaction/transaction-entity/Transaction.spec.ts`
 
 ### **Application Layer**
+
 - [ ] `src/application/use-cases/transaction/schedule-transaction/ScheduleTransactionUseCase.ts`
 - [ ] `src/application/use-cases/transaction/schedule-transaction/ScheduleTransactionDto.ts`
 - [ ] `src/application/use-cases/transaction/schedule-transaction/ScheduleTransactionUseCase.spec.ts`
 
 ### **Contracts (Repositories)**
+
 - [ ] `src/application/contracts/repositories/transaction/IScheduleTransactionRepository.ts`
 
 ## 🧱 **Domain Objects Detalhados**
 
 ### **ScheduledDate Value Object**
+
 ```typescript
 // Validações obrigatórias:
 - Data deve ser futura (não no passado)
@@ -44,6 +49,7 @@ Permitir que o usuário agende transações para serem executadas automaticament
 ```
 
 ### **RecurrencePattern Value Object**
+
 ```typescript
 // Validações obrigatórias:
 - Tipo de recorrência válido (NONE, DAILY, WEEKLY, MONTHLY, YEARLY)
@@ -53,35 +59,38 @@ Permitir que o usuário agende transações para serem executadas automaticament
 ```
 
 ### **RecurrenceType Enum**
+
 ```typescript
 enum RecurrenceType {
   NONE = 'NONE',
   DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',
   MONTHLY = 'MONTHLY',
-  YEARLY = 'YEARLY'
+  YEARLY = 'YEARLY',
 }
 ```
 
 ### **TransactionStatus Enum (Extension)**
+
 ```typescript
 // Adicionar ao enum existente:
-SCHEDULED = 'SCHEDULED'
+SCHEDULED = 'SCHEDULED';
 ```
 
 ### **Transaction.createScheduled() Factory**
+
 ```typescript
 // Funcionalidade:
 - Aceita data futura e padrão de recorrência
 - Valida se data é futura
 - Cria transação com status SCHEDULED
 - Configura agendamento e recorrência
-- Dispara TransactionScheduledEvent
 ```
 
 ## 📋 **Use Case Specifications**
 
 ### **Input (ScheduleTransactionDto)**
+
 ```typescript
 {
   userId: string;           // ID do usuário
@@ -101,6 +110,7 @@ SCHEDULED = 'SCHEDULED'
 ```
 
 ### **Validações Obrigatórias**
+
 - [ ] Usuário deve ter acesso ao orçamento
 - [ ] Data agendada deve ser futura
 - [ ] Conta deve existir e pertencer ao orçamento
@@ -111,6 +121,7 @@ SCHEDULED = 'SCHEDULED'
 - [ ] Se recorrente, padrão deve ser válido
 
 ### **Fluxo Principal**
+
 1. Validar acesso do usuário ao orçamento
 2. Validar data de agendamento (futura)
 3. Buscar e validar conta
@@ -119,10 +130,10 @@ SCHEDULED = 'SCHEDULED'
 6. Criar transação agendada
 7. Configurar sistema de execução automática
 8. Persistir via Unit of Work
-9. Publicar evento de agendamento
-10. Retornar dados da transação agendada
+9. Retornar dados da transação agendada
 
 ### **Business Rules**
+
 - [ ] Data deve ser futura (não passada)
 - [ ] Recorrência é opcional (padrão NONE)
 - [ ] Intervalo mínimo de recorrência: 1
@@ -131,6 +142,7 @@ SCHEDULED = 'SCHEDULED'
 - [ ] Operação atômica via Unit of Work
 
 ## 🚫 **Error Scenarios**
+
 - [ ] `InvalidScheduledDateError` - Data não é futura
 - [ ] `AccountNotFoundError` - Conta não encontrada
 - [ ] `CategoryNotFoundError` - Categoria não encontrada
@@ -142,6 +154,7 @@ SCHEDULED = 'SCHEDULED'
 ## 🧪 **Test Cases**
 
 ### **Domain Tests**
+
 - [ ] ScheduledDate com datas futuras válidas
 - [ ] ScheduledDate com datas passadas (erro)
 - [ ] RecurrencePattern com padrões válidos
@@ -150,6 +163,7 @@ SCHEDULED = 'SCHEDULED'
 - [ ] Transaction.createScheduled() com data passada (erro)
 
 ### **Use Case Tests**
+
 - [ ] Agendamento simples (sem recorrência) bem-sucedido
 - [ ] Agendamento recorrente bem-sucedido
 - [ ] Falha por data passada
@@ -159,24 +173,25 @@ SCHEDULED = 'SCHEDULED'
 - [ ] Falha por falta de acesso
 
 ## 🔗 **Dependencies**
+
 - ✅ Transaction aggregate (já implementado)
 - ✅ Account aggregate (já implementado)
 - ✅ Category aggregate (já implementado)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 - ❌ Sistema de execução automática (scheduler)
 
 ## 📊 **Acceptance Criteria**
+
 - [ ] Usuário pode agendar transações para datas futuras
 - [ ] Sistema valida se data é futura
 - [ ] Usuário pode configurar recorrência opcional
 - [ ] Transação fica com status SCHEDULED
-- [ ] Evento de agendamento é disparado
 - [ ] Sistema programa execução automática
 - [ ] Recorrência funciona conforme configurado
 
 ## 🚀 **Definition of Done**
+
 - [ ] Todos os domain objects implementados e testados
 - [ ] Use case implementado com validações completas
 - [ ] Integração com Unit of Work funcionando
@@ -188,6 +203,7 @@ SCHEDULED = 'SCHEDULED'
 - [ ] Sem breaking changes em APIs existentes
 
 ## 📝 **Notes**
+
 - Sistema de execução automática pode ser implementado posteriormente
 - Considerar timezone do usuário para agendamentos
 - Recorrências complexas podem ser expandidas no futuro

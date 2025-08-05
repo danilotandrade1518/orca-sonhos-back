@@ -10,8 +10,6 @@ import { BudgetParticipants } from '../budget-participants-entity/BudgetParticip
 import { BudgetAlreadyDeletedError } from '../errors/BudgetAlreadyDeletedError';
 import { BudgetNotSharedError } from '../errors/BudgetNotSharedError';
 import { ParticipantAlreadyExistsError } from '../errors/ParticipantAlreadyExistsError';
-import { BudgetDeletedEvent } from '../events/BudgetDeletedEvent';
-import { ParticipantAddedToBudgetEvent } from '../events/ParticipantAddedToBudgetEvent';
 import {
   BudgetType,
   BudgetTypeEnum,
@@ -97,10 +95,6 @@ export class Budget extends AggregateRoot implements IEntity {
     const result = this._participants.addParticipant(userId);
     if (result.hasError) return Either.errors<DomainError, void>(result.errors);
 
-    this.addEvent(
-      new ParticipantAddedToBudgetEvent(this.id, this.id, userId, this.ownerId),
-    );
-
     this._updatedAt = new Date();
     return Either.success<DomainError, void>();
   }
@@ -133,8 +127,6 @@ export class Budget extends AggregateRoot implements IEntity {
 
     this._isDeleted = true;
     this._updatedAt = new Date();
-
-    this.addEvent(new BudgetDeletedEvent(this.id, this.ownerId, this.name));
 
     either.setData(this);
     return either;

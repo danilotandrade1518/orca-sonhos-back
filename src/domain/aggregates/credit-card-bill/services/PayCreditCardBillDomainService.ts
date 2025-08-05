@@ -1,15 +1,14 @@
 import { Either } from '@either';
 
 import { DomainError } from '../../../shared/DomainError';
+import { NotFoundError } from '../../../shared/errors/NotFoundError';
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { Account } from '../../account/account-entity/Account';
-import { CreditCardBill } from '../credit-card-bill-entity/CreditCardBill';
 import { Transaction } from '../../transaction/transaction-entity/Transaction';
 import { TransactionTypeEnum } from '../../transaction/value-objects/transaction-type/TransactionType';
-import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
-import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
+import { CreditCardBill } from '../credit-card-bill-entity/CreditCardBill';
 import { CreditCardBillAlreadyDeletedError } from '../errors/CreditCardBillAlreadyDeletedError';
 import { BillStatusEnum } from '../value-objects/bill-status/BillStatus';
-import { NotFoundError } from '../../../shared/errors/NotFoundError';
 
 export class PayCreditCardBillDomainService {
   createPaymentOperation(
@@ -24,7 +23,6 @@ export class PayCreditCardBillDomainService {
     DomainError,
     {
       debitTransaction: Transaction;
-      billPaidEvent: CreditCardBillPaidEvent;
     }
   > {
     const validationResult = this.canPayBill(bill, account, budgetId, amount);
@@ -56,16 +54,8 @@ export class PayCreditCardBillDomainService {
       return Either.errors(billMarkResult.errors);
     }
 
-    const billPaidEvent = new CreditCardBillPaidEvent(
-      bill.id,
-      bill.creditCardId,
-      amount,
-      paidAt,
-    );
-
     return Either.success({
       debitTransaction: debitTransactionResult.data!,
-      billPaidEvent,
     });
   }
 

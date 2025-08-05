@@ -15,7 +15,6 @@ Permitir que o sistema marque automaticamente transações agendadas como atrasa
 
 ### **Domain Layer**
 - [ ] `src/domain/aggregates/transaction/enums/TransactionStatus.ts` (adicionar LATE)
-- [ ] `src/domain/aggregates/transaction/events/TransactionMarkedAsLateEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/transaction/transaction-entity/Transaction.ts` (método `markAsLate()`)
 - [ ] Testes: `src/domain/aggregates/transaction/transaction-entity/Transaction.spec.ts`
 
@@ -44,7 +43,6 @@ LATE = 'LATE'
 - Valida se data de execução já passou
 - Atualiza status para LATE
 - Registra data em que foi marcada como atrasada
-- Dispara TransactionMarkedAsLateEvent
 ```
 
 ### **TransactionSchedulerService**
@@ -79,7 +77,6 @@ LATE = 'LATE'
    - Validar se pode ser marcada como atrasada
    - Marcar transação como atrasada (domain)
    - Persistir alteração
-   - Publicar evento de atraso
 4. Gerar relatório de transações marcadas como atrasadas
 
 ### **Business Rules**
@@ -119,7 +116,6 @@ LATE = 'LATE'
 
 ## 🔗 **Dependencies**
 - ✅ Transaction aggregate (já implementado)
-- ✅ Event publisher
 - ❌ Sistema de notificações (pode ser stub inicial)
 - ❌ Scheduler para execução automática diária
 
@@ -127,7 +123,6 @@ LATE = 'LATE'
 - [ ] Sistema marca automaticamente transações vencidas como atrasadas
 - [ ] Verificação executa diariamente de forma automática
 - [ ] Status muda de SCHEDULED para LATE
-- [ ] Evento de atraso é disparado
 - [ ] Data de marcação é registrada
 - [ ] Usuário é notificado sobre transações atrasadas
 - [ ] Transações atrasadas aparecem em relatórios específicos

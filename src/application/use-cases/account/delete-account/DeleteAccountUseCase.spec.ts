@@ -1,17 +1,15 @@
 import { Account } from '@domain/aggregates/account/account-entity/Account';
-import { AccountDeletedEvent } from '@domain/aggregates/account/events/AccountDeletedEvent';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { CannotDeleteAccountWithTransactionsError } from '../../../shared/errors/CannotDeleteAccountWithTransactionsError';
 import { AccountDeletionFailedError } from '../../../shared/errors/AccountDeletionFailedError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
+import { CannotDeleteAccountWithTransactionsError } from '../../../shared/errors/CannotDeleteAccountWithTransactionsError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { CheckAccountDependenciesRepositoryStub } from '../../../shared/tests/stubs/CheckAccountDependenciesRepositoryStub';
 import { DeleteAccountRepositoryStub } from '../../../shared/tests/stubs/DeleteAccountRepositoryStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { DeleteAccountDto } from './DeleteAccountDto';
 import { DeleteAccountUseCase } from './DeleteAccountUseCase';
@@ -22,7 +20,6 @@ describe('DeleteAccountUseCase', () => {
   let deleteAccountRepositoryStub: DeleteAccountRepositoryStub;
   let checkAccountDependenciesRepositoryStub: CheckAccountDependenciesRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let mockAccount: Account;
 
   beforeEach(() => {
@@ -31,7 +28,6 @@ describe('DeleteAccountUseCase', () => {
     checkAccountDependenciesRepositoryStub =
       new CheckAccountDependenciesRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
 
     const accountResult = Account.create({
       name: 'Test Account',
@@ -47,7 +43,6 @@ describe('DeleteAccountUseCase', () => {
     }
 
     mockAccount = accountResult.data!;
-    mockAccount.clearEvents();
     getAccountRepositoryStub.mockAccount = mockAccount;
     budgetAuthorizationServiceStub.mockHasAccess = true;
 
@@ -56,7 +51,6 @@ describe('DeleteAccountUseCase', () => {
       deleteAccountRepositoryStub,
       checkAccountDependenciesRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
     );
   });
 
@@ -73,10 +67,6 @@ describe('DeleteAccountUseCase', () => {
       expect(result.data).toEqual({ id: mockAccount.id });
       expect(deleteAccountRepositoryStub.executeCalls).toContain(
         mockAccount.id,
-      );
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-      expect(eventPublisherStub.publishManyCalls[0][0]).toBeInstanceOf(
-        AccountDeletedEvent,
       );
     });
 
@@ -201,24 +191,6 @@ describe('DeleteAccountUseCase', () => {
         userId: 'test-user',
         budgetId: mockAccount.budgetId!,
       });
-    });
-
-    it('should handle event publishing errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      jest
-        .spyOn(eventPublisherStub, 'publishMany')
-        .mockRejectedValueOnce(new Error('publish error'));
-
-      const dto: DeleteAccountDto = {
-        accountId: mockAccount.id,
-        userId: 'authorized-user',
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-
-      consoleSpy.mockRestore();
     });
   });
 });

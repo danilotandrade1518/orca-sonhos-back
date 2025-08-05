@@ -5,21 +5,15 @@ import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
+import { CreditCardBillAlreadyDeletedError } from '../errors/CreditCardBillAlreadyDeletedError';
+import { CreditCardBillCannotBeUpdatedError } from '../errors/CreditCardBillCannotBeUpdatedError';
+import { CreditCardBillNotPaidError } from '../errors/CreditCardBillNotPaidError';
 import { InvalidCreditCardBillDateError } from '../errors/InvalidCreditCardBillDateError';
+import { ReopeningPeriodExpiredError } from '../errors/ReopeningPeriodExpiredError';
 import {
   BillStatus,
   BillStatusEnum,
 } from '../value-objects/bill-status/BillStatus';
-import { CreditCardBillAlreadyDeletedError } from '../errors/CreditCardBillAlreadyDeletedError';
-import { CreditCardBillCannotBeUpdatedError } from '../errors/CreditCardBillCannotBeUpdatedError';
-import { CreditCardBillCreatedEvent } from '../events/CreditCardBillCreatedEvent';
-import { CreditCardBillPaidEvent } from '../events/CreditCardBillPaidEvent';
-import { CreditCardBillDeletedEvent } from '../events/CreditCardBillDeletedEvent';
-import { CreditCardBillReopenedEvent } from '../events/CreditCardBillReopenedEvent';
-import { CreditCardBillUpdatedEvent } from '../events/CreditCardBillUpdatedEvent';
-import { CreditCardBillNotPaidError } from '../errors/CreditCardBillNotPaidError';
-import { ReopeningPeriodExpiredError } from '../errors/ReopeningPeriodExpiredError';
-import { ReopeningJustification } from '../value-objects/reopening-justification/ReopeningJustification';
 
 export interface CreateCreditCardBillDTO {
   creditCardId: string;
@@ -142,19 +136,10 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     this._paidAt = new Date();
     this._updatedAt = new Date();
 
-    this.addEvent(
-      new CreditCardBillPaidEvent(
-        this.id,
-        this.creditCardId,
-        this.amount,
-        this._paidAt,
-      ),
-    );
-
     return Either.success<DomainError, void>();
   }
 
-  reopen(justification: ReopeningJustification): Either<DomainError, void> {
+  reopen(): Either<DomainError, void> {
     if (this._isDeleted)
       return Either.error<DomainError, void>(
         new CreditCardBillAlreadyDeletedError(),
@@ -178,14 +163,6 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
     this._status = openStatus;
     this._paidAt = undefined;
     this._updatedAt = new Date();
-
-    this.addEvent(
-      new CreditCardBillReopenedEvent(
-        this.id,
-        this.creditCardId,
-        justification.value!.justification,
-      ),
-    );
 
     return Either.success<DomainError, void>();
   }
@@ -219,28 +196,10 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
 
     if (either.hasError) return either;
 
-    const changed =
-      this._closingDate.getTime() !== data.closingDate.getTime() ||
-      this._dueDate.getTime() !== data.dueDate.getTime() ||
-      this._amount.value!.cents !== amountVo.value!.cents;
-
     this._closingDate = data.closingDate;
     this._dueDate = data.dueDate;
     this._amount = amountVo;
     this._updatedAt = new Date();
-
-    if (changed) {
-      this.addEvent(
-        new CreditCardBillUpdatedEvent(
-          this.id,
-          this.creditCardId,
-          this._closingDate,
-          this._dueDate,
-          this.amount,
-          this.status,
-        ),
-      );
-    }
 
     either.setData();
     return either;
@@ -254,7 +213,7 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
 
     this._isDeleted = true;
     this._updatedAt = new Date();
-    this.addEvent(new CreditCardBillDeletedEvent(this.id, this.creditCardId));
+
     return Either.success<DomainError, void>();
   }
 
@@ -283,17 +242,6 @@ export class CreditCardBill extends AggregateRoot implements IEntity {
       data.dueDate,
       amount,
       status,
-    );
-
-    bill.addEvent(
-      new CreditCardBillCreatedEvent(
-        bill.id,
-        bill.creditCardId,
-        bill.closingDate,
-        bill.dueDate,
-        bill.amount,
-        bill.status,
-      ),
     );
 
     return Either.success<DomainError, CreditCardBill>(bill);

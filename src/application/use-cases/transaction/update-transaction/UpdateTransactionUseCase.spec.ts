@@ -11,11 +11,10 @@ import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotFoundError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { TransactionUpdateFailedError } from '../../../shared/errors/TransactionUpdateFailedError';
+import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
 import { SaveTransactionRepositoryStub } from '../../../shared/tests/stubs/SaveTransactionRepositoryStub';
-import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { UpdateTransactionDto } from './UpdateTransactionDto';
 import { UpdateTransactionUseCase } from './UpdateTransactionUseCase';
 
@@ -25,7 +24,6 @@ describe('UpdateTransactionUseCase', () => {
   let saveTransactionRepositoryStub: SaveTransactionRepositoryStub;
   let getAccountRepositoryStub: GetAccountRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let mockTransaction: Transaction;
   let mockAccount: Account;
   const userId = EntityId.create().value!.id;
@@ -35,7 +33,6 @@ describe('UpdateTransactionUseCase', () => {
     saveTransactionRepositoryStub = new SaveTransactionRepositoryStub();
     getAccountRepositoryStub = new GetAccountRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
 
     const accountResult = Account.create({
       name: 'Test Account',
@@ -78,7 +75,6 @@ describe('UpdateTransactionUseCase', () => {
       saveTransactionRepositoryStub,
       getAccountRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
     );
   });
 
@@ -97,7 +93,7 @@ describe('UpdateTransactionUseCase', () => {
       expect(result.data!.id).toBe(mockTransaction.id);
     });
 
-    it('should update transaction amount and emit event', async () => {
+    it('should update transaction amount', async () => {
       const dto: UpdateTransactionDto = {
         userId,
         id: mockTransaction.id,
@@ -108,10 +104,9 @@ describe('UpdateTransactionUseCase', () => {
 
       expect(result.hasData).toBe(true);
       expect(result.hasError).toBe(false);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
     });
 
-    it('should update transaction account and emit event with correct data', async () => {
+    it('should update transaction account with correct data', async () => {
       // Create a second account in the same budget
       const secondAccountResult = Account.create({
         name: 'Second Account',
@@ -137,10 +132,9 @@ describe('UpdateTransactionUseCase', () => {
 
       expect(result.hasData).toBe(true);
       expect(result.hasError).toBe(false);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
     });
 
-    it('should update multiple fields and emit single event', async () => {
+    it('should update multiple fields', async () => {
       const dto: UpdateTransactionDto = {
         userId,
         id: mockTransaction.id,
@@ -153,21 +147,6 @@ describe('UpdateTransactionUseCase', () => {
 
       expect(result.hasData).toBe(true);
       expect(result.hasError).toBe(false);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-    });
-
-    it('should update transaction without emitting events when no relevant changes', async () => {
-      const dto: UpdateTransactionDto = {
-        userId,
-        id: mockTransaction.id,
-        description: 'New description only', // Only description changed
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-      expect(result.hasError).toBe(false);
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(0);
     });
 
     it('should return error when transaction not found', async () => {

@@ -10,11 +10,6 @@ import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExe
 import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionCannotBeCancelledError } from '../errors/TransactionCannotBeCancelledError';
 import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
-import { ScheduledTransactionCancelledEvent } from '../events/ScheduledTransactionCancelledEvent';
-import { TransactionCreatedEvent } from '../events/TransactionCreatedEvent';
-import { TransactionDeletedEvent } from '../events/TransactionDeletedEvent';
-import { TransactionMarkedAsLateEvent } from '../events/TransactionMarkedAsLateEvent';
-import { TransactionUpdatedEvent } from '../events/TransactionUpdatedEvent';
 import { CancellationReason } from '../value-objects/cancellation-reason/CancellationReason';
 import { TransactionDescription } from '../value-objects/transaction-description/TransactionDescription';
 import {
@@ -189,10 +184,6 @@ export class Transaction extends AggregateRoot implements IEntity {
     this._cancelledAt = new Date();
     this._updatedAt = new Date();
 
-    this.addEvent(
-      new ScheduledTransactionCancelledEvent(this.id, reasonVo.value!.reason),
-    );
-
     return Either.success();
   }
 
@@ -239,8 +230,6 @@ export class Transaction extends AggregateRoot implements IEntity {
     this._status = TransactionStatus.create(TransactionStatusEnum.LATE);
     this._updatedAt = new Date();
 
-    this.addEvent(new TransactionMarkedAsLateEvent(this.id));
-
     return Either.success<DomainError, void>();
   }
 
@@ -254,21 +243,6 @@ export class Transaction extends AggregateRoot implements IEntity {
 
     this._isDeleted = true;
     this._updatedAt = new Date();
-
-    this.addEvent(
-      new TransactionDeletedEvent(
-        this.id,
-        this.accountId,
-        this.budgetId,
-        this.amount,
-        this.type,
-        this.description,
-        this.status,
-        this.categoryId,
-        this.creditCardId || undefined,
-        this.transactionDate,
-      ),
-    );
 
     either.setData(this);
     return either;
@@ -293,10 +267,6 @@ export class Transaction extends AggregateRoot implements IEntity {
 
     if (either.hasError) return either;
 
-    const accountChanged = this.accountId !== data.accountId;
-    const amountChanged = this.amount !== data.amount;
-    const typeChanged = this.type !== data.type;
-
     const updatedTransaction = new Transaction(
       newDescription,
       newAmount,
@@ -309,20 +279,6 @@ export class Transaction extends AggregateRoot implements IEntity {
       this._creditCardId,
       this._id,
     );
-
-    if (accountChanged || amountChanged || typeChanged) {
-      updatedTransaction.addEvent(
-        new TransactionUpdatedEvent(
-          this.id,
-          this.accountId,
-          data.accountId,
-          this.amount,
-          data.amount,
-          this.type,
-          data.type,
-        ),
-      );
-    }
 
     either.setData(updatedTransaction);
     return either;
@@ -369,16 +325,6 @@ export class Transaction extends AggregateRoot implements IEntity {
       accountId,
       status,
       creditCardId,
-    );
-
-    transaction.addEvent(
-      new TransactionCreatedEvent(
-        transaction.id,
-        data.accountId,
-        data.amount,
-        data.type,
-        data.categoryId,
-      ),
     );
 
     return Either.success<DomainError, Transaction>(transaction);

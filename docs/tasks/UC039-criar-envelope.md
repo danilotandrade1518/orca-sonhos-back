@@ -23,7 +23,6 @@ Permitir criar envelopes virtuais para organizar e controlar gastos por finalida
 - [ ] `src/domain/aggregates/envelope/value-objects/envelope-balance/EnvelopeBalance.ts`
 - [ ] `src/domain/aggregates/envelope/value-objects/envelope-balance/EnvelopeBalance.spec.ts`
 - [ ] `src/domain/aggregates/envelope/enums/EnvelopeStatus.ts`
-- [ ] `src/domain/aggregates/envelope/events/EnvelopeCreatedEvent.ts`
 
 ### **Application Layer**
 - [ ] `src/application/use-cases/envelope/create-envelope/CreateEnvelopeUseCase.ts`
@@ -117,7 +116,6 @@ enum EnvelopeStatus {
 4. Validar categorias associadas (se informadas)
 5. Criar envelope com saldo inicial zero
 6. Persistir envelope via Unit of Work
-7. Publicar evento de criação
 8. Retornar dados do envelope criado
 
 ### **Business Rules**
@@ -164,7 +162,6 @@ enum EnvelopeStatus {
 - ✅ Category aggregate (para associações)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 - ❌ Novo domain Envelope (a ser criado)
 
 ## 📊 **Acceptance Criteria**
@@ -173,7 +170,6 @@ enum EnvelopeStatus {
 - [ ] Alocação mensal pode ser configurada
 - [ ] Envelope pode ser associado a categorias
 - [ ] Nome deve ser único no orçamento
-- [ ] Evento de criação é disparado
 - [ ] Envelope criado aparece na lista do orçamento
 - [ ] Status inicial é ACTIVE
 

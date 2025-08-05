@@ -16,7 +16,6 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 ### **Domain Layer**
 - [ ] `src/domain/aggregates/credit-card-bill/value-objects/reopening-justification/ReopeningJustification.ts`
 - [ ] `src/domain/aggregates/credit-card-bill/value-objects/reopening-justification/ReopeningJustification.spec.ts`
-- [ ] `src/domain/aggregates/credit-card-bill/events/CreditCardBillReopenedEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill.ts` (método `reopen()`)
 - [ ] Testes: `src/domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill.spec.ts`
 
@@ -47,7 +46,6 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 - Valida prazo para reabertura (ex: 30 dias)
 - Atualiza status para OPEN
 - Remove dados de pagamento
-- Dispara CreditCardBillReopenedEvent
 ```
 
 ## 📋 **Use Case Specifications**
@@ -79,7 +77,6 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 6. Reabrir fatura (domain)
 7. Estornar transação de pagamento
 8. Persistir alterações via Unit of Work
-9. Publicar evento de reabertura
 10. Retornar confirmação
 
 ### **Business Rules**
@@ -121,7 +118,6 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 - ✅ Transaction aggregate (para estornar pagamento)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 
 ## 📊 **Acceptance Criteria**
 - [ ] Usuário pode reabrir fatura paga com justificativa
@@ -129,7 +125,6 @@ Permitir reabrir uma fatura que foi marcada como paga por engano, revertendo o p
 - [ ] Status da fatura volta para OPEN
 - [ ] Transação de pagamento é estornada
 - [ ] Valor volta para a conta de origem
-- [ ] Evento de reabertura é disparado
 - [ ] Justificativa é registrada para auditoria
 
 ## 🚀 **Definition of Done**

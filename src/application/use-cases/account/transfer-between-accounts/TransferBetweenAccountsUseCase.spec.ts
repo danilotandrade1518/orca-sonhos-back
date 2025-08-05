@@ -8,7 +8,6 @@ import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundErro
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { ITransferBetweenAccountsUnitOfWorkStub } from '../../../shared/tests/stubs/ITransferBetweenAccountsUnitOfWorkStub';
 import { TransferBetweenAccountsDto } from './TransferBetweenAccountsDto';
@@ -40,7 +39,6 @@ describe('TransferBetweenAccountsUseCase', () => {
   let getAccountRepositoryStub: GetAccountRepositoryStub;
   let transferUnitOfWorkStub: ITransferBetweenAccountsUnitOfWorkStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let fromAccount: Account;
   let toAccount: Account;
   const userId = EntityId.create().value!.id;
@@ -50,12 +48,10 @@ describe('TransferBetweenAccountsUseCase', () => {
     getAccountRepositoryStub = new GetAccountRepositoryStub();
     transferUnitOfWorkStub = new ITransferBetweenAccountsUnitOfWorkStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
     useCase = new TransferBetweenAccountsUseCase(
       getAccountRepositoryStub,
       transferUnitOfWorkStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
       TRANSFER_CATEGORY_ID,
     );
 
@@ -96,7 +92,6 @@ describe('TransferBetweenAccountsUseCase', () => {
         fromAccount.id,
         toAccount.id,
       ]);
-      expect(eventPublisherStub.publishManyCalls.length).toBe(1);
       expect(result.data!.id).toBeDefined();
     });
 
@@ -230,51 +225,12 @@ describe('TransferBetweenAccountsUseCase', () => {
       expect(result.errors[0]).toEqual(new InsufficientBalanceError());
     });
 
-    it('should publish events and clear them on success', async () => {
-      mockRepositorySuccess();
-      const dto: TransferBetweenAccountsDto = {
-        userId,
-        fromAccountId: fromAccount.id,
-        toAccountId: toAccount.id,
-        amount: 50,
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-      if (result.hasData) {
-        const events = eventPublisherStub.publishManyCalls[0];
-        expect(events.length).toBeGreaterThan(0);
-      }
-    });
-
-    it('should handle errors during event publishing gracefully', async () => {
-      mockRepositorySuccess();
-      jest
-        .spyOn(eventPublisherStub, 'publishMany')
-        .mockRejectedValueOnce(new Error('fail'));
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      const dto: TransferBetweenAccountsDto = {
-        userId,
-        fromAccountId: fromAccount.id,
-        toAccountId: toAccount.id,
-        amount: 30,
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-      consoleSpy.mockRestore();
-    });
-
     it('should return error when transfer category ID is invalid', async () => {
       // Create a new use case with an invalid transfer category ID
       const invalidUseCase = new TransferBetweenAccountsUseCase(
         getAccountRepositoryStub,
         transferUnitOfWorkStub,
         budgetAuthorizationServiceStub,
-        eventPublisherStub,
         'invalid-category-id',
       );
 

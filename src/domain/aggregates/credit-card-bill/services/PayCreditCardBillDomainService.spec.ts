@@ -1,11 +1,11 @@
-import { PayCreditCardBillDomainService } from './PayCreditCardBillDomainService';
-import { CreditCardBill } from '../credit-card-bill-entity/CreditCardBill';
-import { Account } from '../../account/account-entity/Account';
-import { BillStatusEnum } from '../value-objects/bill-status/BillStatus';
-import { AccountTypeEnum } from '../../account/value-objects/account-type/AccountType';
-import { CreditCardBillAlreadyDeletedError } from '../errors/CreditCardBillAlreadyDeletedError';
-import { InsufficientBalanceError } from '../../account/errors/InsufficientBalanceError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { Account } from '../../account/account-entity/Account';
+import { InsufficientBalanceError } from '../../account/errors/InsufficientBalanceError';
+import { AccountTypeEnum } from '../../account/value-objects/account-type/AccountType';
+import { CreditCardBill } from '../credit-card-bill-entity/CreditCardBill';
+import { CreditCardBillAlreadyDeletedError } from '../errors/CreditCardBillAlreadyDeletedError';
+import { BillStatusEnum } from '../value-objects/bill-status/BillStatus';
+import { PayCreditCardBillDomainService } from './PayCreditCardBillDomainService';
 
 describe('PayCreditCardBillDomainService', () => {
   let sut: PayCreditCardBillDomainService;
@@ -38,10 +38,7 @@ describe('PayCreditCardBillDomainService', () => {
 
       expect(result.hasError).toBe(false);
       expect(result.data!.debitTransaction).toBeDefined();
-      expect(result.data!.billPaidEvent).toBeDefined();
       expect(result.data!.debitTransaction.amount).toBe(amount);
-      expect(result.data!.billPaidEvent.amount).toBe(amount);
-      expect(result.data!.billPaidEvent.paidAt).toBe(paidAt);
     });
 
     it('should fail when bill is deleted', () => {

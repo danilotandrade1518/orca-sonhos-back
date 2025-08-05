@@ -3,7 +3,6 @@ import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-obje
 import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { EventPublisherStub } from '../../shared/tests/stubs/EventPublisherStub';
 import { FindOverdueScheduledTransactionsRepositoryStub } from '../../shared/tests/stubs/FindOverdueScheduledTransactionsRepositoryStub';
 import { SaveTransactionRepositoryStub } from '../../shared/tests/stubs/SaveTransactionRepositoryStub';
 import { TransactionSchedulerService } from './TransactionSchedulerService';
@@ -11,18 +10,15 @@ import { TransactionSchedulerService } from './TransactionSchedulerService';
 describe('TransactionSchedulerService', () => {
   let findOverdueRepository: FindOverdueScheduledTransactionsRepositoryStub;
   let saveTransactionRepository: SaveTransactionRepositoryStub;
-  let eventPublisher: EventPublisherStub;
   let service: TransactionSchedulerService;
 
   beforeEach(() => {
     findOverdueRepository =
       new FindOverdueScheduledTransactionsRepositoryStub();
     saveTransactionRepository = new SaveTransactionRepositoryStub();
-    eventPublisher = new EventPublisherStub();
     service = new TransactionSchedulerService(
       findOverdueRepository,
       saveTransactionRepository,
-      eventPublisher,
     );
   });
 
@@ -44,7 +40,6 @@ describe('TransactionSchedulerService', () => {
     expect(result.processed).toHaveLength(1);
     expect(tx.status).toBe(TransactionStatusEnum.LATE);
     expect(saveTransactionRepository.executeCalls).toHaveLength(1);
-    expect(eventPublisher.publishManyCalls).toHaveLength(1);
   });
 
   it('should skip transactions when marking fails', async () => {
@@ -64,6 +59,5 @@ describe('TransactionSchedulerService', () => {
 
     expect(result.processed).toHaveLength(0);
     expect(saveTransactionRepository.executeCalls).toHaveLength(0);
-    expect(eventPublisher.publishManyCalls).toHaveLength(0);
   });
 });

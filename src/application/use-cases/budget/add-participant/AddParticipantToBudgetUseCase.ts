@@ -1,6 +1,5 @@
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetBudgetRepository } from '../../../contracts/repositories/budget/IGetBudgetRepository';
 import { ISaveBudgetRepository } from '../../../contracts/repositories/budget/ISaveBudgetRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
@@ -20,7 +19,6 @@ export class AddParticipantToBudgetUseCase
     private getBudgetRepository: IGetBudgetRepository,
     private saveBudgetRepository: ISaveBudgetRepository,
     private budgetAuthorizationService: IBudgetAuthorizationService,
-    private eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -64,16 +62,6 @@ export class AddParticipantToBudgetUseCase
 
     if (saveResult.hasError) {
       return Either.error(new BudgetPersistenceFailedError());
-    }
-
-    const events = budget.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        budget.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: budget.id });

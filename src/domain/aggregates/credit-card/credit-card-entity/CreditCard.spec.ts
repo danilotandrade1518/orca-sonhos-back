@@ -1,12 +1,10 @@
 import { InvalidEntityNameError } from '@domain/shared/errors/InvalidEntityNameError';
 import { InvalidMoneyError } from '@domain/shared/errors/InvalidMoneyError';
+
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { CreditCardAlreadyDeletedError } from '../errors/CreditCardAlreadyDeletedError';
 import { InvalidCreditCardDayError } from '../errors/InvalidCreditCardDayError';
 import { CreditCard } from './CreditCard';
-import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
-import { CreditCardCreatedEvent } from '../events/CreditCardCreatedEvent';
-import { CreditCardUpdatedEvent } from '../events/CreditCardUpdatedEvent';
-import { CreditCardDeletedEvent } from '../events/CreditCardDeletedEvent';
-import { CreditCardAlreadyDeletedError } from '../errors/CreditCardAlreadyDeletedError';
 
 describe('CreditCard', () => {
   const validDTO = {
@@ -18,12 +16,11 @@ describe('CreditCard', () => {
   };
 
   describe('create', () => {
-    it('should create valid credit card and emit event', () => {
+    it('should create valid credit card', () => {
       const result = CreditCard.create(validDTO);
 
       expect(result.hasError).toBe(false);
       const card = result.data!;
-      expect(card.getEvents()[0]).toBeInstanceOf(CreditCardCreatedEvent);
       expect(card.name).toBe(validDTO.name);
     });
 
@@ -50,7 +47,7 @@ describe('CreditCard', () => {
   });
 
   describe('restore', () => {
-    it('should restore credit card without emitting events', () => {
+    it('should restore credit card', () => {
       const created = CreditCard.create(validDTO).data!;
       const restoreData = {
         id: created.id,
@@ -68,15 +65,13 @@ describe('CreditCard', () => {
 
       expect(result.hasError).toBe(false);
       const restored = result.data!;
-      expect(restored.getEvents().length).toBe(0);
       expect(restored.id).toBe(created.id);
     });
   });
 
   describe('update', () => {
-    it('should update fields and emit event', () => {
+    it('should update fields', () => {
       const card = CreditCard.create(validDTO).data!;
-      card.clearEvents();
 
       const result = card.update({
         name: 'New',
@@ -87,22 +82,6 @@ describe('CreditCard', () => {
 
       expect(result.hasError).toBe(false);
       expect(card.name).toBe('New');
-      expect(card.getEvents()[0]).toBeInstanceOf(CreditCardUpdatedEvent);
-    });
-
-    it('should not emit event if no changes', () => {
-      const card = CreditCard.create(validDTO).data!;
-      card.clearEvents();
-
-      const result = card.update({
-        name: validDTO.name,
-        limit: validDTO.limit,
-        closingDay: validDTO.closingDay,
-        dueDay: validDTO.dueDay,
-      });
-
-      expect(result.hasError).toBe(false);
-      expect(card.getEvents().length).toBe(0);
     });
 
     it('should return error when card deleted', () => {
@@ -117,15 +96,13 @@ describe('CreditCard', () => {
   });
 
   describe('delete', () => {
-    it('should soft delete card and emit event', () => {
+    it('should soft delete card', () => {
       const card = CreditCard.create(validDTO).data!;
-      card.clearEvents();
 
       const result = card.delete();
 
       expect(result.hasError).toBe(false);
       expect(card.isDeleted).toBe(true);
-      expect(card.getEvents()[0]).toBeInstanceOf(CreditCardDeletedEvent);
     });
 
     it('should not delete twice', () => {

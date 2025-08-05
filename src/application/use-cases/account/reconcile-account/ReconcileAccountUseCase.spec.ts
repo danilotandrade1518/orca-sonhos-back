@@ -6,7 +6,6 @@ import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundErro
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
 import { IReconcileAccountUnitOfWorkStub } from '../../../shared/tests/stubs/IReconcileAccountUnitOfWorkStub';
 import { ReconcileAccountDto } from './ReconcileAccountDto';
@@ -17,7 +16,6 @@ describe('ReconcileAccountUseCase', () => {
   let getAccountRepositoryStub: GetAccountRepositoryStub;
   let reconcileAccountRepositoryStub: IReconcileAccountUnitOfWorkStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let account: Account;
   const userId = EntityId.create().value!.id;
   const adjustmentCategoryId = EntityId.create().value!.id;
@@ -26,12 +24,10 @@ describe('ReconcileAccountUseCase', () => {
     getAccountRepositoryStub = new GetAccountRepositoryStub();
     reconcileAccountRepositoryStub = new IReconcileAccountUnitOfWorkStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
     useCase = new ReconcileAccountUseCase(
       getAccountRepositoryStub,
       reconcileAccountRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
       adjustmentCategoryId,
     );
 
@@ -52,7 +48,6 @@ describe('ReconcileAccountUseCase', () => {
       budgetId: account.budgetId!,
       accountId: account.id,
       realBalance: 1500,
-      justification: 'Deposito esquecido',
     };
 
     const result = await useCase.execute(dto);
@@ -68,7 +63,6 @@ describe('ReconcileAccountUseCase', () => {
       budgetId: account.budgetId!,
       accountId: account.id,
       realBalance: 800,
-      justification: 'Tarifa bancária',
     };
 
     const result = await useCase.execute(dto);
@@ -84,7 +78,6 @@ describe('ReconcileAccountUseCase', () => {
       budgetId: account.budgetId!,
       accountId: EntityId.create().value!.id,
       realBalance: 1100,
-      justification: 'Justificativa valida',
     };
 
     const result = await useCase.execute(dto);
@@ -100,7 +93,6 @@ describe('ReconcileAccountUseCase', () => {
       budgetId: account.budgetId!,
       accountId: account.id,
       realBalance: 1200,
-      justification: 'Justificativa valida',
     };
 
     const result = await useCase.execute(dto);
@@ -116,7 +108,6 @@ describe('ReconcileAccountUseCase', () => {
       budgetId: account.budgetId!,
       accountId: account.id,
       realBalance: 1400,
-      justification: 'Justificativa valida',
     };
 
     const result = await useCase.execute(dto);

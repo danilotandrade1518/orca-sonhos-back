@@ -1,5 +1,4 @@
 import { Account } from '@domain/aggregates/account/account-entity/Account';
-import { AccountTransferredEvent } from '@domain/aggregates/account/events/AccountTransferredEvent';
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
@@ -14,8 +13,6 @@ export class ITransferBetweenAccountsUnitOfWorkStub
     toAccount: Account;
     debitTransaction: Transaction;
     creditTransaction: Transaction;
-    fromAccountEvent: AccountTransferredEvent;
-    toAccountEvent: AccountTransferredEvent;
   }> = [];
 
   async executeTransfer(params: {
@@ -23,8 +20,6 @@ export class ITransferBetweenAccountsUnitOfWorkStub
     toAccount: Account;
     debitTransaction: Transaction;
     creditTransaction: Transaction;
-    fromAccountEvent: AccountTransferredEvent;
-    toAccountEvent: AccountTransferredEvent;
   }): Promise<Either<DomainError, void>> {
     this.executeTransferCalls.push(params);
     return Either.success(undefined);

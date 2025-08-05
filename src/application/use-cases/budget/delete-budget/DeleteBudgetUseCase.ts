@@ -1,20 +1,19 @@
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { ICheckBudgetDependenciesRepository } from '../../../contracts/repositories/budget/ICheckBudgetDependenciesRepository';
 import { IDeleteBudgetRepository } from '../../../contracts/repositories/budget/IDeleteBudgetRepository';
 import { IGetBudgetRepository } from '../../../contracts/repositories/budget/IGetBudgetRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
+import { BudgetDeletionFailedError } from '../../../shared/errors/BudgetDeletionFailedError';
 import { BudgetNotFoundError } from '../../../shared/errors/BudgetNotFoundError';
 import { BudgetRepositoryError } from '../../../shared/errors/BudgetRepositoryError';
-import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
-import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
-import { BudgetDeletionFailedError } from '../../../shared/errors/BudgetDeletionFailedError';
 import { CannotDeleteBudgetWithAccountsError } from '../../../shared/errors/CannotDeleteBudgetWithAccountsError';
 import { CannotDeleteBudgetWithTransactionsError } from '../../../shared/errors/CannotDeleteBudgetWithTransactionsError';
+import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { OnlyOwnerCanDeleteBudgetError } from '../../../shared/errors/OnlyOwnerCanDeleteBudgetError';
+import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { DeleteBudgetDto } from './DeleteBudgetDto';
 
 export class DeleteBudgetUseCase implements IUseCase<DeleteBudgetDto> {
@@ -23,7 +22,6 @@ export class DeleteBudgetUseCase implements IUseCase<DeleteBudgetDto> {
     private readonly deleteBudgetRepository: IDeleteBudgetRepository,
     private readonly checkDependenciesRepository: ICheckBudgetDependenciesRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -99,16 +97,6 @@ export class DeleteBudgetUseCase implements IUseCase<DeleteBudgetDto> {
 
     if (deleteResult.hasError) {
       return Either.error(new BudgetDeletionFailedError());
-    }
-
-    const events = deletedBudget.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        deletedBudget.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: deletedBudget.id });

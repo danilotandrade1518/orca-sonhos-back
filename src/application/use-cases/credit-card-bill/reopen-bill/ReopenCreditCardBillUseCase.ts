@@ -6,7 +6,6 @@ import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { CreditCardBillNotFoundError } from '@application/shared/errors/CreditCardBillNotFoundError';
 import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
 import { IUseCase, UseCaseResponse } from '@application/shared/IUseCase';
-import { ReopeningJustification } from '@domain/aggregates/credit-card-bill/value-objects/reopening-justification/ReopeningJustification';
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
@@ -48,10 +47,7 @@ export class ReopenCreditCardBillUseCase
     if (auth.hasError) return Either.errors(auth.errors);
     if (!auth.data) return Either.error(new InsufficientPermissionsError());
 
-    const justificationVo = ReopeningJustification.create(dto.justification);
-    if (justificationVo.hasError) return Either.errors(justificationVo.errors);
-
-    const reopenResult = bill.reopen(justificationVo);
+    const reopenResult = bill.reopen();
     if (reopenResult.hasError) return Either.errors(reopenResult.errors);
 
     const saveResult = await this.saveCreditCardBillRepository.execute(bill);

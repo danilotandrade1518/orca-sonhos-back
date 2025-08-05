@@ -1,9 +1,9 @@
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { BudgetTypeEnum } from '../value-objects/budget-type/BudgetType';
 import { CannotRemoveOwnerFromParticipantsError } from './../../../shared/errors/CannotRemoveOwnerFromParticipantsError';
 import { InvalidEntityIdError } from './../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from './../../../shared/errors/InvalidEntityNameError';
 import { NotFoundError } from './../../../shared/errors/NotFoundError';
-import { BudgetTypeEnum } from '../value-objects/budget-type/BudgetType';
 import { Budget, CreateBudgetDTO } from './Budget';
 
 describe('Budget', () => {
@@ -199,35 +199,12 @@ describe('Budget', () => {
         type: BudgetTypeEnum.SHARED,
       }).data!;
 
-      // Add participant first time
       budget.addParticipant(participantId);
 
-      // Try to add same participant again
       const result = budget.addParticipant(participantId);
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0].name).toBe('ParticipantAlreadyExistsError');
-    });
-
-    it('should publish event when participant is added', () => {
-      const name = 'Test Budget';
-      const ownerId = EntityId.create().value!.id;
-      const participantId = EntityId.create().value!.id;
-
-      const budget = Budget.create({
-        name,
-        ownerId,
-        type: BudgetTypeEnum.SHARED,
-      }).data!;
-
-      budget.clearEvents(); // Clear creation events
-
-      const result = budget.addParticipant(participantId);
-
-      expect(result.hasError).toBe(false);
-      const events = budget.getEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0].constructor.name).toBe('ParticipantAddedToBudgetEvent');
     });
   });
 
@@ -366,7 +343,7 @@ describe('Budget', () => {
   });
 
   describe('delete', () => {
-    it('should delete budget and add event', () => {
+    it('should delete budget', () => {
       const ownerId = EntityId.create().value!.id;
       const budget = Budget.create({ name: 'Budget', ownerId }).data!;
 
@@ -374,7 +351,6 @@ describe('Budget', () => {
 
       expect(result.hasError).toBe(false);
       expect(budget.isDeleted).toBe(true);
-      expect(budget.getEvents()).toHaveLength(1);
     });
 
     it('should return error when budget already deleted', () => {

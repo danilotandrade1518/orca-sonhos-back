@@ -1,6 +1,6 @@
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
-import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-objects/transaction-status/TransactionStatus';
+import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
@@ -8,7 +8,6 @@ import { TransactionNotFoundError } from '../../../shared/errors/TransactionNotF
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { DeleteTransactionRepositoryStub } from '../../../shared/tests/stubs/DeleteTransactionRepositoryStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetTransactionRepositoryStub } from '../../../shared/tests/stubs/GetTransactionRepositoryStub';
 import { DeleteTransactionDto } from './DeleteTransactionDto';
 import { DeleteTransactionUseCase } from './DeleteTransactionUseCase';
@@ -18,14 +17,12 @@ describe('DeleteTransactionUseCase', () => {
   let getTransactionRepositoryStub: GetTransactionRepositoryStub;
   let deleteTransactionRepositoryStub: DeleteTransactionRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let mockTransaction: Transaction;
 
   beforeEach(() => {
     getTransactionRepositoryStub = new GetTransactionRepositoryStub();
     deleteTransactionRepositoryStub = new DeleteTransactionRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
 
     const transactionResult = Transaction.create({
       description: 'Test Transaction',
@@ -45,7 +42,6 @@ describe('DeleteTransactionUseCase', () => {
     }
 
     mockTransaction = transactionResult.data!;
-    mockTransaction.clearEvents();
     getTransactionRepositoryStub.mockTransaction = mockTransaction;
     budgetAuthorizationServiceStub.mockHasAccess = true;
 
@@ -53,7 +49,6 @@ describe('DeleteTransactionUseCase', () => {
       getTransactionRepositoryStub,
       deleteTransactionRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
     );
   });
 
@@ -71,7 +66,6 @@ describe('DeleteTransactionUseCase', () => {
       expect(deleteTransactionRepositoryStub.executeCalls).toContain(
         mockTransaction.id,
       );
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
     });
 
     it('should return error when user has no permission', async () => {
@@ -161,18 +155,6 @@ describe('DeleteTransactionUseCase', () => {
         userId: 'test-user',
         budgetId: mockTransaction.budgetId,
       });
-    });
-
-    it('should publish events after successful deletion', async () => {
-      const dto: DeleteTransactionDto = {
-        id: mockTransaction.id,
-        userId: 'authorized-user',
-      };
-
-      await useCase.execute(dto);
-
-      expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-      expect(eventPublisherStub.publishManyCalls[0]).toHaveLength(1);
     });
 
     it('should return error when transaction is already deleted', async () => {

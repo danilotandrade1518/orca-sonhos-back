@@ -5,14 +5,11 @@ import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
+import { CategoryAlreadyDeletedError } from '../errors/CategoryAlreadyDeletedError';
 import {
   CategoryType,
   CategoryTypeEnum,
 } from '../value-objects/category-type/CategoryType';
-import { CategoryAlreadyDeletedError } from '../errors/CategoryAlreadyDeletedError';
-import { CategoryCreatedEvent } from '../events/CategoryCreatedEvent';
-import { CategoryDeletedEvent } from '../events/CategoryDeletedEvent';
-import { CategoryUpdatedEvent } from '../events/CategoryUpdatedEvent';
 
 export interface CreateCategoryDTO {
   name: string;
@@ -95,15 +92,6 @@ export class Category extends AggregateRoot implements IEntity {
 
     const category = new Category(nameVo, typeVo, budgetIdVo);
 
-    category.addEvent(
-      new CategoryCreatedEvent(
-        category.id,
-        category.name,
-        category.type!,
-        category.budgetId,
-      ),
-    );
-
     either.setData(category);
     return either;
   }
@@ -127,22 +115,9 @@ export class Category extends AggregateRoot implements IEntity {
     if (!nameChanged && !typeChanged)
       return Either.success<DomainError, void>();
 
-    const previousName = this.name;
-    const previousType = this.type!;
-
     this._name = nameVo;
     this._type = typeVo;
     this._updatedAt = new Date();
-
-    this.addEvent(
-      new CategoryUpdatedEvent(
-        this.id,
-        previousName,
-        this.name,
-        previousType,
-        this.type!,
-      ),
-    );
 
     return Either.success<DomainError, void>();
   }
@@ -153,8 +128,6 @@ export class Category extends AggregateRoot implements IEntity {
 
     this._isDeleted = true;
     this._updatedAt = new Date();
-
-    this.addEvent(new CategoryDeletedEvent(this.id, this.name, this.budgetId));
 
     return Either.success<DomainError, void>();
   }

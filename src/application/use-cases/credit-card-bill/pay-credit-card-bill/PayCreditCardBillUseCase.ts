@@ -2,14 +2,13 @@ import { PayCreditCardBillDomainService } from '@domain/aggregates/credit-card-b
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { IGetCreditCardBillRepository } from '../../../contracts/repositories/credit-card-bill/IGetCreditCardBillRepository';
 import { IPayCreditCardBillUnitOfWork } from '../../../contracts/unit-of-works/IPayCreditCardBillUnitOfWork';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
+import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { CreditCardBillNotFoundError } from '../../../shared/errors/CreditCardBillNotFoundError';
-import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { PayCreditCardBillDto } from './PayCreditCardBillDto';
@@ -24,7 +23,6 @@ export class PayCreditCardBillUseCase
     private readonly getAccountRepository: IGetAccountRepository,
     private readonly payUnitOfWork: IPayCreditCardBillUnitOfWork,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
   ) {
     this.payCreditCardBillDomainService = new PayCreditCardBillDomainService();
   }
@@ -100,24 +98,17 @@ export class PayCreditCardBillUseCase
       );
     }
 
-    const { debitTransaction, billPaidEvent } = paymentOperationResult.data!;
+    const { debitTransaction } = paymentOperationResult.data!;
 
     const unitOfWorkResult = await this.payUnitOfWork.executePayment({
       debitTransaction,
       bill,
-      billPaidEvent,
     });
 
     if (unitOfWorkResult.hasError) {
       return Either.errors<DomainError | ApplicationError, UseCaseResponse>(
         unitOfWorkResult.errors,
       );
-    }
-
-    try {
-      await this.eventPublisher.publish(billPaidEvent);
-    } catch (error) {
-      console.error('Failed to publish domain event:', error);
     }
 
     return Either.success<DomainError | ApplicationError, UseCaseResponse>({

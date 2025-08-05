@@ -1,9 +1,8 @@
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
-import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
 import { IGetTransactionRepository } from '../../../contracts/repositories/transaction/IGetTransactionRepository';
+import { ISaveTransactionRepository } from '../../../contracts/repositories/transaction/ISaveTransactionRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
@@ -19,7 +18,6 @@ export class CancelScheduledTransactionUseCase
     private readonly getTransactionRepository: IGetTransactionRepository,
     private readonly saveTransactionRepository: ISaveTransactionRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
   ) {}
 
   async execute(
@@ -59,16 +57,6 @@ export class CancelScheduledTransactionUseCase
       await this.saveTransactionRepository.execute(transaction);
     if (repoResult.hasError) {
       return Either.error(new TransactionPersistenceFailedError());
-    }
-
-    const events = transaction.getEvents();
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        transaction.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: transaction.id });

@@ -1,21 +1,21 @@
-import { PayCreditCardBillUseCase } from './PayCreditCardBillUseCase';
-import { PayCreditCardBillDto } from './PayCreditCardBillDto';
-import { CreditCardBill } from '@domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill';
 import { Account } from '@domain/aggregates/account/account-entity/Account';
-import { BillStatusEnum } from '@domain/aggregates/credit-card-bill/value-objects/bill-status/BillStatus';
+import { InsufficientBalanceError } from '@domain/aggregates/account/errors/InsufficientBalanceError';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
+import { CreditCardBill } from '@domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill';
+import { BillStatusEnum } from '@domain/aggregates/credit-card-bill/value-objects/bill-status/BillStatus';
+import { NotFoundError } from '@domain/shared/errors/NotFoundError';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
-import { GetCreditCardBillRepositoryStub } from '../../../shared/tests/stubs/GetCreditCardBillRepositoryStub';
-import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
-import { IPayCreditCardBillUnitOfWorkStub } from '../../../shared/tests/stubs/IPayCreditCardBillUnitOfWorkStub';
-import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
-import { CreditCardBillNotFoundError } from '../../../shared/errors/CreditCardBillNotFoundError';
+
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
+import { CreditCardBillNotFoundError } from '../../../shared/errors/CreditCardBillNotFoundError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
-import { InsufficientBalanceError } from '@domain/aggregates/account/errors/InsufficientBalanceError';
-import { NotFoundError } from '@domain/shared/errors/NotFoundError';
+import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
+import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
+import { GetCreditCardBillRepositoryStub } from '../../../shared/tests/stubs/GetCreditCardBillRepositoryStub';
+import { IPayCreditCardBillUnitOfWorkStub } from '../../../shared/tests/stubs/IPayCreditCardBillUnitOfWorkStub';
+import { PayCreditCardBillDto } from './PayCreditCardBillDto';
+import { PayCreditCardBillUseCase } from './PayCreditCardBillUseCase';
 
 describe('PayCreditCardBillUseCase', () => {
   let useCase: PayCreditCardBillUseCase;
@@ -23,7 +23,6 @@ describe('PayCreditCardBillUseCase', () => {
   let getAccountRepository: GetAccountRepositoryStub;
   let payUnitOfWork: IPayCreditCardBillUnitOfWorkStub;
   let budgetAuthorizationService: BudgetAuthorizationServiceStub;
-  let eventPublisher: EventPublisherStub;
 
   const userId = EntityId.create().value!.id;
   const budgetId = EntityId.create().value!.id;
@@ -34,14 +33,12 @@ describe('PayCreditCardBillUseCase', () => {
     getAccountRepository = new GetAccountRepositoryStub();
     payUnitOfWork = new IPayCreditCardBillUnitOfWorkStub();
     budgetAuthorizationService = new BudgetAuthorizationServiceStub();
-    eventPublisher = new EventPublisherStub();
 
     useCase = new PayCreditCardBillUseCase(
       getCreditCardBillRepository,
       getAccountRepository,
       payUnitOfWork,
       budgetAuthorizationService,
-      eventPublisher,
     );
   });
 
@@ -111,7 +108,6 @@ describe('PayCreditCardBillUseCase', () => {
       expect(result.data!.id).toBe(bill.id);
       expect(payUnitOfWork.executedParams).toBeDefined();
       expect(payUnitOfWork.executedParams!.bill.id).toBe(bill.id);
-      expect(eventPublisher.publishCalls).toHaveLength(1);
     });
 
     it('should fail when user has no permission', async () => {
@@ -255,35 +251,6 @@ describe('PayCreditCardBillUseCase', () => {
       const result = await useCase.execute(dto);
 
       expect(result.hasError).toBe(false);
-    });
-
-    it('should handle event publishing failure gracefully', async () => {
-      const bill = createMockBill();
-      const account = createMockAccount();
-
-      getCreditCardBillRepository.setCreditCardBill(bill);
-      getAccountRepository.mockAccount = account;
-
-      // Mock event publisher to throw error
-      jest
-        .spyOn(eventPublisher, 'publish')
-        .mockRejectedValueOnce(new Error('Event publishing failed'));
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      const dto = createValidDto({
-        creditCardBillId: bill.id,
-        accountId: account.id,
-      });
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasError).toBe(false);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to publish domain event:',
-        expect.any(Error),
-      );
-
-      consoleSpy.mockRestore();
     });
   });
 });

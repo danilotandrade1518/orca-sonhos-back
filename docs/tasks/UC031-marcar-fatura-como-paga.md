@@ -18,7 +18,6 @@ Permitir marcar uma fatura do cartão de crédito como paga, registrando o pagam
 - [ ] `src/domain/aggregates/credit-card-bill/value-objects/payment-amount/PaymentAmount.spec.ts`
 - [ ] `src/domain/aggregates/credit-card-bill/value-objects/payment-date/PaymentDate.ts`
 - [ ] `src/domain/aggregates/credit-card-bill/value-objects/payment-date/PaymentDate.spec.ts`
-- [ ] `src/domain/aggregates/credit-card-bill/events/CreditCardBillPaidEvent.ts`
 - [ ] `src/domain/aggregates/credit-card-bill/enums/CreditCardBillStatus.ts` (adicionar PAID)
 - [ ] Extensão: `src/domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill.ts` (método `markAsPaid()`)
 - [ ] Testes: `src/domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill.spec.ts`
@@ -64,7 +63,6 @@ PAID = 'PAID'
 - Valida se fatura pode ser paga (status OPEN)
 - Atualiza status para PAID
 - Registra data e valor do pagamento
-- Dispara CreditCardBillPaidEvent
 ```
 
 ## 📋 **Use Case Specifications**
@@ -99,7 +97,6 @@ PAID = 'PAID'
 6. Marcar fatura como paga (domain)
 7. Criar transação de débito na conta
 8. Persistir alterações via Unit of Work
-9. Publicar evento de pagamento
 10. Retornar confirmação
 
 ### **Business Rules**
@@ -143,7 +140,6 @@ PAID = 'PAID'
 - ✅ Transaction aggregate (para criar transação)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 
 ## 📊 **Acceptance Criteria**
 - [ ] Usuário pode marcar fatura como paga informando valor e data
@@ -151,7 +147,6 @@ PAID = 'PAID'
 - [ ] Valor é debitado da conta de origem
 - [ ] Status da fatura é atualizado para PAID
 - [ ] Transação de débito é criada automaticamente
-- [ ] Evento de pagamento é disparado
 - [ ] Operação é atômica (falha tudo ou nada)
 
 ## 🚀 **Definition of Done**

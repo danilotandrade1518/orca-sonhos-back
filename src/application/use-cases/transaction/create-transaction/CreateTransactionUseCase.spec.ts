@@ -4,14 +4,13 @@ import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-object
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
 
-import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { AccountRepositoryError } from '../../../shared/errors/AccountRepositoryError';
+import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { TransactionPersistenceFailedError } from '../../../shared/errors/TransactionPersistenceFailedError';
 import { AddTransactionRepositoryStub } from '../../../shared/tests/stubs/AddTransactionRepositoryStub';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { CreateTransactionDto } from './CreateTransactionDto';
 import { CreateTransactionUseCase } from './CreateTransactionUseCase';
 
@@ -20,7 +19,6 @@ describe('CreateTransactionUseCase', () => {
   let addTransactionRepositoryStub: AddTransactionRepositoryStub;
   let getAccountRepositoryStub: GetAccountRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let validAccount: Account;
   const userId = EntityId.create().value!.id;
 
@@ -28,12 +26,10 @@ describe('CreateTransactionUseCase', () => {
     addTransactionRepositoryStub = new AddTransactionRepositoryStub();
     getAccountRepositoryStub = new GetAccountRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
     useCase = new CreateTransactionUseCase(
       addTransactionRepositoryStub,
       getAccountRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
     );
 
     const accountResult = Account.create({

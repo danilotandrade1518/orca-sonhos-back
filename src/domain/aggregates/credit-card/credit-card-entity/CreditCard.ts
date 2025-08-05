@@ -6,11 +6,8 @@ import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
-import { CreditCardDayVo } from '../value-objects/credit-card-day/CreditCardDayVo';
-import { CreditCardCreatedEvent } from '../events/CreditCardCreatedEvent';
-import { CreditCardUpdatedEvent } from '../events/CreditCardUpdatedEvent';
-import { CreditCardDeletedEvent } from '../events/CreditCardDeletedEvent';
 import { CreditCardAlreadyDeletedError } from '../errors/CreditCardAlreadyDeletedError';
+import { CreditCardDayVo } from '../value-objects/credit-card-day/CreditCardDayVo';
 
 export interface CreateCreditCardDTO {
   name: string;
@@ -126,17 +123,6 @@ export class CreditCard extends AggregateRoot implements IEntity {
       budgetIdVo,
     );
 
-    card.addEvent(
-      new CreditCardCreatedEvent(
-        card.id,
-        card.name,
-        card.limit,
-        card.closingDay,
-        card.dueDay,
-        card.budgetId,
-      ),
-    );
-
     return Either.success<DomainError, CreditCard>(card);
   }
 
@@ -184,20 +170,6 @@ export class CreditCard extends AggregateRoot implements IEntity {
     this._dueDay = dueDayVo;
     this._updatedAt = new Date();
 
-    this.addEvent(
-      new CreditCardUpdatedEvent(
-        this.id,
-        previousName,
-        data.name,
-        previousLimit,
-        data.limit,
-        previousClosingDay,
-        data.closingDay,
-        previousDueDay,
-        data.dueDay,
-      ),
-    );
-
     return Either.success<DomainError, void>();
   }
 
@@ -209,7 +181,6 @@ export class CreditCard extends AggregateRoot implements IEntity {
 
     this._isDeleted = true;
     this._updatedAt = new Date();
-    this.addEvent(new CreditCardDeletedEvent(this.id));
 
     return Either.success<DomainError, void>();
   }

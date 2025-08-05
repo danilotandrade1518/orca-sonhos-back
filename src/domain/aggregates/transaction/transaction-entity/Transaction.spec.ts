@@ -1,9 +1,10 @@
-import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
-import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
-import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
-import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExecutedError';
+import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { InvalidCancellationReasonError } from '../errors/InvalidCancellationReasonError';
+import { TransactionAlreadyDeletedError } from '../errors/TransactionAlreadyDeletedError';
+import { TransactionAlreadyExecutedError } from '../errors/TransactionAlreadyExecutedError';
+import { TransactionBusinessRuleError } from '../errors/TransactionBusinessRuleError';
 import { TransactionCannotBeCancelledError } from '../errors/TransactionCannotBeCancelledError';
+import { TransactionNotScheduledError } from '../errors/TransactionNotScheduledError';
 import { TransactionStatusEnum } from '../value-objects/transaction-status/TransactionStatus';
 import { TransactionTypeEnum } from '../value-objects/transaction-type/TransactionType';
 import {
@@ -11,7 +12,6 @@ import {
   Transaction,
   UpdateTransactionDTO,
 } from './Transaction';
-import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 
 describe('Transaction', () => {
   const validTransactionData: CreateTransactionDTO = {
@@ -746,63 +746,6 @@ describe('Transaction', () => {
       expect(result.data!.transactionDate).toEqual(newDate);
     });
 
-    it('deve emitir evento quando conta for alterada', () => {
-      const newAccountId = EntityId.create().value!.id;
-      const updateData: UpdateTransactionDTO = {
-        description: transaction.description,
-        amount: transaction.amount,
-        type: transaction.type,
-        accountId: newAccountId,
-      };
-
-      const result = transaction.update(updateData);
-
-      expect(result.hasError).toBe(false);
-      expect(result.data!.getEvents()).toHaveLength(1);
-    });
-
-    it('deve emitir evento quando valor for alterado', () => {
-      const updateData: UpdateTransactionDTO = {
-        description: transaction.description,
-        amount: 300,
-        type: transaction.type,
-        accountId: transaction.accountId,
-      };
-
-      const result = transaction.update(updateData);
-
-      expect(result.hasError).toBe(false);
-      expect(result.data!.getEvents()).toHaveLength(1);
-    });
-
-    it('deve emitir evento quando tipo for alterado', () => {
-      const updateData: UpdateTransactionDTO = {
-        description: transaction.description,
-        amount: transaction.amount,
-        type: TransactionTypeEnum.TRANSFER,
-        accountId: transaction.accountId,
-      };
-
-      const result = transaction.update(updateData);
-
-      expect(result.hasError).toBe(false);
-      expect(result.data!.getEvents()).toHaveLength(1);
-    });
-
-    it('não deve emitir evento quando apenas descrição for alterada', () => {
-      const updateData: UpdateTransactionDTO = {
-        description: 'Nova descrição sem eventos',
-        amount: transaction.amount,
-        type: transaction.type,
-        accountId: transaction.accountId,
-      };
-
-      const result = transaction.update(updateData);
-
-      expect(result.hasError).toBe(false);
-      expect(result.data!.getEvents()).toHaveLength(0);
-    });
-
     it('deve retornar erro ao atualizar com descrição inválida', () => {
       const updateData: UpdateTransactionDTO = {
         description: 'AB', // Muito curta
@@ -877,15 +820,13 @@ describe('Transaction', () => {
   });
 
   describe('delete', () => {
-    it('deve deletar transação e emitir evento', () => {
+    it('deve deletar transação', () => {
       const transaction = Transaction.create(validTransactionData).data!;
-      transaction.clearEvents(); // Limpar evento de criação
 
       const result = transaction.delete();
 
       expect(result.hasError).toBe(false);
       expect(transaction.isDeleted).toBe(true);
-      expect(transaction.getEvents()).toHaveLength(1);
     });
 
     it('deve retornar erro ao deletar transação já deletada', () => {
@@ -1154,69 +1095,6 @@ describe('Transaction', () => {
             break;
         }
       });
-    });
-  });
-
-  describe('eventos de domínio', () => {
-    it('deve emitir TransactionCreatedEvent ao criar transação', () => {
-      const transaction = Transaction.create(validTransactionData).data!;
-
-      const events = transaction.getEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0].constructor.name).toBe('TransactionCreatedEvent');
-    });
-
-    it('deve limpar eventos após obtê-los', () => {
-      const transaction = Transaction.create(validTransactionData).data!;
-
-      expect(transaction.getEvents()).toHaveLength(1);
-      transaction.clearEvents();
-      expect(transaction.getEvents()).toHaveLength(0);
-    });
-
-    it('deve emitir TransactionDeletedEvent ao deletar transação', () => {
-      const transaction = Transaction.create(validTransactionData).data!;
-      transaction.clearEvents(); // Limpar evento de criação
-
-      transaction.delete();
-
-      const events = transaction.getEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0].constructor.name).toBe('TransactionDeletedEvent');
-    });
-
-    it('deve emitir TransactionMarkedAsLateEvent ao marcar como late', () => {
-      const pastDate = new Date();
-      pastDate.setDate(pastDate.getDate() - 2);
-      const transaction = Transaction.create({
-        ...validTransactionData,
-        transactionDate: pastDate,
-        status: TransactionStatusEnum.SCHEDULED,
-      }).data!;
-      transaction.clearEvents();
-
-      transaction.markAsLate();
-
-      const events = transaction.getEvents();
-      expect(events[0].constructor.name).toBe('TransactionMarkedAsLateEvent');
-    });
-
-    it('deve emitir TransactionUpdatedEvent ao atualizar propriedades relevantes', () => {
-      const transaction = Transaction.create(validTransactionData).data!;
-      transaction.clearEvents(); // Limpar evento de criação
-
-      const updateData: UpdateTransactionDTO = {
-        description: transaction.description,
-        amount: 300, // Valor alterado
-        type: transaction.type,
-        accountId: transaction.accountId,
-      };
-
-      const updatedTransaction = transaction.update(updateData).data!;
-
-      const events = updatedTransaction.getEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0].constructor.name).toBe('TransactionUpdatedEvent');
     });
   });
 

@@ -9,9 +9,6 @@ import { DeletedAccountError } from '../errors/DeletedAccountError';
 import { InsufficientBalanceError } from '../errors/InsufficientBalanceError';
 import { InvalidAccountDataError } from '../errors/InvalidAccountDataError';
 import { ReconciliationNotNecessaryError } from '../errors/ReconciliationNotNecessaryError';
-import { AccountDeletedEvent } from '../events/AccountDeletedEvent';
-import { AccountReconciledEvent } from '../events/AccountReconciledEvent';
-import { AccountUpdatedEvent } from '../events/AccountUpdatedEvent';
 import {
   AccountType,
   AccountTypeEnum,
@@ -201,21 +198,6 @@ export class Account extends AggregateRoot implements IEntity {
       this._id,
     );
 
-    if (hasNameChanged || hasInitialBalanceChanged) {
-      updatedAccount.addEvent(
-        new AccountUpdatedEvent(
-          updatedAccount.id,
-          updatedAccount.budgetId!,
-          this.name!,
-          newName,
-          this.balance!,
-          newInitialBalance,
-          this.description,
-          newDescription,
-        ),
-      );
-    }
-
     either.setData(updatedAccount);
     return either;
   }
@@ -223,16 +205,6 @@ export class Account extends AggregateRoot implements IEntity {
   delete(): void {
     this._updatedAt = new Date();
     this._isDeleted = true;
-    this.addEvent(
-      new AccountDeletedEvent(
-        this.id,
-        this.budgetId!,
-        this.name!,
-        this.type as AccountTypeEnum,
-        this.balance!,
-        this.description,
-      ),
-    );
   }
 
   static create(data: CreateAccountDTO): Either<DomainError, Account> {
@@ -340,10 +312,7 @@ export class Account extends AggregateRoot implements IEntity {
     return Either.success(undefined);
   }
 
-  reconcile(
-    realBalance: number,
-    justification: string,
-  ): Either<DomainError, number> {
+  reconcile(realBalance: number): Either<DomainError, number> {
     const balanceVo = BalanceVo.create(realBalance);
 
     const either = new Either<DomainError, number>();
@@ -364,17 +333,6 @@ export class Account extends AggregateRoot implements IEntity {
 
     this._balance = balanceVo;
     this._updatedAt = new Date();
-
-    this.addEvent(
-      new AccountReconciledEvent(
-        this.id,
-        this.budgetId!,
-        current,
-        realBalance,
-        diff,
-        justification,
-      ),
-    );
 
     return Either.success(diff);
   }

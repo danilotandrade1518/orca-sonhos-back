@@ -7,7 +7,6 @@ import { BudgetRepositoryError } from '../../../shared/errors/BudgetRepositoryEr
 import { BudgetUpdateFailedError } from '../../../shared/errors/BudgetUpdateFailedError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
-import { EventPublisherStub } from '../../../shared/tests/stubs/EventPublisherStub';
 import { GetBudgetRepositoryStub } from '../../../shared/tests/stubs/GetBudgetRepositoryStub';
 import { SaveBudgetRepositoryStub } from '../../../shared/tests/stubs/SaveBudgetRepositoryStub';
 import { UpdateBudgetDto } from './UpdateBudgetDto';
@@ -18,7 +17,6 @@ describe('UpdateBudgetUseCase', () => {
   let getBudgetRepositoryStub: GetBudgetRepositoryStub;
   let saveBudgetRepositoryStub: SaveBudgetRepositoryStub;
   let budgetAuthorizationServiceStub: BudgetAuthorizationServiceStub;
-  let eventPublisherStub: EventPublisherStub;
   let validBudget: Budget;
   const userId = EntityId.create().value!.id;
 
@@ -26,12 +24,10 @@ describe('UpdateBudgetUseCase', () => {
     getBudgetRepositoryStub = new GetBudgetRepositoryStub();
     saveBudgetRepositoryStub = new SaveBudgetRepositoryStub();
     budgetAuthorizationServiceStub = new BudgetAuthorizationServiceStub();
-    eventPublisherStub = new EventPublisherStub();
     useCase = new UpdateBudgetUseCase(
       getBudgetRepositoryStub,
       saveBudgetRepositoryStub,
       budgetAuthorizationServiceStub,
-      eventPublisherStub,
     );
 
     const budgetResult = Budget.create({
@@ -47,7 +43,6 @@ describe('UpdateBudgetUseCase', () => {
     }
 
     validBudget = budgetResult.data!;
-    validBudget.clearEvents();
     getBudgetRepositoryStub.mockBudget = validBudget;
     budgetAuthorizationServiceStub.mockHasAccess = true;
   });
@@ -190,63 +185,6 @@ describe('UpdateBudgetUseCase', () => {
       expect(getBudgetRepositoryStub.executeCalls[0]).toBe(validBudget.id);
       expect(saveBudgetRepositoryStub.executeCalls).toHaveLength(1);
       expect(saveBudgetRepositoryStub.executeCalls[0].id).toBe(validBudget.id);
-    });
-
-    it('should publish events after success', async () => {
-      const dto: UpdateBudgetDto = {
-        userId,
-        budgetId: validBudget.id,
-        name: 'Another Name',
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-      const events = validBudget.getEvents();
-      if (events.length > 0) {
-        expect(eventPublisherStub.publishManyCalls).toHaveLength(1);
-        expect(eventPublisherStub.publishManyCalls[0]).toHaveLength(
-          events.length,
-        );
-      } else {
-        expect(eventPublisherStub.publishManyCalls).toHaveLength(0);
-      }
-    });
-
-    it('should handle event publishing errors gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      jest
-        .spyOn(eventPublisherStub, 'publishMany')
-        .mockRejectedValueOnce(new Error('Event publishing failed'));
-
-      const dto: UpdateBudgetDto = {
-        userId,
-        budgetId: validBudget.id,
-        name: 'Another Name',
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-
-      consoleSpy.mockRestore();
-    });
-
-    it('should clear events after publishing', async () => {
-      const clearEventsSpy = jest.spyOn(validBudget, 'clearEvents');
-      const dto: UpdateBudgetDto = {
-        userId,
-        budgetId: validBudget.id,
-        name: 'Another Name',
-      };
-
-      const result = await useCase.execute(dto);
-
-      expect(result.hasData).toBe(true);
-      const events = validBudget.getEvents();
-      if (events.length > 0) {
-        expect(clearEventsSpy).toHaveBeenCalledTimes(1);
-      }
     });
   });
 });

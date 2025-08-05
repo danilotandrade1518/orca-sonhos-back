@@ -6,7 +6,6 @@ import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-object
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IEventPublisher } from '../../../contracts/events/IEventPublisher';
 import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
@@ -23,7 +22,6 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
     private readonly getAccountRepository: IGetAccountRepository,
     private readonly reconcileAccountUnitOfWork: IReconcileAccountUnitOfWork,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly eventPublisher: IEventPublisher,
     private readonly adjustmentCategoryId: string,
   ) {}
 
@@ -57,10 +55,7 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
       return Either.errors([new InsufficientPermissionsError()]);
     }
 
-    const reconcileResult = account.reconcile(
-      dto.realBalance,
-      dto.justification,
-    );
+    const reconcileResult = account.reconcile(dto.realBalance);
 
     if (reconcileResult.hasError) {
       return Either.errors(reconcileResult.errors);
@@ -94,17 +89,6 @@ export class ReconcileAccountUseCase implements IUseCase<ReconcileAccountDto> {
 
     if (persistResult.hasError) {
       return Either.errors([new TransactionPersistenceFailedError()]);
-    }
-
-    const events = [...account.getEvents(), ...transaction.getEvents()];
-    if (events.length > 0) {
-      try {
-        await this.eventPublisher.publishMany(events);
-        account.clearEvents();
-        transaction.clearEvents();
-      } catch (error) {
-        console.error('Failed to publish events:', error);
-      }
     }
 
     return Either.success({ id: account.id });

@@ -17,7 +17,6 @@ Permitir que o usuário marque uma transação agendada como executada/realizada
 - [ ] `src/domain/aggregates/transaction/value-objects/execution-date/ExecutionDate.ts`
 - [ ] `src/domain/aggregates/transaction/value-objects/execution-date/ExecutionDate.spec.ts`
 - [ ] `src/domain/aggregates/transaction/enums/TransactionStatus.ts` (adicionar EXECUTED)
-- [ ] `src/domain/aggregates/transaction/events/ScheduledTransactionExecutedEvent.ts`
 - [ ] Extensão: `src/domain/aggregates/transaction/transaction-entity/Transaction.ts` (método `markAsExecuted()`)
 - [ ] Testes: `src/domain/aggregates/transaction/transaction-entity/Transaction.spec.ts`
 
@@ -54,7 +53,6 @@ EXECUTED = 'EXECUTED'
 - Valida se data de execução é válida
 - Atualiza status para EXECUTED
 - Registra data de execução
-- Dispara ScheduledTransactionExecutedEvent
 ```
 
 ## 📋 **Use Case Specifications**
@@ -88,8 +86,7 @@ EXECUTED = 'EXECUTED'
 7. Marcar transação como executada (domain)
 8. Aplicar transação no saldo da conta
 9. Persistir alterações via Unit of Work
-10. Publicar evento de execução
-11. Retornar confirmação
+10. Retornar confirmação
 
 ### **Business Rules**
 - [ ] Apenas transações SCHEDULED podem ser executadas
@@ -132,7 +129,6 @@ EXECUTED = 'EXECUTED'
 - ✅ Account aggregate (para aplicar no saldo)
 - ✅ Budget authorization service
 - ✅ Unit of Work pattern
-- ✅ Event publisher
 - ❌ UC015 (Agendar Transação) deve estar implementado
 
 ## 📊 **Acceptance Criteria**
@@ -141,7 +137,6 @@ EXECUTED = 'EXECUTED'
 - [ ] Data de execução é validada e registrada
 - [ ] Saldo da conta é atualizado imediatamente
 - [ ] Status muda para EXECUTED
-- [ ] Evento de execução é disparado
 - [ ] Validação de saldo suficiente para débitos
 - [ ] Transação executada não pode ser executada novamente
 

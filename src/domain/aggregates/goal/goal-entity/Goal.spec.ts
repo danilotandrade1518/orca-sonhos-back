@@ -1,10 +1,10 @@
+import { InvalidEntityIdError } from '../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from '../../../shared/errors/InvalidEntityNameError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
-import { InvalidEntityIdError } from '../../../shared/errors/InvalidEntityIdError';
-import { Goal } from './Goal';
-import { GoalAlreadyDeletedError } from '../errors/GoalAlreadyDeletedError';
 import { GoalAlreadyAchievedError } from '../errors/GoalAlreadyAchievedError';
+import { GoalAlreadyDeletedError } from '../errors/GoalAlreadyDeletedError';
 import { InvalidGoalAmountError } from '../errors/InvalidGoalAmountError';
+import { Goal } from './Goal';
 
 const validName = 'Minha Meta';
 const validTotal = 1000;
@@ -23,12 +23,11 @@ function makeDTO(overrides = {}) {
 
 describe('Goal', () => {
   describe('create', () => {
-    it('deve criar uma meta válida e emitir evento', () => {
+    it('deve criar uma meta válida', () => {
       const result = Goal.create(makeDTO());
 
       expect(result.hasError).toBe(false);
       const goal = result.data!;
-      expect(goal.getEvents().length).toBe(1);
       expect(goal.name).toBe(validName);
     });
 
@@ -48,13 +47,12 @@ describe('Goal', () => {
   });
 
   describe('addAmount', () => {
-    it('deve adicionar aporte válido e emitir eventos', () => {
+    it('deve adicionar aporte válido', () => {
       const goal = Goal.create(makeDTO()).data!;
       const result = goal.addAmount(200);
 
       expect(result.hasError).toBe(false);
       expect(goal.accumulatedAmount).toBe(200);
-      expect(goal.getEvents().length).toBe(2); // created + addAmount
     });
 
     it('deve retornar erro se goal estiver deletada', () => {
@@ -84,13 +82,12 @@ describe('Goal', () => {
   });
 
   describe('delete', () => {
-    it('deve deletar meta e emitir evento', () => {
+    it('deve deletar meta', () => {
       const goal = Goal.create(makeDTO()).data!;
       const result = goal.delete();
 
       expect(result.hasError).toBe(false);
       expect(goal.isDeleted).toBe(true);
-      expect(goal.getEvents().length).toBe(2); // created + deleted
     });
 
     it('deve retornar erro se deletar duas vezes', () => {

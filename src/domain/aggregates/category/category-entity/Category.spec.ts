@@ -1,12 +1,9 @@
-import { CategoryAlreadyDeletedError } from '../errors/CategoryAlreadyDeletedError';
-import { InvalidCategoryTypeError } from '../errors/InvalidCategoryTypeError';
-import { CategoryCreatedEvent } from '../events/CategoryCreatedEvent';
-import { CategoryDeletedEvent } from '../events/CategoryDeletedEvent';
-import { CategoryUpdatedEvent } from '../events/CategoryUpdatedEvent';
-import { CategoryTypeEnum } from '../value-objects/category-type/CategoryType';
 import { InvalidEntityIdError } from '../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from '../../../shared/errors/InvalidEntityNameError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
+import { CategoryAlreadyDeletedError } from '../errors/CategoryAlreadyDeletedError';
+import { InvalidCategoryTypeError } from '../errors/InvalidCategoryTypeError';
+import { CategoryTypeEnum } from '../value-objects/category-type/CategoryType';
 import { Category } from './Category';
 
 function makeCategoryDTO({
@@ -71,19 +68,11 @@ describe('Categoria', () => {
         new InvalidEntityIdError(''),
       ]);
     });
-
-    it('deve emitir CategoryCreatedEvent ao criar', () => {
-      const result = Category.create(makeCategoryDTO());
-      const events = result.data!.getEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(CategoryCreatedEvent);
-    });
   });
 
   describe('update', () => {
-    it('deve atualizar e emitir evento', () => {
+    it('deve atualizar', () => {
       const category = Category.create(makeCategoryDTO()).data!;
-      category.clearEvents();
 
       const result = category.update({
         name: 'Novo',
@@ -93,17 +82,6 @@ describe('Categoria', () => {
       expect(result.hasError).toBe(false);
       expect(category.name).toBe('Novo');
       expect(category.type).toBe(CategoryTypeEnum.INCOME);
-      expect(category.getEvents()[0]).toBeInstanceOf(CategoryUpdatedEvent);
-    });
-
-    it('não deve emitir evento se nada alterar', () => {
-      const dto = makeCategoryDTO();
-      const category = Category.create(dto).data!;
-      category.clearEvents();
-
-      const result = category.update({ name: dto.name, type: dto.type });
-      expect(result.hasError).toBe(false);
-      expect(category.getEvents()).toHaveLength(0);
     });
 
     it('deve retornar erro ao atualizar categoria deletada', () => {
@@ -120,15 +98,13 @@ describe('Categoria', () => {
   });
 
   describe('delete', () => {
-    it('deve deletar e emitir evento', () => {
+    it('deve deletar', () => {
       const category = Category.create(makeCategoryDTO()).data!;
-      category.clearEvents();
 
       const result = category.delete();
 
       expect(result.hasError).toBe(false);
       expect(category.isDeleted).toBe(true);
-      expect(category.getEvents()[0]).toBeInstanceOf(CategoryDeletedEvent);
     });
 
     it('deve retornar erro se deletar novamente', () => {
@@ -158,7 +134,6 @@ describe('Categoria', () => {
       const result = Category.restore(data);
       expect(result.hasError).toBe(false);
       expect(result.data!.id).toBe(created.id);
-      expect(result.data!.getEvents()).toHaveLength(0);
     });
   });
 
