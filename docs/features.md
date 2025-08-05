@@ -14,8 +14,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 📊 **Resumo Geral**
 
 - **Total de Use Cases**: 49
-- **Implementados**: 31 (63%)
-- **Não Implementados**: 18 (37%)
+- **Implementados**: 32 (65%)
+- **Não Implementados**: 17 (35%)
 
 ---
 
@@ -928,8 +928,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC030: Marcar Fatura como Paga
-**Status**: Não Implementado
+### ✅ UC030: Marcar Fatura como Paga
+**Status**: Implementado
+**Arquivo**: [`PayCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/pay-credit-card-bill/PayCreditCardBillUseCase.ts)
 
 **Descrição**: Marca uma fatura do cartão como paga e registra o pagamento.
 
@@ -951,9 +952,11 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 8. Sistema exibe confirmação
 
 **Critérios de Aceitação**:
-- ❌ Valor do pagamento deve ser informado
-- ❌ Data do pagamento é registrada
-- ❌ Saldo da conta é debitado
+- ✅ Valor do pagamento deve ser informado
+- ✅ Data do pagamento é registrada
+- ✅ Saldo da conta é debitado
+- ✅ Validação de orçamento realizada no domain service
+- ✅ Unit of Work garante atomicidade da operação
 
 **Domain Events**:
 - `CreditCardBillPaidEvent`
@@ -1329,13 +1332,12 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 25 use cases (48%)
-- **❌ Não Implementados**: 27 use cases (52%)
+- **✅ Implementados**: 32 use cases (65%)
+- **❌ Não Implementados**: 17 use cases (35%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
-   - UC030: Marcar Fatura como Paga
    - UC032: Controlar Limite do Cartão
 
 2. **Média Prioridade** (Features Importantes):
