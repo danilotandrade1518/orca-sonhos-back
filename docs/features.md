@@ -13,9 +13,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📊 **Resumo Geral**
 
-- **Total de Use Cases**: 48
-- **Implementados**: 32 (67%)
-- **Não Implementados**: 16 (33%)
+- **Total de Use Cases**: 44
+- **Implementados**: 31 (70%)
+- **Não Implementados**: 13 (30%)
 
 ---
 
@@ -231,7 +231,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC006: Editar Conta
+### ✅ UC007: Editar Conta
 
 **Status**: Implementado  
 **Arquivo**: [`UpdateAccountUseCase.ts`](../src/application/use-cases/account/update-account/UpdateAccountUseCase.ts)
@@ -487,31 +487,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Critérios de Aceitação**:
 
-- ✅ Data futura → Status SCHEDULED
-- ✅ Data presente/passada → Status COMPLETED
+- ✅ Data futura → Status SCHEDULED (UC014: Agendar Transação Futura)
+- ✅ Data presente/passada → Status COMPLETED (UC015: Registrar Transação Passada)
 - ✅ Transações passadas afetam histórico
 - ✅ Transações futuras não afetam saldo atual
 
-
 ---
 
-### ❌ UC014: Agendar Transação Futura
-
-**Status**: Não Implementado (Desnecessário - coberto por UC015)
-
-**Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data futura.
-
----
-
-### ❌ UC015: Registrar Transação Passada
-
-**Status**: Não Implementado (Desnecessário - coberto por UC015)
-
-**Descrição**: REMOVIDO - Funcionalidade coberta pelo CreateTransactionUseCase ao definir data passada.
-
----
-
-### ✅ UC016: Marcar Transação como Atrasada
+### ✅ UC015: Marcar Transação como Atrasada
 
 **Status**: Implementado
 **Arquivo**: [`MarkTransactionLateUseCase.ts`](../src/application/use-cases/transaction/mark-transaction-late/MarkTransactionLateUseCase.ts)
@@ -542,7 +525,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC017: Cancelar Transação Agendada
+### ✅ UC014: Cancelar Transação Agendada
 
 **Status**: Implementado
 **Arquivo**: [`CancelScheduledTransactionUseCase.ts`](../src/application/use-cases/transaction/cancel-scheduled-transaction/CancelScheduledTransactionUseCase.ts)
@@ -576,7 +559,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC018: Editar Transação
+### ✅ UC016: Editar Transação
 
 **Status**: Implementado  
 **Arquivo**: [`UpdateTransactionUseCase.ts`](../src/application/use-cases/transaction/update-transaction/UpdateTransactionUseCase.ts)
@@ -610,7 +593,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC019: Excluir Transação
+### ✅ UC017: Excluir Transação
 
 **Status**: Implementado  
 **Arquivo**: [`DeleteTransactionUseCase.ts`](../src/application/use-cases/transaction/delete-transaction/DeleteTransactionUseCase.ts)
@@ -645,7 +628,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📂 **Gestão de Categorias**
 
-### ✅ UC020: Criar Categoria
+### ✅ UC018: Criar Categoria
 
 **Status**: Implementado  
 **Arquivo**: [`CreateCategoryUseCase.ts`](../src/application/use-cases/category/create-category/CreateCategoryUseCase.ts)
@@ -681,7 +664,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC021: Editar Categoria
+### ✅ UC019: Editar Categoria
 
 **Status**: Implementado  
 **Arquivo**: [`UpdateCategoryUseCase.ts`](../src/application/use-cases/category/update-category/UpdateCategoryUseCase.ts)
@@ -715,7 +698,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC022: Excluir Categoria
+### ✅ UC020: Excluir Categoria
 
 **Status**: Implementado  
 **Arquivo**: [`DeleteCategoryUseCase.ts`](../src/application/use-cases/category/delete-category/DeleteCategoryUseCase.ts)
@@ -751,7 +734,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 💳 **Gestão de Cartões de Crédito**
 
-### ✅ UC024: Cadastrar Cartão de Crédito
+### ✅ UC021: Cadastrar Cartão de Crédito
 
 **Status**: Implementado  
 **Arquivo**: [`CreateCreditCardUseCase.ts`](../src/application/use-cases/credit-card/create-credit-card/CreateCreditCardUseCase.ts)
@@ -786,7 +769,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC025: Editar Cartão de Crédito
+### ✅ UC022: Editar Cartão de Crédito
 
 **Status**: Implementado  
 **Arquivo**: [`UpdateCreditCardUseCase.ts`](../src/application/use-cases/credit-card/update-credit-card/UpdateCreditCardUseCase.ts)
@@ -819,7 +802,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC026: Excluir Cartão de Crédito
+### ✅ UC023: Excluir Cartão de Crédito
 
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardUseCase.ts`](../src/application/use-cases/credit-card/delete-credit-card/DeleteCreditCardUseCase.ts)
@@ -853,7 +836,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC027: Criar Fatura do Cartão
+### ✅ UC024: Criar Fatura do Cartão
 
 **Status**: Implementado  
 **Arquivo**: [`CreateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/create-credit-card-bill/CreateCreditCardBillUseCase.ts)
@@ -888,7 +871,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC028: Atualizar Fatura do Cartão
+### ✅ UC025: Atualizar Fatura do Cartão
 
 **Status**: Implementado  
 **Arquivo**: [`UpdateCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/update-credit-card-bill/UpdateCreditCardBillUseCase.ts)
@@ -923,7 +906,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC029: Excluir Fatura do Cartão
+### ✅ UC026: Excluir Fatura do Cartão
 
 **Status**: Implementado  
 **Arquivo**: [`DeleteCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/delete-credit-card-bill/DeleteCreditCardBillUseCase.ts)
@@ -958,7 +941,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC030: Marcar Fatura como Paga
+### ✅ UC027: Marcar Fatura como Paga
 
 **Status**: Implementado
 **Arquivo**: [`PayCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/pay-credit-card-bill/PayCreditCardBillUseCase.ts)
@@ -994,7 +977,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC031: Reabrir Fatura
+### ✅ UC028: Reabrir Fatura
 
 **Status**: Implementado
 **Arquivo**: [`ReopenCreditCardBillUseCase.ts`](../src/application/use-cases/credit-card-bill/reopen-bill/ReopenCreditCardBillUseCase.ts)
@@ -1032,7 +1015,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 🎯 **Gestão de Metas**
 
-### ✅ UC033: Criar Meta
+### ✅ UC029: Criar Meta
 
 **Status**: Implementado  
 **Arquivo**: [`CreateGoalUseCase.ts`](../src/application/use-cases/goal/create-goal/CreateGoalUseCase.ts)
@@ -1068,7 +1051,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC034: Editar Meta
+### ✅ UC030: Editar Meta
 
 **Status**: Implementado  
 **Arquivo**: [`UpdateGoalUseCase.ts`](../src/application/use-cases/goal/update-goal/UpdateGoalUseCase.ts)
@@ -1102,7 +1085,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC035: Excluir Meta
+### ✅ UC031: Excluir Meta
 
 **Status**: Implementado  
 **Arquivo**: [`DeleteGoalUseCase.ts`](../src/application/use-cases/goal/delete-goal/DeleteGoalUseCase.ts)
@@ -1135,7 +1118,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ✅ UC036: Fazer Aporte Manual
+### ✅ UC032: Fazer Aporte Manual
 
 **Status**: Implementado  
 **Arquivo**: [`AddAmountToGoalUseCase.ts`](../src/application/use-cases/goal/add-amount-to-goal/AddAmountToGoalUseCase.ts)
@@ -1174,7 +1157,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 💰 **Sistema de Envelopes**
 
-### ❌ UC037: Criar Envelope
+### ❌ UC033: Criar Envelope
 
 **Status**: Não Implementado
 
@@ -1207,7 +1190,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC038: Editar Envelope
+### ❌ UC034: Editar Envelope
 
 **Status**: Não Implementado
 
@@ -1215,7 +1198,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC039: Excluir Envelope
+### ❌ UC035: Excluir Envelope
 
 **Status**: Não Implementado
 
@@ -1223,7 +1206,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC040: Fazer Aporte no Envelope
+### ❌ UC036: Fazer Aporte no Envelope
 
 **Status**: Não Implementado
 
@@ -1231,7 +1214,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC041: Retirar Valor do Envelope
+### ❌ UC037: Retirar Valor do Envelope
 
 **Status**: Não Implementado
 
@@ -1239,7 +1222,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC042: Transferir Entre Envelopes
+### ❌ UC038: Transferir Entre Envelopes
 
 **Status**: Não Implementado
 
@@ -1247,7 +1230,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC043: Configurar Envelope Automático
+### ❌ UC039: Configurar Envelope Automático
 
 **Status**: Não Implementado
 
@@ -1257,7 +1240,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 🔔 **Alertas e Notificações**
 
-### ❌ UC044: Configurar Alerta de Orçamento
+### ❌ UC040: Configurar Alerta de Orçamento
 
 **Status**: Não Implementado
 
@@ -1265,7 +1248,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC045: Configurar Alerta de Meta
+### ❌ UC041: Configurar Alerta de Meta
 
 **Status**: Não Implementado
 
@@ -1273,7 +1256,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC046: Configurar Lembrete de Vencimento
+### ❌ UC042: Configurar Lembrete de Vencimento
 
 **Status**: Não Implementado
 
@@ -1281,7 +1264,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC047: Receber Notificação de Limite
+### ❌ UC043: Receber Notificação de Limite
 
 **Status**: Não Implementado
 
@@ -1289,7 +1272,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC048: Receber Alerta de Oportunidade
+### ❌ UC044: Receber Alerta de Oportunidade
 
 **Status**: Não Implementado
 
@@ -1297,7 +1280,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC049: Personalizar Canais de Notificação
+### ❌ UC045: Personalizar Canais de Notificação
 
 **Status**: Não Implementado
 
@@ -1305,7 +1288,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC052: Configurar Frequência de Alertas
+### ❌ UC046: Configurar Frequência de Alertas
 
 **Status**: Não Implementado
 
@@ -1315,25 +1298,20 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 32 use cases (67%)
-- **❌ Não Implementados**: 16 use cases (33%)
+- **✅ Implementados**: 31 use cases (70%)
+- **❌ Não Implementados**: 13 use cases (30%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
 
-   - UC014: Editar Categoria
-   - UC015: Excluir Categoria
+   - Sistema de Envelopes (UC033-UC039)
 
-2. **Média Prioridade** (Features Importantes):
-
-   - Sistema de Envelopes (UC037-UC043)
-
-3. **Baixa Prioridade** (Features Avançadas):
-   - Alertas e Notificações (UC044-UC049, UC052)
+2. **Baixa Prioridade** (Features Avançadas):
+   - Alertas e Notificações (UC040-UC046)
 
 **Observação**: Use cases de visualização, relatórios e dashboards serão tratados separadamente em camadas específicas de apresentação e não fazem parte desta documentação focada em mutação de dados.
 
 ---
 
-**Última Atualização**: Agosto/2025 - UC003 (Adicionar Usuário ao Orçamento) implementado com arquitetura completa incluindo BudgetType value object, domain errors e validações de tipo de orçamento. Implementação inclui 51 testes automatizados cobrindo todas as camadas (Domain, Application, Infrastructure).
+**Última Atualização**: Agosto/2025 - Removidos UC014 e UC015 por serem redundantes (funcionalidade coberta pelo CreateTransactionUseCase). Renumerados todos os use cases para sequência contínua. Atualmente temos 31 use cases implementados (70%) de um total de 44 use cases planejados. Implementação inclui cobertura completa de testes automatizados para todas as camadas (Domain, Application, Infrastructure).
