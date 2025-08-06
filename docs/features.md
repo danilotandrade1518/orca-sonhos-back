@@ -14,8 +14,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 📊 **Resumo Geral**
 
 - **Total de Use Cases**: 44
-- **Implementados**: 31 (70%)
-- **Não Implementados**: 13 (30%)
+- **Implementados**: 32 (73%)
+- **Não Implementados**: 12 (27%)
 
 ---
 
@@ -1157,9 +1157,10 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 💰 **Sistema de Envelopes**
 
-### ❌ UC033: Criar Envelope
+### ✅ UC033: Criar Envelope
 
-**Status**: Não Implementado
+**Status**: Implementado  
+**Arquivo**: [`CreateEnvelopeUseCase.ts`](../src/application/use-cases/envelope/create-envelope/CreateEnvelopeUseCase.ts)
 
 **Descrição**: Cria um envelope para alocação de valores por categoria.
 
@@ -1175,8 +1176,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 1. Usuário acessa sistema de envelopes
 2. Clica em "Novo Envelope"
 3. Preenche dados do envelope
-4. Define valor mensal
-5. Associa a categorias (opcional)
+4. Define limite mensal
+5. Associa a categoria
 6. Confirma criação
 7. Sistema valida dados
 8. Sistema cria envelope
@@ -1184,9 +1185,21 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 **Critérios de Aceitação**:
 
-- ❌ Nome deve ser único no orçamento
-- ❌ Valor mensal deve ser positivo
-- ❌ Pode ser associado a múltiplas categorias
+- ✅ Nome deve ter entre 2-100 caracteres
+- ✅ Limite mensal deve ser maior que R$ 0
+- ✅ Deve estar associado a um orçamento válido
+- ✅ Deve estar associado a uma categoria válida
+- ✅ Envelope criado com status ACTIVE por padrão
+- ✅ Sistema verifica autorização do usuário para o orçamento
+
+**Domain Components**:
+
+- `Envelope` - Aggregate Root independente
+- `EnvelopeLimit` - Value Object para limite mensal
+- `EnvelopeStatus` - Value Object para status (ACTIVE, PAUSED, ARCHIVED)
+- `InvalidEnvelopeLimitError` - Erro para limite inválido
+- `EnvelopeAlreadyDeletedError` - Erro para operações em envelope deletado
+- `EnvelopeNotFoundError` - Erro para envelope não encontrado
 
 ---
 
@@ -1298,14 +1311,14 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📈 **Estatísticas Finais**
 
-- **✅ Implementados**: 31 use cases (70%)
-- **❌ Não Implementados**: 13 use cases (30%)
+- **✅ Implementados**: 32 use cases (73%)
+- **❌ Não Implementados**: 12 use cases (27%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
 
-   - Sistema de Envelopes (UC033-UC039)
+   - Sistema de Envelopes (UC034-UC039)
 
 2. **Baixa Prioridade** (Features Avançadas):
    - Alertas e Notificações (UC040-UC046)
@@ -1314,4 +1327,4 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-**Última Atualização**: Agosto/2025 - Removidos UC014 e UC015 por serem redundantes (funcionalidade coberta pelo CreateTransactionUseCase). Renumerados todos os use cases para sequência contínua. Atualmente temos 31 use cases implementados (70%) de um total de 44 use cases planejados. Implementação inclui cobertura completa de testes automatizados para todas as camadas (Domain, Application, Infrastructure).
+**Última Atualização**: Agosto/2025 - Implementado UC033 (Criar Envelope) como agregado independente seguindo padrões DDD. O sistema de envelopes agora possui sua própria estrutura de domínio com entidades, value objects e casos de uso. Atualmente temos 32 use cases implementados (73%) de um total de 44 use cases planejados. Implementação inclui cobertura completa de testes automatizados para todas as camadas (Domain, Application, Infrastructure).
