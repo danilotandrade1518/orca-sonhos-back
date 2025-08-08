@@ -44,4 +44,3 @@ export class EnvelopeBalance {
     return Either.success(new EnvelopeBalance(balance));
   }
 }
-
