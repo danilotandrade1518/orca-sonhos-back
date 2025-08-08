@@ -14,8 +14,8 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 ## 📊 **Resumo Geral**
 
 - **Total de Use Cases**: 37
-- **Implementados**: 32 (86%)
-- **Não Implementados**: 5 (14%)
+- **Implementados**: 37 (100%)
+- **Não Implementados**: 0 (0%)
 
 ---
 
@@ -1203,59 +1203,203 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC034: Editar Envelope
+### ✅ UC034: Editar Envelope
 
-**Status**: Não Implementado
+**Status**: Implementado  
+**Arquivo**: [`UpdateEnvelopeUseCase.ts`](../src/application/use-cases/envelope/update-envelope/UpdateEnvelopeUseCase.ts)
 
 **Descrição**: Edita configurações de um envelope existente.
 
+**Ator**: Usuário participante do orçamento
+
+**Precondições**:
+
+- Usuário logado no sistema
+- Usuário tem acesso ao orçamento
+- Envelope existe e não foi deletado
+
+**Fluxo Principal**:
+
+1. Usuário seleciona envelope para editar
+2. Sistema exibe dados atuais
+3. Usuário altera dados desejados
+4. Confirma alteração
+5. Sistema valida dados
+6. Sistema atualiza envelope
+7. Sistema exibe confirmação
+
+**Critérios de Aceitação**:
+
+- ✅ Nome deve ter entre 2-100 caracteres (se alterado)
+- ✅ Limite mensal deve ser maior que R$ 0 (se alterado)
+- ✅ Não permite editar envelope deletado
+- ✅ Sistema verifica autorização do usuário
+
 ---
 
-### ❌ UC035: Excluir Envelope
+### ✅ UC035: Excluir Envelope
 
-**Status**: Não Implementado
+**Status**: Implementado  
+**Arquivo**: [`DeleteEnvelopeUseCase.ts`](../src/application/use-cases/envelope/delete-envelope/DeleteEnvelopeUseCase.ts)
 
-**Descrição**: Exclui um envelope que não possui saldo.
+**Descrição**: Exclui um envelope (soft delete).
+
+**Ator**: Usuário participante do orçamento
+
+**Precondições**:
+
+- Usuário logado no sistema
+- Usuário tem acesso ao orçamento
+- Envelope existe e não foi deletado
+
+**Fluxo Principal**:
+
+1. Usuário seleciona envelope para excluir
+2. Sistema solicita confirmação
+3. Usuário confirma exclusão
+4. Sistema marca envelope como deletado
+5. Sistema exibe confirmação
+
+**Critérios de Aceitação**:
+
+- ✅ Realiza soft delete (não remove fisicamente)
+- ✅ Não permite excluir envelope já deletado
+- ✅ Sistema verifica autorização do usuário
 
 ---
 
-### ❌ UC036: Fazer Aporte no Envelope
+### ✅ UC036: Fazer Aporte no Envelope
 
-**Status**: Não Implementado
+**Status**: Implementado  
+**Arquivo**: [`AddAmountToEnvelopeUseCase.ts`](../src/application/use-cases/envelope/add-amount-to-envelope/AddAmountToEnvelopeUseCase.ts)
 
 **Descrição**: Adiciona valor a um envelope específico.
 
+**Ator**: Usuário participante do orçamento
+
+**Precondições**:
+
+- Usuário logado no sistema
+- Usuário tem acesso ao orçamento
+- Envelope existe e não foi deletado
+- Valor deve ser positivo
+
+**Fluxo Principal**:
+
+1. Usuário seleciona envelope
+2. Informa valor a adicionar
+3. Confirma operação
+4. Sistema valida dados e limites
+5. Sistema adiciona valor ao saldo
+6. Sistema exibe confirmação
+
+**Critérios de Aceitação**:
+
+- ✅ Valor deve ser positivo
+- ✅ Não permite adicionar se exceder limite mensal
+- ✅ Envelope deve existir e não estar deletado
+- ✅ Sistema verifica autorização do usuário
+
 ---
 
-### ❌ UC037: Retirar Valor do Envelope
+### ✅ UC037: Retirar Valor do Envelope
 
-**Status**: Não Implementado
+**Status**: Implementado  
+**Arquivo**: [`RemoveAmountFromEnvelopeUseCase.ts`](../src/application/use-cases/envelope/remove-amount-from-envelope/RemoveAmountFromEnvelopeUseCase.ts)
 
 **Descrição**: Retira valor de um envelope para uso.
 
+**Ator**: Usuário participante do orçamento
+
+**Precondições**:
+
+- Usuário logado no sistema
+- Usuário tem acesso ao orçamento
+- Envelope existe e não foi deletado
+- Envelope possui saldo suficiente
+
+**Fluxo Principal**:
+
+1. Usuário seleciona envelope
+2. Informa valor a retirar
+3. Confirma operação
+4. Sistema valida saldo disponível
+5. Sistema retira valor do saldo
+6. Sistema exibe confirmação
+
+**Critérios de Aceitação**:
+
+- ✅ Valor deve ser positivo
+- ✅ Saldo deve ser suficiente para retirada
+- ✅ Envelope deve existir e não estar deletado
+- ✅ Sistema verifica autorização do usuário
+
 ---
 
-### ❌ UC038: Transferir Entre Envelopes
+### ✅ UC038: Transferir Entre Envelopes
 
-**Status**: Não Implementado
+**Status**: Implementado  
+**Arquivo**: [`TransferBetweenEnvelopesUseCase.ts`](../src/application/use-cases/envelope/transfer-between-envelopes/TransferBetweenEnvelopesUseCase.ts)
 
 **Descrição**: Transfere valor entre diferentes envelopes.
+
+**Ator**: Usuário participante do orçamento
+
+**Precondições**:
+
+- Usuário logado no sistema
+- Usuário tem acesso ao orçamento
+- Ambos envelopes existem e não foram deletados
+- Envelope origem possui saldo suficiente
+- Envelope destino não excede limite após transferência
+
+**Fluxo Principal**:
+
+1. Usuário seleciona envelope origem
+2. Seleciona envelope destino
+3. Informa valor a transferir
+4. Confirma operação
+5. Sistema valida operação (saldo, limites)
+6. Sistema executa transferência atomicamente
+7. Sistema exibe confirmação
+
+**Critérios de Aceitação**:
+
+- ✅ Valor deve ser positivo
+- ✅ Envelope origem deve ter saldo suficiente
+- ✅ Envelope destino não pode exceder limite após transferência
+- ✅ Ambos envelopes devem existir e não estar deletados
+- ✅ Operação é atômica (tudo ou nada)
+- ✅ Sistema verifica autorização do usuário
+
+**Domain Components Adicionais**:
+
+- `EnvelopeTransferService` - Domain Service para transferências
+- `EnvelopeBalance` - Value Object para saldo do envelope
+- `EnvelopeLimitExceededError` - Erro quando limite é excedido
+- `InsufficientEnvelopeBalanceError` - Erro quando saldo insuficiente
 
 ---
 
 ##  **Estatísticas Finais**
 
-- **✅ Implementados**: 32 use cases (86%)
-- **❌ Não Implementados**: 5 use cases (14%)
+- **✅ Implementados**: 37 use cases (100%)
+- **❌ Não Implementados**: 0 use cases (0%)
 
-### **Priorização Sugerida para Próximas Implementações**:
+### **🎉 MVP Completo!**
 
-1. **Alta Prioridade** (Core Business):
+Todos os use cases do MVP foram implementados com sucesso! O sistema OrçaSonhos agora possui funcionalidade completa para:
 
-   - Sistema de Envelopes (UC034-UC038)
+1. **Gestão de Orçamentos** - Criação, edição, exclusão e compartilhamento
+2. **Gestão de Contas** - Controle de contas bancárias e carteiras
+3. **Gestão de Categorias** - Organização de receitas e despesas
+4. **Gestão de Cartões de Crédito** - Controle de cartões e faturas
+5. **Gestão de Transações** - Registro e controle de movimentações financeiras
+6. **Sistema de Envelopes** - Método de orçamento por envelope para controle de gastos
+7. **Sistema de Metas** - Definição e acompanhamento de objetivos financeiros
 
 **Observação**: Use cases de visualização, relatórios e dashboards serão tratados separadamente em camadas específicas de apresentação e não fazem parte desta documentação focada em mutação de dados.
 
 ---
 
-**Última Atualização**: Agosto/2025 - Implementado UC033 (Criar Envelope) como agregado independente seguindo padrões DDD. Removido UC039 (Configurar Envelope Automático) e todos os use cases de Alertas e Notificações (UC040-UC046) para focar no MVP. O sistema de envelopes agora possui sua própria estrutura de domínio com entidades, value objects e casos de uso. Atualmente temos 32 use cases implementados (86%) de um total de 37 use cases do MVP. Implementação inclui cobertura completa de testes automatizados para todas as camadas (Domain, Application, Infrastructure).
+**Última Atualização**: Agosto/2025 - 🎉 **MVP COMPLETO!** Implementados todos os 37 use cases do MVP (100%), incluindo o sistema completo de envelopes (UC033-UC038) como agregado independente seguindo padrões DDD. Removido UC039 (Configurar Envelope Automático) e todos os use cases de Alertas e Notificações (UC040-UC046) para focar no MVP. O sistema de envelopes possui estrutura completa de domínio com entidades, value objects, domain services e casos de uso. Toda a implementação inclui cobertura completa de testes automatizados para todas as camadas (Domain, Application, Infrastructure). O OrçaSonhos agora oferece funcionalidade completa para gestão financeira pessoal com orçamentos, contas, categorias, cartões, transações, envelopes e metas.
