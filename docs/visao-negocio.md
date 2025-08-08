@@ -12,7 +12,6 @@
 - **Orçamentos compartilhados** permitem colaboração entre usuários.
 - **Adição direta**: Qualquer participante pode adicionar outros usuários ao orçamento sem necessidade de convites ou aprovações.
 - **Acesso total**: Todo usuário adicionado tem acesso completo ao orçamento (sem níveis de permissão).
-- **Notificação**: Sistema notifica usuários quando são adicionados a novos orçamentos.
 - **Remoção**: Participantes podem ser removidos do orçamento (exceto o criador).
 
 ### 💸 Transações (Receitas e Despesas) Ferramenta de gestão financeira familiar simples, prática e com foco em metas reais.
@@ -68,7 +67,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 #### 💡 Impacto no Saldo:
 - **Transações Realizadas**: Afetam imediatamente o saldo atual, independente da data
 - **Transações Agendadas**: Não afetam o saldo atual, apenas aparecem nas projeções
-- **Transações Atrasadas**: Não afetam o saldo atual, mas geram alertas de pendência
+- **Transações Atrasadas**: Não afetam o saldo atual, mas são identificadas pelo sistema como pendentes
 
 ### 🗂️ Categorias
 - Organizam os lançamentos para permitir análise.
@@ -153,7 +152,7 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
   - Saldo atual
   - Evolução das metas
   - Gastos por categoria
-  - Alertas de estouro
+  - Status dos envelopes
 - Visão consolidada (para quem participa de múltiplos orçamentos)
 - Fatura atual de cada cartão, com detalhamento
 - Progresso das metas SMART
@@ -194,7 +193,7 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - **Conciliação bancária**: Registrar transações já realizadas no banco
 - **Controle de pendências**: Marcar contas vencidas que ainda não foram pagas
 - **Histórico completo**: Manter registro fiel da movimentação financeira
-- **Alertas de atraso**: Sistema identifica automaticamente transações em atraso
+- **Identificação de atrasos**: Sistema identifica automaticamente transações em atraso
 
 ---
 
@@ -209,7 +208,7 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 | **Transação** | Registro de entrada ou saída de dinheiro. Pode ter data passada, presente ou futura. Deve sempre ter um valor, data, categoria e orçamento. |
 | **Transação Agendada** | Transação com data futura que ainda não foi efetivada. Útil para planejamento. |
 | **Transação Realizada** | Transação que já aconteceu e impacta o saldo atual. Pode ter qualquer data. |
-| **Transação Atrasada** | Transação com data passada que ainda não foi concluída/paga. Gera alerta no sistema. |
+| **Transação Atrasada** | Transação com data passada que ainda não foi concluída/paga. |
 | **Conta** | Local físico onde o dinheiro está armazenado (conta bancária, carteira, etc.). Pode ter saldo negativo. |
 | **Cartão de Crédito** | Meio de pagamento com controle de limite e fatura. Não é tratado como conta bancária. |
 | **Fatura** | Conjunto de despesas em um cartão com data de fechamento e vencimento. |

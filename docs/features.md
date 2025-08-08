@@ -13,9 +13,9 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ## 📊 **Resumo Geral**
 
-- **Total de Use Cases**: 44
-- **Implementados**: 32 (73%)
-- **Não Implementados**: 12 (27%)
+- **Total de Use Cases**: 37
+- **Implementados**: 32 (86%)
+- **Não Implementados**: 5 (14%)
 
 ---
 
@@ -1243,88 +1243,19 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-### ❌ UC039: Configurar Envelope Automático
+##  **Estatísticas Finais**
 
-**Status**: Não Implementado
-
-**Descrição**: Configura aporte automático mensal para envelope.
-
----
-
-## 🔔 **Alertas e Notificações**
-
-### ❌ UC040: Configurar Alerta de Orçamento
-
-**Status**: Não Implementado
-
-**Descrição**: Configura alertas quando gastos se aproximam do limite.
-
----
-
-### ❌ UC041: Configurar Alerta de Meta
-
-**Status**: Não Implementado
-
-**Descrição**: Configura alertas relacionados ao progresso das metas.
-
----
-
-### ❌ UC042: Configurar Lembrete de Vencimento
-
-**Status**: Não Implementado
-
-**Descrição**: Configura lembretes para datas de vencimento.
-
----
-
-### ❌ UC043: Receber Notificação de Limite
-
-**Status**: Não Implementado
-
-**Descrição**: Recebe notificação quando limites são atingidos.
-
----
-
-### ❌ UC044: Receber Alerta de Oportunidade
-
-**Status**: Não Implementado
-
-**Descrição**: Recebe alertas sobre oportunidades de economia.
-
----
-
-### ❌ UC045: Personalizar Canais de Notificação
-
-**Status**: Não Implementado
-
-**Descrição**: Configura como e onde receber notificações.
-
----
-
-### ❌ UC046: Configurar Frequência de Alertas
-
-**Status**: Não Implementado
-
-**Descrição**: Define com que frequência receber cada tipo de alerta.
-
----
-
-## 📈 **Estatísticas Finais**
-
-- **✅ Implementados**: 32 use cases (73%)
-- **❌ Não Implementados**: 12 use cases (27%)
+- **✅ Implementados**: 32 use cases (86%)
+- **❌ Não Implementados**: 5 use cases (14%)
 
 ### **Priorização Sugerida para Próximas Implementações**:
 
 1. **Alta Prioridade** (Core Business):
 
-   - Sistema de Envelopes (UC034-UC039)
-
-2. **Baixa Prioridade** (Features Avançadas):
-   - Alertas e Notificações (UC040-UC046)
+   - Sistema de Envelopes (UC034-UC038)
 
 **Observação**: Use cases de visualização, relatórios e dashboards serão tratados separadamente em camadas específicas de apresentação e não fazem parte desta documentação focada em mutação de dados.
 
 ---
 
-**Última Atualização**: Agosto/2025 - Implementado UC033 (Criar Envelope) como agregado independente seguindo padrões DDD. O sistema de envelopes agora possui sua própria estrutura de domínio com entidades, value objects e casos de uso. Atualmente temos 32 use cases implementados (73%) de um total de 44 use cases planejados. Implementação inclui cobertura completa de testes automatizados para todas as camadas (Domain, Application, Infrastructure).
+**Última Atualização**: Agosto/2025 - Implementado UC033 (Criar Envelope) como agregado independente seguindo padrões DDD. Removido UC039 (Configurar Envelope Automático) e todos os use cases de Alertas e Notificações (UC040-UC046) para focar no MVP. O sistema de envelopes agora possui sua própria estrutura de domínio com entidades, value objects e casos de uso. Atualmente temos 32 use cases implementados (86%) de um total de 37 use cases do MVP. Implementação inclui cobertura completa de testes automatizados para todas as camadas (Domain, Application, Infrastructure).
