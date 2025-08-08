@@ -3,7 +3,10 @@ import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { CreditCardBill } from '@domain/aggregates/credit-card-bill/credit-card-bill-entity/CreditCardBill';
 import { Either } from '@either';
 
-import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
+import {
+  IDatabaseClient,
+  IPostgresConnectionAdapter,
+} from '../../../../../adapters/IPostgresConnectionAdapter';
 import { CreditCardBillMapper } from '../../../mappers/credit-card-bill/CreditCardBillMapper';
 
 export class SaveCreditCardBillRepository
@@ -12,6 +15,16 @@ export class SaveCreditCardBillRepository
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(bill: CreditCardBill): Promise<Either<RepositoryError, void>> {
+    const client = await this.connection.getClient();
+    const result = await this.executeWithClient(client, bill);
+    client.release();
+    return result;
+  }
+
+  async executeWithClient(
+    client: IDatabaseClient,
+    bill: CreditCardBill,
+  ): Promise<Either<RepositoryError, void>> {
     try {
       const row = CreditCardBillMapper.toRow(bill);
 
@@ -39,15 +52,7 @@ export class SaveCreditCardBillRepository
         row.updated_at,
       ];
 
-      const result = await this.connection.queryOne(query, params);
-
-      if (!result || result.rowCount === 0) {
-        return Either.error(
-          new RepositoryError(
-            'Credit card bill not found or could not be updated',
-          ),
-        );
-      }
+      await client.query(query, params);
 
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
