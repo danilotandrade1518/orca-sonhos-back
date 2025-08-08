@@ -5,11 +5,13 @@ import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { EnvelopeLimit } from '../value-objects/envelope-limit/EnvelopeLimit';
+import { EnvelopeBalance } from '../value-objects/envelope-balance/EnvelopeBalance';
 import {
   EnvelopeStatus,
   EnvelopeStatusEnum,
 } from '../value-objects/envelope-status/EnvelopeStatus';
 import { EnvelopeAlreadyDeletedError } from '../errors/EnvelopeAlreadyDeletedError';
+import { EnvelopeLimitExceededError } from '../errors/EnvelopeLimitExceededError';
 
 export interface CreateEnvelopeDTO {
   name: string;
@@ -29,6 +31,7 @@ export class Envelope extends AggregateRoot implements IEntity {
     private _monthlyLimit: EnvelopeLimit,
     private readonly _budgetId: EntityId,
     private readonly _categoryId: EntityId,
+    private _currentBalance: EnvelopeBalance,
     private _status: EnvelopeStatus,
     existingId?: EntityId,
   ) {
@@ -52,6 +55,9 @@ export class Envelope extends AggregateRoot implements IEntity {
   }
   get categoryId(): string {
     return this._categoryId.value?.id ?? '';
+  }
+  get currentBalance(): number {
+    return this._currentBalance.value;
   }
   get status(): EnvelopeStatusEnum {
     return this._status.value;
@@ -136,6 +142,46 @@ export class Envelope extends AggregateRoot implements IEntity {
     return Either.success(undefined);
   }
 
+  addAmount(amount: number): Either<DomainError, void> {
+    if (this._isDeleted) {
+      return Either.error(new EnvelopeAlreadyDeletedError());
+    }
+
+    const newBalanceResult = this._currentBalance.add(amount);
+    if (newBalanceResult.hasError) {
+      return Either.errors(newBalanceResult.errors);
+    }
+
+    const newBalance = newBalanceResult.data!;
+
+    if (newBalance.value > this.monthlyLimit) {
+      return Either.error(new EnvelopeLimitExceededError());
+    }
+
+    this._currentBalance = newBalance;
+    this._updatedAt = new Date();
+    return Either.success(undefined);
+  }
+
+  removeAmount(amount: number): Either<DomainError, void> {
+    if (this._isDeleted) {
+      return Either.error(new EnvelopeAlreadyDeletedError());
+    }
+
+    const newBalanceResult = this._currentBalance.subtract(amount);
+    if (newBalanceResult.hasError) {
+      return Either.errors(newBalanceResult.errors);
+    }
+
+    this._currentBalance = newBalanceResult.data!;
+    this._updatedAt = new Date();
+    return Either.success(undefined);
+  }
+
+  getAvailableLimit(): number {
+    return this.monthlyLimit - this.currentBalance;
+  }
+
   static create(data: CreateEnvelopeDTO): Either<DomainError, Envelope> {
     const nameVo = EntityName.create(data.name);
     if (nameVo.hasError) {
@@ -158,12 +204,17 @@ export class Envelope extends AggregateRoot implements IEntity {
     }
 
     const status = EnvelopeStatus.create(EnvelopeStatusEnum.ACTIVE);
+    const balanceVo = EnvelopeBalance.create(0);
+    if (balanceVo.hasError) {
+      return Either.errors(balanceVo.errors);
+    }
 
     const envelope = new Envelope(
       nameVo,
       limitVo.data!,
       budgetIdVo,
       categoryIdVo,
+      balanceVo.data!,
       status,
     );
 
@@ -177,6 +228,7 @@ export class Envelope extends AggregateRoot implements IEntity {
     budgetId: string;
     categoryId: string;
     status: EnvelopeStatusEnum;
+    currentBalance: number;
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -207,12 +259,17 @@ export class Envelope extends AggregateRoot implements IEntity {
     }
 
     const status = EnvelopeStatus.create(data.status);
+    const balanceVo = EnvelopeBalance.create(data.currentBalance);
+    if (balanceVo.hasError) {
+      return Either.errors(balanceVo.errors);
+    }
 
     const envelope = new Envelope(
       nameVo,
       limitVo.data!,
       budgetIdVo,
       categoryIdVo,
+      balanceVo.data!,
       status,
       idVo,
     );

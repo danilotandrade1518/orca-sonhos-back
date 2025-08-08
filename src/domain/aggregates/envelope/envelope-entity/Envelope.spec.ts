@@ -1,6 +1,8 @@
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EnvelopeAlreadyDeletedError } from '../errors/EnvelopeAlreadyDeletedError';
 import { InvalidEnvelopeLimitError } from '../errors/InvalidEnvelopeLimitError';
+import { EnvelopeLimitExceededError } from '../errors/EnvelopeLimitExceededError';
+import { InsufficientEnvelopeBalanceError } from '../errors/InsufficientEnvelopeBalanceError';
 import { EnvelopeStatusEnum } from '../value-objects/envelope-status/EnvelopeStatus';
 import { Envelope } from './Envelope';
 
@@ -19,6 +21,7 @@ describe('Envelope Entity', () => {
       expect(result.hasError).toBe(false);
       expect(result.data!.name).toBe('Alimentação');
       expect(result.data!.monthlyLimit).toBe(50000);
+       expect(result.data!.currentBalance).toBe(0);
       expect(result.data!.status).toBe(EnvelopeStatusEnum.ACTIVE);
       expect(result.data!.isDeleted).toBe(false);
     });
@@ -142,6 +145,49 @@ describe('Envelope Entity', () => {
     });
   });
 
+  describe('balance management', () => {
+    it('should add amount successfully', () => {
+      const envelope = Envelope.create(validEnvelopeData).data!;
+      const result = envelope.addAmount(1000);
+      expect(result.hasError).toBe(false);
+      expect(envelope.currentBalance).toBe(1000);
+      expect(envelope.getAvailableLimit()).toBe(49000);
+    });
+
+    it('should not add amount exceeding limit', () => {
+      const envelope = Envelope.create(validEnvelopeData).data!;
+      const result = envelope.addAmount(60000);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(EnvelopeLimitExceededError);
+    });
+
+    it('should remove amount successfully', () => {
+      const envelope = Envelope.create(validEnvelopeData).data!;
+      envelope.addAmount(5000);
+      const result = envelope.removeAmount(3000);
+      expect(result.hasError).toBe(false);
+      expect(envelope.currentBalance).toBe(2000);
+    });
+
+    it('should not remove more than balance', () => {
+      const envelope = Envelope.create(validEnvelopeData).data!;
+      const result = envelope.removeAmount(1000);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InsufficientEnvelopeBalanceError);
+    });
+
+    it('should not remove or add when envelope deleted', () => {
+      const envelope = Envelope.create(validEnvelopeData).data!;
+      envelope.delete();
+      const addResult = envelope.addAmount(1000);
+      const removeResult = envelope.removeAmount(1000);
+      expect(addResult.hasError).toBe(true);
+      expect(removeResult.hasError).toBe(true);
+      expect(addResult.errors[0]).toBeInstanceOf(EnvelopeAlreadyDeletedError);
+      expect(removeResult.errors[0]).toBeInstanceOf(EnvelopeAlreadyDeletedError);
+    });
+  });
+
   describe('status management', () => {
     it('should pause envelope', () => {
       const envelope = Envelope.create(validEnvelopeData).data!;
@@ -213,6 +259,7 @@ describe('Envelope Entity', () => {
         budgetId: EntityId.create().value!.id,
         categoryId: EntityId.create().value!.id,
         status: EnvelopeStatusEnum.ACTIVE,
+        currentBalance: 1000,
         isDeleted: false,
         createdAt: new Date('2025-01-01'),
         updatedAt: new Date('2025-01-02'),
@@ -223,6 +270,7 @@ describe('Envelope Entity', () => {
       expect(result.hasError).toBe(false);
       expect(result.data!.name).toBe('Envelope Restaurado');
       expect(result.data!.monthlyLimit).toBe(30000);
+      expect(result.data!.currentBalance).toBe(1000);
       expect(result.data!.status).toBe(EnvelopeStatusEnum.ACTIVE);
       expect(result.data!.isDeleted).toBe(false);
       expect(result.data!.createdAt).toEqual(restoreData.createdAt);
@@ -237,6 +285,7 @@ describe('Envelope Entity', () => {
         budgetId: EntityId.create().value!.id,
         categoryId: EntityId.create().value!.id,
         status: EnvelopeStatusEnum.ARCHIVED,
+        currentBalance: 0,
         isDeleted: true,
         createdAt: new Date('2025-01-01'),
         updatedAt: new Date('2025-01-02'),
@@ -257,6 +306,7 @@ describe('Envelope Entity', () => {
         budgetId: '',
         categoryId: '',
         status: EnvelopeStatusEnum.ACTIVE,
+        currentBalance: -10,
         isDeleted: false,
         createdAt: new Date('2025-01-01'),
         updatedAt: new Date('2025-01-02'),
