@@ -1,15 +1,12 @@
 import { Either } from '@either';
+
 import { AggregateRoot } from '../../../shared/AggregateRoot';
 import { DomainError } from '../../../shared/DomainError';
 import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
-import { EnvelopeLimit } from '../value-objects/envelope-limit/EnvelopeLimit';
-import {
-  EnvelopeStatus,
-  EnvelopeStatusEnum,
-} from '../value-objects/envelope-status/EnvelopeStatus';
 import { EnvelopeAlreadyDeletedError } from '../errors/EnvelopeAlreadyDeletedError';
+import { EnvelopeLimit } from '../value-objects/envelope-limit/EnvelopeLimit';
 
 export interface CreateEnvelopeDTO {
   name: string;
@@ -29,7 +26,6 @@ export class Envelope extends AggregateRoot implements IEntity {
     private _monthlyLimit: EnvelopeLimit,
     private readonly _budgetId: EntityId,
     private readonly _categoryId: EntityId,
-    private _status: EnvelopeStatus,
     existingId?: EntityId,
   ) {
     super();
@@ -52,9 +48,6 @@ export class Envelope extends AggregateRoot implements IEntity {
   }
   get categoryId(): string {
     return this._categoryId.value?.id ?? '';
-  }
-  get status(): EnvelopeStatusEnum {
-    return this._status.value;
   }
   get createdAt(): Date {
     return this._createdAt;
@@ -104,28 +97,6 @@ export class Envelope extends AggregateRoot implements IEntity {
     return Either.success(undefined);
   }
 
-  pause(): Either<DomainError, void> {
-    if (this._isDeleted) {
-      return Either.error(new EnvelopeAlreadyDeletedError());
-    }
-
-    const pausedStatus = EnvelopeStatus.create(EnvelopeStatusEnum.PAUSED);
-    this._status = pausedStatus;
-    this._updatedAt = new Date();
-    return Either.success(undefined);
-  }
-
-  activate(): Either<DomainError, void> {
-    if (this._isDeleted) {
-      return Either.error(new EnvelopeAlreadyDeletedError());
-    }
-
-    const activeStatus = EnvelopeStatus.create(EnvelopeStatusEnum.ACTIVE);
-    this._status = activeStatus;
-    this._updatedAt = new Date();
-    return Either.success(undefined);
-  }
-
   delete(): Either<DomainError, void> {
     if (this._isDeleted) {
       return Either.error(new EnvelopeAlreadyDeletedError());
@@ -157,14 +128,11 @@ export class Envelope extends AggregateRoot implements IEntity {
       return Either.errors(categoryIdVo.errors);
     }
 
-    const status = EnvelopeStatus.create(EnvelopeStatusEnum.ACTIVE);
-
     const envelope = new Envelope(
       nameVo,
       limitVo.data!,
       budgetIdVo,
       categoryIdVo,
-      status,
     );
 
     return Either.success(envelope);
@@ -176,7 +144,6 @@ export class Envelope extends AggregateRoot implements IEntity {
     monthlyLimit: number;
     budgetId: string;
     categoryId: string;
-    status: EnvelopeStatusEnum;
     isDeleted: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -206,14 +173,11 @@ export class Envelope extends AggregateRoot implements IEntity {
       return Either.errors(idVo.errors);
     }
 
-    const status = EnvelopeStatus.create(data.status);
-
     const envelope = new Envelope(
       nameVo,
       limitVo.data!,
       budgetIdVo,
       categoryIdVo,
-      status,
       idVo,
     );
 

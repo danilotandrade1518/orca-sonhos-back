@@ -1,7 +1,6 @@
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EnvelopeAlreadyDeletedError } from '../errors/EnvelopeAlreadyDeletedError';
 import { InvalidEnvelopeLimitError } from '../errors/InvalidEnvelopeLimitError';
-import { EnvelopeStatusEnum } from '../value-objects/envelope-status/EnvelopeStatus';
 import { Envelope } from './Envelope';
 
 describe('Envelope Entity', () => {
@@ -19,7 +18,6 @@ describe('Envelope Entity', () => {
       expect(result.hasError).toBe(false);
       expect(result.data!.name).toBe('Alimentação');
       expect(result.data!.monthlyLimit).toBe(50000);
-      expect(result.data!.status).toBe(EnvelopeStatusEnum.ACTIVE);
       expect(result.data!.isDeleted).toBe(false);
     });
 
@@ -142,47 +140,6 @@ describe('Envelope Entity', () => {
     });
   });
 
-  describe('status management', () => {
-    it('should pause envelope', () => {
-      const envelope = Envelope.create(validEnvelopeData).data!;
-
-      const result = envelope.pause();
-
-      expect(result.hasError).toBe(false);
-      expect(envelope.status).toBe(EnvelopeStatusEnum.PAUSED);
-    });
-
-    it('should activate envelope', () => {
-      const envelope = Envelope.create(validEnvelopeData).data!;
-      envelope.pause();
-
-      const result = envelope.activate();
-
-      expect(result.hasError).toBe(false);
-      expect(envelope.status).toBe(EnvelopeStatusEnum.ACTIVE);
-    });
-
-    it('should fail to pause when envelope is deleted', () => {
-      const envelope = Envelope.create(validEnvelopeData).data!;
-      envelope.delete();
-
-      const result = envelope.pause();
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(EnvelopeAlreadyDeletedError);
-    });
-
-    it('should fail to activate when envelope is deleted', () => {
-      const envelope = Envelope.create(validEnvelopeData).data!;
-      envelope.delete();
-
-      const result = envelope.activate();
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(EnvelopeAlreadyDeletedError);
-    });
-  });
-
   describe('delete', () => {
     it('should delete envelope successfully', () => {
       const envelope = Envelope.create(validEnvelopeData).data!;
@@ -212,7 +169,6 @@ describe('Envelope Entity', () => {
         monthlyLimit: 30000,
         budgetId: EntityId.create().value!.id,
         categoryId: EntityId.create().value!.id,
-        status: EnvelopeStatusEnum.ACTIVE,
         isDeleted: false,
         createdAt: new Date('2025-01-01'),
         updatedAt: new Date('2025-01-02'),
@@ -223,7 +179,6 @@ describe('Envelope Entity', () => {
       expect(result.hasError).toBe(false);
       expect(result.data!.name).toBe('Envelope Restaurado');
       expect(result.data!.monthlyLimit).toBe(30000);
-      expect(result.data!.status).toBe(EnvelopeStatusEnum.ACTIVE);
       expect(result.data!.isDeleted).toBe(false);
       expect(result.data!.createdAt).toEqual(restoreData.createdAt);
       expect(result.data!.updatedAt).toEqual(restoreData.updatedAt);
@@ -236,7 +191,6 @@ describe('Envelope Entity', () => {
         monthlyLimit: 25000,
         budgetId: EntityId.create().value!.id,
         categoryId: EntityId.create().value!.id,
-        status: EnvelopeStatusEnum.ARCHIVED,
         isDeleted: true,
         createdAt: new Date('2025-01-01'),
         updatedAt: new Date('2025-01-02'),
@@ -246,7 +200,6 @@ describe('Envelope Entity', () => {
 
       expect(result.hasError).toBe(false);
       expect(result.data!.isDeleted).toBe(true);
-      expect(result.data!.status).toBe(EnvelopeStatusEnum.ARCHIVED);
     });
 
     it('should fail to restore with invalid data', () => {
@@ -256,7 +209,6 @@ describe('Envelope Entity', () => {
         monthlyLimit: -100,
         budgetId: '',
         categoryId: '',
-        status: EnvelopeStatusEnum.ACTIVE,
         isDeleted: false,
         createdAt: new Date('2025-01-01'),
         updatedAt: new Date('2025-01-02'),
