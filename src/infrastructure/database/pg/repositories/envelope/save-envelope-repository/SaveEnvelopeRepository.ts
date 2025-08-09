@@ -3,7 +3,10 @@ import { Envelope } from '@domain/aggregates/envelope/envelope-entity/Envelope';
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
+import {
+  IDatabaseClient,
+  IPostgresConnectionAdapter,
+} from '../../../../../adapters/IPostgresConnectionAdapter';
 import { EnvelopeMapper } from '../../../mappers/envelope/EnvelopeMapper';
 
 class EnvelopePersistenceError extends DomainError {
@@ -18,6 +21,16 @@ export class SaveEnvelopeRepository implements ISaveEnvelopeRepository {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(envelope: Envelope): Promise<Either<DomainError, void>> {
+    const client = await this.connection.getClient();
+    const result = await this.executeWithClient(client, envelope);
+    client.release();
+    return result;
+  }
+
+  async executeWithClient(
+    client: IDatabaseClient,
+    envelope: Envelope,
+  ): Promise<Either<DomainError, void>> {
     try {
       const row = EnvelopeMapper.toRow(envelope);
 
@@ -41,7 +54,7 @@ export class SaveEnvelopeRepository implements ISaveEnvelopeRepository {
         row.updated_at,
       ];
 
-      await this.connection.queryOne(query, params);
+      await client.query(query, params);
       return Either.success<DomainError, void>(undefined);
     } catch (error) {
       return Either.error(

@@ -2,7 +2,10 @@ import { Envelope } from '@domain/aggregates/envelope/envelope-entity/Envelope';
 import { DomainError } from '@domain/shared/DomainError';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
+import {
+  IDatabaseClient,
+  IPostgresConnectionAdapter,
+} from '../../../../../adapters/IPostgresConnectionAdapter';
 import { EnvelopeMapper } from '../../../mappers/envelope/EnvelopeMapper';
 import { SaveEnvelopeRepository } from './SaveEnvelopeRepository';
 
@@ -11,16 +14,22 @@ jest.mock('../../../mappers/envelope/EnvelopeMapper');
 describe('SaveEnvelopeRepository', () => {
   let repository: SaveEnvelopeRepository;
   let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
+  let mockClient: jest.Mocked<IDatabaseClient>;
   let mockMapper: jest.Mocked<typeof EnvelopeMapper>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockClient = {
+      query: jest.fn().mockResolvedValue([]),
+      release: jest.fn(),
+    } as jest.Mocked<IDatabaseClient>;
+
     mockConnection = {
       query: jest.fn(),
       queryOne: jest.fn(),
       transaction: jest.fn(),
-      getClient: jest.fn(),
+      getClient: jest.fn().mockResolvedValue(mockClient),
     };
 
     mockMapper = EnvelopeMapper as jest.Mocked<typeof EnvelopeMapper>;
@@ -53,13 +62,12 @@ describe('SaveEnvelopeRepository', () => {
       };
 
       mockMapper.toRow.mockReturnValue(row);
-      mockConnection.queryOne.mockResolvedValue(undefined);
 
       const result = await repository.execute(envelope);
 
       expect(result.hasError).toBe(false);
       expect(mockMapper.toRow).toHaveBeenCalledWith(envelope);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE envelopes'),
         expect.arrayContaining([
           row.id,
@@ -70,6 +78,7 @@ describe('SaveEnvelopeRepository', () => {
           row.updated_at,
         ]),
       );
+      expect(mockClient.release).toHaveBeenCalledTimes(1);
     });
 
     it('should update existing envelope', async () => {
@@ -85,19 +94,19 @@ describe('SaveEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: new Date(),
       });
-      mockConnection.queryOne.mockResolvedValue(undefined);
 
       const result = await repository.execute(envelope);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('SET'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1'),
         expect.any(Array),
       );
+      expect(mockClient.release).toHaveBeenCalledTimes(1);
     });
 
     it('should call UPDATE with correct parameters', async () => {
@@ -115,30 +124,30 @@ describe('SaveEnvelopeRepository', () => {
       };
 
       mockMapper.toRow.mockReturnValue(row);
-      mockConnection.queryOne.mockResolvedValue(undefined);
 
       await repository.execute(envelope);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('name = $2'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('monthly_limit = $3'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('current_balance = $4'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = $5'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('updated_at = $6'),
         expect.any(Array),
       );
+      expect(mockClient.release).toHaveBeenCalledTimes(1);
     });
 
     it('should return error when db fails', async () => {
@@ -156,13 +165,14 @@ describe('SaveEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
       });
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockClient.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(envelope);
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(DomainError);
       expect(result.errors[0].message).toContain('Failed to save envelope');
+      expect(mockClient.release).toHaveBeenCalledTimes(1);
     });
 
     it('should handle unknown errors', async () => {
@@ -180,13 +190,14 @@ describe('SaveEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
       });
-      mockConnection.queryOne.mockRejectedValue(unknownError);
+      mockClient.query.mockRejectedValue(unknownError);
 
       const result = await repository.execute(envelope);
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(DomainError);
       expect(result.errors[0].message).toContain('Unknown error');
+      expect(mockClient.release).toHaveBeenCalledTimes(1);
     });
 
     it('should use correct SQL structure', async () => {
@@ -202,22 +213,113 @@ describe('SaveEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
       });
-      mockConnection.queryOne.mockResolvedValue(undefined);
 
       await repository.execute(envelope);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE envelopes'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('SET'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1'),
         expect.any(Array),
       );
+      expect(mockClient.release).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('executeWithClient', () => {
+    const createValidEnvelope = (): Envelope => {
+      const result = Envelope.create({
+        name: 'Test Envelope',
+        monthlyLimit: 10000,
+        budgetId: EntityId.create().value!.id,
+        categoryId: EntityId.create().value!.id,
+      });
+      return result.data!;
+    };
+
+    it('should save envelope successfully with provided client', async () => {
+      const envelope = createValidEnvelope();
+      const row = {
+        id: envelope.id,
+        name: 'Test Envelope',
+        monthly_limit: '100.00',
+        budget_id: envelope.budgetId,
+        category_id: envelope.categoryId,
+        current_balance: '0.00',
+        is_deleted: false,
+        created_at: envelope.createdAt,
+        updated_at: envelope.updatedAt,
+      };
+
+      mockMapper.toRow.mockReturnValue(row);
+
+      const result = await repository.executeWithClient(mockClient, envelope);
+
+      expect(result.hasError).toBe(false);
+      expect(mockMapper.toRow).toHaveBeenCalledWith(envelope);
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE envelopes'),
+        expect.arrayContaining([
+          row.id,
+          row.name,
+          row.monthly_limit,
+          row.current_balance,
+          row.is_deleted,
+          row.updated_at,
+        ]),
+      );
+      expect(mockClient.release).not.toHaveBeenCalled();
+    });
+
+    it('should return error when db fails with provided client', async () => {
+      const envelope = createValidEnvelope();
+      const dbError = new Error('Database connection failed');
+
+      mockMapper.toRow.mockReturnValue({
+        id: envelope.id,
+        name: 'Test Envelope',
+        monthly_limit: '100.00',
+        budget_id: envelope.budgetId,
+        category_id: envelope.categoryId,
+        current_balance: '0.00',
+        is_deleted: false,
+        created_at: envelope.createdAt,
+        updated_at: envelope.updatedAt,
+      });
+      mockClient.query.mockRejectedValue(dbError);
+
+      const result = await repository.executeWithClient(mockClient, envelope);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(DomainError);
+      expect(result.errors[0].message).toContain('Failed to save envelope');
+      expect(mockClient.release).not.toHaveBeenCalled();
+    });
+
+    it('should not release client when using executeWithClient', async () => {
+      const envelope = createValidEnvelope();
+
+      mockMapper.toRow.mockReturnValue({
+        id: envelope.id,
+        name: 'Test Envelope',
+        monthly_limit: '100.00',
+        budget_id: envelope.budgetId,
+        category_id: envelope.categoryId,
+        current_balance: '0.00',
+        is_deleted: false,
+        created_at: envelope.createdAt,
+        updated_at: envelope.updatedAt,
+      });
+
+      await repository.executeWithClient(mockClient, envelope);
+
+      expect(mockClient.release).not.toHaveBeenCalled();
     });
   });
 });
