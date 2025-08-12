@@ -15,10 +15,20 @@ export class SaveCreditCardBillRepository
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
   async execute(bill: CreditCardBill): Promise<Either<RepositoryError, void>> {
-    const client = await this.connection.getClient();
-    const result = await this.executeWithClient(client, bill);
-    client.release();
-    return result;
+    try {
+      const client = await this.connection.getClient();
+      const result = await this.executeWithClient(client, bill);
+      client.release();
+      return result;
+    } catch (error) {
+      const err = error as Error;
+      return Either.error(
+        new RepositoryError(
+          `Failed to save credit card bill: ${err.message}`,
+          err,
+        ),
+      );
+    }
   }
 
   async executeWithClient(

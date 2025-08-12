@@ -7,7 +7,12 @@ module.exports = {
     '**/?(*.)+(test).[tj]s', // padrão para integrados
   ],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.d.ts',
+    '!src/**/errors/*.ts',
+    '!src/**/*Error.ts'
+  ],
   moduleNameMapper: {
     '^@either$': '<rootDir>/src/shared/core/either.ts',
     '^@domain/(.*)$': '<rootDir>/src/domain/$1',
