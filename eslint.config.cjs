@@ -26,6 +26,8 @@ module.exports = [
     rules: {
       ...tsPlugin.configs.recommended.rules,
       'prettier/prettier': 'error',
+      // Allow require() in test setup files
+      '@typescript-eslint/no-var-requires': 'off',
     },
   },
   {
@@ -41,6 +43,16 @@ module.exports = [
     languageOptions: {
       globals: {
         ...globals.node,
+      },
+    },
+  },
+  {
+    files: ['**/migrations/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        exports: 'writable',
+        module: 'writable',
       },
     },
   },

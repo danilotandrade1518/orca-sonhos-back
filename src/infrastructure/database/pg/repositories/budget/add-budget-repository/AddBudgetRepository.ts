@@ -23,7 +23,7 @@ export class AddBudgetRepository implements IAddBudgetRepository {
         row.id,
         row.name,
         row.owner_id,
-        JSON.stringify(row.participant_ids),
+        row.participant_ids,
         row.is_deleted,
         row.created_at,
         row.updated_at,

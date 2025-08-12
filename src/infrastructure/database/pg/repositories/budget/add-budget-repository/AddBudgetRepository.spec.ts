@@ -60,7 +60,7 @@ describe('AddBudgetRepository', () => {
           mockRow.id,
           mockRow.name,
           mockRow.owner_id,
-          JSON.stringify(mockRow.participant_ids),
+          mockRow.participant_ids,
           mockRow.is_deleted,
           mockRow.created_at,
           mockRow.updated_at,

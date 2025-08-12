@@ -63,7 +63,7 @@ describe('AddCreditCardRepository', () => {
       const [query, params] = mockConnection.queryOne.mock.calls[0];
       expect(query).toContain('INSERT INTO credit_cards');
       expect(query).toContain(
-        'id, name, limit, closing_day, due_day, budget_id',
+        'id, name, credit_limit, closing_day, due_day, budget_id',
       );
       expect(query).toContain('is_deleted, created_at, updated_at');
       expect(query).toContain('VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)');

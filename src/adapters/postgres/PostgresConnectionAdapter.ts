@@ -41,7 +41,10 @@ export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
 
     this.pool.on('error', (err) => {
       console.error('Unexpected error on idle client', err);
-      process.exit(-1);
+      // Don't exit process in test environment
+      if (process.env.NODE_ENV !== 'test') {
+        process.exit(-1);
+      }
     });
   }
 
@@ -85,5 +88,9 @@ export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
   async getClient(): Promise<IDatabaseClient> {
     const poolClient = await this.pool.connect();
     return new DatabaseClientAdapter(poolClient);
+  }
+
+  async close(): Promise<void> {
+    await this.pool.end();
   }
 }

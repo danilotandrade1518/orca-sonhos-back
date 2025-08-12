@@ -17,7 +17,7 @@ export class AddCreditCardRepository implements IAddCreditCardRepository {
 
       const query = `
         INSERT INTO credit_cards (
-          id, name, limit, closing_day, due_day, budget_id, 
+          id, name, credit_limit, closing_day, due_day, budget_id, 
           is_deleted, created_at, updated_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       `;
