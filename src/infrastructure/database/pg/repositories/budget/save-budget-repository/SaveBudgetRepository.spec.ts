@@ -43,6 +43,7 @@ describe('SaveBudgetRepository', () => {
       name: budget.name,
       owner_id: budget.ownerId,
       participant_ids: budget.participants,
+      type: budget.type,
       is_deleted: budget.isDeleted,
       created_at: budget.createdAt,
       updated_at: budget.updatedAt,

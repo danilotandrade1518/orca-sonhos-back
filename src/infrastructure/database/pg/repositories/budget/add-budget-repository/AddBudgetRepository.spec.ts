@@ -1,5 +1,6 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
@@ -33,6 +34,7 @@ describe('AddBudgetRepository', () => {
         name: 'Test Budget',
         ownerId: 'owner-id',
         participantIds: ['participant-1'],
+        type: BudgetTypeEnum.SHARED,
         isDeleted: false,
         createdAt: new Date('2023-01-01'),
         updatedAt: new Date('2023-01-02'),
@@ -43,6 +45,7 @@ describe('AddBudgetRepository', () => {
         name: 'Test Budget',
         owner_id: 'owner-id',
         participant_ids: ['participant-1'],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date('2023-01-01'),
         updated_at: new Date('2023-01-02'),
@@ -61,6 +64,7 @@ describe('AddBudgetRepository', () => {
           mockRow.name,
           mockRow.owner_id,
           mockRow.participant_ids,
+          mockRow.type,
           mockRow.is_deleted,
           mockRow.created_at,
           mockRow.updated_at,
@@ -122,6 +126,7 @@ describe('AddBudgetRepository', () => {
         name: 'Test Budget',
         ownerId: 'owner-id',
         participantIds: [],
+        type: BudgetTypeEnum.SHARED,
         isDeleted: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -132,6 +137,7 @@ describe('AddBudgetRepository', () => {
         name: 'Test Budget',
         owner_id: 'owner-id',
         participant_ids: [],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -143,7 +149,7 @@ describe('AddBudgetRepository', () => {
       await repository.execute(mockBudget);
 
       const expected =
-        /INSERT INTO budgets\s*\(\s*id, name, owner_id, participant_ids, is_deleted, created_at, updated_at\s*\)\s*VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7\)/;
+        /INSERT INTO budgets\s*\(\s*id, name, owner_id, participant_ids, type, is_deleted, created_at, updated_at\s*\)\s*VALUES \(\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8\)/;
       expect(mockConnection.queryOne.mock.calls[0][0]).toMatch(expected);
     });
 
@@ -175,6 +181,7 @@ describe('AddBudgetRepository', () => {
         name: 'Test Budget',
         ownerId: 'owner-id',
         participantIds: [],
+        type: BudgetTypeEnum.SHARED,
         isDeleted: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -185,6 +192,7 @@ describe('AddBudgetRepository', () => {
         name: 'Test Budget',
         owner_id: 'owner-id',
         participant_ids: [],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),

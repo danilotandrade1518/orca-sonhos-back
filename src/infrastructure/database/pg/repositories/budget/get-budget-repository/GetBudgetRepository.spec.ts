@@ -7,6 +7,7 @@ import { Either } from '@either';
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { GetBudgetRepository } from './GetBudgetRepository';
+import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 
 // Mock do BudgetMapper
 jest.mock('../../../mappers/budget/BudgetMapper');
@@ -46,6 +47,7 @@ describe('GetBudgetRepository', () => {
       name: 'Test Budget',
       owner_id: EntityId.create().value!.id,
       participant_ids: [EntityId.create().value!.id],
+      type: BudgetTypeEnum.SHARED,
       is_deleted: false,
       created_at: new Date('2023-01-01'),
       updated_at: new Date('2023-01-02'),
@@ -126,7 +128,7 @@ describe('GetBudgetRepository', () => {
       await repository.execute(validId);
 
       const expectedQuery = expect.stringMatching(
-        /SELECT[\s\S]*id,[\s\S]*name,[\s\S]*owner_id,[\s\S]*participant_ids,[\s\S]*is_deleted,[\s\S]*created_at,[\s\S]*updated_at[\s\S]*FROM budgets[\s\S]*WHERE id = \$1 AND is_deleted = false/,
+        /SELECT[\s\S]*id,[\s\S]*name,[\s\S]*owner_id,[\s\S]*participant_ids,[\s\S]*type,[\s\S]*is_deleted,[\s\S]*created_at,[\s\S]*updated_at[\s\S]*FROM budgets[\s\S]*WHERE id = \$1 AND is_deleted = false/,
       );
 
       expect(mockConnection.queryOne).toHaveBeenCalledWith(expectedQuery, [

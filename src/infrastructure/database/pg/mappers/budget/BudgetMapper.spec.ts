@@ -1,4 +1,5 @@
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
 import { BudgetMapper, BudgetRow } from './BudgetMapper';
@@ -15,6 +16,7 @@ describe('BudgetMapper', () => {
         name: 'Test Budget',
         owner_id: ownerId,
         participant_ids: [ownerId, participantId],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date('2023-01-01'),
         updated_at: new Date('2023-01-02'),
@@ -44,6 +46,7 @@ describe('BudgetMapper', () => {
         name: 'Empty Participants Budget',
         owner_id: ownerId,
         participant_ids: [],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -64,6 +67,7 @@ describe('BudgetMapper', () => {
         name: 'Null Participants Budget',
         owner_id: ownerId,
         participant_ids: null as unknown as string[], // Simulating PostgreSQL null
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -84,6 +88,7 @@ describe('BudgetMapper', () => {
         name: 'Deleted Budget',
         owner_id: ownerId,
         participant_ids: [ownerId],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: true,
         created_at: new Date(),
         updated_at: new Date(),
@@ -104,6 +109,7 @@ describe('BudgetMapper', () => {
         name: '', // Invalid empty name
         owner_id: ownerId,
         participant_ids: [ownerId],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -122,6 +128,7 @@ describe('BudgetMapper', () => {
         name: 'Valid Name',
         owner_id: '', // Invalid empty owner_id
         participant_ids: [],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -136,10 +143,11 @@ describe('BudgetMapper', () => {
       const ownerId = EntityId.create().value!.id;
 
       const row: BudgetRow = {
-        id: '', // Invalid empty id
+        id: '',
         name: 'Valid Name',
         owner_id: ownerId,
         participant_ids: [ownerId],
+        type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),

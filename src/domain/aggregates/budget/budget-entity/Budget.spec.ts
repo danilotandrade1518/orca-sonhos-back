@@ -315,10 +315,10 @@ describe('Budget', () => {
         type: BudgetTypeEnum.SHARED,
       }).data!;
 
-      expect(personalBudget.type.isPersonal()).toBe(true);
-      expect(personalBudget.type.isShared()).toBe(false);
-      expect(sharedBudget.type.isShared()).toBe(true);
-      expect(sharedBudget.type.isPersonal()).toBe(false);
+      expect(personalBudget.isPersonal).toBe(true);
+      expect(personalBudget.isShared).toBe(false);
+      expect(sharedBudget.isShared).toBe(true);
+      expect(sharedBudget.isPersonal).toBe(false);
     });
 
     it('should auto-detect budget type based on participants', () => {
@@ -337,8 +337,8 @@ describe('Budget', () => {
         participantIds: [participantId],
       }).data!;
 
-      expect(personalBudget.type.isPersonal()).toBe(true);
-      expect(sharedBudget.type.isShared()).toBe(true);
+      expect(personalBudget.isPersonal).toBe(true);
+      expect(sharedBudget.isShared).toBe(true);
     });
   });
 

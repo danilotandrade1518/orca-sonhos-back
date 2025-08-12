@@ -56,8 +56,14 @@ export class Budget extends AggregateRoot implements IEntity {
   get participants(): string[] {
     return this._participants.participants;
   }
-  get type(): BudgetType {
-    return this._type;
+  get type(): BudgetTypeEnum {
+    return this._type.type;
+  }
+  get isShared(): boolean {
+    return this._type.isShared();
+  }
+  get isPersonal(): boolean {
+    return this._type.isPersonal();
   }
   get createdAt(): Date {
     return this._createdAt;

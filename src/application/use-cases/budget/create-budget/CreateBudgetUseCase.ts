@@ -15,6 +15,7 @@ export class CreateBudgetUseCase implements IUseCase<CreateBudgetDto> {
       name: dto.name,
       ownerId: dto.ownerId,
       participantIds: dto.participantIds,
+      type: dto.type,
     });
 
     if (budgetResult.hasError)

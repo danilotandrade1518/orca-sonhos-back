@@ -15,8 +15,8 @@ export class AddBudgetRepository implements IAddBudgetRepository {
 
       const query = `
         INSERT INTO budgets (
-          id, name, owner_id, participant_ids, is_deleted, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+          id, name, owner_id, participant_ids, type, is_deleted, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `;
 
       const params = [
@@ -24,6 +24,7 @@ export class AddBudgetRepository implements IAddBudgetRepository {
         row.name,
         row.owner_id,
         row.participant_ids,
+        row.type,
         row.is_deleted,
         row.created_at,
         row.updated_at,

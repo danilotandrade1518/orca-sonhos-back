@@ -8,6 +8,8 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
+  pgm.createType('budget_type_enum', ['PERSONAL', 'SHARED']);
+
   pgm.createTable('budgets', {
     id: {
       type: 'uuid',
@@ -26,6 +28,10 @@ exports.up = (pgm) => {
       type: 'uuid[]',
       notNull: true,
       default: '{}',
+    },
+    type: {
+      type: 'budget_type_enum',
+      notNull: true,
     },
     is_deleted: {
       type: 'boolean',

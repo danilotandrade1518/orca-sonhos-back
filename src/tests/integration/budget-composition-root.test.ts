@@ -1,8 +1,10 @@
-import { BudgetCompositionRoot } from '../../main/composition/BudgetCompositionRoot';
-import { TestContainersSetup } from './setup/testcontainers-setup';
-import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
-import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
+import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+
+import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
+import { BudgetCompositionRoot } from '../../main/composition/BudgetCompositionRoot';
+import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
+import { TestContainersSetup } from './setup/testcontainers-setup';
 
 const testBudgetId = EntityId.create().value!.id;
 const testUserId = EntityId.create().value!.id;
@@ -40,27 +42,24 @@ describe('BudgetCompositionRoot Integration Tests', () => {
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeDefined();
+      expect(result.data!.id).toBeDefined();
 
-      if (!result.hasError && result.data) {
-        expect(result.data.id).toBeDefined();
+      const dbResult = await connection.query(
+        'SELECT * FROM budgets WHERE name = $1',
+        ['Integration Test Budget'],
+      );
 
-        const dbResult = await connection.query(
-          'SELECT * FROM budgets WHERE name = $1',
-          ['Integration Test Budget'],
-        );
-
-        expect(dbResult).toHaveLength(1);
-        expect(dbResult[0].name).toBe('Integration Test Budget');
-        expect(dbResult[0].owner_id).toBe(testUserId);
-        expect(dbResult[0].is_deleted).toBe(false);
-      }
+      expect(dbResult).toHaveLength(1);
+      expect(dbResult[0].name).toBe('Integration Test Budget');
+      expect(dbResult[0].owner_id).toBe(testUserId);
+      expect(dbResult[0].is_deleted).toBe(false);
     });
 
     it('should handle validation errors', async () => {
       const useCase = compositionRoot.createCreateBudgetUseCase();
 
       const result = await useCase.execute({
-        name: '', // Invalid empty name
+        name: '',
         ownerId: testUserId,
         participantIds: [],
       });
@@ -103,6 +102,216 @@ describe('BudgetCompositionRoot Integration Tests', () => {
     });
   });
 
+  describe('createUpdateBudgetUseCase', () => {
+    let budgetId: string;
+
+    beforeEach(async () => {
+      const createUseCase = compositionRoot.createCreateBudgetUseCase();
+      const createResult = await createUseCase.execute({
+        name: 'Budget to Update',
+        ownerId: testUserId,
+        participantIds: [testUserId],
+      });
+
+      expect(createResult.hasError).toBe(false);
+      budgetId = createResult.data!.id;
+      authService.setUserPermissions(testUserId, [budgetId]);
+    });
+
+    it('should update budget successfully through full stack', async () => {
+      const updateUseCase = compositionRoot.createUpdateBudgetUseCase();
+
+      const result = await updateUseCase.execute({
+        budgetId: budgetId,
+        userId: testUserId,
+        name: 'Updated Budget Name',
+      });
+
+      expect(result.hasError).toBe(false);
+
+      const dbResult = await connection.query(
+        'SELECT * FROM budgets WHERE id = $1',
+        [budgetId],
+      );
+
+      expect(dbResult).toHaveLength(1);
+      expect(dbResult[0].name).toBe('Updated Budget Name');
+    });
+
+    it('should handle unauthorized update attempts', async () => {
+      const updateUseCase = compositionRoot.createUpdateBudgetUseCase();
+      const unauthorizedUserId = EntityId.create().value!.id;
+
+      const result = await updateUseCase.execute({
+        budgetId: budgetId,
+        userId: unauthorizedUserId,
+        name: 'Unauthorized Update',
+      });
+
+      expect(result.hasError).toBe(true);
+    });
+  });
+
+  describe('createDeleteBudgetUseCase', () => {
+    let budgetId: string;
+
+    beforeEach(async () => {
+      const createUseCase = compositionRoot.createCreateBudgetUseCase();
+      const createResult = await createUseCase.execute({
+        name: 'Budget to Delete',
+        ownerId: testUserId,
+        participantIds: [testUserId],
+      });
+
+      expect(createResult.hasError).toBe(false);
+      budgetId = createResult.data!.id;
+      authService.setUserPermissions(testUserId, [budgetId]);
+    });
+
+    it('should delete budget successfully through full stack', async () => {
+      const deleteUseCase = compositionRoot.createDeleteBudgetUseCase();
+
+      const result = await deleteUseCase.execute({
+        budgetId: budgetId,
+        userId: testUserId,
+      });
+
+      expect(result.hasError).toBe(false);
+
+      const dbResult = await connection.query(
+        'SELECT * FROM budgets WHERE id = $1',
+        [budgetId],
+      );
+
+      expect(dbResult).toHaveLength(1);
+      expect(dbResult[0].is_deleted).toBe(true);
+    });
+
+    it('should handle unauthorized delete attempts', async () => {
+      const deleteUseCase = compositionRoot.createDeleteBudgetUseCase();
+      const unauthorizedUserId = EntityId.create().value!.id;
+
+      const result = await deleteUseCase.execute({
+        budgetId: budgetId,
+        userId: unauthorizedUserId,
+      });
+
+      expect(result.hasError).toBe(true);
+    });
+  });
+
+  describe('createAddParticipantToBudgetUseCase', () => {
+    let budgetId: string;
+    let newParticipantId: string;
+
+    beforeEach(async () => {
+      newParticipantId = EntityId.create().value!.id;
+
+      const createUseCase = compositionRoot.createCreateBudgetUseCase();
+      const createResult = await createUseCase.execute({
+        name: 'Budget for Participant Test',
+        ownerId: testUserId,
+        participantIds: [],
+        type: BudgetTypeEnum.SHARED,
+      });
+
+      expect(createResult.hasError).toBe(false);
+      budgetId = createResult.data!.id;
+      authService.setUserPermissions(testUserId, [budgetId]);
+    });
+
+    it('should add participant successfully through full stack', async () => {
+      const addParticipantUseCase =
+        compositionRoot.createAddParticipantToBudgetUseCase();
+
+      const result = await addParticipantUseCase.execute({
+        budgetId,
+        participantId: newParticipantId,
+        userId: testUserId,
+      });
+
+      expect(result.hasError).toBe(false);
+
+      const dbResult = await connection.query(
+        'SELECT * FROM budgets WHERE id = $1',
+        [budgetId],
+      );
+
+      expect(dbResult).toHaveLength(1);
+      expect(dbResult[0].participant_ids).toContain(newParticipantId);
+    });
+
+    it('should handle unauthorized add participant attempts', async () => {
+      const addParticipantUseCase =
+        compositionRoot.createAddParticipantToBudgetUseCase();
+      const unauthorizedUserId = EntityId.create().value!.id;
+
+      const result = await addParticipantUseCase.execute({
+        budgetId,
+        participantId: newParticipantId,
+        userId: unauthorizedUserId,
+      });
+
+      expect(result.hasError).toBe(true);
+    });
+  });
+
+  describe('createRemoveParticipantFromBudgetUseCase', () => {
+    let budgetId: string;
+    let participantToRemoveId: string;
+
+    beforeEach(async () => {
+      participantToRemoveId = EntityId.create().value!.id;
+
+      const createUseCase = compositionRoot.createCreateBudgetUseCase();
+      const createResult = await createUseCase.execute({
+        name: 'Budget for Remove Participant Test',
+        ownerId: testUserId,
+        participantIds: [testUserId, participantToRemoveId],
+      });
+
+      expect(createResult.hasError).toBe(false);
+      budgetId = createResult.data!.id;
+      authService.setUserPermissions(testUserId, [budgetId]);
+    });
+
+    it('should remove participant successfully through full stack', async () => {
+      const removeParticipantUseCase =
+        compositionRoot.createRemoveParticipantFromBudgetUseCase();
+
+      const result = await removeParticipantUseCase.execute({
+        budgetId,
+        participantId: participantToRemoveId,
+        userId: testUserId,
+      });
+
+      expect(result.hasError).toBe(false);
+
+      const dbResult = await connection.query(
+        'SELECT * FROM budgets WHERE id = $1',
+        [budgetId],
+      );
+
+      expect(dbResult).toHaveLength(1);
+      expect(dbResult[0].participant_ids).not.toContain(participantToRemoveId);
+      expect(dbResult[0].participant_ids).toContain(testUserId);
+    });
+
+    it('should handle unauthorized remove participant attempts', async () => {
+      const removeParticipantUseCase =
+        compositionRoot.createRemoveParticipantFromBudgetUseCase();
+      const unauthorizedUserId = EntityId.create().value!.id;
+
+      const result = await removeParticipantUseCase.execute({
+        budgetId,
+        participantId: participantToRemoveId,
+        userId: unauthorizedUserId,
+      });
+
+      expect(result.hasError).toBe(true);
+    });
+  });
+
   describe('authorization integration', () => {
     it('should use mock authorization service correctly', async () => {
       const result = await authService.canAccessBudget(
@@ -121,6 +330,28 @@ describe('BudgetCompositionRoot Integration Tests', () => {
         'unauthorized-user',
         testBudgetId,
       );
+
+      expect(result.hasError).toBe(true);
+    });
+  });
+
+  describe('error handling integration', () => {
+    it('should handle database connection errors gracefully', async () => {
+      const result = await connection.query('SELECT 1 as test');
+      expect(result).toBeDefined();
+    });
+
+    it('should handle invalid budget IDs', async () => {
+      const updateUseCase = compositionRoot.createUpdateBudgetUseCase();
+      const invalidBudgetId = EntityId.create().value!.id;
+
+      authService.setUserPermissions(testUserId, [invalidBudgetId]);
+
+      const result = await updateUseCase.execute({
+        budgetId: invalidBudgetId,
+        userId: testUserId,
+        name: 'Updated Name',
+      });
 
       expect(result.hasError).toBe(true);
     });

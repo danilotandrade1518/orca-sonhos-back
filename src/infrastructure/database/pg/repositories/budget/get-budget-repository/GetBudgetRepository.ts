@@ -17,6 +17,7 @@ export class GetBudgetRepository implements IGetBudgetRepository {
           name,
           owner_id,
           participant_ids,
+          type,
           is_deleted,
           created_at,
           updated_at

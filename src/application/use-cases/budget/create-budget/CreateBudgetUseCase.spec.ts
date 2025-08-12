@@ -1,3 +1,4 @@
+import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
 
@@ -177,6 +178,18 @@ describe('CreateBudgetUseCase', () => {
       expect(result.hasData).toBe(false);
       expect(result.errors[0].message).toContain('is invalid');
       expect(executeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should create SHARED budget successfully', async () => {
+      const dto: CreateBudgetDto = {
+        name: 'Shared Budget',
+        ownerId: EntityId.create().value!.id,
+        type: BudgetTypeEnum.SHARED,
+      };
+
+      const result = await useCase.execute(dto);
+
+      expect(result.data!.id).toBeDefined();
     });
   });
 });

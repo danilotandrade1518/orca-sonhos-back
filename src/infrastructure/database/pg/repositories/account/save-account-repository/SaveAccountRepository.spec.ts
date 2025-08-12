@@ -69,6 +69,7 @@ describe('SaveAccountRepository', () => {
         row.budget_id,
         row.balance,
         row.is_deleted,
+        row.updated_at,
       ]);
       expect(mockClient.release).toHaveBeenCalled();
     });
@@ -94,6 +95,7 @@ describe('SaveAccountRepository', () => {
         row.budget_id,
         row.balance,
         row.is_deleted,
+        row.updated_at,
       ]);
     });
 

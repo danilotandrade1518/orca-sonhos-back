@@ -49,6 +49,7 @@ export class SaveAccountRepository implements ISaveAccountRepository {
         budget_id,
         balance,
         is_deleted,
+        account.updatedAt,
       ]);
 
       return Either.success<RepositoryError, void>(undefined);
