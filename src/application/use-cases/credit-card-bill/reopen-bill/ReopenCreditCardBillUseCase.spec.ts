@@ -1,4 +1,6 @@
 import { CreditCardBillNotFoundError } from '@application/shared/errors/CreditCardBillNotFoundError';
+import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
+import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { GetCreditCardBillRepositoryStub } from '@application/shared/tests/stubs/GetCreditCardBillRepositoryStub';
 import { GetCreditCardRepositoryStub } from '@application/shared/tests/stubs/GetCreditCardRepositoryStub';
@@ -117,5 +119,175 @@ describe('ReopenCreditCardBillUseCase', () => {
     const result = await useCase.execute(dto);
     expect(result.hasError).toBe(true);
     expect(result.errors[0]).toBeInstanceOf(CreditCardBillNotFoundError);
+  });
+
+  it('deve retornar erro quando get bill repository falha', async () => {
+    const repositoryError = new RepositoryError('Database connection failed');
+    jest
+      .spyOn(getBillRepo, 'execute')
+      .mockResolvedValue(Either.error(repositoryError));
+
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: 'any-id',
+      justification: 'test',
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(true);
+    expect(result.errors[0]).toBe(repositoryError);
+  });
+
+  it('deve retornar erro quando cartão não é encontrado', async () => {
+    const bill = makeBill();
+    getBillRepo.setCreditCardBill(bill);
+    getCardRepo.setCreditCard(null);
+
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: bill.id,
+      justification: 'test',
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(true);
+    expect(result.errors[0]).toBeInstanceOf(CreditCardBillNotFoundError);
+  });
+
+  it('deve retornar erro quando get card repository falha', async () => {
+    const bill = makeBill();
+    getBillRepo.setCreditCardBill(bill);
+
+    const repositoryError = new RepositoryError('Database error');
+    jest
+      .spyOn(getCardRepo, 'execute')
+      .mockResolvedValue(Either.error(repositoryError));
+
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: bill.id,
+      justification: 'test',
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(true);
+    expect(result.errors[0]).toBe(repositoryError);
+  });
+
+  it('deve retornar erro quando authorization service falha', async () => {
+    const bill = makeBill();
+    getBillRepo.setCreditCardBill(bill);
+    const card = makeCard(budgetId);
+    getCardRepo.setCreditCard(card);
+
+    authService.shouldFail = true;
+
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: bill.id,
+      justification: 'test',
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(true);
+  });
+
+  it('deve retornar erro quando usuário não tem permissões suficientes', async () => {
+    const bill = makeBill();
+    getBillRepo.setCreditCardBill(bill);
+    const card = makeCard(budgetId);
+    getCardRepo.setCreditCard(card);
+    authService.mockHasAccess = false;
+
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: bill.id,
+      justification: 'test',
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(true);
+    expect(result.errors[0]).toBeInstanceOf(InsufficientPermissionsError);
+  });
+
+  it('deve retornar erro quando bill.reopen() falha', async () => {
+    // Create a bill that's already in OPEN status to trigger reopen error
+    const data: RestoreCreditCardBillDTO = {
+      id: EntityId.create().value!.id,
+      creditCardId: EntityId.create().value!.id,
+      closingDate: new Date('2024-01-01'),
+      dueDate: new Date('2024-01-20'),
+      amount: 1000,
+      status: BillStatusEnum.OPEN, // Already open, can't reopen
+      paidAt: undefined,
+      isDeleted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const openBill = CreditCardBill.restore(data).data!;
+
+    getBillRepo.setCreditCardBill(openBill);
+    const card = makeCard(budgetId);
+    getCardRepo.setCreditCard(card);
+    authService.mockHasAccess = true;
+
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: openBill.id,
+      justification: 'test',
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(true);
+  });
+
+  it('deve retornar erro quando save bill repository falha', async () => {
+    const bill = makeBill();
+    getBillRepo.setCreditCardBill(bill);
+    const card = makeCard(budgetId);
+    getCardRepo.setCreditCard(card);
+    authService.mockHasAccess = true;
+
+    const repositoryError = new RepositoryError('Failed to save bill');
+    jest
+      .spyOn(saveBillRepo, 'execute')
+      .mockResolvedValue(Either.error(repositoryError));
+
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: bill.id,
+      justification: 'test',
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(true);
+    expect(result.errors[0]).toBe(repositoryError);
+  });
+
+  it('deve reabrir fatura com justificativa longa', async () => {
+    const bill = makeBill();
+    getBillRepo.setCreditCardBill(bill);
+    const card = makeCard(budgetId);
+    getCardRepo.setCreditCard(card);
+    authService.mockHasAccess = true;
+
+    const longJustification = 'x'.repeat(500);
+    const dto: ReopenCreditCardBillDto = {
+      userId,
+      budgetId,
+      creditCardBillId: bill.id,
+      justification: longJustification,
+    };
+
+    const result = await useCase.execute(dto);
+    expect(result.hasError).toBe(false);
+    expect(result.data).toEqual({ id: bill.id });
   });
 });
