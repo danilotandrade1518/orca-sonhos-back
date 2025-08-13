@@ -17,16 +17,7 @@ export class DeleteCategoryRepository implements IDeleteCategoryRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne(query, [id]);
-
-      if (!result || result.rowCount === 0) {
-        return Either.error(
-          new RepositoryError(
-            `Category with id ${id} not found for deletion`,
-            new Error('Category not found'),
-          ),
-        );
-      }
+      await this.connection.query(query, [id]);
 
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {

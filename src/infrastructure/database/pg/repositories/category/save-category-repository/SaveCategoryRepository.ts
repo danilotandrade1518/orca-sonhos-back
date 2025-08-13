@@ -33,16 +33,7 @@ export class SaveCategoryRepository implements ISaveCategoryRepository {
         row.updated_at,
       ];
 
-      const result = await this.connection.queryOne(query, params);
-
-      if (!result || result.rowCount === 0) {
-        return Either.error(
-          new RepositoryError(
-            `Category with id ${row.id} not found for update`,
-            new Error('Category not found'),
-          ),
-        );
-      }
+      await this.connection.query(query, params);
 
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {

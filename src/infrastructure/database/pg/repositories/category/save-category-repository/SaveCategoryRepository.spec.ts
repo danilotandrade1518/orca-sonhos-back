@@ -7,12 +7,12 @@ import { SaveCategoryRepository } from './SaveCategoryRepository';
 describe('SaveCategoryRepository', () => {
   let repository: SaveCategoryRepository;
   let mockConnection: {
-    queryOne: jest.Mock;
+    query: jest.Mock;
   };
 
   beforeEach(() => {
     mockConnection = {
-      queryOne: jest.fn(),
+      query: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     repository = new SaveCategoryRepository(mockConnection as any);
@@ -38,13 +38,13 @@ describe('SaveCategoryRepository', () => {
         type: CategoryTypeEnum.EXPENSE,
       });
 
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 1 });
+      mockConnection.query.mockResolvedValue([]);
 
       const result = await repository.execute(category);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledTimes(1);
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE categories'),
         expect.arrayContaining([
           category.id,
@@ -59,11 +59,11 @@ describe('SaveCategoryRepository', () => {
 
     it('should call UPDATE with correct SQL structure', async () => {
       const category = createValidCategory();
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 1 });
+      mockConnection.query.mockResolvedValue([]);
 
       await repository.execute(category);
 
-      const [query, params] = mockConnection.queryOne.mock.calls[0];
+      const [query, params] = mockConnection.query.mock.calls[0];
       expect(query).toContain('UPDATE categories');
       expect(query).toContain('name = $2');
       expect(query).toContain('type = $3');
@@ -81,12 +81,12 @@ describe('SaveCategoryRepository', () => {
         budgetId: EntityId.create().value!.id,
       }).data!;
 
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 1 });
+      mockConnection.query.mockResolvedValue([]);
 
       const result = await repository.execute(category);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE categories'),
         expect.arrayContaining([CategoryTypeEnum.INCOME]),
       );
@@ -96,12 +96,12 @@ describe('SaveCategoryRepository', () => {
       const category = createValidCategory();
       category.delete();
 
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 1 });
+      mockConnection.query.mockResolvedValue([]);
 
       const result = await repository.execute(category);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE categories'),
         expect.arrayContaining([true]), // is_deleted = true
       );
@@ -114,44 +114,21 @@ describe('SaveCategoryRepository', () => {
         type: CategoryTypeEnum.EXPENSE,
       });
 
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 1 });
+      mockConnection.query.mockResolvedValue([]);
 
       const result = await repository.execute(category);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE categories'),
         expect.arrayContaining(['Completely New Name']),
       );
     });
 
-    it('should return error when category not found', async () => {
-      const category = createValidCategory();
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 0 });
-
-      const result = await repository.execute(category);
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(RepositoryError);
-      expect(result.errors[0].message).toContain('Category with id');
-      expect(result.errors[0].message).toContain('not found for update');
-    });
-
-    it('should return error when query returns null', async () => {
-      const category = createValidCategory();
-      mockConnection.queryOne.mockResolvedValue(null);
-
-      const result = await repository.execute(category);
-
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(RepositoryError);
-      expect(result.errors[0].message).toContain('not found for update');
-    });
-
     it('should return error when database fails', async () => {
       const category = createValidCategory();
       const dbError = new Error('Database connection failed');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(category);
 
@@ -174,11 +151,11 @@ describe('SaveCategoryRepository', () => {
         type: CategoryTypeEnum.EXPENSE,
       });
 
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 1 });
+      mockConnection.query.mockResolvedValue([]);
 
       await repository.execute(category);
 
-      const [, params] = mockConnection.queryOne.mock.calls[0];
+      const [, params] = mockConnection.query.mock.calls[0];
       expect(params[0]).toBe(category.id); // id
       expect(params[1]).toBe('Updated Name'); // name
       expect(params[2]).toBe(CategoryTypeEnum.EXPENSE); // type
@@ -195,12 +172,12 @@ describe('SaveCategoryRepository', () => {
         budgetId: newBudgetId,
       }).data!;
 
-      mockConnection.queryOne.mockResolvedValue({ rowCount: 1 });
+      mockConnection.query.mockResolvedValue([]);
 
       const result = await repository.execute(category);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE categories'),
         expect.arrayContaining([newBudgetId]),
       );
