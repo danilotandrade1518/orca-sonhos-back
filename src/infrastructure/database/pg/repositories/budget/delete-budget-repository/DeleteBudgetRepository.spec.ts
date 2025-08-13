@@ -12,7 +12,6 @@ describe('DeleteBudgetRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -22,35 +21,35 @@ describe('DeleteBudgetRepository', () => {
 
   describe('execute', () => {
     it('should mark budget as deleted successfully', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute('budget-id');
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE budgets'),
         ['budget-id'],
       );
     });
 
     it('should be idempotent when called multiple times', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const first = await repository.execute('budget-id');
       const second = await repository.execute('budget-id');
 
       expect(first.hasError).toBe(false);
       expect(second.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(2);
+      expect(mockConnection.query).toHaveBeenCalledTimes(2);
     });
 
     it('should not fail when budget is already deleted', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute('already-deleted');
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['already-deleted'],
       );
@@ -58,7 +57,7 @@ describe('DeleteBudgetRepository', () => {
 
     it('should return error when database query fails', async () => {
       const dbError = new Error('connection error');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute('budget-id');
 
@@ -67,11 +66,11 @@ describe('DeleteBudgetRepository', () => {
     });
 
     it('should use correct SQL query', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute('budget-id');
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringMatching(
           /UPDATE budgets[\s\S]*SET is_deleted = true, updated_at = NOW()[\s\S]*WHERE id = \$1 AND is_deleted = false/,
         ),
@@ -80,7 +79,7 @@ describe('DeleteBudgetRepository', () => {
     });
 
     it('should handle non-Error exceptions', async () => {
-      mockConnection.queryOne.mockRejectedValue('fail');
+      mockConnection.query.mockRejectedValue('fail');
 
       const result = await repository.execute('budget-id');
 
@@ -90,7 +89,7 @@ describe('DeleteBudgetRepository', () => {
     });
 
     it('should handle invalid ids', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const resultNull = await repository.execute('');
       expect(resultNull.hasError).toBe(false);

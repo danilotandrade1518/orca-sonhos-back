@@ -46,7 +46,6 @@ describe('ReconcileAccountUnitOfWork', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn().mockResolvedValue(mockClient),
     };
@@ -206,7 +205,7 @@ describe('ReconcileAccountUnitOfWork', () => {
 
       // Simulate an unexpected error during execution (after BEGIN succeeds)
       mockClient.query
-        .mockResolvedValueOnce([]) // BEGIN succeeds
+        .mockResolvedValueOnce(null) // BEGIN succeeds
         .mockRejectedValueOnce(rollbackError); // ROLLBACK fails
 
       mockSaveAccountRepository.executeWithClient.mockRejectedValue(
@@ -271,7 +270,7 @@ describe('ReconcileAccountUnitOfWork', () => {
 
       mockClient.query.mockImplementation(async (sql: string) => {
         calls.push(`query:${sql}`);
-        return [];
+        return null;
       });
 
       mockSaveAccountRepository.executeWithClient.mockImplementation(

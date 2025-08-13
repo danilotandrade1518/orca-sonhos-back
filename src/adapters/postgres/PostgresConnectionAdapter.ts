@@ -1,4 +1,4 @@
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 import {
   DatabaseConfig,
@@ -10,13 +10,15 @@ import {
 class DatabaseClientAdapter implements IDatabaseClient {
   constructor(private poolClient: PoolClient) {}
 
-  async query<T = QueryResultRow>(
+  async query<T = Record<string, unknown>>(
     text: string,
     params?: unknown[],
-  ): Promise<T[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = await this.poolClient.query(text, params);
-    return result.rows;
+  ): Promise<QueryResultRow<T>> {
+    const result = await this.poolClient.query(text, params);
+    return {
+      rows: result.rows as T[],
+      rowCount: result.rowCount ?? 0,
+    };
   }
 
   release(): void {
@@ -41,33 +43,26 @@ export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
 
     this.pool.on('error', (err) => {
       console.error('Unexpected error on idle client', err);
-      // Don't exit process in test environment
       if (process.env.NODE_ENV !== 'test') {
         process.exit(-1);
       }
     });
   }
 
-  async query<T extends QueryResultRow = QueryResultRow>(
+  async query<T = Record<string, unknown>>(
     text: string,
     params?: unknown[],
-  ): Promise<T[]> {
+  ): Promise<QueryResultRow<T>> {
     const client = await this.pool.connect();
     try {
-      const result: QueryResult<T> = await client.query(text, params);
-      return result.rows;
+      const result = await client.query(text, params);
+      return {
+        rows: result.rows as T[],
+        rowCount: result.rowCount ?? 0,
+      };
     } finally {
       client.release();
     }
-  }
-
-  async queryOne<T = QueryResultRow>(
-    text: string,
-    params?: unknown[],
-  ): Promise<T | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = await this.query<any>(text, params);
-    return rows.length > 0 ? rows[0] : null;
   }
 
   async transaction<T>(callback: (client: unknown) => Promise<T>): Promise<T> {

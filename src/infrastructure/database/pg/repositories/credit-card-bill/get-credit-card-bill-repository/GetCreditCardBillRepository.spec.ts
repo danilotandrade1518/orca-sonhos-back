@@ -31,7 +31,6 @@ describe('GetCreditCardBillRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -79,14 +78,14 @@ describe('GetCreditCardBillRepository', () => {
       const validRow = createValidRow();
       const validBill = createValidCreditCardBill();
 
-      mockConnection.queryOne.mockResolvedValue(validRow);
+      mockConnection.query.mockResolvedValue({ rows: [validRow], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.success(validBill));
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(validBill);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
         [validId],
       );
@@ -94,13 +93,13 @@ describe('GetCreditCardBillRepository', () => {
     });
 
     it('should return null when credit card bill not found', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1 AND is_deleted = false'),
         [validId],
       );
@@ -108,11 +107,11 @@ describe('GetCreditCardBillRepository', () => {
     });
 
     it('should filter deleted credit card bills', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         [validId],
       );
@@ -120,7 +119,7 @@ describe('GetCreditCardBillRepository', () => {
 
     it('should return error when database query fails', async () => {
       const dbError = new Error('Database connection failed');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(validId);
 
@@ -137,7 +136,7 @@ describe('GetCreditCardBillRepository', () => {
         new TestDomainError('Mapping failed') as DomainError,
       );
 
-      mockConnection.queryOne.mockResolvedValue(validRow);
+      mockConnection.query.mockResolvedValue({ rows: [validRow], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(
         mappingError as Either<DomainError, CreditCardBill>,
       );
@@ -151,8 +150,8 @@ describe('GetCreditCardBillRepository', () => {
       );
     });
 
-    it('should handle undefined database result', async () => {
-      mockConnection.queryOne.mockResolvedValue(undefined);
+    it('should handle null database result', async () => {
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
@@ -161,11 +160,11 @@ describe('GetCreditCardBillRepository', () => {
     });
 
     it('should use correct SQL query structure', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
 
-      const calledQuery = mockConnection.queryOne.mock.calls[0][0];
+      const calledQuery = mockConnection.query.mock.calls[0][0];
       expect(calledQuery).toContain('SELECT');
       expect(calledQuery).toContain(
         'id, credit_card_id, closing_date, due_date, amount, status',
@@ -179,20 +178,20 @@ describe('GetCreditCardBillRepository', () => {
 
     it('should handle empty bill ID', async () => {
       const emptyId = '';
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(emptyId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.query).toHaveBeenCalledWith(expect.any(String), [
         emptyId,
       ]);
     });
 
     it('should handle special characters in bill ID', async () => {
       const specialId = 'test-id-with-special-chars-@#$';
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(specialId);
 
@@ -202,7 +201,7 @@ describe('GetCreditCardBillRepository', () => {
 
     it('should handle network timeout error', async () => {
       const timeoutError = new Error('Connection timeout');
-      mockConnection.queryOne.mockRejectedValue(timeoutError);
+      mockConnection.query.mockRejectedValue(timeoutError);
 
       const result = await repository.execute(validId);
 
@@ -213,7 +212,7 @@ describe('GetCreditCardBillRepository', () => {
 
     it('should handle unknown database error', async () => {
       const unknownError = 'Unknown database error';
-      mockConnection.queryOne.mockRejectedValue(unknownError);
+      mockConnection.query.mockRejectedValue(unknownError);
 
       const result = await repository.execute(validId);
 
@@ -225,19 +224,19 @@ describe('GetCreditCardBillRepository', () => {
     });
 
     it('should call repository only once per execution', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
       await repository.execute(validId);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(2);
+      expect(mockConnection.query).toHaveBeenCalledTimes(2);
     });
 
     it('should preserve bill status in mapping', async () => {
       const validRow = createValidRow();
       const validBill = createValidCreditCardBill();
 
-      mockConnection.queryOne.mockResolvedValue(validRow);
+      mockConnection.query.mockResolvedValue({ rows: [validRow], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.success(validBill));
 
       await repository.execute(validId);

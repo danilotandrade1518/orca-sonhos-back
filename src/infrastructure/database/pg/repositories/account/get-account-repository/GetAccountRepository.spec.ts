@@ -22,7 +22,6 @@ describe('GetAccountRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -45,21 +44,21 @@ describe('GetAccountRepository', () => {
 
     it('should return account when found', async () => {
       const account = {} as Account;
-      mockConnection.queryOne.mockResolvedValue(validRow);
+      mockConnection.query.mockResolvedValue({ rows: [validRow], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.success(account));
 
       const result = await repository.execute('acc-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(account);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.query).toHaveBeenCalledWith(expect.any(String), [
         'acc-id',
       ]);
       expect(mockMapper.toDomain).toHaveBeenCalledWith(validRow);
     });
 
     it('should return null when account not found', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       const result = await repository.execute('acc-id');
 
@@ -69,11 +68,9 @@ describe('GetAccountRepository', () => {
     });
 
     it('should filter deleted accounts', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
-
       await repository.execute('acc-id');
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['acc-id'],
       );
@@ -81,7 +78,7 @@ describe('GetAccountRepository', () => {
 
     it('should return error when database query fails', async () => {
       const err = new Error('db');
-      mockConnection.queryOne.mockRejectedValue(err);
+      mockConnection.query.mockRejectedValue(err);
 
       const result = await repository.execute('acc-id');
 
@@ -90,7 +87,7 @@ describe('GetAccountRepository', () => {
     });
 
     it('should return error when mapping fails', async () => {
-      mockConnection.queryOne.mockResolvedValue(validRow);
+      mockConnection.query.mockResolvedValue({ rows: [validRow], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(
         Either.error(new Error('map') as unknown as DomainError),
       );

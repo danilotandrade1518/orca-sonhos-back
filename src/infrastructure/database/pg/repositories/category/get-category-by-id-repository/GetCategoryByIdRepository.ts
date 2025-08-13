@@ -21,13 +21,17 @@ export class GetCategoryByIdRepository implements IGetCategoryRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne<CategoryRow>(query, [id]);
+      const queryResultRow = await this.connection.query<CategoryRow>(query, [
+        id,
+      ]);
 
-      if (!result) {
+      const row = queryResultRow?.rows[0];
+
+      if (!row) {
         return Either.success<RepositoryError, Category | null>(null);
       }
 
-      const categoryOrError = CategoryMapper.toDomain(result);
+      const categoryOrError = CategoryMapper.toDomain(row);
       if (categoryOrError.hasError) {
         return Either.error(
           new RepositoryError(

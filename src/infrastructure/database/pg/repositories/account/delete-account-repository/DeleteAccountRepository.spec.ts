@@ -17,7 +17,6 @@ describe('DeleteAccountRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn().mockResolvedValue(mockClient),
     };
@@ -27,34 +26,28 @@ describe('DeleteAccountRepository', () => {
 
   describe('execute', () => {
     it('should mark account as deleted successfully', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
-
       const result = await repository.execute('acc-id');
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.query).toHaveBeenCalledWith(expect.any(String), [
         'acc-id',
       ]);
     });
 
     it('should be idempotent', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
-
       const first = await repository.execute('acc-id');
       const second = await repository.execute('acc-id');
 
       expect(first.hasError).toBe(false);
       expect(second.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(2);
+      expect(mockConnection.query).toHaveBeenCalledTimes(2);
     });
 
     it('should not fail when account already deleted', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
-
       const result = await repository.execute('acc-id');
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE accounts'),
         ['acc-id'],
       );
@@ -62,7 +55,7 @@ describe('DeleteAccountRepository', () => {
 
     it('should return error when database query fails', async () => {
       const err = new Error('db');
-      mockConnection.queryOne.mockRejectedValue(err);
+      mockConnection.query.mockRejectedValue(err);
 
       const result = await repository.execute('acc-id');
 

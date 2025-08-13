@@ -39,7 +39,7 @@ export class SaveGoalRepository implements ISaveGoalRepository {
         row.updated_at,
       ];
 
-      const result = await this.connection.queryOne(query, params);
+      const result = await this.connection.query(query, params);
 
       if (!result || result.rowCount === 0) {
         return Either.error(

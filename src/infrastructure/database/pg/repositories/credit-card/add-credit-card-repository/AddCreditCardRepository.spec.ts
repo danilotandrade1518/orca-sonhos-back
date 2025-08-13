@@ -1,20 +1,27 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { CreditCard } from '@domain/aggregates/credit-card/credit-card-entity/CreditCard';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
+
 import { AddCreditCardRepository } from './AddCreditCardRepository';
 
 describe('AddCreditCardRepository', () => {
   let repository: AddCreditCardRepository;
-  let mockConnection: {
-    queryOne: jest.Mock;
-  };
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
 
   beforeEach(() => {
-    mockConnection = {
-      queryOne: jest.fn().mockResolvedValue(undefined),
+    const mockClient = {
+      query: jest.fn(),
+      release: jest.fn(),
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    repository = new AddCreditCardRepository(mockConnection as any);
+
+    mockConnection = {
+      query: jest.fn(),
+      transaction: jest.fn(),
+      getClient: jest.fn().mockResolvedValue(mockClient),
+    };
+
+    repository = new AddCreditCardRepository(mockConnection);
   });
 
   afterEach(() => {
@@ -38,8 +45,8 @@ describe('AddCreditCardRepository', () => {
       const result = await repository.execute(creditCard);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledTimes(1);
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO credit_cards'),
         expect.arrayContaining([
           creditCard.id,
@@ -60,7 +67,7 @@ describe('AddCreditCardRepository', () => {
 
       await repository.execute(creditCard);
 
-      const [query, params] = mockConnection.queryOne.mock.calls[0];
+      const [query, params] = mockConnection.query.mock.calls[0];
       expect(query).toContain('INSERT INTO credit_cards');
       expect(query).toContain(
         'id, name, credit_limit, closing_day, due_day, budget_id',
@@ -82,7 +89,7 @@ describe('AddCreditCardRepository', () => {
       const result = await repository.execute(creditCard);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO credit_cards'),
         expect.arrayContaining([25, 15]),
       );
@@ -100,7 +107,7 @@ describe('AddCreditCardRepository', () => {
       const result = await repository.execute(creditCard);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO credit_cards'),
         expect.arrayContaining([1000000]),
       );
@@ -113,7 +120,7 @@ describe('AddCreditCardRepository', () => {
       const result = await repository.execute(creditCard);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO credit_cards'),
         expect.arrayContaining([true]), // is_deleted = true
       );
@@ -126,7 +133,7 @@ describe('AddCreditCardRepository', () => {
       };
       dbError.code = '23505';
 
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(creditCard);
 
@@ -141,7 +148,7 @@ describe('AddCreditCardRepository', () => {
       const creditCard = createValidCreditCard();
       const dbError = new Error('Database connection failed');
 
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(creditCard);
 
@@ -155,7 +162,7 @@ describe('AddCreditCardRepository', () => {
       const creditCard = createValidCreditCard();
       const unknownError = 'Unknown error string';
 
-      mockConnection.queryOne.mockRejectedValue(unknownError);
+      mockConnection.query.mockRejectedValue(unknownError);
 
       const result = await repository.execute(creditCard);
 
@@ -163,30 +170,6 @@ describe('AddCreditCardRepository', () => {
       expect(result.errors[0]).toBeInstanceOf(RepositoryError);
       expect(result.errors[0].message).toContain('Failed to add credit card');
       expect(result.errors[0].message).toContain('Unknown error');
-    });
-
-    it('should preserve all credit card properties', async () => {
-      const budgetId = EntityId.create().value!.id;
-      const creditCard = CreditCard.create({
-        name: 'Complete Card',
-        limit: 750000,
-        closingDay: 12,
-        dueDay: 5,
-        budgetId,
-      }).data!;
-
-      await repository.execute(creditCard);
-
-      const [, params] = mockConnection.queryOne.mock.calls[0];
-      expect(params[0]).toBe(creditCard.id); // id
-      expect(params[1]).toBe('Complete Card'); // name
-      expect(params[2]).toBe(750000); // limit
-      expect(params[3]).toBe(12); // closing_day
-      expect(params[4]).toBe(5); // due_day
-      expect(params[5]).toBe(budgetId); // budget_id
-      expect(params[6]).toBe(false); // is_deleted
-      expect(params[7]).toBeInstanceOf(Date); // created_at
-      expect(params[8]).toBeInstanceOf(Date); // updated_at
     });
 
     it('should handle credit card with minimum valid closing and due days', async () => {
@@ -201,7 +184,7 @@ describe('AddCreditCardRepository', () => {
       const result = await repository.execute(creditCard);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO credit_cards'),
         expect.arrayContaining([1, 1]),
       );

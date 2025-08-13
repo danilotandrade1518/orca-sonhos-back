@@ -25,7 +25,11 @@ export class GetBudgetRepository implements IGetBudgetRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne<BudgetRow>(query, [id]);
+      const queryResultRow = await this.connection.query<BudgetRow>(query, [
+        id,
+      ]);
+
+      const result = queryResultRow?.rows[0];
 
       if (!result) {
         return Either.success<RepositoryError, Budget | null>(null);

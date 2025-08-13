@@ -12,7 +12,6 @@ describe('DeleteTransactionRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -22,23 +21,23 @@ describe('DeleteTransactionRepository', () => {
 
   describe('execute', () => {
     it('should mark transaction as deleted', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
       const result = await repository.execute('id');
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.query).toHaveBeenCalledWith(expect.any(String), [
         'id',
       ]);
     });
 
     it('should be idempotent', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
       await repository.execute('id');
       await repository.execute('id');
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(2);
+      expect(mockConnection.query).toHaveBeenCalledTimes(2);
     });
 
     it('should return error on db failure', async () => {
-      mockConnection.queryOne.mockRejectedValue(new Error('db'));
+      mockConnection.query.mockRejectedValue(new Error('db'));
       const result = await repository.execute('id');
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(RepositoryError);

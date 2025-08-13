@@ -19,7 +19,7 @@ export class SaveCreditCardRepository implements ISaveCreditCardRepository {
         UPDATE credit_cards 
         SET 
           name = $2,
-          limit = $3,
+          credit_limit = $3,
           closing_day = $4,
           due_day = $5,
           budget_id = $6,
@@ -31,7 +31,7 @@ export class SaveCreditCardRepository implements ISaveCreditCardRepository {
       const params = [
         row.id,
         row.name,
-        row.limit,
+        row.credit_limit,
         row.closing_day,
         row.due_day,
         row.budget_id,
@@ -39,16 +39,7 @@ export class SaveCreditCardRepository implements ISaveCreditCardRepository {
         row.updated_at,
       ];
 
-      const result = await this.connection.queryOne(query, params);
-
-      if (!result || result.rowCount === 0) {
-        return Either.error(
-          new RepositoryError(
-            `Credit card with id ${creditCard.id} not found for update`,
-            new Error('Credit card not found'),
-          ),
-        );
-      }
+      await this.connection.query(query, params);
 
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {

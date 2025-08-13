@@ -1,5 +1,6 @@
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
+import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { DomainError } from '@domain/shared/DomainError';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { Either } from '@either';
@@ -7,7 +8,6 @@ import { Either } from '@either';
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { GetBudgetRepository } from './GetBudgetRepository';
-import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 
 // Mock do BudgetMapper
 jest.mock('../../../mappers/budget/BudgetMapper');
@@ -30,7 +30,6 @@ describe('GetBudgetRepository', () => {
     // Mock da conexão
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -59,14 +58,17 @@ describe('GetBudgetRepository', () => {
         ownerId: validBudgetRow.owner_id,
       }).data!;
 
-      mockConnection.queryOne.mockResolvedValue(validBudgetRow);
+      mockConnection.query.mockResolvedValue({
+        rows: [validBudgetRow],
+        rowCount: 1,
+      });
       mockBudgetMapper.toDomain.mockReturnValue(Either.success(mockBudget));
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(mockBudget);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
         [validId],
       );
@@ -74,13 +76,13 @@ describe('GetBudgetRepository', () => {
     });
 
     it('should return null when budget not found', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1 AND is_deleted = false'),
         [validId],
       );
@@ -88,11 +90,11 @@ describe('GetBudgetRepository', () => {
     });
 
     it('should filter deleted budgets', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         [validId],
       );
@@ -100,7 +102,7 @@ describe('GetBudgetRepository', () => {
 
     it('should return error when database query fails', async () => {
       const dbError = new Error('Database connection failed');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(validId);
 
@@ -112,7 +114,10 @@ describe('GetBudgetRepository', () => {
 
     it('should return error when budget mapping fails', async () => {
       const mappingError = new TestDomainError('Invalid domain data');
-      mockConnection.queryOne.mockResolvedValue(validBudgetRow);
+      mockConnection.query.mockResolvedValue({
+        rows: [validBudgetRow],
+        rowCount: 1,
+      });
       mockBudgetMapper.toDomain.mockReturnValue(Either.error(mappingError));
 
       const result = await repository.execute(validId);
@@ -123,7 +128,7 @@ describe('GetBudgetRepository', () => {
     });
 
     it('should use correct SQL query', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
 
@@ -131,14 +136,14 @@ describe('GetBudgetRepository', () => {
         /SELECT[\s\S]*id,[\s\S]*name,[\s\S]*owner_id,[\s\S]*participant_ids,[\s\S]*type,[\s\S]*is_deleted,[\s\S]*created_at,[\s\S]*updated_at[\s\S]*FROM budgets[\s\S]*WHERE id = \$1 AND is_deleted = false/,
       );
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expectedQuery, [
+      expect(mockConnection.query).toHaveBeenCalledWith(expectedQuery, [
         validId,
       ]);
     });
 
     it('should handle non-Error exceptions', async () => {
       const nonErrorException = 'String error';
-      mockConnection.queryOne.mockRejectedValue(nonErrorException);
+      mockConnection.query.mockRejectedValue(nonErrorException);
 
       const result = await repository.execute(validId);
 
@@ -148,13 +153,13 @@ describe('GetBudgetRepository', () => {
       expect(result.errors[0].cause!.message).toBe('Unknown error');
     });
 
-    it('should use queryOne method for single result', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+    it('should use query method for single result', async () => {
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.query).toHaveBeenCalledTimes(1);
+      expect(mockConnection.query).toHaveBeenCalledWith(expect.any(String), [
         validId,
       ]);
     });

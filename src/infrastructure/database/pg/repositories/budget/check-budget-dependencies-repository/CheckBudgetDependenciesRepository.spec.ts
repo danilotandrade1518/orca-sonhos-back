@@ -12,7 +12,6 @@ describe('CheckBudgetDependenciesRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -22,20 +21,26 @@ describe('CheckBudgetDependenciesRepository', () => {
 
   describe('hasAccounts', () => {
     it('should return true when budget has active accounts', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_accounts: true });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_accounts: true }],
+        rowCount: 1,
+      });
 
       const result = await repository.hasAccounts('budget-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(true);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('EXISTS'),
         ['budget-id'],
       );
     });
 
     it('should return false when budget has no accounts', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_accounts: false });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_accounts: false }],
+        rowCount: 1,
+      });
 
       const result = await repository.hasAccounts('budget-id');
 
@@ -44,11 +49,14 @@ describe('CheckBudgetDependenciesRepository', () => {
     });
 
     it('should ignore deleted accounts', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_accounts: false });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_accounts: false }],
+        rowCount: 1,
+      });
 
       await repository.hasAccounts('budget-id');
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['budget-id'],
       );
@@ -56,7 +64,7 @@ describe('CheckBudgetDependenciesRepository', () => {
 
     it('should handle database errors', async () => {
       const dbError = new Error('db error');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.hasAccounts('budget-id');
 
@@ -67,20 +75,26 @@ describe('CheckBudgetDependenciesRepository', () => {
 
   describe('hasTransactions', () => {
     it('should return true when budget has active transactions', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_transactions: true });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_transactions: true }],
+        rowCount: 1,
+      });
 
       const result = await repository.hasTransactions('budget-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(true);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('EXISTS'),
         ['budget-id'],
       );
     });
 
     it('should return false when budget has no transactions', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_transactions: false }],
+        rowCount: 1,
+      });
 
       const result = await repository.hasTransactions('budget-id');
 
@@ -89,11 +103,14 @@ describe('CheckBudgetDependenciesRepository', () => {
     });
 
     it('should ignore deleted transactions', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_transactions: false }],
+        rowCount: 1,
+      });
 
       await repository.hasTransactions('budget-id');
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['budget-id'],
       );
@@ -101,7 +118,7 @@ describe('CheckBudgetDependenciesRepository', () => {
 
     it('should handle database errors', async () => {
       const dbError = new Error('db error');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.hasTransactions('budget-id');
 

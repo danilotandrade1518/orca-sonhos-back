@@ -49,10 +49,10 @@ describe('BudgetCompositionRoot Integration Tests', () => {
         ['Integration Test Budget'],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].name).toBe('Integration Test Budget');
-      expect(dbResult[0].owner_id).toBe(testUserId);
-      expect(dbResult[0].is_deleted).toBe(false);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].name).toBe('Integration Test Budget');
+      expect(dbResult.rows[0].owner_id).toBe(testUserId);
+      expect(dbResult.rows[0].is_deleted).toBe(false);
     });
 
     it('should handle validation errors', async () => {
@@ -72,8 +72,8 @@ describe('BudgetCompositionRoot Integration Tests', () => {
     it('should connect to test database successfully', async () => {
       const result = await connection.query('SELECT 1 as test');
 
-      expect(result).toHaveLength(1);
-      expect(result[0].test).toBe(1);
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].test).toBe(1);
     });
 
     it('should create and query budgets table', async () => {
@@ -89,9 +89,9 @@ describe('BudgetCompositionRoot Integration Tests', () => {
         ORDER BY ordinal_position
       `);
 
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.rows.length).toBeGreaterThan(0);
 
-      const columnNames = result.map((row) => row.column_name);
+      const columnNames = result.rows.map((row) => row.column_name);
       expect(columnNames).toContain('id');
       expect(columnNames).toContain('name');
       expect(columnNames).toContain('owner_id');
@@ -134,8 +134,8 @@ describe('BudgetCompositionRoot Integration Tests', () => {
         [budgetId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].name).toBe('Updated Budget Name');
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].name).toBe('Updated Budget Name');
     });
 
     it('should handle unauthorized update attempts', async () => {
@@ -183,8 +183,8 @@ describe('BudgetCompositionRoot Integration Tests', () => {
         [budgetId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].is_deleted).toBe(true);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].is_deleted).toBe(true);
     });
 
     it('should handle unauthorized delete attempts', async () => {
@@ -237,8 +237,8 @@ describe('BudgetCompositionRoot Integration Tests', () => {
         [budgetId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].participant_ids).toContain(newParticipantId);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].participant_ids).toContain(newParticipantId);
     });
 
     it('should handle unauthorized add participant attempts', async () => {
@@ -292,9 +292,11 @@ describe('BudgetCompositionRoot Integration Tests', () => {
         [budgetId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].participant_ids).not.toContain(participantToRemoveId);
-      expect(dbResult[0].participant_ids).toContain(testUserId);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].participant_ids).not.toContain(
+        participantToRemoveId,
+      );
+      expect(dbResult.rows[0].participant_ids).toContain(testUserId);
     });
 
     it('should handle unauthorized remove participant attempts', async () => {

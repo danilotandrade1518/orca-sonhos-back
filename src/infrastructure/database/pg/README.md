@@ -46,7 +46,6 @@ const db = PostgreSQLConnection.getInstance(config);
 
 // Fazer queries
 const users = await db.query('SELECT * FROM users WHERE active = $1', [true]);
-const user = await db.queryOne('SELECT * FROM users WHERE id = $1', [userId]);
 
 // Transações
 await db.transaction(async (client) => {

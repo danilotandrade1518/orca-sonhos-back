@@ -29,10 +29,12 @@ export class FindOverdueScheduledTransactionsRepository
         ORDER BY transaction_date ASC
       `;
 
-      const rows = await this.connection.query<TransactionRow>(query, [
-        'SCHEDULED',
-        referenceDate,
-      ]);
+      const queryResultRow = await this.connection.query<TransactionRow>(
+        query,
+        ['SCHEDULED', referenceDate],
+      );
+
+      const rows = queryResultRow?.rows || [];
 
       const transactions: Transaction[] = [];
 

@@ -5,7 +5,7 @@ import { Either } from '@either';
 export interface CreditCardRow {
   id: string;
   name: string;
-  limit: number;
+  credit_limit: number;
   closing_day: number;
   due_day: number;
   budget_id: string;
@@ -19,7 +19,7 @@ export class CreditCardMapper {
     return CreditCard.restore({
       id: row.id,
       name: row.name,
-      limit: row.limit,
+      limit: Number(row.credit_limit),
       closingDay: row.closing_day,
       dueDay: row.due_day,
       budgetId: row.budget_id,
@@ -33,7 +33,7 @@ export class CreditCardMapper {
     return {
       id: creditCard.id,
       name: creditCard.name,
-      limit: creditCard.limit,
+      credit_limit: creditCard.limit,
       closing_day: creditCard.closingDay,
       due_day: creditCard.dueDay,
       budget_id: creditCard.budgetId,

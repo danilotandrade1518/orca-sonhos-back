@@ -46,7 +46,6 @@ describe('TransferBetweenAccountsUnitOfWork', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn().mockResolvedValue(mockClient),
     };
@@ -289,7 +288,7 @@ describe('TransferBetweenAccountsUnitOfWork', () => {
         if (sql === 'ROLLBACK') {
           throw rollbackError;
         }
-        return Promise.resolve([]);
+        return Promise.resolve(null);
       });
 
       const result = await unitOfWork.executeTransfer(transferParams);
@@ -331,7 +330,7 @@ describe('TransferBetweenAccountsUnitOfWork', () => {
 
       mockClient.query.mockImplementation(async (sql: string) => {
         calls.push(`query:${sql}`);
-        return [];
+        return null;
       });
 
       mockSaveAccountRepository.executeWithClient.mockImplementation(

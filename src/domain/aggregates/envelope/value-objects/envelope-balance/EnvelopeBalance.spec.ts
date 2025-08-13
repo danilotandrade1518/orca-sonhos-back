@@ -1,5 +1,3 @@
-import { DomainError } from '@domain/shared/DomainError';
-
 import { InsufficientEnvelopeBalanceError } from '../../errors/InsufficientEnvelopeBalanceError';
 import { EnvelopeBalance } from './EnvelopeBalance';
 
@@ -48,4 +46,3 @@ describe('EnvelopeBalance', () => {
     expect(result.hasError).toBe(true);
   });
 });
-

@@ -12,7 +12,6 @@ describe('CheckAccountDependenciesRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -22,19 +21,25 @@ describe('CheckAccountDependenciesRepository', () => {
 
   describe('hasTransactions', () => {
     it('should return true when account has transactions', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_transactions: true });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_transactions: true }],
+        rowCount: 1,
+      });
 
       const result = await repository.hasTransactions('acc-id');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(true);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.query).toHaveBeenCalledWith(expect.any(String), [
         'acc-id',
       ]);
     });
 
     it('should return false when account has no transactions', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
+      mockConnection.query.mockResolvedValue({
+        rows: [{ has_transactions: false }],
+        rowCount: 1,
+      });
 
       const result = await repository.hasTransactions('acc-id');
 
@@ -43,11 +48,9 @@ describe('CheckAccountDependenciesRepository', () => {
     });
 
     it('should ignore deleted transactions', async () => {
-      mockConnection.queryOne.mockResolvedValue({ has_transactions: false });
-
       await repository.hasTransactions('acc-id');
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         ['acc-id'],
       );
@@ -55,7 +58,7 @@ describe('CheckAccountDependenciesRepository', () => {
 
     it('should handle database errors', async () => {
       const err = new Error('db');
-      mockConnection.queryOne.mockRejectedValue(err);
+      mockConnection.query.mockRejectedValue(err);
 
       const result = await repository.hasTransactions('acc-id');
 

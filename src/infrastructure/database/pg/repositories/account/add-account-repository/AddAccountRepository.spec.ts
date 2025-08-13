@@ -22,7 +22,6 @@ describe('AddAccountRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -61,12 +60,11 @@ describe('AddAccountRepository', () => {
       };
 
       mockAccountMapper.toRow.mockReturnValue(mockRow);
-      mockConnection.queryOne.mockResolvedValue(null);
 
       const result = await repository.execute(account);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO accounts'),
         expect.arrayContaining([
           account.id,
@@ -104,7 +102,7 @@ describe('AddAccountRepository', () => {
       mockAccountMapper.toRow.mockReturnValue(mockRow);
 
       const dbError = new Error('Database connection failed');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(account);
 

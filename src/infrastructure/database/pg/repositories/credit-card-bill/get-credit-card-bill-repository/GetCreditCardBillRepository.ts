@@ -26,9 +26,12 @@ export class GetCreditCardBillRepository
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne<CreditCardBillRow>(query, [
-        id,
-      ]);
+      const queryResultRow = await this.connection.query<CreditCardBillRow>(
+        query,
+        [id],
+      );
+
+      const result = queryResultRow?.rows[0];
 
       if (!result) {
         return Either.success<RepositoryError, CreditCardBill | null>(null);

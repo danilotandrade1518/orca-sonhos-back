@@ -11,8 +11,8 @@ import {
   IDatabaseClient,
   IPostgresConnectionAdapter,
 } from '../../../../adapters/IPostgresConnectionAdapter';
-import { AddTransactionRepository } from '../../repositories/transaction/add-transaction-repository/AddTransactionRepository';
 import { SaveCreditCardBillRepository } from '../../repositories/credit-card-bill/save-credit-card-bill-repository/SaveCreditCardBillRepository';
+import { AddTransactionRepository } from '../../repositories/transaction/add-transaction-repository/AddTransactionRepository';
 import { PayCreditCardBillUnitOfWork } from './PayCreditCardBillUnitOfWork';
 
 jest.mock(
@@ -45,7 +45,6 @@ describe('PayCreditCardBillUnitOfWork', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn().mockResolvedValue(mockClient),
     };
@@ -205,7 +204,7 @@ describe('PayCreditCardBillUnitOfWork', () => {
 
       // Simulate an unexpected error during execution (after BEGIN succeeds)
       mockClient.query
-        .mockResolvedValueOnce([]) // BEGIN succeeds
+        .mockResolvedValueOnce(null) // BEGIN succeeds
         .mockRejectedValueOnce(rollbackError); // ROLLBACK fails
 
       mockAddTransactionRepository.executeWithClient.mockRejectedValue(
@@ -267,7 +266,7 @@ describe('PayCreditCardBillUnitOfWork', () => {
 
       mockClient.query.mockImplementation(async (sql: string) => {
         calls.push(`query:${sql}`);
-        return [];
+        return null;
       });
 
       mockAddTransactionRepository.executeWithClient.mockImplementation(

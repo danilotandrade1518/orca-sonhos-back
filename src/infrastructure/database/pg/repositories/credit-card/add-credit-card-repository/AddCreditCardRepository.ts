@@ -25,7 +25,7 @@ export class AddCreditCardRepository implements IAddCreditCardRepository {
       const params = [
         row.id,
         row.name,
-        row.limit,
+        row.credit_limit,
         row.closing_day,
         row.due_day,
         row.budget_id,
@@ -34,7 +34,7 @@ export class AddCreditCardRepository implements IAddCreditCardRepository {
         row.updated_at,
       ];
 
-      await this.connection.queryOne(query, params);
+      await this.connection.query(query, params);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
       const err = error as Error & { code?: string };

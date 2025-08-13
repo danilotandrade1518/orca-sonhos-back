@@ -30,7 +30,11 @@ export class GetEnvelopeRepository implements IGetEnvelopeRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const row = await this.connection.queryOne<EnvelopeRow>(query, [id]);
+      const queryResultRow = await this.connection.query<EnvelopeRow>(query, [
+        id,
+      ]);
+
+      const row = queryResultRow?.rows?.[0];
 
       if (!row) {
         return Either.success<DomainError, Envelope | null>(null);

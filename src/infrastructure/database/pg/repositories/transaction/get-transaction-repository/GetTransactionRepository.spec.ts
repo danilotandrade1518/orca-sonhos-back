@@ -31,7 +31,6 @@ describe('GetTransactionRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -59,7 +58,7 @@ describe('GetTransactionRepository', () => {
 
     it('should return transaction when found', async () => {
       const tx = {} as Transaction;
-      mockConnection.queryOne.mockResolvedValue(row);
+      mockConnection.query.mockResolvedValue({ rows: [row], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.success(tx));
 
       const result = await repository.execute(validId);
@@ -68,7 +67,7 @@ describe('GetTransactionRepository', () => {
     });
 
     it('should return null when not found', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
       expect(result.hasError).toBe(false);
@@ -77,7 +76,7 @@ describe('GetTransactionRepository', () => {
     });
 
     it('should return error when mapping fails', async () => {
-      mockConnection.queryOne.mockResolvedValue(row);
+      mockConnection.query.mockResolvedValue({ rows: [row], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(
         Either.error(new TestDomainError('map')),
       );
@@ -89,7 +88,7 @@ describe('GetTransactionRepository', () => {
 
     it('should return error on db failure', async () => {
       const err = new Error('fail');
-      mockConnection.queryOne.mockRejectedValue(err);
+      mockConnection.query.mockRejectedValue(err);
 
       const result = await repository.execute(validId);
       expect(result.hasError).toBe(true);

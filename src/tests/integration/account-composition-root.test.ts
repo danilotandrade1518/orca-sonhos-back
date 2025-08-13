@@ -81,11 +81,11 @@ describe('AccountCompositionRoot Integration Tests', () => {
         ['Integration Test Account'],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].name).toBe('Integration Test Account');
-      expect(dbResult[0].budget_id).toBe(testBudgetId);
-      expect(dbResult[0].type).toBe(AccountTypeEnum.CHECKING_ACCOUNT);
-      expect(dbResult[0].is_deleted).toBe(false);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].name).toBe('Integration Test Account');
+      expect(dbResult.rows[0].budget_id).toBe(testBudgetId);
+      expect(dbResult.rows[0].type).toBe(AccountTypeEnum.CHECKING_ACCOUNT);
+      expect(dbResult.rows[0].is_deleted).toBe(false);
     });
 
     it('should handle validation errors', async () => {
@@ -152,8 +152,8 @@ describe('AccountCompositionRoot Integration Tests', () => {
         [accountId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].name).toBe('Updated Account Name');
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].name).toBe('Updated Account Name');
     });
 
     it('should handle unauthorized update attempts', async () => {
@@ -203,8 +203,8 @@ describe('AccountCompositionRoot Integration Tests', () => {
         [accountId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].is_deleted).toBe(true);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].is_deleted).toBe(true);
     });
 
     it('should handle unauthorized delete attempts', async () => {
@@ -335,8 +335,8 @@ describe('AccountCompositionRoot Integration Tests', () => {
     it('should connect to test database successfully', async () => {
       const result = await connection.query('SELECT 1 as test');
 
-      expect(result).toHaveLength(1);
-      expect(result[0].test).toBe(1);
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].test).toBe(1);
     });
 
     it('should create and query accounts table', async () => {
@@ -352,9 +352,9 @@ describe('AccountCompositionRoot Integration Tests', () => {
         ORDER BY ordinal_position
       `);
 
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.rows.length).toBeGreaterThan(0);
 
-      const columnNames = result.map((row) => row.column_name);
+      const columnNames = result.rows.map((row) => row.column_name);
       expect(columnNames).toContain('id');
       expect(columnNames).toContain('name');
       expect(columnNames).toContain('budget_id');

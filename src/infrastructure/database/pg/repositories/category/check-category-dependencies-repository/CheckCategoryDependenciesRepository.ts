@@ -17,9 +17,11 @@ export class CheckCategoryDependenciesRepository
         WHERE category_id = $1 AND is_deleted = false
       `;
 
-      const transactionResult = await this.connection.queryOne<{
+      const queryResultRow = await this.connection.query<{
         count: string;
       }>(transactionQuery, [categoryId]);
+
+      const transactionResult = queryResultRow?.rows[0];
 
       const transactionCount = parseInt(transactionResult?.count || '0', 10);
 

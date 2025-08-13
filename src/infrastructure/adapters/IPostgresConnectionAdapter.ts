@@ -9,29 +9,21 @@ export interface DatabaseConfig {
   connectionTimeoutMillis?: number;
 }
 
-export interface QueryResultRow {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [column: string]: any;
-}
+export type QueryResultRow<T> = { rows: T[]; rowCount: number };
 
 export interface IDatabaseClient {
-  query<T = QueryResultRow>(text: string, params?: unknown[]): Promise<T[]>;
-
+  query<T = unknown>(
+    text: string,
+    params?: unknown[],
+  ): Promise<QueryResultRow<T> | null>;
   release(): void;
 }
 
 export interface IPostgresConnectionAdapter {
-  query<T extends QueryResultRow = QueryResultRow>(
+  query<T = unknown>(
     text: string,
     params?: unknown[],
-  ): Promise<T[]>;
-
-  queryOne<T = QueryResultRow>(
-    text: string,
-    params?: unknown[],
-  ): Promise<T | null>;
-
+  ): Promise<QueryResultRow<T> | null>;
   transaction<T>(callback: (client: unknown) => Promise<T>): Promise<T>;
-
   getClient(): Promise<IDatabaseClient>;
 }

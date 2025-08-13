@@ -12,7 +12,7 @@ describe('CreditCardMapper', () => {
       const row: CreditCardRow = {
         id,
         name: 'Test Credit Card',
-        limit: 100000,
+        credit_limit: 100000,
         closing_day: 5,
         due_day: 10,
         budget_id: budgetId,
@@ -43,7 +43,7 @@ describe('CreditCardMapper', () => {
       const row: CreditCardRow = {
         id,
         name: 'Deleted Credit Card',
-        limit: 50000,
+        credit_limit: 50000,
         closing_day: 15,
         due_day: 20,
         budget_id: budgetId,
@@ -62,7 +62,7 @@ describe('CreditCardMapper', () => {
       const row: CreditCardRow = {
         id: 'invalid-id',
         name: '',
-        limit: -1000,
+        credit_limit: -1000,
         closing_day: 35,
         due_day: -5,
         budget_id: 'invalid-budget-id',
@@ -91,7 +91,7 @@ describe('CreditCardMapper', () => {
 
       expect(result.id).toBe(creditCard.id);
       expect(result.name).toBe('My Credit Card');
-      expect(result.limit).toBe(200000);
+      expect(result.credit_limit).toBe(200000);
       expect(result.closing_day).toBe(7);
       expect(result.due_day).toBe(12);
       expect(result.budget_id).toBe(creditCard.budgetId);
@@ -130,7 +130,7 @@ describe('CreditCardMapper', () => {
 
       expect(typeof result.id).toBe('string');
       expect(typeof result.name).toBe('string');
-      expect(typeof result.limit).toBe('number');
+      expect(typeof result.credit_limit).toBe('number');
       expect(typeof result.closing_day).toBe('number');
       expect(typeof result.due_day).toBe('number');
       expect(result.budget_id).toBe(budgetId);

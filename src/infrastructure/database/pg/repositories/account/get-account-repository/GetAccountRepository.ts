@@ -28,7 +28,11 @@ export class GetAccountRepository implements IGetAccountRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const row = await this.connection.queryOne<AccountRow>(query, [id]);
+      const queryResultRow = await this.connection.query<AccountRow>(query, [
+        id,
+      ]);
+
+      const row = queryResultRow?.rows[0];
 
       if (!row) {
         return Either.success<RepositoryError, Account | null>(null);

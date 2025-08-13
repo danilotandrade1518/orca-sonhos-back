@@ -30,7 +30,6 @@ describe('GetCategoryByIdRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -40,7 +39,6 @@ describe('GetCategoryByIdRepository', () => {
   });
 
   it('should get category by id successfully', async () => {
-    // Arrange
     const categoryId = '550e8400-e29b-41d4-a716-446655440000';
     const categoryRow: CategoryRow = {
       id: categoryId,
@@ -62,16 +60,17 @@ describe('GetCategoryByIdRepository', () => {
       updatedAt: new Date(),
     });
 
-    mockConnection.queryOne.mockResolvedValue(categoryRow);
+    mockConnection.query.mockResolvedValue({
+      rows: [categoryRow],
+      rowCount: 1,
+    });
     mockCategoryMapper.toDomain.mockReturnValue(mockCategory);
 
-    // Act
     const result = await repository.execute(categoryId);
 
-    // Assert
     expect(result.hasError).toBeFalsy();
     expect(result.data).toBe(mockCategory.data);
-    expect(mockConnection.queryOne).toHaveBeenCalledWith(
+    expect(mockConnection.query).toHaveBeenCalledWith(
       expect.stringContaining('SELECT'),
       [categoryId],
     );
@@ -79,17 +78,14 @@ describe('GetCategoryByIdRepository', () => {
   });
 
   it('should return null when category is not found', async () => {
-    // Arrange
     const categoryId = '550e8400-e29b-41d4-a716-446655440000';
-    mockConnection.queryOne.mockResolvedValue(null);
+    mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
-    // Act
     const result = await repository.execute(categoryId);
 
-    // Assert
     expect(result.hasError).toBeFalsy();
     expect(result.data).toBeNull();
-    expect(mockConnection.queryOne).toHaveBeenCalledWith(
+    expect(mockConnection.query).toHaveBeenCalledWith(
       expect.stringContaining('SELECT'),
       [categoryId],
     );
@@ -97,7 +93,6 @@ describe('GetCategoryByIdRepository', () => {
   });
 
   it('should return error when mapping fails', async () => {
-    // Arrange
     const categoryId = '550e8400-e29b-41d4-a716-446655440000';
     const categoryRow: CategoryRow = {
       id: categoryId,
@@ -110,30 +105,28 @@ describe('GetCategoryByIdRepository', () => {
     };
 
     const mappingError = Either.error(new TestDomainError('Mapping error'));
-    mockConnection.queryOne.mockResolvedValue(categoryRow);
+    mockConnection.query.mockResolvedValue({
+      rows: [categoryRow],
+      rowCount: 1,
+    });
     mockCategoryMapper.toDomain.mockReturnValue(
       mappingError as Either<DomainError, Category>,
     );
 
-    // Act
     const result = await repository.execute(categoryId);
 
-    // Assert
     expect(result.hasError).toBeTruthy();
     expect(result.errors[0]).toBeInstanceOf(RepositoryError);
     expect(result.errors[0].message).toContain('Failed to map category');
   });
 
   it('should return error when database query fails', async () => {
-    // Arrange
     const categoryId = '550e8400-e29b-41d4-a716-446655440000';
     const dbError = new Error('Database connection failed');
-    mockConnection.queryOne.mockRejectedValue(dbError);
+    mockConnection.query.mockRejectedValue(dbError);
 
-    // Act
     const result = await repository.execute(categoryId);
 
-    // Assert
     expect(result.hasError).toBeTruthy();
     expect(result.errors[0]).toBeInstanceOf(RepositoryError);
     expect(result.errors[0].message).toContain('Failed to get category by id');

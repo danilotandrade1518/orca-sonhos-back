@@ -17,9 +17,9 @@ export class DeleteCreditCardRepository implements IDeleteCreditCardRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne(query, [id]);
+      const result = await this.connection.query(query, [id]);
 
-      if (!result || result.rowCount === 0) {
+      if (result?.rowCount === 0) {
         return Either.error(
           new RepositoryError(
             `Credit card with id ${id} not found for deletion`,

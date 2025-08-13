@@ -24,7 +24,12 @@ export class GetTransactionRepository implements IGetTransactionRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const row = await this.connection.queryOne<TransactionRow>(query, [id]);
+      const queryResultRow = await this.connection.query<TransactionRow>(
+        query,
+        [id],
+      );
+
+      const row = queryResultRow?.rows[0];
 
       if (!row) {
         return Either.success<RepositoryError, Transaction | null>(null);

@@ -17,7 +17,7 @@ export class DeleteGoalRepository implements IDeleteGoalRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne(query, [id]);
+      const result = await this.connection.query(query, [id]);
 
       if (!result || result.rowCount === 0) {
         return Either.error(

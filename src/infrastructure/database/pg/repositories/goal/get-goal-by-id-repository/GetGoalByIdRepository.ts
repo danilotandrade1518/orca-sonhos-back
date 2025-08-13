@@ -19,7 +19,9 @@ export class GetGoalByIdRepository implements IGetGoalRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne<GoalRow>(query, [id]);
+      const queryResultRow = await this.connection.query<GoalRow>(query, [id]);
+
+      const result = queryResultRow?.rows[0];
 
       if (!result) {
         return Either.success<RepositoryError, Goal | null>(null);

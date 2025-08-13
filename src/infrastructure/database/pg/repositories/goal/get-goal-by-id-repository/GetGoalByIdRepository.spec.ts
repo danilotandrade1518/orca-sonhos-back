@@ -19,17 +19,16 @@ class TestDomainError extends DomainError {
 describe('GetGoalByIdRepository', () => {
   let repository: GetGoalByIdRepository;
   let mockConnectionAdapter: IPostgresConnectionAdapter;
-  let mockQueryOne: jest.Mock;
+  let mockQuery: jest.Mock;
 
   const validId = '550e8400-e29b-41d4-a716-446655440001';
   const goalId = '550e8400-e29b-41d4-a716-446655440002';
 
   beforeEach(() => {
-    mockQueryOne = jest.fn();
+    mockQuery = jest.fn();
 
     mockConnectionAdapter = {
-      query: jest.fn(),
-      queryOne: mockQueryOne,
+      query: mockQuery,
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -69,7 +68,10 @@ describe('GetGoalByIdRepository', () => {
         isAchieved: () => false,
       } as Goal;
 
-      mockQueryOne.mockResolvedValue(mockRow);
+      mockQuery.mockResolvedValue({
+        rows: [mockRow],
+        rowCount: 1,
+      });
       jest
         .spyOn(GoalMapper, 'toDomain')
         .mockReturnValue(Either.success(mockGoal));
@@ -78,37 +80,37 @@ describe('GetGoalByIdRepository', () => {
 
       expect(result.hasError).toBe(false);
       expect(result.data).toEqual(mockGoal);
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
         [validId],
       );
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1 AND is_deleted = false'),
         [validId],
       );
     });
 
     it('should return null when goal not found', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockQuery.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
         [validId],
       );
     });
 
     it('should filter deleted goals', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockQuery.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         [validId],
       );
@@ -116,7 +118,7 @@ describe('GetGoalByIdRepository', () => {
 
     it('should return error when database query fails', async () => {
       const databaseError = new Error('Connection timeout');
-      mockQueryOne.mockRejectedValue(databaseError);
+      mockQuery.mockRejectedValue(databaseError);
 
       const result = await repository.execute(validId);
 
@@ -140,7 +142,10 @@ describe('GetGoalByIdRepository', () => {
       };
 
       const mappingError = new TestDomainError('Invalid goal amount');
-      mockQueryOne.mockResolvedValue(mockRow);
+      mockQuery.mockResolvedValue({
+        rows: [mockRow],
+        rowCount: 1,
+      });
       jest
         .spyOn(GoalMapper, 'toDomain')
         .mockReturnValue(
@@ -157,7 +162,7 @@ describe('GetGoalByIdRepository', () => {
     });
 
     it('should handle undefined database result', async () => {
-      mockQueryOne.mockResolvedValue(undefined);
+      mockQuery.mockResolvedValue(undefined);
 
       const result = await repository.execute(validId);
 
@@ -166,11 +171,11 @@ describe('GetGoalByIdRepository', () => {
     });
 
     it('should use correct SQL query structure', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockQuery.mockResolvedValue(null);
 
       await repository.execute(validId);
 
-      const calledQuery = mockQueryOne.mock.calls[0][0];
+      const calledQuery = mockQuery.mock.calls[0][0];
       expect(calledQuery).toContain('SELECT');
       expect(calledQuery).toContain(
         'id, name, total_amount, accumulated_amount, deadline, budget_id',
@@ -183,13 +188,13 @@ describe('GetGoalByIdRepository', () => {
     });
 
     it('should handle empty goal ID', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockQuery.mockResolvedValue(null);
 
       const result = await repository.execute('');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1'),
         [''],
       );
@@ -197,13 +202,13 @@ describe('GetGoalByIdRepository', () => {
 
     it('should handle special characters in goal ID', async () => {
       const specialId = "'; DROP TABLE goals; --";
-      mockQueryOne.mockResolvedValue(null);
+      mockQuery.mockResolvedValue(null);
 
       const result = await repository.execute(specialId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1'),
         [specialId],
       );
@@ -212,7 +217,7 @@ describe('GetGoalByIdRepository', () => {
     it('should handle network timeout error', async () => {
       const timeoutError = new Error('Connection timeout');
       timeoutError.name = 'TimeoutError';
-      mockQueryOne.mockRejectedValue(timeoutError);
+      mockQuery.mockRejectedValue(timeoutError);
 
       const result = await repository.execute(validId);
 
@@ -223,7 +228,7 @@ describe('GetGoalByIdRepository', () => {
 
     it('should handle unknown database error', async () => {
       const unknownError = 'Unknown database error';
-      mockQueryOne.mockRejectedValue(unknownError);
+      mockQuery.mockRejectedValue(unknownError);
 
       const result = await repository.execute(validId);
 
@@ -233,12 +238,12 @@ describe('GetGoalByIdRepository', () => {
     });
 
     it('should call repository only once per execution', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockQuery.mockResolvedValue(null);
 
       await repository.execute(validId);
       await repository.execute(validId);
 
-      expect(mockQueryOne).toHaveBeenCalledTimes(2);
+      expect(mockQuery).toHaveBeenCalledTimes(2);
     });
 
     it('should preserve goal properties in mapping', async () => {
@@ -268,7 +273,10 @@ describe('GetGoalByIdRepository', () => {
         isAchieved: () => false,
       } as Goal;
 
-      mockQueryOne.mockResolvedValue(mockRow);
+      mockQuery.mockResolvedValue({
+        rows: [mockRow],
+        rowCount: 1,
+      });
       jest
         .spyOn(GoalMapper, 'toDomain')
         .mockReturnValue(Either.success(mockGoal));
@@ -309,7 +317,10 @@ describe('GetGoalByIdRepository', () => {
         isAchieved: () => false,
       } as Goal;
 
-      mockQueryOne.mockResolvedValue(mockRow);
+      mockQuery.mockResolvedValue({
+        rows: [mockRow],
+        rowCount: 1,
+      });
       jest
         .spyOn(GoalMapper, 'toDomain')
         .mockReturnValue(Either.success(mockGoal));

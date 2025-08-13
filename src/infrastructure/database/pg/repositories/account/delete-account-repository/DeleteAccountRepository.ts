@@ -15,7 +15,7 @@ export class DeleteAccountRepository implements IDeleteAccountRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      await this.connection.queryOne(query, [accountId]);
+      await this.connection.query(query, [accountId]);
 
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {

@@ -30,8 +30,8 @@ export class AddAccountRepository implements IAddAccountRepository {
         row.updated_at,
       ];
 
-      await this.connection.queryOne(query, params);
-      return Either.success<RepositoryError, void>(undefined);
+      await this.connection.query(query, params);
+      return Either.success<RepositoryError, void>();
     } catch (error) {
       const err = error as Error & { code?: string };
       if (err.code === '23505') {

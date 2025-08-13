@@ -20,9 +20,11 @@ export class CheckAccountDependenciesRepository
         ) as has_transactions
       `;
 
-      const result = await this.connection.queryOne<{
+      const queryResultRow = await this.connection.query<{
         has_transactions: boolean;
       }>(query, [accountId]);
+
+      const result = queryResultRow?.rows[0];
 
       return Either.success<RepositoryError, boolean>(
         result?.has_transactions || false,

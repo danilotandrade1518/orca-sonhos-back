@@ -23,7 +23,6 @@ describe('SaveTransactionRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -61,7 +60,7 @@ describe('SaveTransactionRepository', () => {
 
     it('should update transaction successfully', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(false);
@@ -69,20 +68,20 @@ describe('SaveTransactionRepository', () => {
 
     it('should update existing transaction', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(tx);
-      const query = mockConnection.queryOne.mock.calls[0][0];
+      const query = mockConnection.query.mock.calls[0][0];
       expect(query).toContain('UPDATE transactions SET');
       expect(query).toContain('WHERE id = $1');
     });
 
     it('should call UPDATE with correct parameters', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(tx);
-      const params = mockConnection.queryOne.mock.calls[0][1];
+      const params = mockConnection.query.mock.calls[0][1];
       expect(params).toEqual([
         row.id,
         row.description,
@@ -101,7 +100,7 @@ describe('SaveTransactionRepository', () => {
     it('should return error when db fails', async () => {
       mockMapper.toRow.mockReturnValue({ ...row });
       const err = new Error('db');
-      mockConnection.queryOne.mockRejectedValue(err);
+      mockConnection.query.mockRejectedValue(err);
 
       const result = await repository.execute(tx);
       expect(result.hasError).toBe(true);

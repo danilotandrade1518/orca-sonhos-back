@@ -21,23 +21,24 @@ class TestDomainError extends DomainError {
 
 describe('GetCreditCardRepository', () => {
   let repository: GetCreditCardRepository;
-  let mockConnectionAdapter: IPostgresConnectionAdapter;
-  let mockQueryOne: jest.Mock;
+  let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
 
   const validId = '550e8400-e29b-41d4-a716-446655440001';
   const creditCardId = '550e8400-e29b-41d4-a716-446655440002';
 
   beforeEach(() => {
-    mockQueryOne = jest.fn();
-
-    mockConnectionAdapter = {
+    const mockClient = {
       query: jest.fn(),
-      queryOne: mockQueryOne,
-      transaction: jest.fn(),
-      getClient: jest.fn(),
+      release: jest.fn(),
     };
 
-    repository = new GetCreditCardRepository(mockConnectionAdapter);
+    mockConnection = {
+      query: jest.fn(),
+      transaction: jest.fn(),
+      getClient: jest.fn().mockResolvedValue(mockClient),
+    };
+
+    repository = new GetCreditCardRepository(mockConnection);
   });
 
   afterEach(() => {
@@ -49,7 +50,7 @@ describe('GetCreditCardRepository', () => {
       const mockRow: CreditCardRow = {
         id: creditCardId,
         name: 'Cartão de Crédito Principal',
-        limit: 5000.0,
+        credit_limit: 5000.0,
         closing_day: 15,
         due_day: 10,
         budget_id: '550e8400-e29b-41d4-a716-446655440003',
@@ -70,7 +71,10 @@ describe('GetCreditCardRepository', () => {
         updatedAt: new Date('2024-01-15T10:00:00Z'),
       } as CreditCard;
 
-      mockQueryOne.mockResolvedValue(mockRow);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockRow],
+        rowCount: 1,
+      });
       jest
         .spyOn(CreditCardMapper, 'toDomain')
         .mockReturnValue(Either.success(mockCreditCard));
@@ -79,37 +83,37 @@ describe('GetCreditCardRepository', () => {
 
       expect(result.hasError).toBe(false);
       expect(result.data).toEqual(mockCreditCard);
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
         [validId],
       );
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1 AND is_deleted = false'),
         [validId],
       );
     });
 
     it('should return null when credit card not found', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
         [validId],
       );
     });
 
     it('should filter deleted credit cards', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         [validId],
       );
@@ -117,7 +121,7 @@ describe('GetCreditCardRepository', () => {
 
     it('should return error when database query fails', async () => {
       const databaseError = new Error('Connection timeout');
-      mockQueryOne.mockRejectedValue(databaseError);
+      mockConnection.query.mockRejectedValue(databaseError);
 
       const result = await repository.execute(validId);
 
@@ -130,7 +134,7 @@ describe('GetCreditCardRepository', () => {
       const mockRow: CreditCardRow = {
         id: creditCardId,
         name: 'Invalid Credit Card',
-        limit: -1000.0, // Invalid limit
+        credit_limit: -1000.0, // Invalid limit
         closing_day: 15,
         due_day: 10,
         budget_id: '550e8400-e29b-41d4-a716-446655440003',
@@ -140,7 +144,10 @@ describe('GetCreditCardRepository', () => {
       };
 
       const mappingError = new TestDomainError('Invalid credit card limit');
-      mockQueryOne.mockResolvedValue(mockRow);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockRow],
+        rowCount: 1,
+      });
       jest
         .spyOn(CreditCardMapper, 'toDomain')
         .mockReturnValue(
@@ -156,8 +163,8 @@ describe('GetCreditCardRepository', () => {
       );
     });
 
-    it('should handle undefined database result', async () => {
-      mockQueryOne.mockResolvedValue(undefined);
+    it('should handle null database result', async () => {
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
@@ -166,14 +173,16 @@ describe('GetCreditCardRepository', () => {
     });
 
     it('should use correct SQL query structure', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
 
-      const calledQuery = mockQueryOne.mock.calls[0][0];
+      console.log(mockConnection.query.mock.calls);
+
+      const calledQuery = mockConnection.query.mock.calls[0][0];
       expect(calledQuery).toContain('SELECT');
       expect(calledQuery).toContain(
-        'id, name, limit, closing_day, due_day, budget_id',
+        'id, name, credit_limit, closing_day, due_day, budget_id',
       );
       expect(calledQuery).toContain('is_deleted, created_at, updated_at');
       expect(calledQuery).toContain('FROM credit_cards');
@@ -181,13 +190,13 @@ describe('GetCreditCardRepository', () => {
     });
 
     it('should handle empty credit card ID', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute('');
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1'),
         [''],
       );
@@ -195,13 +204,13 @@ describe('GetCreditCardRepository', () => {
 
     it('should handle special characters in credit card ID', async () => {
       const specialId = "'; DROP TABLE credit_cards; --";
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(specialId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
-      expect(mockQueryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1'),
         [specialId],
       );
@@ -210,7 +219,7 @@ describe('GetCreditCardRepository', () => {
     it('should handle network timeout error', async () => {
       const timeoutError = new Error('Connection timeout');
       timeoutError.name = 'TimeoutError';
-      mockQueryOne.mockRejectedValue(timeoutError);
+      mockConnection.query.mockRejectedValue(timeoutError);
 
       const result = await repository.execute(validId);
 
@@ -221,7 +230,7 @@ describe('GetCreditCardRepository', () => {
 
     it('should handle unknown database error', async () => {
       const unknownError = 'Unknown database error';
-      mockQueryOne.mockRejectedValue(unknownError);
+      mockConnection.query.mockRejectedValue(unknownError);
 
       const result = await repository.execute(validId);
 
@@ -233,19 +242,19 @@ describe('GetCreditCardRepository', () => {
     });
 
     it('should call repository only once per execution', async () => {
-      mockQueryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(validId);
       await repository.execute(validId);
 
-      expect(mockQueryOne).toHaveBeenCalledTimes(2);
+      expect(mockConnection.query).toHaveBeenCalledTimes(2);
     });
 
     it('should preserve credit card properties in mapping', async () => {
       const mockRow: CreditCardRow = {
         id: creditCardId,
         name: 'Cartão Premium',
-        limit: 10000.0,
+        credit_limit: 10000.0,
         closing_day: 20,
         due_day: 15,
         budget_id: '550e8400-e29b-41d4-a716-446655440004',
@@ -266,12 +275,17 @@ describe('GetCreditCardRepository', () => {
         updatedAt: new Date('2024-02-15T14:45:00Z'),
       } as CreditCard;
 
-      mockQueryOne.mockResolvedValue(mockRow);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockRow],
+        rowCount: 1,
+      });
       jest
         .spyOn(CreditCardMapper, 'toDomain')
         .mockReturnValue(Either.success(mockCreditCard));
 
       const result = await repository.execute(validId);
+
+      console.log(result);
 
       expect(result.hasError).toBe(false);
       expect(result.data?.name).toBe('Cartão Premium');

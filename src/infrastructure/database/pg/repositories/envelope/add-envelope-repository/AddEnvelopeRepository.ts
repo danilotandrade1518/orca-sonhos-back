@@ -40,7 +40,7 @@ export class AddEnvelopeRepository implements IAddEnvelopeRepository {
         row.updated_at,
       ];
 
-      await this.connection.queryOne(query, params);
+      await this.connection.query(query, params);
       return Either.success<DomainError, void>(undefined);
     } catch (error) {
       const err = error as Error & { code?: string };

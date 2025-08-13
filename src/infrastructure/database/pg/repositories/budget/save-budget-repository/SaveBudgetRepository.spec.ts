@@ -18,7 +18,6 @@ describe('SaveBudgetRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -51,12 +50,12 @@ describe('SaveBudgetRepository', () => {
 
     it('should save budget successfully', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(budget);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(expect.any(String), [
+      expect(mockConnection.query).toHaveBeenCalledWith(expect.any(String), [
         row.id,
         row.name,
         row.participant_ids,
@@ -67,18 +66,18 @@ describe('SaveBudgetRepository', () => {
 
     it('should update existing budget', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(budget);
 
-      const calledQuery: string = mockConnection.queryOne.mock.calls[0][0];
+      const calledQuery: string = mockConnection.query.mock.calls[0][0];
       expect(calledQuery).toContain('UPDATE budgets SET');
     });
 
     it('should return error when database query fails', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
       const dbError = new Error('DB fail');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(budget);
 
@@ -102,18 +101,18 @@ describe('SaveBudgetRepository', () => {
 
     it('should use correct SQL query', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(budget);
 
       const expected =
         /UPDATE budgets SET[\s\S]*updated_at = \$5[\s\S]*WHERE id = \$1/;
-      expect(mockConnection.queryOne.mock.calls[0][0]).toMatch(expected);
+      expect(mockConnection.query.mock.calls[0][0]).toMatch(expected);
     });
 
     it('should handle non-Error exceptions', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockRejectedValue('string-error');
+      mockConnection.query.mockRejectedValue('string-error');
 
       const result = await repository.execute(budget);
 
@@ -123,13 +122,13 @@ describe('SaveBudgetRepository', () => {
       expect(result.errors[0].cause!.message).toBe('Unknown error');
     });
 
-    it('should call queryOne once', async () => {
+    it('should call query once', async () => {
       mockBudgetMapper.toRow.mockReturnValue({ ...row });
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       await repository.execute(budget);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledTimes(1);
+      expect(mockConnection.query).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -33,7 +33,6 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -83,7 +82,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
       const row = createValidRow(overdueDate);
       const transaction = createValidTransaction();
 
-      mockConnection.query.mockResolvedValue([row]);
+      mockConnection.query.mockResolvedValue({ rows: [row], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.success(transaction));
 
       const result = await repository.execute(referenceDate);
@@ -98,7 +97,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     });
 
     it('should return empty array when no overdue transactions found', async () => {
-      mockConnection.query.mockResolvedValue([]);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       const result = await repository.execute(referenceDate);
 
@@ -107,7 +106,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     });
 
     it('should filter by SCHEDULED status', async () => {
-      mockConnection.query.mockResolvedValue([]);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       await repository.execute(referenceDate);
 
@@ -118,7 +117,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     });
 
     it('should filter by transaction_date < referenceDate', async () => {
-      mockConnection.query.mockResolvedValue([]);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       await repository.execute(referenceDate);
 
@@ -129,7 +128,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     });
 
     it('should exclude deleted transactions', async () => {
-      mockConnection.query.mockResolvedValue([]);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       await repository.execute(referenceDate);
 
@@ -140,7 +139,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     });
 
     it('should order by transaction_date ASC', async () => {
-      mockConnection.query.mockResolvedValue([]);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       await repository.execute(referenceDate);
 
@@ -156,7 +155,10 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
       const transaction1 = createValidTransaction();
       const transaction2 = createValidTransaction();
 
-      mockConnection.query.mockResolvedValue([row1, row2]);
+      mockConnection.query.mockResolvedValue({
+        rows: [row1, row2],
+        rowCount: 2,
+      });
       mockMapper.toDomain
         .mockReturnValueOnce(Either.success(transaction1))
         .mockReturnValueOnce(Either.success(transaction2));
@@ -173,7 +175,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
       const row = createValidRow(new Date('2025-08-07'));
       const mapperError = new TestDomainError('Mapping failed');
 
-      mockConnection.query.mockResolvedValue([row]);
+      mockConnection.query.mockResolvedValue({ rows: [row], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.error(mapperError));
 
       const result = await repository.execute(referenceDate);
@@ -208,7 +210,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     });
 
     it('should use correct SQL query structure', async () => {
-      mockConnection.query.mockResolvedValue([]);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       await repository.execute(referenceDate);
 

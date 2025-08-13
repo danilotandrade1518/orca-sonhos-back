@@ -15,7 +15,7 @@ export class DeleteBudgetRepository implements IDeleteBudgetRepository {
         WHERE id = $1 AND is_deleted = false
       `;
 
-      await this.connection.queryOne(query, [budgetId]);
+      await this.connection.query(query, [budgetId]);
 
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {

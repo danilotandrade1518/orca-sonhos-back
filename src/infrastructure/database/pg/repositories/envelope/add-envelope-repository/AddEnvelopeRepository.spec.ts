@@ -18,7 +18,6 @@ describe('AddEnvelopeRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -53,13 +52,12 @@ describe('AddEnvelopeRepository', () => {
       };
 
       mockMapper.toRow.mockReturnValue(row);
-      mockConnection.queryOne.mockResolvedValue(undefined);
 
       const result = await repository.execute(envelope);
 
       expect(result.hasError).toBe(false);
       expect(mockMapper.toRow).toHaveBeenCalledWith(envelope);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO envelopes'),
         expect.arrayContaining([
           row.id,
@@ -93,7 +91,7 @@ describe('AddEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
       });
-      mockConnection.queryOne.mockRejectedValue(duplicateError);
+      mockConnection.query.mockRejectedValue(duplicateError);
 
       const result = await repository.execute(envelope);
 
@@ -117,7 +115,7 @@ describe('AddEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
       });
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(envelope);
 
@@ -141,7 +139,7 @@ describe('AddEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
       });
-      mockConnection.queryOne.mockRejectedValue(unknownError);
+      mockConnection.query.mockRejectedValue(unknownError);
 
       const result = await repository.execute(envelope);
 
@@ -163,21 +161,20 @@ describe('AddEnvelopeRepository', () => {
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
       });
-      mockConnection.queryOne.mockResolvedValue(undefined);
 
       await repository.execute(envelope);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO envelopes'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining(
           'id, name, monthly_limit, budget_id, category_id',
         ),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)'),
         expect.any(Array),
       );

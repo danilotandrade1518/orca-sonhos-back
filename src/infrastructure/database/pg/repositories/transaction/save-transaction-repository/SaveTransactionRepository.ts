@@ -2,6 +2,7 @@ import { ISaveTransactionRepository } from '@application/contracts/repositories/
 import { RepositoryError } from '@application/shared/errors/RepositoryError';
 import { Transaction } from '@domain/aggregates/transaction/transaction-entity/Transaction';
 import { Either } from '@either';
+
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 import {
   TransactionMapper,
@@ -57,7 +58,7 @@ export class SaveTransactionRepository implements ISaveTransactionRepository {
         row.updated_at,
       ];
 
-      await this.connection.queryOne(query, params);
+      await this.connection.query(query, params);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
       return Either.error(

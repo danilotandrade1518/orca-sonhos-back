@@ -30,7 +30,6 @@ describe('GetEnvelopeRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn(),
     };
@@ -70,21 +69,21 @@ describe('GetEnvelopeRepository', () => {
       const row = createValidRow();
       const envelope = createValidEnvelope();
 
-      mockConnection.queryOne.mockResolvedValue(row);
+      mockConnection.query.mockResolvedValue({ rows: [row], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.success(envelope));
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
       expect(result.data).toBe(envelope);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE id = $1 AND is_deleted = false'),
         [validId],
       );
     });
 
     it('should return null when envelope not found', async () => {
-      mockConnection.queryOne.mockResolvedValue(undefined);
+      mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
       const result = await repository.execute(validId);
 
@@ -93,11 +92,9 @@ describe('GetEnvelopeRepository', () => {
     });
 
     it('should exclude deleted envelopes', async () => {
-      mockConnection.queryOne.mockResolvedValue(undefined);
-
       await repository.execute(validId);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('is_deleted = false'),
         expect.any(Array),
       );
@@ -107,7 +104,7 @@ describe('GetEnvelopeRepository', () => {
       const row = createValidRow();
       const mapperError = new TestDomainError('Mapping failed');
 
-      mockConnection.queryOne.mockResolvedValue(row);
+      mockConnection.query.mockResolvedValue({ rows: [row], rowCount: 1 });
       mockMapper.toDomain.mockReturnValue(Either.error(mapperError));
 
       const result = await repository.execute(validId);
@@ -118,7 +115,7 @@ describe('GetEnvelopeRepository', () => {
 
     it('should return error on database failure', async () => {
       const dbError = new Error('Database connection failed');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(validId);
 
@@ -129,7 +126,7 @@ describe('GetEnvelopeRepository', () => {
 
     it('should handle unknown errors', async () => {
       const unknownError = 'Unknown error';
-      mockConnection.queryOne.mockRejectedValue(unknownError);
+      mockConnection.query.mockRejectedValue(unknownError);
 
       const result = await repository.execute(validId);
 
@@ -139,25 +136,23 @@ describe('GetEnvelopeRepository', () => {
     });
 
     it('should use correct SQL structure', async () => {
-      mockConnection.queryOne.mockResolvedValue(undefined);
-
       await repository.execute(validId);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('FROM envelopes'),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining(
           'id, name, monthly_limit, budget_id, category_id',
         ),
         expect.any(Array),
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('current_balance, is_deleted'),
         expect.any(Array),
       );

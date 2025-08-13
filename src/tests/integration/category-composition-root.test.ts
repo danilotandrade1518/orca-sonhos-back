@@ -56,11 +56,11 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         ['Integration Test Category'],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].name).toBe('Integration Test Category');
-      expect(dbResult[0].budget_id).toBe(testBudgetId);
-      expect(dbResult[0].type).toBe('EXPENSE');
-      expect(dbResult[0].is_deleted).toBe(false);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].name).toBe('Integration Test Category');
+      expect(dbResult.rows[0].budget_id).toBe(testBudgetId);
+      expect(dbResult.rows[0].type).toBe('EXPENSE');
+      expect(dbResult.rows[0].is_deleted).toBe(false);
     });
 
     it('should handle validation errors', async () => {
@@ -121,9 +121,9 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         [categoryId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].name).toBe('Updated Category Name');
-      expect(dbResult[0].type).toBe('INCOME');
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].name).toBe('Updated Category Name');
+      expect(dbResult.rows[0].type).toBe('INCOME');
     });
 
     it('should handle invalid category ID', async () => {
@@ -182,8 +182,8 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         [categoryId],
       );
 
-      expect(dbResult).toHaveLength(1);
-      expect(dbResult[0].is_deleted).toBe(true);
+      expect(dbResult.rows).toHaveLength(1);
+      expect(dbResult.rows[0].is_deleted).toBe(true);
     });
 
     it('should handle invalid category ID', async () => {
@@ -243,8 +243,8 @@ describe('CategoryCompositionRoot Integration Tests', () => {
     it('should connect to test database successfully', async () => {
       const result = await connection.query('SELECT 1 as test');
 
-      expect(result).toHaveLength(1);
-      expect(result[0].test).toBe(1);
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].test).toBe(1);
     });
 
     it('should create and query categories table', async () => {
@@ -260,9 +260,9 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         ORDER BY ordinal_position
       `);
 
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.rows.length).toBeGreaterThan(0);
 
-      const columnNames = result.map((row) => row.column_name);
+      const columnNames = result.rows.map((row) => row.column_name);
       expect(columnNames).toContain('id');
       expect(columnNames).toContain('name');
       expect(columnNames).toContain('budget_id');
@@ -334,7 +334,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         ['Despesa Test'],
       );
 
-      expect(dbResult[0].type).toBe('EXPENSE');
+      expect(dbResult.rows[0].type).toBe('EXPENSE');
     });
 
     it('should create INCOME category successfully', async () => {
@@ -353,7 +353,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         ['Receita Test'],
       );
 
-      expect(dbResult[0].type).toBe('INCOME');
+      expect(dbResult.rows[0].type).toBe('INCOME');
     });
 
     it('should update category type from EXPENSE to INCOME', async () => {
@@ -386,7 +386,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         [categoryId],
       );
 
-      expect(dbResult[0].type).toBe('INCOME');
+      expect(dbResult.rows[0].type).toBe('INCOME');
     });
   });
 });

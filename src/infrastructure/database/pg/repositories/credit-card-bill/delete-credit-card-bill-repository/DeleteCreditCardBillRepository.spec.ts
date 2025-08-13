@@ -10,7 +10,6 @@ describe('DeleteCreditCardBillRepository', () => {
 
   beforeEach(() => {
     mockConnection = {
-      queryOne: jest.fn(),
       query: jest.fn(),
       getClient: jest.fn(),
       transaction: jest.fn(),
@@ -23,12 +22,15 @@ describe('DeleteCreditCardBillRepository', () => {
 
     it('should delete credit card bill successfully', async () => {
       const mockResult = { rowCount: 1 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockResult],
+        rowCount: 1,
+      });
 
       const result = await repository.execute(validId);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_card_bills'),
         [validId],
       );
@@ -36,11 +38,14 @@ describe('DeleteCreditCardBillRepository', () => {
 
     it('should call UPDATE with correct SQL structure for soft delete', async () => {
       const mockResult = { rowCount: 1 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockResult],
+        rowCount: 1,
+      });
 
       await repository.execute(validId);
 
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringMatching(
           /UPDATE\s+credit_card_bills\s+SET\s+is_deleted\s*=\s*true,\s*updated_at\s*=\s*NOW\(\)\s+WHERE\s+id\s*=\s*\$1\s+AND\s+is_deleted\s*=\s*false/i,
         ),
@@ -49,8 +54,10 @@ describe('DeleteCreditCardBillRepository', () => {
     });
 
     it('should return error when credit card bill not found', async () => {
-      const mockResult = { rowCount: 0 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+      });
 
       const result = await repository.execute(validId);
 
@@ -62,7 +69,7 @@ describe('DeleteCreditCardBillRepository', () => {
     });
 
     it('should return error when result is null', async () => {
-      mockConnection.queryOne.mockResolvedValue(null);
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
@@ -73,8 +80,8 @@ describe('DeleteCreditCardBillRepository', () => {
       );
     });
 
-    it('should return error when result is undefined', async () => {
-      mockConnection.queryOne.mockResolvedValue(undefined);
+    it('should return error when result is null', async () => {
+      mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute(validId);
 
@@ -86,8 +93,10 @@ describe('DeleteCreditCardBillRepository', () => {
     });
 
     it('should handle empty string id', async () => {
-      const mockResult = { rowCount: 0 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+      });
 
       const result = await repository.execute('');
 
@@ -99,8 +108,10 @@ describe('DeleteCreditCardBillRepository', () => {
     });
 
     it('should handle whitespace-only id', async () => {
-      const mockResult = { rowCount: 0 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+      });
 
       const result = await repository.execute('   ');
 
@@ -112,8 +123,10 @@ describe('DeleteCreditCardBillRepository', () => {
     });
 
     it('should handle non-existent credit card bill id', async () => {
-      const mockResult = { rowCount: 0 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+      });
 
       const result = await repository.execute('non-existent-id');
 
@@ -125,8 +138,10 @@ describe('DeleteCreditCardBillRepository', () => {
     });
 
     it('should handle malformed credit card bill id', async () => {
-      const mockResult = { rowCount: 0 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+      });
 
       const result = await repository.execute('invalid-uuid-format');
 
@@ -139,7 +154,7 @@ describe('DeleteCreditCardBillRepository', () => {
 
     it('should return error when database query fails', async () => {
       const dbError = new Error('Database connection failed');
-      mockConnection.queryOne.mockRejectedValue(dbError);
+      mockConnection.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(validId);
 
@@ -153,7 +168,7 @@ describe('DeleteCreditCardBillRepository', () => {
 
     it('should preserve error details when database operation fails', async () => {
       const originalError = new Error('Constraint violation');
-      mockConnection.queryOne.mockRejectedValue(originalError);
+      mockConnection.query.mockRejectedValue(originalError);
 
       const result = await repository.execute(validId);
 
@@ -167,8 +182,10 @@ describe('DeleteCreditCardBillRepository', () => {
 
     it('should handle very long credit card bill id', async () => {
       const longId = 'a'.repeat(1000);
-      const mockResult = { rowCount: 0 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+      });
 
       const result = await repository.execute(longId);
 
@@ -177,7 +194,7 @@ describe('DeleteCreditCardBillRepository', () => {
       expect(result.errors[0].message).toBe(
         'Credit card bill not found or already deleted',
       );
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_card_bills'),
         [longId],
       );
@@ -186,12 +203,15 @@ describe('DeleteCreditCardBillRepository', () => {
     it('should handle special characters in credit card bill id', async () => {
       const specialId = 'bill-id-with-special-chars-!@#$%';
       const mockResult = { rowCount: 1 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockResult],
+        rowCount: 1,
+      });
 
       const result = await repository.execute(specialId);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.queryOne).toHaveBeenCalledWith(
+      expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_card_bills'),
         [specialId],
       );
@@ -199,7 +219,10 @@ describe('DeleteCreditCardBillRepository', () => {
 
     it('should handle successful deletion with exactly one row affected', async () => {
       const mockResult = { rowCount: 1 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockResult],
+        rowCount: 1,
+      });
 
       const result = await repository.execute(validId);
 
@@ -208,7 +231,10 @@ describe('DeleteCreditCardBillRepository', () => {
 
     it('should return success result with correct type', async () => {
       const mockResult = { rowCount: 1 };
-      mockConnection.queryOne.mockResolvedValue(mockResult);
+      mockConnection.query.mockResolvedValue({
+        rows: [mockResult],
+        rowCount: 1,
+      });
 
       const result = await repository.execute(validId);
 

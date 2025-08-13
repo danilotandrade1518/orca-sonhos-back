@@ -17,7 +17,7 @@ export class DeleteTransactionRepository
         WHERE id = $1 AND is_deleted = false
       `;
 
-      await this.connection.queryOne(query, [id]);
+      await this.connection.query(query, [id]);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
       return Either.error(

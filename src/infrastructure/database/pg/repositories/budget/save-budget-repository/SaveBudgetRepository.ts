@@ -43,7 +43,7 @@ export class SaveBudgetRepository implements ISaveBudgetRepository {
         row.updated_at,
       ];
 
-      await this.connection.queryOne(query, params);
+      await this.connection.query(query, params);
       return Either.success<RepositoryError, void>(undefined);
     } catch (error) {
       return Either.error(

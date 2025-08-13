@@ -37,7 +37,6 @@ describe('TransferBetweenEnvelopesUnitOfWork', () => {
     mockPostgresConnectionAdapter = {
       getClient: jest.fn().mockResolvedValue(mockClient),
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
     } as jest.Mocked<IPostgresConnectionAdapter>;
 
@@ -206,7 +205,7 @@ describe('TransferBetweenEnvelopesUnitOfWork', () => {
 
       const commitError = new Error('COMMIT failed');
       mockClient.query
-        .mockResolvedValueOnce([]) // BEGIN
+        .mockResolvedValueOnce(null) // BEGIN
         .mockRejectedValue(commitError); // COMMIT
 
       const result = await unitOfWork.executeTransfer({
@@ -234,7 +233,7 @@ describe('TransferBetweenEnvelopesUnitOfWork', () => {
       );
 
       mockClient.query
-        .mockResolvedValueOnce([]) // BEGIN
+        .mockResolvedValueOnce(null) // BEGIN
         .mockRejectedValue(rollbackError); // ROLLBACK
 
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -263,7 +262,7 @@ describe('TransferBetweenEnvelopesUnitOfWork', () => {
 
       mockClient.query.mockImplementation((sql: string) => {
         executionOrder.push(`client.query: ${sql}`);
-        return Promise.resolve([]);
+        return Promise.resolve(null);
       });
 
       mockSaveEnvelopeRepository.executeWithClient.mockImplementation(

@@ -20,12 +20,12 @@ export class CheckBudgetDependenciesRepository
         ) as has_accounts
       `;
 
-      const result = await this.connection.queryOne<{ has_accounts: boolean }>(
+      const result = await this.connection.query<{ has_accounts: boolean }>(
         query,
         [budgetId],
       );
       return Either.success<RepositoryError, boolean>(
-        result?.has_accounts || false,
+        result?.rows[0]?.has_accounts || false,
       );
     } catch (error) {
       return Either.error(
@@ -48,11 +48,11 @@ export class CheckBudgetDependenciesRepository
         ) as has_transactions
       `;
 
-      const result = await this.connection.queryOne<{
+      const result = await this.connection.query<{
         has_transactions: boolean;
       }>(query, [budgetId]);
       return Either.success<RepositoryError, boolean>(
-        result?.has_transactions || false,
+        result?.rows[0]?.has_transactions || false,
       );
     } catch (error) {
       return Either.error(

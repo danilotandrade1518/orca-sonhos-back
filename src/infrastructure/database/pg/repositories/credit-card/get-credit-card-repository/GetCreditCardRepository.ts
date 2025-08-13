@@ -18,13 +18,17 @@ export class GetCreditCardRepository implements IGetCreditCardRepository {
     try {
       const query = `
         SELECT 
-          id, name, limit, closing_day, due_day, budget_id,
+          id, name, credit_limit, closing_day, due_day, budget_id,
           is_deleted, created_at, updated_at
         FROM credit_cards 
         WHERE id = $1 AND is_deleted = false
       `;
 
-      const result = await this.connection.queryOne<CreditCardRow>(query, [id]);
+      const queryResultRow = await this.connection.query<CreditCardRow>(query, [
+        id,
+      ]);
+
+      const result = queryResultRow?.rows[0];
 
       if (!result) {
         return Either.success<RepositoryError, CreditCard | null>(null);

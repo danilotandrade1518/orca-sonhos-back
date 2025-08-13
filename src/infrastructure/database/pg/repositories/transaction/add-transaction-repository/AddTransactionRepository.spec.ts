@@ -28,7 +28,6 @@ describe('AddTransactionRepository', () => {
 
     mockConnection = {
       query: jest.fn(),
-      queryOne: jest.fn(),
       transaction: jest.fn(),
       getClient: jest.fn().mockResolvedValue(mockClient),
     };

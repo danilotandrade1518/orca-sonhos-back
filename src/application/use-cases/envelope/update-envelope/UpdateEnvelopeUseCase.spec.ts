@@ -1,5 +1,4 @@
 import { Envelope } from '@domain/aggregates/envelope/envelope-entity/Envelope';
-import { EnvelopeLimit } from '@domain/aggregates/envelope/value-objects/envelope-limit/EnvelopeLimit';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
 import { EnvelopeNotFoundError } from '../../../shared/errors/EnvelopeNotFoundError';
