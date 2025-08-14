@@ -46,10 +46,10 @@ describe('GetEnvelopeRepository', () => {
     const createValidRow = (): EnvelopeRow => ({
       id: validId,
       name: 'Test Envelope',
-      monthly_limit: '100.00',
+      monthly_limit: 10000,
       budget_id: budgetId,
       category_id: categoryId,
-      current_balance: '50.00',
+      current_balance: 5000,
       is_deleted: false,
       created_at: new Date(),
       updated_at: new Date(),

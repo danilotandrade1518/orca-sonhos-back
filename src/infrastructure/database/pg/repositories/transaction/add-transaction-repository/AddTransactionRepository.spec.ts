@@ -51,7 +51,7 @@ describe('AddTransactionRepository', () => {
     const row: TransactionRow = {
       id: tx.id,
       description: tx.description,
-      amount: '10.00',
+      amount: 1000,
       type: tx.type,
       account_id: tx.accountId,
       category_id: tx.categoryId,

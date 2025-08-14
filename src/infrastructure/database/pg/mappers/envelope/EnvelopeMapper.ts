@@ -5,10 +5,10 @@ import { Either } from '@either';
 export interface EnvelopeRow {
   id: string;
   name: string;
-  monthly_limit: string;
+  monthly_limit: number;
   budget_id: string;
   category_id: string;
-  current_balance: string;
+  current_balance: number;
   is_deleted: boolean;
   created_at: Date;
   updated_at: Date;
@@ -16,8 +16,8 @@ export interface EnvelopeRow {
 
 export class EnvelopeMapper {
   static toDomain(row: EnvelopeRow): Either<DomainError, Envelope> {
-    const monthlyLimit = Math.round(parseFloat(row.monthly_limit) * 100);
-    const currentBalance = Math.round(parseFloat(row.current_balance) * 100);
+    const monthlyLimit = row.monthly_limit;
+    const currentBalance = row.current_balance;
 
     return Envelope.restore({
       id: row.id,
@@ -36,10 +36,10 @@ export class EnvelopeMapper {
     return {
       id: envelope.id,
       name: envelope.name,
-      monthly_limit: (envelope.monthlyLimit / 100).toFixed(2),
+      monthly_limit: envelope.monthlyLimit,
       budget_id: envelope.budgetId,
       category_id: envelope.categoryId,
-      current_balance: (envelope.currentBalance / 100).toFixed(2),
+      current_balance: envelope.currentBalance,
       is_deleted: envelope.isDeleted,
       created_at: envelope.createdAt,
       updated_at: envelope.updatedAt,

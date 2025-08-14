@@ -23,7 +23,7 @@ export class CreditCardBillMapper {
       creditCardId: row.credit_card_id,
       closingDate: row.closing_date,
       dueDate: row.due_date,
-      amount: row.amount,
+      amount: Number(row.amount),
       status: row.status,
       paidAt: row.paid_at,
       isDeleted: row.is_deleted,

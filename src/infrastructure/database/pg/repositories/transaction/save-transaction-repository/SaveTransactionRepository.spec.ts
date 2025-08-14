@@ -46,7 +46,7 @@ describe('SaveTransactionRepository', () => {
     const row: TransactionRow = {
       id: tx.id,
       description: tx.description,
-      amount: '20.00',
+      amount: 20000,
       type: tx.type,
       account_id: tx.accountId,
       category_id: tx.categoryId,

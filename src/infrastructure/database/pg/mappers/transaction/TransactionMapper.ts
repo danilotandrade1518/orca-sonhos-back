@@ -7,7 +7,7 @@ import { Either } from '@either';
 export interface TransactionRow {
   id: string;
   description: string;
-  amount: string;
+  amount: number;
   type: string;
   account_id: string;
   category_id: string;
@@ -21,12 +21,10 @@ export interface TransactionRow {
 
 export class TransactionMapper {
   static toDomain(row: TransactionRow): Either<DomainError, Transaction> {
-    const amount = Math.round(parseFloat(row.amount) * 100);
-
     return Transaction.restore({
       id: row.id,
       description: row.description,
-      amount,
+      amount: row.amount,
       type: row.type as TransactionTypeEnum,
       accountId: row.account_id,
       categoryId: row.category_id,
@@ -43,7 +41,7 @@ export class TransactionMapper {
     return {
       id: transaction.id,
       description: transaction.description,
-      amount: (transaction.amount / 100).toFixed(2),
+      amount: transaction.amount,
       type: transaction.type,
       account_id: transaction.accountId,
       category_id: transaction.categoryId || null,

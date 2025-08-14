@@ -13,10 +13,10 @@ describe('EnvelopeMapper', () => {
       const row: EnvelopeRow = {
         id: validId,
         name: 'Test Envelope',
-        monthly_limit: '100.00',
+        monthly_limit: 10000,
         budget_id: budgetId,
         category_id: categoryId,
-        current_balance: '50.00',
+        current_balance: 5000,
         is_deleted: false,
         created_at: new Date('2025-01-01'),
         updated_at: new Date('2025-01-02'),
@@ -40,10 +40,10 @@ describe('EnvelopeMapper', () => {
       const row: EnvelopeRow = {
         id: validId,
         name: 'Test Envelope',
-        monthly_limit: '1.50',
+        monthly_limit: 150,
         budget_id: budgetId,
         category_id: categoryId,
-        current_balance: '0.99',
+        current_balance: 99,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -60,10 +60,10 @@ describe('EnvelopeMapper', () => {
       const row: EnvelopeRow = {
         id: 'invalid-id',
         name: '', // Invalid name
-        monthly_limit: '100.00',
+        monthly_limit: 10000,
         budget_id: budgetId,
         category_id: categoryId,
-        current_balance: '50.00',
+        current_balance: 5000,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -88,10 +88,10 @@ describe('EnvelopeMapper', () => {
 
       expect(result.id).toBe(envelope.id);
       expect(result.name).toBe('Test Envelope');
-      expect(result.monthly_limit).toBe('100.00');
+      expect(result.monthly_limit).toBe(10000);
       expect(result.budget_id).toBe(envelope.budgetId);
       expect(result.category_id).toBe(envelope.categoryId);
-      expect(result.current_balance).toBe('0.00'); // New envelope starts with 0 balance
+      expect(result.current_balance).toBe(0);
       expect(result.is_deleted).toBe(false);
       expect(result.created_at).toBeInstanceOf(Date);
       expect(result.updated_at).toBeInstanceOf(Date);
@@ -107,8 +107,8 @@ describe('EnvelopeMapper', () => {
 
       const result = EnvelopeMapper.toRow(envelope);
 
-      expect(result.monthly_limit).toBe('1.50');
-      expect(result.current_balance).toBe('0.00');
+      expect(result.monthly_limit).toBe(150);
+      expect(result.current_balance).toBe(0);
     });
   });
 });

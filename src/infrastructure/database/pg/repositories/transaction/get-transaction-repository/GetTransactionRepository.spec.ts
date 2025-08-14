@@ -44,7 +44,7 @@ describe('GetTransactionRepository', () => {
     const row: TransactionRow = {
       id: validId,
       description: 'Test',
-      amount: '20.00',
+      amount: 20000,
       type: 'EXPENSE',
       account_id: EntityId.create().value!.id,
       category_id: EntityId.create().value!.id,

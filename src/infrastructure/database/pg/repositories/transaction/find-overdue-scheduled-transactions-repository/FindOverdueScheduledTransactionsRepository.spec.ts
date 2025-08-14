@@ -51,7 +51,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     const createValidRow = (transactionDate: Date): TransactionRow => ({
       id: validId,
       description: 'Overdue transaction',
-      amount: '50.00',
+      amount: 5000,
       type: 'EXPENSE',
       account_id: accountId,
       category_id: categoryId,

@@ -11,7 +11,7 @@ describe('TransactionMapper', () => {
       const row: TransactionRow = {
         id: EntityId.create().value!.id,
         description: 'Test',
-        amount: '100.50',
+        amount: 10050,
         type: 'EXPENSE',
         account_id: EntityId.create().value!.id,
         category_id: EntityId.create().value!.id,
@@ -37,7 +37,7 @@ describe('TransactionMapper', () => {
       const row: TransactionRow = {
         id: 'invalid',
         description: 'Te',
-        amount: 'abc',
+        amount: -100,
         type: 'WRONG',
         account_id: 'invalid',
         category_id: 'invalid',
@@ -69,7 +69,7 @@ describe('TransactionMapper', () => {
 
       const row = TransactionMapper.toRow(tx);
       expect(row.id).toBe(tx.id);
-      expect(row.amount).toBe('123.45');
+      expect(row.amount).toBe(12345);
       expect(row.type).toBe('INCOME');
       expect(row.category_id).toBe(tx.categoryId);
       expect(row.status).toBe('SCHEDULED');
