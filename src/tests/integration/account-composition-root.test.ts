@@ -29,6 +29,7 @@ describe('AccountCompositionRoot Integration Tests', () => {
     await TestContainersSetup.resetDatabase();
 
     testUserId = EntityId.create().value!.id;
+
     // Seed budget
     testBudgetId = EntityId.create().value!.id;
     await connection.query(
