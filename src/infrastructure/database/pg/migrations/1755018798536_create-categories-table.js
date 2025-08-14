@@ -9,7 +9,7 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
   // Create enum type for category types
-  pgm.createType('category_type_enum', ['INCOME', 'EXPENSE']);
+  pgm.createType('category_type_enum', ['INCOME', 'EXPENSE', 'TRANSFER']);
 
   pgm.createTable('categories', {
     id: {

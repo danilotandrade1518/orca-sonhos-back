@@ -14,6 +14,8 @@ import { SaveAccountRepository } from '@infrastructure/database/pg/repositories/
 import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
 import { IReconcileAccountUnitOfWork } from '@application/contracts/unit-of-works/IReconcileAccountUnitOfWork';
 import { ITransferBetweenAccountsUnitOfWork } from '@application/contracts/unit-of-works/ITransferBetweenAccountsUnitOfWork';
+import { ReconcileAccountUnitOfWork } from '@infrastructure/database/pg/unit-of-works/reconcile-account/ReconcileAccountUnitOfWork';
+import { TransferBetweenAccountsUnitOfWork } from '@infrastructure/database/pg/unit-of-works/transfer-between-accounts/TransferBetweenAccountsUnitOfWork';
 
 import { makeCreateAccountUseCase } from '../factories/use-cases/account/make-create-account-use-case';
 import { makeDeleteAccountUseCase } from '../factories/use-cases/account/make-delete-account-use-case';
@@ -22,14 +24,23 @@ import { makeReconcileAccountUseCase } from '../factories/use-cases/account/make
 import { makeTransferBetweenAccountsUseCase } from '../factories/use-cases/account/make-transfer-between-accounts-use-case';
 
 export class AccountCompositionRoot {
+  private readonly reconcileAccountUnitOfWork: IReconcileAccountUnitOfWork;
+  private readonly transferUnitOfWork: ITransferBetweenAccountsUnitOfWork;
+
   constructor(
     private readonly connection: IPostgresConnectionAdapter,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly reconcileAccountUnitOfWork: IReconcileAccountUnitOfWork,
-    private readonly transferUnitOfWork: ITransferBetweenAccountsUnitOfWork,
     private readonly adjustmentCategoryId: string,
     private readonly transferCategoryId: string,
-  ) {}
+  ) {
+    // Instantiate production unit of works
+    this.reconcileAccountUnitOfWork = new ReconcileAccountUnitOfWork(
+      this.connection,
+    );
+    this.transferUnitOfWork = new TransferBetweenAccountsUnitOfWork(
+      this.connection,
+    );
+  }
 
   private createAddAccountRepository(): AddAccountRepository {
     return new AddAccountRepository(this.connection);

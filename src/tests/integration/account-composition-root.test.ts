@@ -4,8 +4,6 @@ import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
 import { AccountCompositionRoot } from '../../main/composition/AccountCompositionRoot';
 import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
-import { MockReconcileAccountUnitOfWork } from './setup/mock-reconcile-account-unit-of-work';
-import { MockTransferBetweenAccountsUnitOfWork } from './setup/mock-transfer-between-accounts-unit-of-work';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 
 let testBudgetId: string;
@@ -15,25 +13,12 @@ describe('AccountCompositionRoot Integration Tests', () => {
   let compositionRoot: AccountCompositionRoot;
   let connection: PostgresConnectionAdapter;
   let authService: MockBudgetAuthorizationService;
-  let reconcileUnitOfWork: MockReconcileAccountUnitOfWork;
-  let transferUnitOfWork: MockTransferBetweenAccountsUnitOfWork;
-  const adjustmentCategoryId = EntityId.create().value!.id;
-  const transferCategoryId = EntityId.create().value!.id;
+  let transferCategoryId: string;
+  let adjustmentCategoryId: string;
 
   beforeAll(async () => {
     connection = await TestContainersSetup.setup();
     authService = new MockBudgetAuthorizationService();
-    reconcileUnitOfWork = new MockReconcileAccountUnitOfWork();
-    transferUnitOfWork = new MockTransferBetweenAccountsUnitOfWork();
-
-    compositionRoot = new AccountCompositionRoot(
-      connection,
-      authService,
-      reconcileUnitOfWork,
-      transferUnitOfWork,
-      adjustmentCategoryId,
-      transferCategoryId,
-    );
   }, 60000);
 
   afterAll(async () => {
@@ -43,11 +28,9 @@ describe('AccountCompositionRoot Integration Tests', () => {
   beforeEach(async () => {
     await TestContainersSetup.resetDatabase();
 
-    // Generate fresh IDs for each test
-    testBudgetId = EntityId.create().value!.id;
     testUserId = EntityId.create().value!.id;
-
-    // Create a budget in the database first to satisfy foreign key constraint
+    // Seed budget
+    testBudgetId = EntityId.create().value!.id;
     await connection.query(
       `
       INSERT INTO budgets (id, name, owner_id, type, created_at, updated_at)
@@ -56,8 +39,31 @@ describe('AccountCompositionRoot Integration Tests', () => {
       [testBudgetId, 'Test Budget', testUserId, 'PERSONAL'],
     );
 
+    // Seed adjustment category
+    adjustmentCategoryId = EntityId.create().value!.id;
+    await connection.query(
+      `INSERT INTO categories (id, name, type, budget_id, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, NOW(), NOW())`,
+      [adjustmentCategoryId, 'Adjustment', 'INCOME', testBudgetId],
+    );
+
+    // Seed transfer category
+    transferCategoryId = EntityId.create().value!.id;
+    await connection.query(
+      `INSERT INTO categories (id, name, type, budget_id, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, NOW(), NOW())`,
+      [transferCategoryId, 'Transfer', 'TRANSFER', testBudgetId],
+    );
+
     authService.clearPermissions();
     authService.setUserPermissions(testUserId, [testBudgetId]);
+
+    compositionRoot = new AccountCompositionRoot(
+      connection,
+      authService,
+      adjustmentCategoryId,
+      transferCategoryId,
+    );
   });
 
   describe('createCreateAccountUseCase', () => {
@@ -122,7 +128,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
     let accountId: string;
 
     beforeEach(async () => {
-      // Create an account first
       const createUseCase = compositionRoot.createCreateAccountUseCase();
       const createResult = await createUseCase.execute({
         userId: testUserId,
@@ -174,7 +179,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
     let accountId: string;
 
     beforeEach(async () => {
-      // Create an account first
       const createUseCase = compositionRoot.createCreateAccountUseCase();
       const createResult = await createUseCase.execute({
         userId: testUserId,
@@ -224,7 +228,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
     let accountId: string;
 
     beforeEach(async () => {
-      // Create an account first
       const createUseCase = compositionRoot.createCreateAccountUseCase();
       const createResult = await createUseCase.execute({
         userId: testUserId,
@@ -245,11 +248,11 @@ describe('AccountCompositionRoot Integration Tests', () => {
         userId: testUserId,
         budgetId: testBudgetId,
         accountId: accountId,
-        realBalance: 950, // Difference of -50
+        realBalance: 950,
       });
 
+      console.log(result.errors);
       expect(result.hasError).toBe(false);
-      expect(reconcileUnitOfWork.executeCallCount).toBe(1);
     });
 
     it('should handle unauthorized reconcile attempts', async () => {
@@ -272,7 +275,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
     let destinationAccountId: string;
 
     beforeEach(async () => {
-      // Create source account
       const createUseCase = compositionRoot.createCreateAccountUseCase();
       const sourceResult = await createUseCase.execute({
         userId: testUserId,
@@ -285,7 +287,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       expect(sourceResult.hasError).toBe(false);
       sourceAccountId = sourceResult.data!.id;
 
-      // Create destination account
       const destinationResult = await createUseCase.execute({
         userId: testUserId,
         name: 'Destination Account',
@@ -310,8 +311,8 @@ describe('AccountCompositionRoot Integration Tests', () => {
         description: 'Integration test transfer',
       });
 
+      console.log(result.errors);
       expect(result.hasError).toBe(false);
-      expect(transferUnitOfWork.executeCallCount).toBe(1);
     });
 
     it('should handle unauthorized transfer attempts', async () => {

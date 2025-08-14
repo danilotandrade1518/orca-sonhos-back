@@ -9,7 +9,13 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
   // Create enum types for transaction status and type
-  pgm.createType('transaction_status_enum', ['SCHEDULED', 'EXECUTED', 'CANCELLED']);
+  pgm.createType('transaction_status_enum', [
+    'SCHEDULED',
+    'COMPLETED',
+    'CANCELLED',
+    'OVERDUE',
+    'LATE',
+  ]);
   pgm.createType('transaction_type_enum', ['INCOME', 'EXPENSE', 'TRANSFER']);
 
   pgm.createTable('transactions', {
@@ -106,15 +112,21 @@ exports.up = (pgm) => {
   pgm.createIndex('transactions', ['account_id', 'transaction_date']);
   pgm.createIndex('transactions', ['budget_id', 'transaction_date']);
   pgm.createIndex('transactions', ['status', 'transaction_date']);
-  
+
   // Add constraints for business rules
-  pgm.addConstraint('transactions', 'transactions_amount_check', 
-    'CHECK (amount > 0)');
-  
+  pgm.addConstraint(
+    'transactions',
+    'transactions_amount_check',
+    'CHECK (amount > 0)',
+  );
+
   // Ensure cancellation fields are consistent
-  pgm.addConstraint('transactions', 'transactions_cancellation_check',
-    'CHECK ((status = \'CANCELLED\' AND cancellation_reason IS NOT NULL AND cancelled_at IS NOT NULL) OR ' +
-    '(status != \'CANCELLED\' AND cancellation_reason IS NULL AND cancelled_at IS NULL))');
+  pgm.addConstraint(
+    'transactions',
+    'transactions_cancellation_check',
+    "CHECK ((status = 'CANCELLED' AND cancellation_reason IS NOT NULL AND cancelled_at IS NOT NULL) OR " +
+      "(status != 'CANCELLED' AND cancellation_reason IS NULL AND cancelled_at IS NULL))",
+  );
 };
 
 /**

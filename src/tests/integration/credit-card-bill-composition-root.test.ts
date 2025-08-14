@@ -1,7 +1,6 @@
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
-import { PayCreditCardBillUnitOfWork } from '@infrastructure/database/pg/unit-of-works/pay-credit-card-bill/PayCreditCardBillUnitOfWork';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
 import { CreditCardBillCompositionRoot } from '../../main/composition/CreditCardBillCompositionRoot';
@@ -25,12 +24,10 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
     connection = await TestContainersSetup.setup();
 
     authService = new MockBudgetAuthorizationService();
-    const payUnitOfWork = new PayCreditCardBillUnitOfWork(connection);
 
     billCompositionRoot = new CreditCardBillCompositionRoot(
       connection,
       authService,
-      payUnitOfWork,
     );
     creditCardCompositionRoot = new CreditCardCompositionRoot(connection);
   }, 60000);

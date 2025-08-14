@@ -1,32 +1,36 @@
-import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
-import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
 import { IPayCreditCardBillUnitOfWork } from '@application/contracts/unit-of-works/IPayCreditCardBillUnitOfWork';
-
-import { AddCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/add-credit-card-bill-repository/AddCreditCardBillRepository';
-import { GetCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/get-credit-card-bill-repository/GetCreditCardBillRepository';
-import { SaveCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/save-credit-card-bill-repository/SaveCreditCardBillRepository';
-import { DeleteCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/delete-credit-card-bill-repository/DeleteCreditCardBillRepository';
-import { GetAccountRepository } from '@infrastructure/database/pg/repositories/account/get-account-repository/GetAccountRepository';
-import { GetCreditCardRepository } from '@infrastructure/database/pg/repositories/credit-card/get-credit-card-repository/GetCreditCardRepository';
-
+import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
 import { CreateCreditCardBillUseCase } from '@application/use-cases/credit-card-bill/create-credit-card-bill/CreateCreditCardBillUseCase';
-import { UpdateCreditCardBillUseCase } from '@application/use-cases/credit-card-bill/update-credit-card-bill/UpdateCreditCardBillUseCase';
 import { DeleteCreditCardBillUseCase } from '@application/use-cases/credit-card-bill/delete-credit-card-bill/DeleteCreditCardBillUseCase';
 import { PayCreditCardBillUseCase } from '@application/use-cases/credit-card-bill/pay-credit-card-bill/PayCreditCardBillUseCase';
 import { ReopenCreditCardBillUseCase } from '@application/use-cases/credit-card-bill/reopen-bill/ReopenCreditCardBillUseCase';
+import { UpdateCreditCardBillUseCase } from '@application/use-cases/credit-card-bill/update-credit-card-bill/UpdateCreditCardBillUseCase';
+import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
+import { GetAccountRepository } from '@infrastructure/database/pg/repositories/account/get-account-repository/GetAccountRepository';
+import { AddCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/add-credit-card-bill-repository/AddCreditCardBillRepository';
+import { DeleteCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/delete-credit-card-bill-repository/DeleteCreditCardBillRepository';
+import { GetCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/get-credit-card-bill-repository/GetCreditCardBillRepository';
+import { SaveCreditCardBillRepository } from '@infrastructure/database/pg/repositories/credit-card-bill/save-credit-card-bill-repository/SaveCreditCardBillRepository';
+import { GetCreditCardRepository } from '@infrastructure/database/pg/repositories/credit-card/get-credit-card-repository/GetCreditCardRepository';
+import { PayCreditCardBillUnitOfWork } from '@infrastructure/database/pg/unit-of-works/pay-credit-card-bill/PayCreditCardBillUnitOfWork';
 
 import { makeCreateCreditCardBillUseCase } from '../factories/use-cases/credit-card-bill/make-create-credit-card-bill-use-case';
-import { makeUpdateCreditCardBillUseCase } from '../factories/use-cases/credit-card-bill/make-update-credit-card-bill-use-case';
 import { makeDeleteCreditCardBillUseCase } from '../factories/use-cases/credit-card-bill/make-delete-credit-card-bill-use-case';
 import { makePayCreditCardBillUseCase } from '../factories/use-cases/credit-card-bill/make-pay-credit-card-bill-use-case';
 import { makeReopenCreditCardBillUseCase } from '../factories/use-cases/credit-card-bill/make-reopen-credit-card-bill-use-case';
+import { makeUpdateCreditCardBillUseCase } from '../factories/use-cases/credit-card-bill/make-update-credit-card-bill-use-case';
 
 export class CreditCardBillCompositionRoot {
+  private readonly payCreditCardBillUnitOfWork: IPayCreditCardBillUnitOfWork;
+
   constructor(
     private readonly connection: IPostgresConnectionAdapter,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-    private readonly payCreditCardBillUnitOfWork: IPayCreditCardBillUnitOfWork,
-  ) {}
+  ) {
+    this.payCreditCardBillUnitOfWork = new PayCreditCardBillUnitOfWork(
+      this.connection,
+    );
+  }
 
   // Repositories builders
   private createAddCreditCardBillRepository(): AddCreditCardBillRepository {
