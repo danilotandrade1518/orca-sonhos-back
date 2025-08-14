@@ -5,6 +5,14 @@ module.exports = {
   // Aumenta o timeout padrão dos testes (útil para integrações com TestContainers / banco)
   testTimeout: 120000, // 120s
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
   testMatch: [
     '**/?(*.)+(spec).[tj]s', // padrão para unitários
     '**/?(*.)+(test).[tj]s', // padrão para integrados
