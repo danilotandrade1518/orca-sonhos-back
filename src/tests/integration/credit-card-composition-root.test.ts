@@ -153,16 +153,9 @@ describe('CreditCardCompositionRoot Integration Tests', () => {
       expect(createResult.hasError).toBe(false);
       const creditCardId = createResult.data!.id;
 
-      const dbCheck = await connection.query(
-        'SELECT * FROM credit_cards WHERE id = $1',
-        [creditCardId],
-      );
-      console.log(
-        '🔍 Credit card found in DB after creation:',
-        dbCheck.rows.length > 0,
-        'ID:',
+      await connection.query('SELECT * FROM credit_cards WHERE id = $1', [
         creditCardId,
-      );
+      ]);
 
       const updateUseCase = compositionRoot.createUpdateCreditCardUseCase();
       const updateResult = await updateUseCase.execute({
@@ -172,13 +165,6 @@ describe('CreditCardCompositionRoot Integration Tests', () => {
         closingDay: 5,
         dueDay: 15,
       });
-
-      if (updateResult.hasError) {
-        console.log(
-          '❌ Update Credit Card failed with errors:',
-          updateResult.errors,
-        );
-      }
 
       expect(updateResult.hasError).toBe(false);
 

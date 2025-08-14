@@ -232,10 +232,6 @@ describe('DeleteCreditCardRepository', () => {
 
       const result = await repository.execute(creditCardId);
 
-      console.log(
-        '🔍 DeleteCreditCardRepository execute result:',
-        result.errors,
-      );
       expect(result.hasError).toBe(false);
       // Should work regardless of which budget it belongs to
       expect(mockConnection.query).toHaveBeenCalledWith(

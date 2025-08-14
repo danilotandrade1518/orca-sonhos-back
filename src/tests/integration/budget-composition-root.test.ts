@@ -18,17 +18,17 @@ describe('BudgetCompositionRoot Integration Tests', () => {
     connection = await TestContainersSetup.setup();
     authService = new MockBudgetAuthorizationService();
     compositionRoot = new BudgetCompositionRoot(connection, authService);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await TestContainersSetup.teardown();
-  }, 30000);
+  });
 
   beforeEach(async () => {
     await TestContainersSetup.resetDatabase();
     authService.clearPermissions();
     authService.setUserPermissions(testUserId, [testBudgetId]);
-  }, 60000);
+  });
 
   describe('createCreateBudgetUseCase', () => {
     it('should create budget successfully through full stack', async () => {

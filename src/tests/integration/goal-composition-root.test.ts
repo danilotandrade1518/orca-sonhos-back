@@ -19,11 +19,11 @@ describe('GoalCompositionRoot Integration Tests', () => {
     connection = await TestContainersSetup.setup();
     authService = new MockBudgetAuthorizationService();
     compositionRoot = new GoalCompositionRoot(connection);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await TestContainersSetup.teardown();
-  }, 30000);
+  });
 
   beforeEach(async () => {
     await TestContainersSetup.resetDatabase();

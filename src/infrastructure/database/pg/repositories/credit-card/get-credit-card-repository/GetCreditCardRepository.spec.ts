@@ -80,7 +80,6 @@ describe('GetCreditCardRepository', () => {
         .mockReturnValue(Either.success(mockCreditCard));
 
       const result = await repository.execute(validId);
-
       expect(result.hasError).toBe(false);
       expect(result.data).toEqual(mockCreditCard);
       expect(mockConnection.query).toHaveBeenCalledWith(
@@ -177,8 +176,6 @@ describe('GetCreditCardRepository', () => {
 
       await repository.execute(validId);
 
-      console.log(mockConnection.query.mock.calls);
-
       const calledQuery = mockConnection.query.mock.calls[0][0];
       expect(calledQuery).toContain('SELECT');
       expect(calledQuery).toContain(
@@ -193,7 +190,6 @@ describe('GetCreditCardRepository', () => {
       mockConnection.query.mockResolvedValue(null);
 
       const result = await repository.execute('');
-
       expect(result.hasError).toBe(false);
       expect(result.data).toBeNull();
       expect(mockConnection.query).toHaveBeenCalledWith(
@@ -284,8 +280,6 @@ describe('GetCreditCardRepository', () => {
         .mockReturnValue(Either.success(mockCreditCard));
 
       const result = await repository.execute(validId);
-
-      console.log(result);
 
       expect(result.hasError).toBe(false);
       expect(result.data?.name).toBe('Cartão Premium');

@@ -30,11 +30,11 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
       authService,
     );
     creditCardCompositionRoot = new CreditCardCompositionRoot(connection);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await TestContainersSetup.teardown();
-  }, 30000);
+  });
 
   beforeEach(async () => {
     await TestContainersSetup.resetDatabase();

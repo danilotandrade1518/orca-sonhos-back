@@ -5,3 +5,4 @@ export { CreditCardBillCompositionRoot } from './CreditCardBillCompositionRoot';
 export { CreditCardCompositionRoot } from './CreditCardCompositionRoot';
 export { EnvelopeCompositionRoot } from './EnvelopeCompositionRoot';
 export { GoalCompositionRoot } from './GoalCompositionRoot';
+export { TransactionCompositionRoot } from './TransactionCompositionRoot';

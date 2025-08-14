@@ -15,11 +15,11 @@ describe('CategoryCompositionRoot Integration Tests', () => {
     connection = await TestContainersSetup.setup();
 
     compositionRoot = new CategoryCompositionRoot(connection);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await TestContainersSetup.teardown();
-  }, 30000);
+  });
 
   beforeEach(async () => {
     await TestContainersSetup.resetDatabase();
@@ -35,7 +35,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
     `,
       [testBudgetId, 'Test Budget', EntityId.create().value!.id, 'PERSONAL'],
     );
-  }, 60000);
+  });
 
   describe('createCreateCategoryUseCase', () => {
     it('should create category successfully through full stack', async () => {

@@ -2,6 +2,9 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  // Aumenta o timeout padrão dos testes (útil para integrações com TestContainers / banco)
+  testTimeout: 120000, // 120s
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testMatch: [
     '**/?(*.)+(spec).[tj]s', // padrão para unitários
     '**/?(*.)+(test).[tj]s', // padrão para integrados

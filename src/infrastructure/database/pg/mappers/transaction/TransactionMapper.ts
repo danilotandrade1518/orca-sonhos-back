@@ -17,6 +17,8 @@ export interface TransactionRow {
   is_deleted: boolean;
   created_at: Date;
   updated_at: Date;
+  cancellation_reason?: string;
+  cancelled_at?: Date;
 }
 
 export class TransactionMapper {
@@ -34,6 +36,8 @@ export class TransactionMapper {
       isDeleted: row.is_deleted,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      cancellationReason: row.cancellation_reason,
+      cancelledAt: row.cancelled_at,
     });
   }
 
@@ -51,6 +55,8 @@ export class TransactionMapper {
       is_deleted: transaction.isDeleted,
       created_at: transaction.createdAt,
       updated_at: transaction.updatedAt,
+      cancellation_reason: transaction.cancellationReason,
+      cancelled_at: transaction.cancelledAt,
     } as TransactionRow;
   }
 }

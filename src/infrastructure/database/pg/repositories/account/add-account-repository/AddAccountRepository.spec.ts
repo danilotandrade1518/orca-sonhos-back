@@ -40,11 +40,6 @@ describe('AddAccountRepository', () => {
         initialBalance: 1000,
       });
 
-      if (accountResult.hasError) {
-        console.log('Account creation errors:', accountResult.errors);
-        throw new Error('Failed to create account');
-      }
-
       const account = accountResult.data!;
 
       // Mock AccountMapper.toRow to return a proper row

@@ -40,7 +40,9 @@ export class SaveTransactionRepository implements ISaveTransactionRepository {
           transaction_date = $8,
           status = $9,
           is_deleted = $10,
-          updated_at = $11
+          updated_at = $11,
+          cancellation_reason = $12,
+          cancelled_at = $13  
         WHERE id = $1
       `;
 
@@ -56,6 +58,8 @@ export class SaveTransactionRepository implements ISaveTransactionRepository {
         row.status,
         row.is_deleted,
         row.updated_at,
+        row.cancellation_reason,
+        row.cancelled_at,
       ];
 
       await this.connection.query(query, params);
