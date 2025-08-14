@@ -9,7 +9,6 @@ export interface GoalRow {
   accumulated_amount: number;
   deadline: Date | null;
   budget_id: string;
-  is_achieved: boolean;
   is_deleted: boolean;
   created_at: Date;
   updated_at: Date;
@@ -20,8 +19,8 @@ export class GoalMapper {
     return Goal.restore({
       id: row.id,
       name: row.name,
-      totalAmount: row.total_amount,
-      accumulatedAmount: row.accumulated_amount,
+      totalAmount: Number(row.total_amount),
+      accumulatedAmount: Number(row.accumulated_amount),
       deadline: row.deadline || undefined,
       budgetId: row.budget_id,
       isDeleted: row.is_deleted,
@@ -38,7 +37,6 @@ export class GoalMapper {
       accumulated_amount: goal.accumulatedAmount,
       deadline: goal.deadline || null,
       budget_id: goal.budgetId,
-      is_achieved: goal.isAchieved(),
       is_deleted: goal.isDeleted,
       created_at: goal.createdAt,
       updated_at: goal.updatedAt,

@@ -21,9 +21,8 @@ export class SaveGoalRepository implements ISaveGoalRepository {
           accumulated_amount = $4,
           deadline = $5,
           budget_id = $6,
-          is_achieved = $7,
-          is_deleted = $8,
-          updated_at = $9
+          is_deleted = $7,
+          updated_at = $8
         WHERE id = $1
       `;
 
@@ -34,7 +33,6 @@ export class SaveGoalRepository implements ISaveGoalRepository {
         row.accumulated_amount,
         row.deadline,
         row.budget_id,
-        row.is_achieved,
         row.is_deleted,
         row.updated_at,
       ];

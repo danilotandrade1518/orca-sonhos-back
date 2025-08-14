@@ -32,7 +32,7 @@ describe('CreditCardCompositionRoot Integration Tests', () => {
     `,
       [testBudgetId, 'Test Budget', EntityId.create().value!.id, 'PERSONAL'],
     );
-  });
+  }, 60000);
 
   describe('createCreateCreditCardUseCase', () => {
     it('should create credit card successfully through full stack', async () => {

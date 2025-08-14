@@ -83,11 +83,10 @@ describe('SaveGoalRepository', () => {
       expect(query).toContain('accumulated_amount = $4');
       expect(query).toContain('deadline = $5');
       expect(query).toContain('budget_id = $6');
-      expect(query).toContain('is_achieved = $7');
-      expect(query).toContain('is_deleted = $8');
-      expect(query).toContain('updated_at = $9');
+      expect(query).toContain('is_deleted = $7');
+      expect(query).toContain('updated_at = $8');
       expect(query).toContain('WHERE id = $1');
-      expect(params).toHaveLength(9);
+      expect(params).toHaveLength(8);
     });
 
     it('should handle goal with deadline', async () => {
@@ -111,28 +110,6 @@ describe('SaveGoalRepository', () => {
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([deadline]),
-      );
-    });
-
-    it('should handle achieved goal', async () => {
-      const goal = Goal.create({
-        name: 'Achieved Goal',
-        totalAmount: 50000,
-        budgetId: EntityId.create().value!.id,
-        accumulatedAmount: 50000, // Same as total = achieved
-      }).data!;
-
-      mockConnection.query.mockResolvedValue({
-        rows: [{ rowCount: 1 }],
-        rowCount: 1,
-      });
-
-      const result = await repository.execute(goal);
-
-      expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE goals'),
-        expect.arrayContaining([true]), // is_achieved = true
       );
     });
 

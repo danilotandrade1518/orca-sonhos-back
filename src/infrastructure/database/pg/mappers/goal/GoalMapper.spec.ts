@@ -17,7 +17,6 @@ describe('GoalMapper', () => {
         accumulated_amount: 25000,
         deadline,
         budget_id: budgetId,
-        is_achieved: false,
         is_deleted: false,
         created_at: now,
         updated_at: now,
@@ -49,7 +48,6 @@ describe('GoalMapper', () => {
         accumulated_amount: 10000,
         deadline: null,
         budget_id: budgetId,
-        is_achieved: false,
         is_deleted: false,
         created_at: now,
         updated_at: now,
@@ -73,7 +71,6 @@ describe('GoalMapper', () => {
         accumulated_amount: 0,
         deadline: null,
         budget_id: budgetId,
-        is_achieved: false,
         is_deleted: true,
         created_at: now,
         updated_at: now,
@@ -93,7 +90,6 @@ describe('GoalMapper', () => {
         accumulated_amount: -500,
         deadline: null,
         budget_id: 'invalid-budget-id',
-        is_achieved: false,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -124,7 +120,6 @@ describe('GoalMapper', () => {
       expect(result.accumulated_amount).toBe(100000);
       expect(result.deadline).toBe(deadline);
       expect(result.budget_id).toBe(goal.budgetId);
-      expect(result.is_achieved).toBe(goal.isAchieved());
       expect(result.is_deleted).toBe(false);
       expect(result.created_at).toBe(goal.createdAt);
       expect(result.updated_at).toBe(goal.updatedAt);
@@ -153,7 +148,6 @@ describe('GoalMapper', () => {
 
       const result = GoalMapper.toRow(goal);
 
-      expect(result.is_achieved).toBe(true);
       expect(result.accumulated_amount).toBe(result.total_amount);
     });
 
@@ -188,7 +182,6 @@ describe('GoalMapper', () => {
       expect(typeof result.total_amount).toBe('number');
       expect(typeof result.accumulated_amount).toBe('number');
       expect(result.budget_id).toBe(budgetId);
-      expect(typeof result.is_achieved).toBe('boolean');
       expect(typeof result.is_deleted).toBe('boolean');
       expect(result.created_at).toBeInstanceOf(Date);
       expect(result.updated_at).toBeInstanceOf(Date);

@@ -24,7 +24,7 @@ export class TransactionMapper {
     return Transaction.restore({
       id: row.id,
       description: row.description,
-      amount: row.amount,
+      amount: Number(row.amount),
       type: row.type as TransactionTypeEnum,
       accountId: row.account_id,
       categoryId: row.category_id,

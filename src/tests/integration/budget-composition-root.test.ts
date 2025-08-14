@@ -28,7 +28,7 @@ describe('BudgetCompositionRoot Integration Tests', () => {
     await TestContainersSetup.resetDatabase();
     authService.clearPermissions();
     authService.setUserPermissions(testUserId, [testBudgetId]);
-  });
+  }, 60000);
 
   describe('createCreateBudgetUseCase', () => {
     it('should create budget successfully through full stack', async () => {

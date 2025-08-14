@@ -72,13 +72,9 @@ describe('AddGoalRepository', () => {
       expect(query).toContain(
         'id, name, total_amount, accumulated_amount, deadline, budget_id',
       );
-      expect(query).toContain(
-        'is_achieved, is_deleted, created_at, updated_at',
-      );
-      expect(query).toContain(
-        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-      );
-      expect(params).toHaveLength(10);
+      expect(query).toContain('is_deleted, created_at, updated_at');
+      expect(query).toContain('VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)');
+      expect(params).toHaveLength(9);
     });
 
     it('should handle goal with deadline', async () => {
@@ -97,23 +93,6 @@ describe('AddGoalRepository', () => {
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO goals'),
         expect.arrayContaining([deadline]),
-      );
-    });
-
-    it('should handle achieved goal', async () => {
-      const goal = Goal.create({
-        name: 'Achieved Goal',
-        totalAmount: 50000,
-        budgetId: EntityId.create().value!.id,
-        accumulatedAmount: 50000, // Same as total = achieved
-      }).data!;
-
-      const result = await repository.execute(goal);
-
-      expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO goals'),
-        expect.arrayContaining([true]), // is_achieved = true
       );
     });
 

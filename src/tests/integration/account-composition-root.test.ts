@@ -65,7 +65,7 @@ describe('AccountCompositionRoot Integration Tests', () => {
       adjustmentCategoryId,
       transferCategoryId,
     );
-  });
+  }, 60000);
 
   describe('createCreateAccountUseCase', () => {
     it('should create account successfully through full stack', async () => {

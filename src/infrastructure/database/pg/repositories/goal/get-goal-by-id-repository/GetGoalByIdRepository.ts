@@ -14,7 +14,7 @@ export class GetGoalByIdRepository implements IGetGoalRepository {
       const query = `
         SELECT 
           id, name, total_amount, accumulated_amount, deadline, budget_id,
-          is_achieved, is_deleted, created_at, updated_at
+          is_deleted, created_at, updated_at
         FROM goals 
         WHERE id = $1 AND is_deleted = false
       `;

@@ -16,16 +16,13 @@ export interface EnvelopeRow {
 
 export class EnvelopeMapper {
   static toDomain(row: EnvelopeRow): Either<DomainError, Envelope> {
-    const monthlyLimit = row.monthly_limit;
-    const currentBalance = row.current_balance;
-
     return Envelope.restore({
       id: row.id,
       name: row.name,
-      monthlyLimit,
+      monthlyLimit: Number(row.monthly_limit),
       budgetId: row.budget_id,
       categoryId: row.category_id,
-      currentBalance,
+      currentBalance: Number(row.current_balance),
       isDeleted: row.is_deleted,
       createdAt: row.created_at,
       updatedAt: row.updated_at,

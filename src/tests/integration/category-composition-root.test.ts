@@ -35,7 +35,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
     `,
       [testBudgetId, 'Test Budget', EntityId.create().value!.id, 'PERSONAL'],
     );
-  });
+  }, 60000);
 
   describe('createCreateCategoryUseCase', () => {
     it('should create category successfully through full stack', async () => {

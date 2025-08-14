@@ -16,8 +16,8 @@ export class AddGoalRepository implements IAddGoalRepository {
       const query = `
         INSERT INTO goals (
           id, name, total_amount, accumulated_amount, deadline, budget_id, 
-          is_achieved, is_deleted, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          is_deleted, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       `;
 
       const params = [
@@ -27,7 +27,6 @@ export class AddGoalRepository implements IAddGoalRepository {
         row.accumulated_amount,
         row.deadline,
         row.budget_id,
-        row.is_achieved,
         row.is_deleted,
         row.created_at,
         row.updated_at,
