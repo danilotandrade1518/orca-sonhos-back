@@ -29,12 +29,11 @@ export class CreateBudgetController implements HttpController {
       type: body.type as BudgetTypeEnum,
     });
 
-    if (result.hasError) {
+    if (result.hasError)
       return mapErrorsToHttp(
         result.errors as (DomainError | ApplicationError)[],
         request.requestId,
       );
-    }
 
     return {
       status: 201,

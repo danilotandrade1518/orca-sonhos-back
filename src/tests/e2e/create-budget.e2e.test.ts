@@ -42,7 +42,6 @@ describe('POST /budgets (E2E)', () => {
   });
 
   it('should map domain errors to 400 (simulate by forcing invalid data)', async () => {
-    // name empty likely invalid in domain entity creation
     const res = await request(server.rawApp)
       .post('/budgets')
       .send({
