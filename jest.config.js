@@ -22,7 +22,7 @@ module.exports = {
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/**/errors/*.ts',
-    '!src/**/*Error.ts'
+    '!src/**/*Error.ts',
   ],
   moduleNameMapper: {
     '^@either$': '<rootDir>/src/shared/core/either.ts',
