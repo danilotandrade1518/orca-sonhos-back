@@ -2,11 +2,10 @@ import { AddBudgetRepositoryStub } from '@application/shared/tests/stubs/AddBudg
 import { CreateBudgetUseCase } from '@application/use-cases/budget/create-budget/CreateBudgetUseCase';
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { ExpressHttpServerAdapter } from '@http/adapters/express-adapter';
+import { CreateBudgetController } from '@http/controllers/budget/create-budget.controller';
+import { RouteDefinition } from '@http/server-adapter';
 import request from 'supertest';
-
-import { ExpressHttpServerAdapter } from '../../interface/http/adapters/express-adapter';
-import { RouteDefinition } from '../../interface/http/server-adapter';
-import { CreateBudgetController } from '../../interface/http/controllers/budget/create-budget.controller';
 
 // E2E focuses only on HTTP wiring (no DB). Using in-memory stub.
 

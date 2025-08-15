@@ -1,15 +1,14 @@
-import request from 'supertest';
-
-import { ExpressHttpServerAdapter } from '../../interface/http/adapters/express-adapter';
-import { RouteDefinition } from '../../interface/http/server-adapter';
-import { RemoveParticipantFromBudgetController } from '../../interface/http/controllers/budget/remove-participant.controller';
-import { RemoveParticipantFromBudgetUseCase } from '@application/use-cases/budget/remove-participant/RemoveParticipantFromBudgetUseCase';
+import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { GetBudgetRepositoryStub } from '@application/shared/tests/stubs/GetBudgetRepositoryStub';
 import { SaveBudgetRepositoryStub } from '@application/shared/tests/stubs/SaveBudgetRepositoryStub';
-import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
+import { RemoveParticipantFromBudgetUseCase } from '@application/use-cases/budget/remove-participant/RemoveParticipantFromBudgetUseCase';
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { ExpressHttpServerAdapter } from '@http/adapters/express-adapter';
+import { RemoveParticipantFromBudgetController } from '@http/controllers/budget/remove-participant.controller';
+import { RouteDefinition } from '@http/server-adapter';
+import request from 'supertest';
 
 const getRepoRemove = new GetBudgetRepositoryStub();
 const saveRepoRemove = new SaveBudgetRepositoryStub();
