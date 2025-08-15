@@ -3,8 +3,8 @@ import { CreateBudgetUseCase } from '@application/use-cases/budget/create-budget
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { DomainError } from '@domain/shared/DomainError';
 
+import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
-import { mapErrorsToHttp } from '../../mappers/error-mapper';
 
 type CreateBudgetBody = {
   name: string;
@@ -30,14 +30,13 @@ export class CreateBudgetController implements HttpController {
     });
 
     if (result.hasError)
-      return mapErrorsToHttp(
-        result.errors as (DomainError | ApplicationError)[],
+      return DefaultResponseBuilder.errors(
         request.requestId,
+        result.errors as (DomainError | ApplicationError)[],
       );
 
-    return {
-      status: 201,
-      body: { id: result.data?.id, traceId: request.requestId },
-    };
+    return DefaultResponseBuilder.created(request.requestId, {
+      id: result.data?.id,
+    });
   }
 }

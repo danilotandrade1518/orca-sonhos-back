@@ -2,8 +2,8 @@ import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { RemoveParticipantFromBudgetUseCase } from '@application/use-cases/budget/remove-participant/RemoveParticipantFromBudgetUseCase';
 import { DomainError } from '@domain/shared/DomainError';
 
+import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
-import { mapErrorsToHttp } from '../../mappers/error-mapper';
 
 type RemoveParticipantBody = {
   userId: string;
@@ -26,14 +26,13 @@ export class RemoveParticipantFromBudgetController implements HttpController {
     });
 
     if (result.hasError)
-      return mapErrorsToHttp(
-        result.errors as (DomainError | ApplicationError)[],
+      return DefaultResponseBuilder.errors(
         request.requestId,
+        result.errors as (DomainError | ApplicationError)[],
       );
 
-    return {
-      status: 200,
-      body: { id: result.data?.id, traceId: request.requestId },
-    };
+    return DefaultResponseBuilder.ok(request.requestId, {
+      id: result.data?.id,
+    });
   }
 }

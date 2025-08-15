@@ -1,24 +1,29 @@
 import { ApplicationError } from '@application/shared/errors/ApplicationError';
-import { DeleteBudgetUseCase } from '@application/use-cases/budget/delete-budget/DeleteBudgetUseCase';
+import { UpdateAccountUseCase } from '@application/use-cases/account/update-account/UpdateAccountUseCase';
 import { DomainError } from '@domain/shared/DomainError';
 
 import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
-type DeleteBudgetBody = {
+type UpdateAccountBody = {
+  id: string; // account id
   userId: string;
-  budgetId: string;
+  name?: string;
+  description?: string;
+  initialBalance?: number;
 };
 
-export class DeleteBudgetController implements HttpController {
-  constructor(private readonly useCase: DeleteBudgetUseCase) {}
+export class UpdateAccountController implements HttpController {
+  constructor(private readonly useCase: UpdateAccountUseCase) {}
 
-  async handle(request: HttpRequest<DeleteBudgetBody>): Promise<HttpResponse> {
+  async handle(request: HttpRequest<UpdateAccountBody>): Promise<HttpResponse> {
     const body = request.body;
-
     const result = await this.useCase.execute({
+      id: body.id,
       userId: body.userId,
-      budgetId: body.budgetId,
+      name: body.name,
+      description: body.description,
+      initialBalance: body.initialBalance,
     });
 
     if (result.hasError)

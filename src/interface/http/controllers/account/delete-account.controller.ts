@@ -1,24 +1,23 @@
 import { ApplicationError } from '@application/shared/errors/ApplicationError';
-import { DeleteBudgetUseCase } from '@application/use-cases/budget/delete-budget/DeleteBudgetUseCase';
+import { DeleteAccountUseCase } from '@application/use-cases/account/delete-account/DeleteAccountUseCase';
 import { DomainError } from '@domain/shared/DomainError';
 
 import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
-type DeleteBudgetBody = {
+type DeleteAccountBody = {
   userId: string;
-  budgetId: string;
+  accountId: string;
 };
 
-export class DeleteBudgetController implements HttpController {
-  constructor(private readonly useCase: DeleteBudgetUseCase) {}
+export class DeleteAccountController implements HttpController {
+  constructor(private readonly useCase: DeleteAccountUseCase) {}
 
-  async handle(request: HttpRequest<DeleteBudgetBody>): Promise<HttpResponse> {
+  async handle(request: HttpRequest<DeleteAccountBody>): Promise<HttpResponse> {
     const body = request.body;
-
     const result = await this.useCase.execute({
       userId: body.userId,
-      budgetId: body.budgetId,
+      accountId: body.accountId,
     });
 
     if (result.hasError)

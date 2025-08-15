@@ -1,24 +1,29 @@
 import { ApplicationError } from '@application/shared/errors/ApplicationError';
-import { DeleteBudgetUseCase } from '@application/use-cases/budget/delete-budget/DeleteBudgetUseCase';
+import { ReconcileAccountUseCase } from '@application/use-cases/account/reconcile-account/ReconcileAccountUseCase';
 import { DomainError } from '@domain/shared/DomainError';
 
 import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
-type DeleteBudgetBody = {
+type ReconcileAccountBody = {
   userId: string;
-  budgetId: string;
+  budgetId: string; // forwarded to use case
+  accountId: string;
+  realBalance: number;
 };
 
-export class DeleteBudgetController implements HttpController {
-  constructor(private readonly useCase: DeleteBudgetUseCase) {}
+export class ReconcileAccountController implements HttpController {
+  constructor(private readonly useCase: ReconcileAccountUseCase) {}
 
-  async handle(request: HttpRequest<DeleteBudgetBody>): Promise<HttpResponse> {
+  async handle(
+    request: HttpRequest<ReconcileAccountBody>,
+  ): Promise<HttpResponse> {
     const body = request.body;
-
     const result = await this.useCase.execute({
       userId: body.userId,
       budgetId: body.budgetId,
+      accountId: body.accountId,
+      realBalance: body.realBalance,
     });
 
     if (result.hasError)

@@ -1,24 +1,31 @@
 import { ApplicationError } from '@application/shared/errors/ApplicationError';
-import { DeleteBudgetUseCase } from '@application/use-cases/budget/delete-budget/DeleteBudgetUseCase';
+import { TransferBetweenAccountsUseCase } from '@application/use-cases/account/transfer-between-accounts/TransferBetweenAccountsUseCase';
 import { DomainError } from '@domain/shared/DomainError';
 
 import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
-type DeleteBudgetBody = {
+type TransferBetweenAccountsBody = {
   userId: string;
-  budgetId: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  description?: string;
 };
 
-export class DeleteBudgetController implements HttpController {
-  constructor(private readonly useCase: DeleteBudgetUseCase) {}
+export class TransferBetweenAccountsController implements HttpController {
+  constructor(private readonly useCase: TransferBetweenAccountsUseCase) {}
 
-  async handle(request: HttpRequest<DeleteBudgetBody>): Promise<HttpResponse> {
+  async handle(
+    request: HttpRequest<TransferBetweenAccountsBody>,
+  ): Promise<HttpResponse> {
     const body = request.body;
-
     const result = await this.useCase.execute({
       userId: body.userId,
-      budgetId: body.budgetId,
+      fromAccountId: body.fromAccountId,
+      toAccountId: body.toAccountId,
+      amount: body.amount,
+      description: body.description,
     });
 
     if (result.hasError)

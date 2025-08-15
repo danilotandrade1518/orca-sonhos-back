@@ -2,8 +2,8 @@ import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { UpdateBudgetUseCase } from '@application/use-cases/budget/update-budget/UpdateBudgetUseCase';
 import { DomainError } from '@domain/shared/DomainError';
 
+import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
-import { mapErrorsToHttp } from '../../mappers/error-mapper';
 
 type UpdateBudgetBody = {
   userId: string;
@@ -24,14 +24,13 @@ export class UpdateBudgetController implements HttpController {
     });
 
     if (result.hasError)
-      return mapErrorsToHttp(
-        result.errors as (DomainError | ApplicationError)[],
+      return DefaultResponseBuilder.errors(
         request.requestId,
+        result.errors as (DomainError | ApplicationError)[],
       );
 
-    return {
-      status: 200,
-      body: { id: result.data?.id, traceId: request.requestId },
-    };
+    return DefaultResponseBuilder.ok(request.requestId, {
+      id: result.data?.id,
+    });
   }
 }
