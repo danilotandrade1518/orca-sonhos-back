@@ -1,24 +1,23 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json';
+import { loadEnv } from './config/env';
 
 dotenv.config();
+const env = loadEnv();
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 process.env.TZ = 'UTC';
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('OrçaSonhos API rodando!');
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+app.listen(Number(env.HTTP_PORT), () => {
+  console.log(`Servidor rodando na porta ${env.HTTP_PORT}`);
 });
