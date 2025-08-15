@@ -73,10 +73,6 @@ const makeCreditCardBill = (): CreditCardBill => {
   };
 
   const result = CreditCardBill.restore(data);
-  if (result.hasError) {
-    console.log('Error creating credit card bill:', result.errors);
-    throw new Error('Failed to create credit card bill for test');
-  }
   return result.data!;
 };
 

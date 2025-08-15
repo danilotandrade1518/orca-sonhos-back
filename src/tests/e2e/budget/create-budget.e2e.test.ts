@@ -2,7 +2,7 @@ import { AddBudgetRepositoryStub } from '@application/shared/tests/stubs/AddBudg
 import { CreateBudgetUseCase } from '@application/use-cases/budget/create-budget/CreateBudgetUseCase';
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
-import { ExpressHttpServerAdapter } from '@http/adapters/express-adapter';
+import { createHttpTestServer } from '../support/http-test-server';
 import { CreateBudgetController } from '@http/controllers/budget/create-budget.controller';
 import { RouteDefinition } from '@http/server-adapter';
 import request from 'supertest';
@@ -10,10 +10,9 @@ import request from 'supertest';
 // E2E focuses only on HTTP wiring (no DB). Using in-memory stub.
 
 describe('POST /budgets (E2E)', () => {
-  let server: ExpressHttpServerAdapter;
+  const { server, register, close } = createHttpTestServer();
 
   beforeAll(() => {
-    server = new ExpressHttpServerAdapter();
     const repo = new AddBudgetRepositoryStub();
     const useCase = new CreateBudgetUseCase(repo);
     const controller = new CreateBudgetController(useCase);
@@ -21,7 +20,11 @@ describe('POST /budgets (E2E)', () => {
     const routes: RouteDefinition[] = [
       { method: 'POST', path: '/budgets', controller },
     ];
-    server.registerRoutes(routes);
+    register(...routes);
+  });
+
+  afterAll(async () => {
+    await close();
   });
 
   it('should create a budget and return 201 with id and traceId headers', async () => {

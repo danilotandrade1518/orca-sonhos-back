@@ -1,7 +1,7 @@
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { CreditCardCompositionRoot } from '@main/composition/CreditCardCompositionRoot';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { CreditCardCompositionRoot } from '../../main/composition/CreditCardCompositionRoot';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 
 let testBudgetId: string;

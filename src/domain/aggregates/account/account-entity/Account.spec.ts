@@ -381,10 +381,6 @@ describe('Account', () => {
           budgetId: validBudgetId,
         });
 
-        if (account.hasError) {
-          console.log('Account creation errors:', account.errors);
-        }
-
         expect(account.hasError).toBe(false);
 
         const canTransferResult = account.data!.canTransfer(100);

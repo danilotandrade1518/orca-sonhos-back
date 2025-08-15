@@ -1,8 +1,8 @@
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { GoalCompositionRoot } from '@main/composition/GoalCompositionRoot';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { GoalCompositionRoot } from '../../main/composition/GoalCompositionRoot';
 import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 
@@ -127,7 +127,6 @@ describe('GoalCompositionRoot Integration Tests', () => {
         name: 'Remove Me',
         totalAmount: 100000,
       });
-      console.log(created.errors);
       testGoalId = created.data!.id;
     });
 

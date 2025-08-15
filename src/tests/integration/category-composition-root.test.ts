@@ -1,8 +1,8 @@
 import { CategoryTypeEnum } from '@domain/aggregates/category/value-objects/category-type/CategoryType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { CategoryCompositionRoot } from '@main/composition/CategoryCompositionRoot';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { CategoryCompositionRoot } from '../../main/composition/CategoryCompositionRoot';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 
 let testBudgetId: string;
@@ -374,10 +374,6 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         name: 'Changeable Category',
         type: CategoryTypeEnum.INCOME,
       });
-
-      if (updateResult.hasError) {
-        console.log('Update errors:', updateResult.errors);
-      }
 
       expect(updateResult.hasError).toBe(false);
 

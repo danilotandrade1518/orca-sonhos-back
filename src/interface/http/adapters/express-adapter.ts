@@ -14,6 +14,7 @@ import { createTimeoutMiddleware } from '../middlewares/timeout-middleware';
 
 export class ExpressHttpServerAdapter implements IHttpServerAdapter {
   private app = express();
+  private serverInstance: import('http').Server | null = null;
   private globalMiddlewares: HttpMiddleware[] = [
     requestIdMiddleware,
     contextLoggerMiddleware,
@@ -122,7 +123,20 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
   }
 
   listen(port: number, callback?: () => void) {
-    this.app.listen(port, callback);
+    this.serverInstance = this.app.listen(port, callback);
+  }
+
+  close(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.serverInstance) return resolve();
+      this.serverInstance.close(() => resolve());
+      this.serverInstance = null;
+    });
+  }
+
+  // For test environments to drop references
+  dispose() {
+    this.globalMiddlewares = [];
   }
 
   private compose(

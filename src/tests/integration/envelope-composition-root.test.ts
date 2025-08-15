@@ -2,7 +2,7 @@ import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-t
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { EnvelopeCompositionRoot } from '../../main/composition/EnvelopeCompositionRoot';
+import { EnvelopeCompositionRoot } from '@main/composition/EnvelopeCompositionRoot';
 import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 

@@ -38,10 +38,6 @@ describe('TransferBetweenAccountsDomainService', () => {
         transferCategoryId,
       );
 
-      if (result.hasError) {
-        console.log('Domain Service errors:', result.errors);
-      }
-
       expect(result.hasError).toBe(false);
       expect(result.data!.debitTransaction).toBeDefined();
       expect(result.data!.creditTransaction).toBeDefined();

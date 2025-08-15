@@ -1,9 +1,9 @@
-import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
-import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
 import { TransactionStatusEnum } from '@domain/aggregates/transaction/value-objects/transaction-status/TransactionStatus';
+import { TransactionTypeEnum } from '@domain/aggregates/transaction/value-objects/transaction-type/TransactionType';
+import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { TransactionCompositionRoot } from '@main/composition/TransactionCompositionRoot';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { TransactionCompositionRoot } from '../../main/composition/TransactionCompositionRoot';
 import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 

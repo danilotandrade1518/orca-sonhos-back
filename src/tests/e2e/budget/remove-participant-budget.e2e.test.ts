@@ -5,7 +5,7 @@ import { RemoveParticipantFromBudgetUseCase } from '@application/use-cases/budge
 import { Budget } from '@domain/aggregates/budget/budget-entity/Budget';
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
-import { ExpressHttpServerAdapter } from '@http/adapters/express-adapter';
+import { createHttpTestServer } from '../support/http-test-server';
 import { RemoveParticipantFromBudgetController } from '@http/controllers/budget/remove-participant.controller';
 import { RouteDefinition } from '@http/server-adapter';
 import request from 'supertest';
@@ -31,17 +31,20 @@ const removeParticipantUseCase = new RemoveParticipantFromBudgetUseCase(
 );
 
 describe('POST /budgets/participants/remove (remove participant) E2E', () => {
-  let server: ExpressHttpServerAdapter;
+  const { server, register, close } = createHttpTestServer();
 
   beforeAll(() => {
-    server = new ExpressHttpServerAdapter();
     const controller = new RemoveParticipantFromBudgetController(
       removeParticipantUseCase,
     );
     const routes: RouteDefinition[] = [
       { method: 'POST', path: '/budgets/participants/remove', controller },
     ];
-    server.registerRoutes(routes);
+    register(...routes);
+  });
+
+  afterAll(async () => {
+    await close();
   });
 
   it('should remove a participant and return 200 with id and traceId', async () => {

@@ -50,10 +50,6 @@ const makeCreditCard = (isDeleted = false): CreditCard => {
   };
 
   const result = CreditCard.restore(data);
-  if (result.hasError) {
-    console.log('Error creating credit card:', result.errors);
-    throw new Error('Failed to create credit card for test');
-  }
   return result.data!;
 };
 

@@ -1,8 +1,8 @@
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { BudgetCompositionRoot } from '@main/composition/BudgetCompositionRoot';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { BudgetCompositionRoot } from '../../main/composition/BudgetCompositionRoot';
 import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 

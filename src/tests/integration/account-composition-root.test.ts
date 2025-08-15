@@ -1,8 +1,8 @@
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { AccountCompositionRoot } from '@main/composition/AccountCompositionRoot';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { AccountCompositionRoot } from '../../main/composition/AccountCompositionRoot';
 import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 
@@ -252,7 +252,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
         realBalance: 950,
       });
 
-      console.log(result.errors);
       expect(result.hasError).toBe(false);
     });
 
@@ -312,7 +311,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
         description: 'Integration test transfer',
       });
 
-      console.log(result.errors);
       expect(result.hasError).toBe(false);
     });
 

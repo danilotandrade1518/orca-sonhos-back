@@ -4,14 +4,16 @@ import { HttpMiddleware } from '../http-types';
 export function createTimeoutMiddleware(ms: number): HttpMiddleware {
   return async (req, next) => {
     let finished = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     return await Promise.race<ReturnType<typeof next>>([
       (async () => {
         const res = await next();
         finished = true;
+        if (timer) clearTimeout(timer);
         return res;
       })(),
       new Promise((resolve) => {
-        setTimeout(() => {
+        timer = setTimeout(() => {
           if (finished) return;
           req.logger?.warn?.({ msg: 'request_timeout', timeout_ms: ms });
           resolve({

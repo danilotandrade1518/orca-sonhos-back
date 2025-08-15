@@ -16,6 +16,7 @@ module.exports = {
   testMatch: [
     '**/?(*.)+(spec).[tj]s', // padrão para unitários
     '**/?(*.)+(test).[tj]s', // padrão para integrados
+    '**/?(*.)+(test.e2e).[tj]s', // padrão para e2e
   ],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   collectCoverageFrom: [
@@ -30,5 +31,6 @@ module.exports = {
     '^@application/(.*)$': '<rootDir>/src/application/$1',
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
     '^@http/(.*)$': '<rootDir>/src/interface/http/$1',
+    '^@main/(.*)$': '<rootDir>/src/main/$1',
   },
 };

@@ -1,10 +1,10 @@
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { BudgetTypeEnum } from '@domain/aggregates/budget/value-objects/budget-type/BudgetType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { CreditCardBillCompositionRoot } from '@main/composition/CreditCardBillCompositionRoot';
+import { CreditCardCompositionRoot } from '@main/composition/CreditCardCompositionRoot';
 
 import { PostgresConnectionAdapter } from '../../adapters/postgres/PostgresConnectionAdapter';
-import { CreditCardBillCompositionRoot } from '../../main/composition/CreditCardBillCompositionRoot';
-import { CreditCardCompositionRoot } from '../../main/composition/CreditCardCompositionRoot';
 import { MockBudgetAuthorizationService } from './setup/mock-budget-authorization-service';
 import { TestContainersSetup } from './setup/testcontainers-setup';
 
