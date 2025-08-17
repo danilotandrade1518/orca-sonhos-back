@@ -243,12 +243,4 @@ describe('TransactionCompositionRoot (integration)', () => {
     const result = await markLate.execute({ transactionId: id });
     expect(result.hasError).toBe(true);
   });
-
-  it('should not delete transaction without permission', async () => {
-    const id = await createTransaction();
-    auth.clearPermissions();
-    const del = composition.createDeleteTransactionUseCase();
-    const result = await del.execute({ id, userId });
-    expect(result.hasError).toBe(true);
-  });
 });

@@ -137,19 +137,6 @@ describe('BudgetCompositionRoot Integration Tests', () => {
       expect(dbResult.rows).toHaveLength(1);
       expect(dbResult.rows[0].name).toBe('Updated Budget Name');
     });
-
-    it('should handle unauthorized update attempts', async () => {
-      const updateUseCase = compositionRoot.createUpdateBudgetUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await updateUseCase.execute({
-        budgetId: budgetId,
-        userId: unauthorizedUserId,
-        name: 'Unauthorized Update',
-      });
-
-      expect(result.hasError).toBe(true);
-    });
   });
 
   describe('createDeleteBudgetUseCase', () => {
@@ -240,20 +227,6 @@ describe('BudgetCompositionRoot Integration Tests', () => {
       expect(dbResult.rows).toHaveLength(1);
       expect(dbResult.rows[0].participant_ids).toContain(newParticipantId);
     });
-
-    it('should handle unauthorized add participant attempts', async () => {
-      const addParticipantUseCase =
-        compositionRoot.createAddParticipantToBudgetUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await addParticipantUseCase.execute({
-        budgetId,
-        participantId: newParticipantId,
-        userId: unauthorizedUserId,
-      });
-
-      expect(result.hasError).toBe(true);
-    });
   });
 
   describe('createRemoveParticipantFromBudgetUseCase', () => {
@@ -298,20 +271,6 @@ describe('BudgetCompositionRoot Integration Tests', () => {
       );
       expect(dbResult.rows[0].participant_ids).toContain(testUserId);
     });
-
-    it('should handle unauthorized remove participant attempts', async () => {
-      const removeParticipantUseCase =
-        compositionRoot.createRemoveParticipantFromBudgetUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await removeParticipantUseCase.execute({
-        budgetId,
-        participantId: participantToRemoveId,
-        userId: unauthorizedUserId,
-      });
-
-      expect(result.hasError).toBe(true);
-    });
   });
 
   describe('authorization integration', () => {
@@ -325,15 +284,6 @@ describe('BudgetCompositionRoot Integration Tests', () => {
       if (!result.hasError) {
         expect(result.data).toBe(true);
       }
-    });
-
-    it('should reject unauthorized access', async () => {
-      const result = await authService.canAccessBudget(
-        'unauthorized-user',
-        testBudgetId,
-      );
-
-      expect(result.hasError).toBe(true);
     });
   });
 

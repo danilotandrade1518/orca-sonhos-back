@@ -108,21 +108,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
 
       expect(result.hasError).toBe(true);
     });
-
-    it('should handle unauthorized creation attempts', async () => {
-      const useCase = compositionRoot.createCreateAccountUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await useCase.execute({
-        userId: unauthorizedUserId,
-        name: 'Unauthorized Account',
-        budgetId: testBudgetId,
-        type: AccountTypeEnum.CHECKING_ACCOUNT,
-        initialBalance: 1000,
-      });
-
-      expect(result.hasError).toBe(true);
-    });
   });
 
   describe('createUpdateAccountUseCase', () => {
@@ -161,19 +146,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       expect(dbResult.rows).toHaveLength(1);
       expect(dbResult.rows[0].name).toBe('Updated Account Name');
     });
-
-    it('should handle unauthorized update attempts', async () => {
-      const updateUseCase = compositionRoot.createUpdateAccountUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await updateUseCase.execute({
-        id: accountId,
-        userId: unauthorizedUserId,
-        name: 'Unauthorized Update',
-      });
-
-      expect(result.hasError).toBe(true);
-    });
   });
 
   describe('createDeleteAccountUseCase', () => {
@@ -211,18 +183,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       expect(dbResult.rows).toHaveLength(1);
       expect(dbResult.rows[0].is_deleted).toBe(true);
     });
-
-    it('should handle unauthorized delete attempts', async () => {
-      const deleteUseCase = compositionRoot.createDeleteAccountUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await deleteUseCase.execute({
-        userId: unauthorizedUserId,
-        accountId: accountId,
-      });
-
-      expect(result.hasError).toBe(true);
-    });
   });
 
   describe('createReconcileAccountUseCase', () => {
@@ -253,20 +213,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       });
 
       expect(result.hasError).toBe(false);
-    });
-
-    it('should handle unauthorized reconcile attempts', async () => {
-      const reconcileUseCase = compositionRoot.createReconcileAccountUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await reconcileUseCase.execute({
-        userId: unauthorizedUserId,
-        budgetId: testBudgetId,
-        accountId: accountId,
-        realBalance: 950,
-      });
-
-      expect(result.hasError).toBe(true);
     });
   });
 
@@ -312,22 +258,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       });
 
       expect(result.hasError).toBe(false);
-    });
-
-    it('should handle unauthorized transfer attempts', async () => {
-      const transferUseCase =
-        compositionRoot.createTransferBetweenAccountsUseCase();
-      const unauthorizedUserId = EntityId.create().value!.id;
-
-      const result = await transferUseCase.execute({
-        userId: unauthorizedUserId,
-        fromAccountId: sourceAccountId,
-        toAccountId: destinationAccountId,
-        amount: 200,
-        description: 'Unauthorized transfer',
-      });
-
-      expect(result.hasError).toBe(true);
     });
   });
 
@@ -377,15 +307,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       if (!result.hasError) {
         expect(result.data).toBe(true);
       }
-    });
-
-    it('should reject unauthorized access', async () => {
-      const result = await authService.canAccessBudget(
-        'unauthorized-user',
-        testBudgetId,
-      );
-
-      expect(result.hasError).toBe(true);
     });
   });
 

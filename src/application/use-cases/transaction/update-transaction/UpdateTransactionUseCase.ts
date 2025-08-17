@@ -40,23 +40,9 @@ export class UpdateTransactionUseCase
 
     const existingTransaction = transactionResult.data;
 
-    const accountResult = await this.getAccountRepository.execute(
-      existingTransaction.accountId,
-    );
-
-    if (accountResult.hasError) {
-      return Either.error(new AccountRepositoryError());
-    }
-
-    if (!accountResult.data) {
-      return Either.error(new AccountNotFoundError());
-    }
-
-    const account = accountResult.data;
-
     const authResult = await this.budgetAuthorizationService.canAccessBudget(
       dto.userId,
-      account.budgetId!,
+      existingTransaction.budgetId!,
     );
 
     if (authResult.hasError) {
