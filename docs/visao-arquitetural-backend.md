@@ -534,3 +534,76 @@ Esta organização visa:
 ---
 
 **Este documento deve ser atualizado conforme a arquitetura evoluir. Todo o código do projeto será escrito em Inglês.**
+
+## 14. Padrão de Endpoints para Mutations (Decisão de API Command-Style)
+
+### 14.1. Motivação
+
+Adotamos um modelo de domínio rico (DDD) com agregados, invariantes e regras explícitas em Use Cases. A tentativa de expressar estas operações via REST puro (verbs + resources canônicos) resultaria em:
+
+- Ambiguidade ou sobrecarga de verbos HTTP para operações específicas (ex: `mark-transaction-late`, `cancel-scheduled-transaction`, `transfer-between-envelopes`).
+- Necessidade de múltiplos endpoints PATCH/PUT semanticamente distintos sobre o mesmo recurso.
+- Maior risco de “anemic domain” ao tentar forçar operações complexas dentro de CRUD genérico.
+
+Para preservar a clareza de intenção e alinhar com o modelo Command (próximo de CQRS), adotamos um estilo orientado a comandos para mutações.
+
+### 14.2. Padrão Definido
+
+- **Todos os endpoints de mutação usam HTTP POST.**
+- **Formato da rota:** `/<aggregate|context>/<action-name>`
+  - Exemplos:
+    - `POST /budget/create-budget`
+    - `POST /transaction/mark-transaction-late`
+    - `POST /credit-card-bill/pay-credit-card-bill`
+    - `POST /envelope/transfer-between-envelopes`
+- O nome da ação reflete diretamente o caso de uso (classe do UseCase) com kebab-case.
+- Request Body segue o DTO do Use Case. Response segue o `UseCaseResponse` encapsulado pelo `DefaultResponseBuilder`.
+
+### 14.3. Escopo
+
+Esta convenção aplica-se exclusivamente a operações de **mutação** (commands). Consultas (queries) poderão futuramente adotar um padrão distinto (ex: GET com filtros ou um endpoint `/query` específico) mantendo a separação CQRS.
+
+### 14.4. Benefícios
+
+| Aspecto                     | Benefício                                                               |
+| --------------------------- | ----------------------------------------------------------------------- |
+| Clareza semântica           | Cada endpoint comunica explicitamente a intenção do caso de uso         |
+| Evolução                    | Facilita adicionar novas operações sem quebrar contratos REST genéricos |
+| Alinhamento DDD             | Mantém o ubiquitous language entre domínio e interface                  |
+| Simplicidade de Autorização | Policies podem mapear 1:1 para ações                                    |
+| Consistência de Erros       | `Either` + `DefaultResponseBuilder` padronizados                        |
+
+### 14.5. Trade-offs / Consequências
+
+- Menos aderente a expectativas REST puras / ferramentas automáticas de geração.
+- Pode exigir documentação mais explícita (OpenAPI, Swagger já adaptado).
+- Aumento potencial de número de endpoints (um por ação) — mitigado por agrupamento por contexto.
+
+### 14.6. Convenções de Nome
+
+- `create-`, `update-`, `delete-` para CRUD direto.
+- Verbos de negócio específicos (`mark-`, `pay-`, `reopen-`, `transfer-between-`, `add-amount-`, `remove-amount-`).
+- Kebab-case sempre; evitar abreviações obscuras.
+
+### 14.7. Idempotência
+
+- Operações naturalmente idempotentes (ex: `reopen-credit-card-bill` dentro da janela válida) devem continuar seguras a reenvio — a lógica de domínio garante consistência.
+- Para comandos não idempotentes (ex: `pay-credit-card-bill`) podem ser futuramente suportados headers como `Idempotency-Key` se necessário.
+
+### 14.8. Versionamento Futuro
+
+- Caso surja necessidade: prefixo opcional `/v1/` manteve-se adiado até primeira ruptura.
+- Evoluções breaking criam novo action name OU novo namespace (`/v2/transaction/...`).
+
+### 14.9. Autorização
+
+- Autorização é aplicada por serviço (`IBudgetAuthorizationService`) no Use Case; camada HTTP não contém lógica de permissão.
+- A consistência do verbo único (POST) reduz matriz de permissão ao par (contexto, ação).
+
+### 14.10. Referência
+
+- Decisão formalizada na ADR: `0008-padrao-endpoints-mutations-post-comando.md`.
+
+---
+
+> Esta seção será revisitada quando introduzirmos query endpoints especializados ou se adotarmos GraphQL / gRPC para leitura.

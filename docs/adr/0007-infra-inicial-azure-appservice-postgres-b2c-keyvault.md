@@ -33,7 +33,9 @@ Escolher um conjunto mínimo de serviços de infraestrutura que atenda aos requi
 ## Opções Consideradas
 
 ### A. Azure App Service + PostgreSQL Flexible Server + Entra ID B2C + Key Vault (DECISÃO)
+
 **Prós**
+
 - PaaS maduro para aplicações HTTP (autoscale básico, slots de deploy).
 - Deploy direto de container ou build integrado (flexibilidade).
 - PostgreSQL Flexible Server: backups, HA opcional, performance configurável.
@@ -41,24 +43,28 @@ Escolher um conjunto mínimo de serviços de infraestrutura que atenda aos requi
 - Entra ID B2C: fluxo de autenticação de usuários finais sem construir Identity internamente.
 - Integração nativa entre serviços (diagnostics, logging centralizado) sem esforço inicial.
 - Permite manter código da aplicação essencialmente neutro (HTTP + pg driver + abstrações).
-**Contras**
+  **Contras**
 - Custo um pouco maior que um único Droplet + DB self-managed.
 - Some vendor coupling em modelos de identity (claims/flows B2C) e segredos (Key Vault APIs) – mitigável via abstrações.
 - Escala horizontal mais cara que container-based bare metal / providers alternativos para picos abruptos.
 
 ### B. Azure Container Apps + PostgreSQL Flexible + Key Vault + Entra ID B2C
+
 **Prós**: Melhor granularidade de escala (scale to zero), sidecars, Dapr opcional.  
 **Contras**: Complexidade maior de configuração inicial; sobrecarga desnecessária agora; latência fria potencial (scale-to-zero) não crítica para MVP.
 
 ### C. DigitalOcean Droplet (App + pg) ou Droplet + Managed PostgreSQL
+
 **Prós**: Custo inicial menor; simplicidade operacional (1-2 recursos).  
 **Contras**: Mais responsabilidade de sistema (patching SO se DB no mesmo droplet); ecossistema menor de serviços gerenciados (sem equivalente direto a B2C). Migração futura para features avançadas exigiria ajustes.
 
 ### D. AWS Fargate / ECS + RDS PostgreSQL + Secrets Manager + Cognito
+
 **Prós**: Plataforma ampla, escalabilidade alta, parallels com Azure stack.  
 **Contras**: Curva de aprendizado (ECS task definitions, networking); custo potencialmente maior em baixa escala; mais verbose para primeira entrega.
 
 ### E. EC2 / VM Genérica + PostgreSQL self-managed + Vault (self-host) / arquivos env
+
 **Prós**: Custo potencial mínimo; controle total.  
 **Contras**: Alto esforço operacional (patches, backups, hardening); risco de falhas de disponibilidade; distração do foco principal (produto).
 
@@ -78,25 +84,27 @@ Adotar o conjunto: **Azure App Service (container)** + **Azure Database for Post
 ## Consequências
 
 ### Positivas
+
 - Menor tempo até o primeiro deploy funcional.
 - Redução de riscos de perda de dados (backups automáticos PostgreSQL).
 - Canal futuro claro para rotação de segredos (Key Vault) sem refatorar core.
 - Simplificação de login de usuários sem stack de Identity interna.
 
 ### Negativas
+
 - Dependência nas particularidades de configuração B2C (nomenclatura de atributos, política de fluxo) – abstração necessária.
 - Custos fixos mínimos superiores a uma VM única de baixo custo.
 - Eventual necessidade de ajuste se latência fria ou escala fina for requisito mais à frente (nesse caso Container Apps ou Functions).
 
 ## Mitigações de Lock-in
 
-| Área | Risco | Mitigação Técnica | Status |
-|------|-------|-------------------|--------|
-| Segredos | Uso direto de SDK Key Vault em toda a codebase | Introduzir `ISecretsProvider` adaptador; implementação Azure & fallback env | Pendente |
-| Auth | Dependência de claims específicos B2C | `IAuthTokenValidator` parse genérico JWT + mapeamento claims → objeto Principal | Pendente |
-| Storage | Feature específica de PostgreSQL (extensões não portáveis) | Limitar inicialmente a funcionalidades padrão + JSONB; avaliar extensões caso a caso | Em uso |
-| Logs | Formato vendor (App Insights) | Manter logger stdout estruturado (JSON) consumível por qualquer agregador | Em uso |
-| Config | Variáveis com prefixos provider específicos | Continuar namespacing neutro (`HTTP_`, `DB_`, `AUTH_`, `SECRETS_`) | Em uso |
+| Área     | Risco                                                      | Mitigação Técnica                                                                    | Status   |
+| -------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------- |
+| Segredos | Uso direto de SDK Key Vault em toda a codebase             | Introduzir `ISecretsProvider` adaptador; implementação Azure & fallback env          | Pendente |
+| Auth     | Dependência de claims específicos B2C                      | `IAuthTokenValidator` parse genérico JWT + mapeamento claims → objeto Principal      | Pendente |
+| Storage  | Feature específica de PostgreSQL (extensões não portáveis) | Limitar inicialmente a funcionalidades padrão + JSONB; avaliar extensões caso a caso | Em uso   |
+| Logs     | Formato vendor (App Insights)                              | Manter logger stdout estruturado (JSON) consumível por qualquer agregador            | Em uso   |
+| Config   | Variáveis com prefixos provider específicos                | Continuar namespacing neutro (`HTTP_`, `DB_`, `AUTH_`, `SECRETS_`)                   | Em uso   |
 
 ## Plano de Implementação (Incremental)
 
@@ -118,6 +126,7 @@ Adotar o conjunto: **Azure App Service (container)** + **Azure Database for Post
 ## Critérios de Revisão Futuras
 
 Rever esta decisão quando ocorrer um ou mais:
+
 - Pico > 10x usuários esperados ou necessidade de scale-to-zero.
 - Requisito de custo ultra baixo que justifique troca para provider mais simples.
 - Introdução de eventos/streams que demandem outra plataforma (ex: Event Hub / Kafka).
@@ -131,18 +140,19 @@ Rever esta decisão quando ocorrer um ou mais:
 
 ## Alternativas Rejeitadas (Resumo)
 
-| Opção | Motivo Principal de Rejeição Agora |
-|-------|-----------------------------------|
-| Container Apps | Overhead inicial desnecessário & complexidade extra |
-| DO Droplet | Mais operação manual / menos serviços gerenciados integrados |
-| AWS ECS/Fargate | Curva de aprendizado + tooling extra neste momento |
-| VM Genérica | Operação e segurança onerosa ao time pequeno |
+| Opção           | Motivo Principal de Rejeição Agora                           |
+| --------------- | ------------------------------------------------------------ |
+| Container Apps  | Overhead inicial desnecessário & complexidade extra          |
+| DO Droplet      | Mais operação manual / menos serviços gerenciados integrados |
+| AWS ECS/Fargate | Curva de aprendizado + tooling extra neste momento           |
+| VM Genérica     | Operação e segurança onerosa ao time pequeno                 |
 
 ## Acompanhamento
 
 Este ADR deve ser revisado em: 2026-02-15. Antes se surgir necessidade.
 
 ---
+
 **Autor:** Equipe OrçaSonhos  
 **Revisão:** 2026-02-15  
 **Status:** Aceito

@@ -61,10 +61,13 @@ exports.up = (pgm) => {
   pgm.createIndex('goals', 'budget_id');
   pgm.createIndex('goals', 'deadline');
   pgm.createIndex('goals', ['budget_id', 'is_deleted']);
-  
+
   // Add constraint to ensure accumulated amount doesn't exceed total amount
-  pgm.addConstraint('goals', 'goals_accumulated_amount_check', 
-    'CHECK (accumulated_amount <= total_amount)');
+  pgm.addConstraint(
+    'goals',
+    'goals_accumulated_amount_check',
+    'CHECK (accumulated_amount <= total_amount)',
+  );
 };
 
 /**

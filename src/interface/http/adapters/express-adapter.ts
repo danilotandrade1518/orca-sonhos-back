@@ -86,10 +86,13 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
             return;
           }
           res.end();
-        } catch {
+        } catch (err) {
+          const originalErr = err;
           const errorHandled = await errorHandlerMiddleware(
             httpReq,
-            async () => ({ status: 500 }),
+            async () => {
+              throw originalErr;
+            },
           );
           res.status(errorHandled.status);
           if (errorHandled.body) {
@@ -120,6 +123,10 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
           throw new Error(`Unsupported method ${route.method}`);
       }
     });
+  }
+
+  addGlobalMiddleware(mw: HttpMiddleware) {
+    this.globalMiddlewares.push(mw);
   }
 
   listen(port: number, callback?: () => void) {

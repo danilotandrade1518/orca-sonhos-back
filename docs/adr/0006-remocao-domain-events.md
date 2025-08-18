@@ -3,7 +3,7 @@
 **Status:** Aceito  
 **Data:** 2024-12-19  
 **Decisores:** Equipe de Desenvolvimento  
-**Contexto Técnico:** Simplificação arquitetural e aplicação do princípio YAGNI  
+**Contexto Técnico:** Simplificação arquitetural e aplicação do princípio YAGNI
 
 ## Contexto
 
@@ -28,10 +28,12 @@ Durante o desenvolvimento do projeto Orca Sonhos, implementamos inicialmente uma
 ### Cenários de Uso dos Domain Events
 
 1. **Atualização de saldos após transações**
+
    - Atual: Transaction dispara TransactionCreatedEvent → Handler atualiza Account
    - Simples: Use Case atualiza Account diretamente ou via Unit of Work
 
 2. **Operações cross-aggregate**
+
    - Atual: Evento comunica entre agregados
    - Simples: Unit of Work para operações atômicas, Domain Services para regras complexas
 
@@ -41,12 +43,12 @@ Durante o desenvolvimento do projeto Orca Sonhos, implementamos inicialmente uma
 
 ### Benefícios Esperados vs Realidade
 
-| Benefício Esperado | Realidade do Projeto |
-|-------------------|---------------------|
+| Benefício Esperado             | Realidade do Projeto                                                          |
+| ------------------------------ | ----------------------------------------------------------------------------- |
 | Desacoplamento entre agregados | A maioria das operações é simples e não precisa deste nível de desacoplamento |
-| Facilitar testes | Na verdade, complicou os testes com necessidade de verificar eventos |
-| Extensibilidade | Premature optimization - não temos necessidades complexas ainda |
-| Auditoria e monitoramento | Pode ser implementado de forma mais simples quando necessário |
+| Facilitar testes               | Na verdade, complicou os testes com necessidade de verificar eventos          |
+| Extensibilidade                | Premature optimization - não temos necessidades complexas ainda               |
+| Auditoria e monitoramento      | Pode ser implementado de forma mais simples quando necessário                 |
 
 ## Decisão
 
@@ -55,15 +57,18 @@ Durante o desenvolvimento do projeto Orca Sonhos, implementamos inicialmente uma
 ### O que será removido:
 
 1. **Infraestrutura de eventos**
+
    - Interfaces: `IDomainEvent`, `IEventHandler`, `IEventPublisher`
    - Implementações: `EventPublisher` com EventEmitter2
    - Configurações: Setup do EventEmitter2
 
 2. **Event Handlers**
+
    - `UpdateAccountBalanceHandler`
    - Outros handlers implementados
 
 3. **Event Accumulators nos agregados**
+
    - Métodos `addEvent()`, `getEvents()`, `clearEvents()`
    - Arrays de eventos em entidades
 
@@ -103,16 +108,19 @@ Durante o desenvolvimento do projeto Orca Sonhos, implementamos inicialmente uma
 ## Estratégia de Implementação
 
 ### Fase 1: Remoção da infraestrutura
+
 1. Remover interfaces e implementações de eventos
 2. Limpar dependências do EventEmitter2
 3. Atualizar documentação arquitetural
 
 ### Fase 2: Refatoração dos Use Cases
+
 1. Simplificar Use Cases removendo lógica de eventos
 2. Implementar operações diretas ou via Unit of Work
 3. Atualizar testes correspondentes
 
 ### Fase 3: Limpeza dos agregados
+
 1. Remover event accumulators das entidades
 2. Simplificar métodos de criação e atualização
 3. Focar regras de negócio essenciais
@@ -120,12 +128,15 @@ Durante o desenvolvimento do projeto Orca Sonhos, implementamos inicialmente uma
 ## Alternativas Consideradas
 
 ### 1. Manter apenas eventos essenciais
+
 **Rejeitada**: Ainda adiciona complexidade sem benefício claro
 
 ### 2. Implementar eventos síncronos simples
+
 **Rejeitada**: Unit of Work já resolve as necessidades de atomicidade
 
 ### 3. Eventos futuros com observabilidade
+
 **Aceita como evolução futura**: Quando tivermos necessidades reais de monitoramento e auditoria
 
 ## Plano de Evolução Futura
@@ -149,6 +160,7 @@ Poderemos **reintroduzir Domain Events** de forma gradual e justificada, aplican
 ---
 
 **Referências:**
+
 - ADR-0003: Escolha EventEmitter2 Domain Events (agora obsoleto)
 - Clean Architecture principles
 - Domain-Driven Design patterns

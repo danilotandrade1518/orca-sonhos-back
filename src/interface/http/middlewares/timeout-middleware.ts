@@ -7,10 +7,13 @@ export function createTimeoutMiddleware(ms: number): HttpMiddleware {
     let timer: ReturnType<typeof setTimeout> | null = null;
     return await Promise.race<ReturnType<typeof next>>([
       (async () => {
-        const res = await next();
-        finished = true;
-        if (timer) clearTimeout(timer);
-        return res;
+        try {
+          const res = await next();
+          return res;
+        } finally {
+          finished = true;
+          if (timer) clearTimeout(timer);
+        }
       })(),
       new Promise((resolve) => {
         timer = setTimeout(() => {

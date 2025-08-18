@@ -18,6 +18,22 @@ const envSchema = z.object({
   DB_USER: z.string().min(1),
   DB_PASSWORD: z.string().min(1),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  CATEGORY_ID_ADJUSTMENT: z
+    .string()
+    .uuid()
+    .default('00000000-0000-0000-0000-000000000001'),
+  CATEGORY_ID_TRANSFER: z
+    .string()
+    .uuid()
+    .default('00000000-0000-0000-0000-000000000002'),
+  AUTH_REQUIRED: z
+    .string()
+    .transform((v) => v === 'true')
+    .default('true'),
+  AUTH_JWKS_URI: z.string().url().optional(),
+  AUTH_ISSUER: z.string().optional(),
+  AUTH_AUDIENCE: z.string().optional(),
+  AUTH_USER_ID_CLAIM: z.string().default('sub'),
 });
 
 export type Env = z.infer<typeof envSchema>;

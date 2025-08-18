@@ -30,10 +30,12 @@ npm test:coverage
 ```
 
 ## Scripts úteis
+
 - `npm run lint` — Lint do código
 - `npm run format` — Formata o código com Prettier
 
 ## Contribuição
+
 - Siga o padrão de código (ESLint/Prettier)
 - Crie testes para novas funcionalidades
 - Use variáveis de ambiente conforme `.env.example`
@@ -41,4 +43,4 @@ npm test:coverage
 ## Migrations
 
 - As migrations do banco são gerenciadas com [umzug](https://github.com/sequelize/umzug).
-- Para rodar as migrations, utilize o script npm correspondente (ver abaixo). 
+- Para rodar as migrations, utilize o script npm correspondente (ver abaixo).

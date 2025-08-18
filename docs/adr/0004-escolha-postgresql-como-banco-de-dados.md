@@ -19,16 +19,19 @@ O projeto OrçaSonhos é um sistema de gestão financeira pessoal que precisa de
 O OrçaSonhos possui as seguintes características que influenciam a escolha do banco:
 
 1. **Estrutura Relacional Forte**
+
    - Hierarquia: Orçamentos → Contas → Transações
    - Relacionamentos complexos: Usuários ↔ Orçamentos (many-to-many)
    - Integridade referencial crítica
 
 2. **Dados Financeiros**
+
    - Precisão decimal obrigatória para valores monetários
    - Consistência transacional (transferências entre contas)
    - Auditoria e rastreabilidade
 
 3. **Consultas Complexas**
+
    - Relatórios por período, categoria, conta
    - Agregações (somas, médias, tendências)
    - Análises temporais para metas
@@ -41,7 +44,9 @@ O OrçaSonhos possui as seguintes características que influenciam a escolha do 
 ## Opções Consideradas
 
 ### 1. PostgreSQL
+
 **Prós:**
+
 - ACID completo com transações robustas
 - Tipos de dados avançados (DECIMAL, JSONB, ENUM)
 - Performance excelente em consultas analíticas
@@ -51,28 +56,35 @@ O OrçaSonhos possui as seguintes características que influenciam a escolha do 
 - Open source com comunidade ativa
 
 **Contras:**
+
 - Curva de aprendizado ligeiramente maior
 - Consumo de memória um pouco maior que MySQL
 
 ### 2. MySQL
+
 **Prós:**
+
 - Popularidade e documentação abundante
 - Performance boa para operações simples
 - Ecosystem conhecido
 
 **Contras:**
+
 - Suporte a JSON limitado (melhor apenas na versão 8.0+)
 - Window functions chegaram tarde (8.0)
 - Tipos DECIMAL menos precisos
 - Integração com TypeORM menos robusta
 
 ### 3. MongoDB
+
 **Prós:**
+
 - Flexibilidade de schema
 - Performance em operações simples
 - Suporte nativo a JSON
 
 **Contras:**
+
 - Sem ACID multi-documento (crítico para finanças)
 - Consultas analíticas complexas são verbosas
 - Relacionamentos não são o forte
@@ -86,29 +98,33 @@ O OrçaSonhos possui as seguintes características que influenciam a escolha do 
 ### Justificativas Principais
 
 1. **Integridade Financeira**
+
    - ACID completo garante consistência em transferências
    - Transações robustas para operações críticas
    - Constraints e triggers para validações
 
 2. **Tipos de Dados Ideais**
+
    ```sql
    -- Precisão monetária
    amount DECIMAL(15,2) NOT NULL
-   
+
    -- Enums tipados
    transaction_type transaction_type_enum NOT NULL
-   
+
    -- Dados semi-estruturados eficientes
    participant_ids JSONB NOT NULL DEFAULT '[]'::jsonb
    ```
 
 3. **Performance Analítica**
+
    - Window functions para análises temporais
    - CTEs para relatórios complexos
    - Índices GIN para campos JSON
    - Particionamento para grandes volumes
 
 4. **Ecosystem TypeScript**
+
    - TypeORM com suporte excelente
    - Drivers maduros (pg, pg-pool)
    - Types bem definidos
@@ -137,6 +153,7 @@ O OrçaSonhos possui as seguintes características que influenciam a escolha do 
 ## Implementação
 
 ### Stack Tecnológica
+
 ```typescript
 // Banco de Dados
 PostgreSQL 15+
@@ -152,6 +169,7 @@ pg-pool com configuração otimizada
 ```
 
 ### Estrutura Base
+
 ```sql
 -- Exemplo de tabela otimizada
 CREATE TABLE transactions (
@@ -173,6 +191,7 @@ CREATE INDEX idx_transactions_metadata ON transactions USING GIN (metadata);
 ## Revisão
 
 Este ADR deve ser revisado em 6 meses para avaliar:
+
 - Performance real em produção
 - Facilidade de desenvolvimento
 - Escalabilidade observada

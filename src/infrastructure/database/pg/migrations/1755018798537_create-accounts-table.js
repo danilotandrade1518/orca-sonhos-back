@@ -13,7 +13,7 @@ exports.up = (pgm) => {
     'CHECKING_ACCOUNT',
     'SAVINGS_ACCOUNT',
     'INVESTMENT_ACCOUNT',
-    'CASH'
+    'CASH',
   ]);
 
   pgm.createTable('accounts', {

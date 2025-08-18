@@ -59,14 +59,23 @@ exports.up = (pgm) => {
   // Create indexes for better query performance
   pgm.createIndex('credit_cards', 'budget_id');
   pgm.createIndex('credit_cards', ['budget_id', 'is_deleted']);
-  
+
   // Add constraints for day validation
-  pgm.addConstraint('credit_cards', 'credit_cards_closing_day_check', 
-    'CHECK (closing_day >= 1 AND closing_day <= 31)');
-  pgm.addConstraint('credit_cards', 'credit_cards_due_day_check', 
-    'CHECK (due_day >= 1 AND due_day <= 31)');
-  pgm.addConstraint('credit_cards', 'credit_cards_limit_check', 
-    'CHECK (credit_limit >= 0)');
+  pgm.addConstraint(
+    'credit_cards',
+    'credit_cards_closing_day_check',
+    'CHECK (closing_day >= 1 AND closing_day <= 31)',
+  );
+  pgm.addConstraint(
+    'credit_cards',
+    'credit_cards_due_day_check',
+    'CHECK (due_day >= 1 AND due_day <= 31)',
+  );
+  pgm.addConstraint(
+    'credit_cards',
+    'credit_cards_limit_check',
+    'CHECK (credit_limit >= 0)',
+  );
 };
 
 /**

@@ -12,9 +12,7 @@ import { InsufficientPermissionsError } from '../../../shared/errors/Insufficien
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { DeleteEnvelopeDto } from './DeleteEnvelopeDto';
 
-export class DeleteEnvelopeUseCase
-  implements IUseCase<DeleteEnvelopeDto>
-{
+export class DeleteEnvelopeUseCase implements IUseCase<DeleteEnvelopeDto> {
   constructor(
     private readonly getEnvelopeRepository: IGetEnvelopeRepository,
     private readonly saveEnvelopeRepository: ISaveEnvelopeRepository,

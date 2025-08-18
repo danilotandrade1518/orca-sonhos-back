@@ -30,7 +30,11 @@ export function mapErrorsToHttp(
 
 function determineStatus(errors: (DomainError | ApplicationError)[]): number {
   if (errors.some((e) => /NotFound/i.test(e.name))) return 404;
-  if (errors.some((e) => /Unauthorized|Forbidden|Authorization/i.test(e.name)))
+  if (
+    errors.some((e) =>
+      /Unauthorized|Forbidden|Authorization|AuthToken/i.test(e.name),
+    )
+  )
     return 403;
   return 400;
 }

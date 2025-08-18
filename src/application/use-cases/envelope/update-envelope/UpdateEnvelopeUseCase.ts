@@ -11,9 +11,7 @@ import { InsufficientPermissionsError } from '../../../shared/errors/Insufficien
 import { IUseCase, UseCaseResponse } from '../../../shared/IUseCase';
 import { UpdateEnvelopeDto } from './UpdateEnvelopeDto';
 
-export class UpdateEnvelopeUseCase
-  implements IUseCase<UpdateEnvelopeDto>
-{
+export class UpdateEnvelopeUseCase implements IUseCase<UpdateEnvelopeDto> {
   constructor(
     private readonly getEnvelopeRepository: IGetEnvelopeRepository,
     private readonly saveEnvelopeRepository: ISaveEnvelopeRepository,

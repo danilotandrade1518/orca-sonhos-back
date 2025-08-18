@@ -28,7 +28,12 @@ describe('TransferBetweenEnvelopesService', () => {
     const source = makeEnvelope(budgetId, 10000, 5000);
     const target = makeEnvelope(budgetId, 10000, 1000);
 
-    const result = service.createTransferOperation(source, target, 2000, budgetId);
+    const result = service.createTransferOperation(
+      source,
+      target,
+      2000,
+      budgetId,
+    );
 
     expect(result.hasError).toBe(false);
     expect(source.currentBalance).toBe(3000);
@@ -39,7 +44,12 @@ describe('TransferBetweenEnvelopesService', () => {
     const source = makeEnvelope(budgetId, 10000, 5000);
     const target = makeEnvelope(EntityId.create().value!.id, 10000, 1000);
 
-    const result = service.createTransferOperation(source, target, 1000, budgetId);
+    const result = service.createTransferOperation(
+      source,
+      target,
+      1000,
+      budgetId,
+    );
 
     expect(result.hasError).toBe(true);
   });
@@ -57,7 +67,12 @@ describe('TransferBetweenEnvelopesService', () => {
     const source = makeEnvelope(budgetId, 10000, 500);
     const target = makeEnvelope(budgetId, 10000, 1000);
 
-    const result = service.createTransferOperation(source, target, 1000, budgetId);
+    const result = service.createTransferOperation(
+      source,
+      target,
+      1000,
+      budgetId,
+    );
 
     expect(result.hasError).toBe(true);
     expect(result.errors[0]).toBeInstanceOf(InsufficientEnvelopeBalanceError);
@@ -67,7 +82,12 @@ describe('TransferBetweenEnvelopesService', () => {
     const source = makeEnvelope(budgetId, 10000, 8000);
     const target = makeEnvelope(budgetId, 10000, 9000);
 
-    const result = service.createTransferOperation(source, target, 2000, budgetId);
+    const result = service.createTransferOperation(
+      source,
+      target,
+      2000,
+      budgetId,
+    );
 
     expect(result.hasError).toBe(true);
     expect(result.errors[0]).toBeInstanceOf(EnvelopeLimitExceededError);

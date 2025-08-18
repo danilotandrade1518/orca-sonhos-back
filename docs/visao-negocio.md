@@ -1,4 +1,5 @@
 # 📘 Visão de Negócio – Or### 💡 Orçamento (Budget)
+
 - Representa um agrupamento de finanças com um objetivo ou perfil comum.
 - Pode ser **compartilhado** (ex: "Casa") ou **pessoal** (ex: "Viagem solo").
 - O usuário pode alternar entre diferentes orçamentos.
@@ -9,6 +10,7 @@
   - Saldo e controle por envelope
 
 #### 👥 Compartilhamento Simplificado
+
 - **Orçamentos compartilhados** permitem colaboração entre usuários.
 - **Adição direta**: Qualquer participante pode adicionar outros usuários ao orçamento sem necessidade de convites ou aprovações.
 - **Acesso total**: Todo usuário adicionado tem acesso completo ao orçamento (sem níveis de permissão).
@@ -39,6 +41,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 ## 🧭 Conceitos Centrais
 
 ### 💡 Orçamento (Budget)
+
 - Representa um agrupamento de finanças com um objetivo ou perfil comum.
 - Pode ser **compartilhado** (ex: “Casa”) ou **pessoal** (ex: “Viagem solo”).
 - O usuário pode alternar entre diferentes orçamentos.
@@ -49,6 +52,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
   - Saldo e controle por envelope
 
 ### 💸 Transações (Receitas e Despesas)
+
 - São os lançamentos manuais ou importados que alimentam o sistema.
 - Associadas a uma **categoria**, um **orçamento** e uma **data**.
 - **Flexibilidade temporal**: O sistema permite transações com **data passada, presente ou futura** para máximo controle financeiro.
@@ -65,11 +69,13 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 - Cada transação possui uma **forma de pagamento**, que pode incluir cartões de crédito.
 
 #### 💡 Impacto no Saldo:
+
 - **Transações Realizadas**: Afetam imediatamente o saldo atual, independente da data
 - **Transações Agendadas**: Não afetam o saldo atual, apenas aparecem nas projeções
 - **Transações Atrasadas**: Não afetam o saldo atual, mas são identificadas pelo sistema como pendentes
 
 ### 🗂️ Categorias
+
 - Organizam os lançamentos para permitir análise.
 - Baseadas no modelo 50-30-20:
   - **50%**: Necessidades (moradia, alimentação, transporte)
@@ -78,6 +84,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 - Usuários podem criar suas próprias categorias conforme necessidade.
 
 ### 🎯 Metas (Objetivos Financeiros)
+
 - São o coração do OrçaSonhos: **transformar sonhos em planos de ação financeiros.**
 - Cada meta é vinculada a um orçamento.
 - Parâmetros:
@@ -88,11 +95,13 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
   - Aportes manuais
 
 ### 💰 Envelopes (Orçamento Mensal por Categoria)
+
 - Definem limites de gastos por categoria.
 - Ajudam o usuário a **controlar o que pode gastar** em cada área.
 - Funcionam como subcontas dentro de um orçamento.
 
 ### 🏦 Contas (Accounts)
+
 - Representam **onde o dinheiro está fisicamente armazenado** antes de ser gasto ou após ser recebido.
 - **Dimensão complementar** aos orçamentos: orçamentos definem "para que uso", contas definem "onde está".
 - Cada conta mantém seu **saldo próprio** e histórico de movimentações.
@@ -105,6 +114,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
   - **Outros**: Tipos personalizados conforme necessidade
 
 #### Como funciona na prática:
+
 - **Toda transação** deve indicar de qual conta o dinheiro saiu/entrou
 - **Transferências** podem mover dinheiro entre contas (ex: saque no caixa)
 - **Reconciliação**: Saldos das contas devem bater com extratos reais
@@ -115,6 +125,7 @@ A proposta é unir **simplicidade, clareza e efetividade**, permitindo desde o c
 O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao controle de despesas**, seguindo o modelo:
 
 #### Como funciona:
+
 - Ao lançar uma **despesa**, o usuário seleciona a **forma de pagamento** como sendo um cartão (ex: “Cartão Nubank”).
 - O gasto é tratado como uma despesa comum, com sua **categoria normal** (ex: mercado, transporte), e entra no orçamento e relatórios normalmente.
 - Existe uma **área específica** para cada cartão, que mostra:
@@ -125,12 +136,14 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - O pagamento da fatura é **registrado como uma nova transação**, com categoria "Pagamento de Fatura" e origem em uma conta bancária ou orçamento.
 
 #### Benefícios:
+
 - Mantém a consistência nos relatórios por categoria
 - Permite controle real de limite e fatura
 - Não fragmenta a experiência de lançamento
 - Permite visão clara da fatura e pagamento
 
 ### 💳 Fatura de Cartão (CreditCardBill)
+
 - Agregado que representa uma fatura específica de um cartão de crédito.
 - Cada fatura tem:
   - Data de fechamento e vencimento
@@ -162,6 +175,7 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 ## 🧩 Casos de Uso Prioritários
 
 ### 👥 Gestão Familiar
+
 - Criar um orçamento compartilhado com parceiro(a)
 - Adicionar parceiro(a) diretamente ao orçamento (sem convites)
 - Definir metas comuns (ex: reforma da casa)
@@ -169,11 +183,13 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - Ambos participantes têm acesso total para lançar transações e gerenciar o orçamento
 
 ### 👤 Gestão Individual
+
 - Orçamento pessoal separado (ex: hobbies, presentes, cursos)
 - Meta pessoal (ex: comprar um notebook)
 - Controle de gastos pessoais sem impactar o casal
 
 ### 🔁 Planejamento Contínuo
+
 - Revisar gastos semanais/mensais
 - Ajustar envelopes e metas
 - Realocar valores entre orçamentos
@@ -182,13 +198,15 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 - **Projetar fluxo de caixa**: Visualizar entradas e saídas futuras para melhor planejamento
 
 ### 📅 Transações Futuras - Casos de Uso
+
 - **Receitas recorrentes**: Agendar salário do próximo mês
-- **Despesas fixas**: Contas de luz, água, internet com vencimento futuro  
+- **Despesas fixas**: Contas de luz, água, internet com vencimento futuro
 - **Planejamento de gastos**: Aniversários, viagens, compras planejadas
 - **Parcelas e financiamentos**: Controlar prestações futuras
 - **Gestão de metas**: Calcular quando objetivos serão atingidos com aportes manuais
 
 ### 📅 Transações Passadas - Casos de Uso
+
 - **Lançamento retroativo**: Cadastrar gastos esquecidos com data correta
 - **Conciliação bancária**: Registrar transações já realizadas no banco
 - **Controle de pendências**: Marcar contas vencidas que ainda não foram pagas
@@ -199,22 +217,22 @@ O OrçaSonhos permite **gerenciar cartões de crédito de forma integrada ao con
 
 ## 📚 Termos importantes para a IA Assistente
 
-| Termo | Significado |
-|-------|-------------|
-| **Orçamento** | Espaço virtual com categorias, transações, metas e envelopes. Pode ser compartilhado ou individual. |
-| **Categoria** | Tipo de gasto/receita (ex: alimentação, transporte, investimento). Organiza as transações. |
-| **Meta** | Objetivo financeiro (ex: comprar carro, fazer intercâmbio), com valor-alvo e prazo. |
-| **Envelope** | Limite de gastos por categoria dentro de um orçamento mensal. |
-| **Transação** | Registro de entrada ou saída de dinheiro. Pode ter data passada, presente ou futura. Deve sempre ter um valor, data, categoria e orçamento. |
-| **Transação Agendada** | Transação com data futura que ainda não foi efetivada. Útil para planejamento. |
-| **Transação Realizada** | Transação que já aconteceu e impacta o saldo atual. Pode ter qualquer data. |
-| **Transação Atrasada** | Transação com data passada que ainda não foi concluída/paga. |
-| **Conta** | Local físico onde o dinheiro está armazenado (conta bancária, carteira, etc.). Pode ter saldo negativo. |
-| **Cartão de Crédito** | Meio de pagamento com controle de limite e fatura. Não é tratado como conta bancária. |
-| **Fatura** | Conjunto de despesas em um cartão com data de fechamento e vencimento. |
-| **Pagamento de fatura** | Despesa pontual que representa a quitação da fatura do cartão. |
-| **Dashboard** | Tela com resumo financeiro de um orçamento ou da visão geral do usuário. |
-| **Usuário** | Pessoa que acessa a plataforma. Pode ter acesso a múltiplos orçamentos e metas. |
+| Termo                   | Significado                                                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Orçamento**           | Espaço virtual com categorias, transações, metas e envelopes. Pode ser compartilhado ou individual.                                         |
+| **Categoria**           | Tipo de gasto/receita (ex: alimentação, transporte, investimento). Organiza as transações.                                                  |
+| **Meta**                | Objetivo financeiro (ex: comprar carro, fazer intercâmbio), com valor-alvo e prazo.                                                         |
+| **Envelope**            | Limite de gastos por categoria dentro de um orçamento mensal.                                                                               |
+| **Transação**           | Registro de entrada ou saída de dinheiro. Pode ter data passada, presente ou futura. Deve sempre ter um valor, data, categoria e orçamento. |
+| **Transação Agendada**  | Transação com data futura que ainda não foi efetivada. Útil para planejamento.                                                              |
+| **Transação Realizada** | Transação que já aconteceu e impacta o saldo atual. Pode ter qualquer data.                                                                 |
+| **Transação Atrasada**  | Transação com data passada que ainda não foi concluída/paga.                                                                                |
+| **Conta**               | Local físico onde o dinheiro está armazenado (conta bancária, carteira, etc.). Pode ter saldo negativo.                                     |
+| **Cartão de Crédito**   | Meio de pagamento com controle de limite e fatura. Não é tratado como conta bancária.                                                       |
+| **Fatura**              | Conjunto de despesas em um cartão com data de fechamento e vencimento.                                                                      |
+| **Pagamento de fatura** | Despesa pontual que representa a quitação da fatura do cartão.                                                                              |
+| **Dashboard**           | Tela com resumo financeiro de um orçamento ou da visão geral do usuário.                                                                    |
+| **Usuário**             | Pessoa que acessa a plataforma. Pode ter acesso a múltiplos orçamentos e metas.                                                             |
 
 ---
 

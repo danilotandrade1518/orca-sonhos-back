@@ -71,14 +71,20 @@ exports.up = (pgm) => {
   pgm.createIndex('credit_card_bills', 'due_date');
   pgm.createIndex('credit_card_bills', ['credit_card_id', 'is_deleted']);
   pgm.createIndex('credit_card_bills', ['status', 'due_date']);
-  
+
   // Add constraint to ensure closing date is before due date
-  pgm.addConstraint('credit_card_bills', 'credit_card_bills_dates_check', 
-    'CHECK (closing_date < due_date)');
-  
+  pgm.addConstraint(
+    'credit_card_bills',
+    'credit_card_bills_dates_check',
+    'CHECK (closing_date < due_date)',
+  );
+
   // Add constraint to ensure paid_at is set when status is PAID
-  pgm.addConstraint('credit_card_bills', 'credit_card_bills_paid_status_check',
-    'CHECK ((status = \'PAID\' AND paid_at IS NOT NULL) OR (status != \'PAID\'))');
+  pgm.addConstraint(
+    'credit_card_bills',
+    'credit_card_bills_paid_status_check',
+    "CHECK ((status = 'PAID' AND paid_at IS NOT NULL) OR (status != 'PAID'))",
+  );
 };
 
 /**

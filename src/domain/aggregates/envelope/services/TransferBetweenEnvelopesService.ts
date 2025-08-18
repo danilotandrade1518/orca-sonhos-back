@@ -21,7 +21,10 @@ export class TransferBetweenEnvelopesService {
     targetEnvelope: Envelope,
     amount: number,
     budgetId: string,
-  ): Either<DomainError, { sourceEnvelope: Envelope; targetEnvelope: Envelope }> {
+  ): Either<
+    DomainError,
+    { sourceEnvelope: Envelope; targetEnvelope: Envelope }
+  > {
     if (
       sourceEnvelope.budgetId !== budgetId ||
       targetEnvelope.budgetId !== budgetId ||

@@ -11,6 +11,7 @@ HTTP {status}
 ```
 
 Regras:
+
 1. `errors` nunca vazio.
 2. `traceId` == header `x-request-id`.
 3. Removido campo `success`.
@@ -18,6 +19,7 @@ Regras:
 5. Mensagens sem dados sensíveis (stack apenas em log).
 
 Status principais:
+
 - 400: validação/domínio
 - 403: autenticação/autorização
 - 404: não encontrado

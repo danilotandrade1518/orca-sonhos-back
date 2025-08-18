@@ -80,17 +80,17 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
     id: {
       type: 'uuid',
       primaryKey: true,
-      default: pgm.func('gen_random_uuid()')
+      default: pgm.func('gen_random_uuid()'),
     },
     name: {
       type: 'varchar(255)',
-      notNull: true
+      notNull: true,
     },
     created_at: {
       type: 'timestamptz',
       notNull: true,
-      default: pgm.func('NOW()')
-    }
+      default: pgm.func('NOW()'),
+    },
   });
 }
 
@@ -133,7 +133,6 @@ A classe `PostgreSQLConnection` fornece métodos para monitoramento:
 const db = PostgreSQLConnection.getInstance();
 
 console.log('Pool size:', db.getPoolSize());
-console.log('Idle connections:', db.getIdleCount()); 
+console.log('Idle connections:', db.getIdleCount());
 console.log('Waiting connections:', db.getWaitingCount());
-
 ```

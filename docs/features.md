@@ -296,7 +296,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 - ✅ Não pode excluir conta com transações ativas
 - ✅ Exclusão é lógica (soft delete)
 
-
 ---
 
 ### ✅ UC009: Transferir entre Contas
@@ -367,7 +366,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 - ✅ Diferença deve ser justificada
 - ✅ Transação de ajuste é claramente identificada
 - ✅ Histórico de reconciliações é mantido
-
 
 ---
 
@@ -453,7 +451,6 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 - ✅ Categoria deve ser do tipo EXPENSE
 - ✅ Conta deve ter saldo suficiente
 - ✅ Saldo da conta é decrementado
-
 
 ---
 
@@ -1381,7 +1378,7 @@ Este documento descreve todos os casos de uso (features) da aplicação OrçaSon
 
 ---
 
-##  **Estatísticas Finais**
+## **Estatísticas Finais**
 
 - **✅ Implementados**: 37 use cases (100%)
 - **❌ Não Implementados**: 0 use cases (0%)

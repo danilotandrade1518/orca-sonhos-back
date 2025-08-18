@@ -1,9 +1,11 @@
 # ADR 0002: Uso de Either nos Repositories com Jest Stubs
 
 ## Status
+
 Aceito
 
 ## Contexto
+
 Inicialmente, implementamos repositories que retornavam `Promise<void>` e lançavam exceções. Porém, ao analisar a arquitetura do projeto, percebemos que:
 
 1. Todo o domain layer utiliza `Either` extensivamente
@@ -12,6 +14,7 @@ Inicialmente, implementamos repositories que retornavam `Promise<void>` e lança
 4. Type safety e controle explícito de erros são prioritários
 
 ## Decisão
+
 Refatoramos para usar `Either` nos repositories:
 
 1. **Either nos Repositories**: Repositories retornam `Promise<Either<RepositoryError, T>>`
@@ -22,6 +25,7 @@ Refatoramos para usar `Either` nos repositories:
 ## Implementação
 
 ### Estrutura de Erro
+
 ```typescript
 export class RepositoryError extends DomainError {
   constructor(
@@ -35,6 +39,7 @@ export class RepositoryError extends DomainError {
 ```
 
 ### Repository Interface
+
 ```typescript
 export interface IAddBudgetRepository {
   execute(budget: Budget): Promise<Either<RepositoryError, void>>;
@@ -42,6 +47,7 @@ export interface IAddBudgetRepository {
 ```
 
 ### Repository Implementation (Infraestrutura)
+
 ```typescript
 export class BudgetRepository implements IAddBudgetRepository {
   async execute(budget: Budget): Promise<Either<RepositoryError, void>> {
@@ -51,8 +57,8 @@ export class BudgetRepository implements IAddBudgetRepository {
       either.setData(undefined);
     } catch (error) {
       const repositoryError = new RepositoryError(
-        'Failed to save budget', 
-        error
+        'Failed to save budget',
+        error,
       );
       either.addError(repositoryError);
     }
@@ -62,6 +68,7 @@ export class BudgetRepository implements IAddBudgetRepository {
 ```
 
 ### Use Case
+
 ```typescript
 const persistResult = await this.addBudgetRepository.execute(budget);
 if (persistResult.hasError) {
@@ -72,6 +79,7 @@ return ResponseBuilder.success(budget.id);
 ```
 
 ### Testes com Jest Stubs
+
 ```typescript
 // Stub simples
 export class AddBudgetRepositoryStub implements IAddBudgetRepository {
@@ -110,9 +118,10 @@ const executeSpy = jest
 - Maior consistência com padrões DDD e functional programming
 
 ## Dados
+
 - Data: 2024-12-19
 - Testes passando: 232/232
-- Arquivos alterados: 
+- Arquivos alterados:
   - `IAddBudgetRepository.ts` - Interface com Either
   - `RepositoryError.ts` - Erro específico criado
   - `CreateBudgetUseCase.ts` - Verificação de Either

@@ -20,18 +20,21 @@ Especificamente, o `CreateTransactionUseCase` estava utilizando `ISaveTransactio
 Decidimos separar as responsabilidades dos repositories em interfaces específicas por operação:
 
 ### IAddRepository (Criação)
+
 - **Propósito**: Persistir novas entidades no sistema
 - **Semântica**: Operações de INSERT no banco de dados
-- **Uso**: Use Cases de criação (Create*)
+- **Uso**: Use Cases de criação (Create\*)
 - **Exemplo**: `IAddTransactionRepository` usado por `CreateTransactionUseCase`
 
 ### ISaveRepository (Atualização)
+
 - **Propósito**: Atualizar entidades existentes
 - **Semântica**: Operações de UPDATE no banco de dados
-- **Uso**: Use Cases de modificação (Update*, Mark*, Cancel*)
+- **Uso**: Use Cases de modificação (Update*, Mark*, Cancel\*)
 - **Exemplo**: `ISaveTransactionRepository` usado por `MarkTransactionLateUseCase`
 
 ### Repositórios de Consulta (Existentes)
+
 - **IGetRepository**: Busca de entidades específicas por ID
 - **IFindRepository**: Consultas específicas de negócio
 
@@ -46,17 +49,22 @@ export interface IMarkTransactionLateRepository {
 }
 
 export interface ICancelScheduledTransactionRepository {
-  execute(transactionId: string, reason: string): Promise<Either<RepositoryError, void>>;
+  execute(
+    transactionId: string,
+    reason: string,
+  ): Promise<Either<RepositoryError, void>>;
 }
 ```
 
 **Problemas desta abordagem:**
+
 1. **Explosão de interfaces**: Cada operação específica geraria uma interface
 2. **Violação de responsabilidades**: Repository assumindo lógica de domínio
 3. **Dificuldade de manutenção**: Muitas interfaces para operações similares
 4. **Acoplamento forte**: Repository acoplado a regras específicas de negócio
 
 **✅ PREFERIR a abordagem atual:**
+
 - Use Cases manipulam entidades aplicando regras de domínio
 - Repositories genéricos (`IAdd`, `ISave`, `IGet`) para persistência
 - Separação clara entre lógica de domínio e persistência
@@ -95,10 +103,12 @@ export interface IGetTransactionRepository {
 ## Diretrizes de Design
 
 ### 1. Granularidade Adequada
+
 - **Repositories**: Devem ser **genéricos por operação** (Add, Save, Get, Find)
 - **Use Cases**: Devem ser **específicos por regra de negócio** (Create, MarkAsLate, Cancel)
 
 ### 2. Responsabilidades
+
 - **Repository**: Apenas persistência e recuperação de dados
 - **Use Case**: Orquestração e aplicação de regras de domínio
 - **Entity/Aggregate**: Encapsulamento das regras de negócio
@@ -114,7 +124,9 @@ export class MarkTransactionLateUseCase {
   ) {}
 
   async execute(dto: MarkTransactionLateDto) {
-    const transaction = await this.getTransactionRepository.execute(dto.transactionId);
+    const transaction = await this.getTransactionRepository.execute(
+      dto.transactionId,
+    );
     transaction.markAsLate(); // ← Regra de domínio na entidade
     await this.saveTransactionRepository.execute(transaction); // ← Persistência genérica
   }
@@ -179,9 +191,11 @@ export class MarkTransactionLateUseCase {
 ## Alternativas Consideradas
 
 1. **Repository Genérico com Flags**: Manter interface única com parâmetros indicando operação
+
    - Rejeitado: Manteria ambiguidade e violaria SRP
 
 2. **Métodos Separados na Mesma Interface**: `create()` e `update()` na mesma interface
+
    - Rejeitado: Violaria Interface Segregation Principle
 
 3. **Command Pattern**: Usar commands para operações

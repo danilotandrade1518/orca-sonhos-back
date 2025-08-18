@@ -63,15 +63,21 @@ exports.up = (pgm) => {
   pgm.createIndex('envelopes', 'category_id');
   pgm.createIndex('envelopes', ['budget_id', 'is_deleted']);
   pgm.createIndex('envelopes', ['budget_id', 'category_id']);
-  
+
   // Add constraint to ensure monthly_limit is positive
-  pgm.addConstraint('envelopes', 'envelopes_monthly_limit_check', 
-    'CHECK (monthly_limit > 0)');
-  
+  pgm.addConstraint(
+    'envelopes',
+    'envelopes_monthly_limit_check',
+    'CHECK (monthly_limit > 0)',
+  );
+
   // Add constraint to ensure current_balance doesn't exceed monthly_limit significantly
   // (allowing some flexibility for real-world scenarios)
-  pgm.addConstraint('envelopes', 'envelopes_balance_check', 
-    'CHECK (current_balance >= 0 AND current_balance <= monthly_limit * 2)');
+  pgm.addConstraint(
+    'envelopes',
+    'envelopes_balance_check',
+    'CHECK (current_balance >= 0 AND current_balance <= monthly_limit * 2)',
+  );
 };
 
 /**

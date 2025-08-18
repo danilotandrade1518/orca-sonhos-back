@@ -1,6 +1,7 @@
 # ADR-0003: Escolha da biblioteca EventEmitter2 para implementação de Domain Events
 
 ## Status
+
 ✅ **Aceito** (7 de janeiro de 2025)
 
 ## Contexto
@@ -28,21 +29,25 @@ Decidimos utilizar a biblioteca **EventEmitter2** para implementação dos Domai
 ## Alternativas Consideradas
 
 ### 1. EventEmitter2 ⭐⭐⭐⭐⭐ (ESCOLHIDA)
+
 - **Pros**: Wildcards, namespaces, TypeScript nativo, zero dependencies, familiar
 - **Cons**: Limitado a single process
 - **Adequação**: Perfeita para MVP e pode evoluir
 
 ### 2. Node.js EventEmitter (Nativo) ⭐⭐⭐
+
 - **Pros**: Zero dependencies, performance, bem conhecido
 - **Cons**: Limitado (sem wildcards/namespaces), TypeScript support básico
 - **Adequação**: Muito básico para nossas necessidades
 
 ### 3. @nestjs/cqrs ⭐⭐⭐⭐
+
 - **Pros**: CQRS completo, decorators, type-safe
 - **Cons**: Dependency do NestJS (usamos Express), mais pesado
 - **Adequação**: Overkill para nossa arquitetura atual
 
 ### 4. Implementação Custom ⭐⭐⭐
+
 - **Pros**: Controle total, learning experience
 - **Cons**: Tempo de desenvolvimento, necessita testes extensivos, reinventar a roda
 - **Adequação**: Não justifica o esforço
@@ -52,6 +57,7 @@ Decidimos utilizar a biblioteca **EventEmitter2** para implementação dos Domai
 ### Por que EventEmitter2?
 
 #### 1. **Funcionalidades Avançadas**
+
 ```typescript
 // Wildcards para capturar grupos de eventos
 emitter.on('Transaction.*', transactionAuditHandler);
@@ -63,6 +69,7 @@ emitter.on('Account.BalanceUpdated', notificationHandler);
 ```
 
 #### 2. **TypeScript Support Excelente**
+
 ```typescript
 // Type safety nativo
 const emitter = new EventEmitter2();
@@ -72,17 +79,20 @@ emitter.on('TransactionCreatedEvent', (event: TransactionCreatedEvent) => {
 ```
 
 #### 3. **Configuração Flexível**
+
 ```typescript
 const emitter = new EventEmitter2({
-  wildcard: true,        // Habilita wildcards
-  delimiter: '.',        // Separador para namespaces
-  maxListeners: 20,      // Controle de memory leaks
-  verboseMemoryLeak: true // Alertas de vazamentos
+  wildcard: true, // Habilita wildcards
+  delimiter: '.', // Separador para namespaces
+  maxListeners: 20, // Controle de memory leaks
+  verboseMemoryLeak: true, // Alertas de vazamentos
 });
 ```
 
 #### 4. **Migration Path Clara**
+
 A abstração via interfaces permite evolução futura:
+
 ```typescript
 // Atual: EventEmitter2
 export class EventEmitter2Publisher implements IEventPublisher
@@ -145,11 +155,13 @@ export class RabbitMQEventPublisher implements IEventPublisher
 ### 🔮 Plano de Evolução
 
 #### Fase 1 (Atual): EventEmitter2 In-Process
+
 - Implementação simples e direta
 - Handlers síncronos
 - Sem persistência de eventos
 
 #### Fase 2 (Futuro): Event Store
+
 ```typescript
 // Adicionar persistência de eventos
 await this.eventStore.save(events);
@@ -157,6 +169,7 @@ await this.eventPublisher.publish(events);
 ```
 
 #### Fase 3 (Escala): External Queues
+
 ```typescript
 // Migrar para SQS/RabbitMQ mantendo interfaces
 export class SQSEventPublisher implements IEventPublisher {
