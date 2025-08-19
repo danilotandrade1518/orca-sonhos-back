@@ -146,3 +146,16 @@ jobs:
             --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE
       - name: Show deployment outputs
         run: az deployment group show -g $AZURE_RESOURCE_GROUP -n $AZURE_DEPLOYMENT_NAME --query properties.outputs
+      - name: Run database migrations
+        env:
+          DB_HOST: ${{ env.POSTGRES_SERVER_NAME }}.postgres.database.azure.com
+          DB_PORT: 5432
+          DB_NAME: orcasonhos
+          DB_USER: ${{ secrets.PG_ADMIN_USER }}@${{ env.POSTGRES_SERVER_NAME }}
+          DB_PASSWORD: ${{ secrets.PG_ADMIN_PASSWORD }}
+          CATEGORY_ID_ADJUSTMENT: 00000000-0000-0000-0000-000000000001
+          CATEGORY_ID_TRANSFER: 00000000-0000-0000-0000-000000000002
+          NODE_ENV: production
+        run: |
+          npm ci --omit=dev=false
+          npm run migrate
