@@ -124,7 +124,7 @@ jobs:
       BICEP_FILE: infra/main.bicep
       BASE_NAME: orcasonhos-prod
       POSTGRES_SERVER_NAME: orcasonhosprodpg
-      AZURE_LOCATION: eastus
+      AZURE_LOCATION: brazilsouth
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -140,6 +140,8 @@ jobs:
           inlineScript: az version
       - name: Azure CLI version
         run: az version
+      - name: Show chosen location
+        run: echo "Using fixed AZURE_LOCATION=$AZURE_LOCATION"
       - name: Set IMAGE env (digest)
         run: echo "IMAGE=ghcr.io/${{ github.repository }}@${{ needs.docker-build-push.outputs.image-digest }}" >> $GITHUB_ENV
       - name: Create resource group
