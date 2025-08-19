@@ -16,8 +16,8 @@ param postgresServerName string
 param postgresVersion string = '16'
 @description('SKU do Postgres (ex: Standard_B1ms)')
 param postgresSkuName string = 'Standard_B1ms'
-@description('Tier do Postgres')
-param postgresTier string = 'GeneralPurpose'
+@description('Tier do Postgres (Burstable para SKUs Standard_B*, GeneralPurpose para Standard_D*, MemoryOptimized para Standard_E*)')
+param postgresTier string = 'Burstable' // Ajustado de GeneralPurpose -> Burstable para compatibilidade com Standard_B1ms (erro anterior ServerEditionIncompatibleWithSkuSize)
 @description('Storage MB Postgres')
 param postgresStorageMb int = 32768
 @description('Usuário administrador Postgres')
