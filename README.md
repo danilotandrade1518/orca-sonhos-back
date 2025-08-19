@@ -40,6 +40,14 @@ npm test:coverage
 - Crie testes para novas funcionalidades
 - Use variáveis de ambiente conforme `.env.example`
 
+### Observabilidade (MVP)
+
+Variáveis relevantes:
+
+- `DB_SLOW_QUERY_MS` (default 200): limiar em ms acima do qual uma query é logada como lenta (`category":"db.slow_query"`). Abaixo disso é logada em nível debug (`category":"db.query"`).
+
+Logs de mutações seguem par `mutation.start` / `mutation.end` com `durationMs` e `outcome`.
+
 ## Migrations
 
 - As migrations do banco são gerenciadas com [umzug](https://github.com/sequelize/umzug).

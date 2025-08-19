@@ -212,17 +212,26 @@ describe('ReconcileAccountUnitOfWork', () => {
         unexpectedError,
       );
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       const result =
         await unitOfWork.executeReconciliation(reconciliationParams);
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(ReconciliationExecutionError);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to rollback transaction:',
-        rollbackError,
-      );
+
+      const logged = (consoleSpy.mock.calls as unknown[][]).some((c) => {
+        try {
+          const obj = JSON.parse(c[0] as string);
+          return (
+            obj.msg === 'rollback_failure' &&
+            obj.operation === 'reconcile_account'
+          );
+        } catch {
+          return false;
+        }
+      });
+      expect(logged).toBe(true);
 
       consoleSpy.mockRestore();
     });

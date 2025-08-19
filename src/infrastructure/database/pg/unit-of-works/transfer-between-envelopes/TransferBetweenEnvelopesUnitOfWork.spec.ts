@@ -236,7 +236,7 @@ describe('TransferBetweenEnvelopesUnitOfWork', () => {
         .mockResolvedValueOnce(null) // BEGIN
         .mockRejectedValue(rollbackError); // ROLLBACK
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       const result = await unitOfWork.executeTransfer({
         sourceEnvelope,
@@ -245,12 +245,21 @@ describe('TransferBetweenEnvelopesUnitOfWork', () => {
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(EnvelopeTransferExecutionError);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to rollback transaction:',
-        rollbackError,
-      );
 
-      consoleErrorSpy.mockRestore();
+      const logged = (consoleSpy.mock.calls as unknown[][]).some((c) => {
+        try {
+          const obj = JSON.parse(c[0] as string);
+          return (
+            obj.msg === 'rollback_failure' &&
+            obj.operation === 'transfer_between_envelopes'
+          );
+        } catch {
+          return false;
+        }
+      });
+      expect(logged).toBe(true);
+
+      consoleSpy.mockRestore();
     });
 
     it('should execute operations in correct order', async () => {

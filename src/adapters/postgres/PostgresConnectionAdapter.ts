@@ -1,4 +1,6 @@
 import { Pool, PoolClient } from 'pg';
+import { logger } from '@shared/logging/logger';
+import { timedQuery } from '@shared/observability/db-timing';
 
 import {
   DatabaseConfig,
@@ -14,11 +16,22 @@ class DatabaseClientAdapter implements IDatabaseClient {
     text: string,
     params?: unknown[],
   ): Promise<QueryResultRow<T>> {
-    const result = await this.poolClient.query(text, params);
-    return {
-      rows: result.rows as T[],
-      rowCount: result.rowCount ?? 0,
+    let rows: T[] = [];
+    let rowCount = 0;
+    const exec = async () => {
+      const r = await this.poolClient.query(text, params);
+      rows = r.rows as T[];
+      rowCount = r.rowCount ?? 0;
+      return r;
     };
+    await timedQuery({
+      logger,
+      sql: text,
+      label: 'client_query',
+      exec,
+      rowCount: () => rowCount,
+    });
+    return { rows, rowCount };
   }
 
   release(): void {
@@ -55,11 +68,22 @@ export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
   ): Promise<QueryResultRow<T>> {
     const client = await this.pool.connect();
     try {
-      const result = await client.query(text, params);
-      return {
-        rows: result.rows as T[],
-        rowCount: result.rowCount ?? 0,
+      let rows: T[] = [];
+      let rowCount = 0;
+      const exec = async () => {
+        const r = await client.query(text, params);
+        rows = r.rows as T[];
+        rowCount = r.rowCount ?? 0;
+        return r;
       };
+      await timedQuery({
+        logger,
+        sql: text,
+        label: 'pool_query',
+        exec,
+        rowCount: () => rowCount,
+      });
+      return { rows, rowCount };
     } finally {
       client.release();
     }
@@ -68,12 +92,27 @@ export class PostgresConnectionAdapter implements IPostgresConnectionAdapter {
   async transaction<T>(callback: (client: unknown) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await timedQuery({
+        logger,
+        sql: 'BEGIN',
+        label: 'tx_begin',
+        exec: () => client.query('BEGIN'),
+      });
       const result = await callback(client as unknown);
-      await client.query('COMMIT');
+      await timedQuery({
+        logger,
+        sql: 'COMMIT',
+        label: 'tx_commit',
+        exec: () => client.query('COMMIT'),
+      });
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await timedQuery({
+        logger,
+        sql: 'ROLLBACK',
+        label: 'tx_rollback',
+        exec: () => client.query('ROLLBACK'),
+      });
       throw error;
     } finally {
       client.release();

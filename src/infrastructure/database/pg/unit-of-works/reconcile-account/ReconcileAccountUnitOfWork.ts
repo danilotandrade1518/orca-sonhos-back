@@ -12,6 +12,11 @@ import {
 } from '../../../../adapters/IPostgresConnectionAdapter';
 import { SaveAccountRepository } from '../../repositories/account/save-account-repository/SaveAccountRepository';
 import { AddTransactionRepository } from '../../repositories/transaction/add-transaction-repository/AddTransactionRepository';
+import { logger } from '@shared/logging/logger';
+import {
+  logMutationStart,
+  logMutationEnd,
+} from '@shared/observability/mutation-logger';
 
 export class ReconcileAccountUnitOfWork implements IReconcileAccountUnitOfWork {
   private readonly saveAccountRepository: SaveAccountRepository;
@@ -33,6 +38,12 @@ export class ReconcileAccountUnitOfWork implements IReconcileAccountUnitOfWork {
     transaction: Transaction;
   }): Promise<Either<DomainError | ApplicationError, void>> {
     const { account, transaction } = params;
+    const started = process.hrtime.bigint();
+    logMutationStart(logger, {
+      operation: 'reconcile_account',
+      entityType: 'account',
+      entityId: account.id,
+    });
 
     let client: IDatabaseClient;
 
@@ -73,7 +84,14 @@ export class ReconcileAccountUnitOfWork implements IReconcileAccountUnitOfWork {
 
       await client.query('COMMIT');
       client.release();
-
+      const ended = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'reconcile_account',
+        entityType: 'account',
+        entityId: account.id,
+        durationMs: Number(ended - started) / 1_000_000,
+        outcome: 'success',
+      });
       return Either.success<DomainError | ApplicationError, void>(undefined);
     } catch (error) {
       if (client!) {
@@ -81,10 +99,23 @@ export class ReconcileAccountUnitOfWork implements IReconcileAccountUnitOfWork {
           await client.query('ROLLBACK');
           client.release();
         } catch (rollbackError) {
-          console.error('Failed to rollback transaction:', rollbackError);
+          logger.error({
+            msg: 'rollback_failure',
+            operation: 'reconcile_account',
+            error: (rollbackError as Error).message,
+          });
         }
       }
-
+      const ended = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'reconcile_account',
+        entityType: 'account',
+        entityId: account.id,
+        durationMs: Number(ended - started) / 1_000_000,
+        outcome: 'error',
+        errorName: (error as Error).name,
+        errorMessage: (error as Error).message,
+      });
       return Either.error<DomainError | ApplicationError, void>(
         new ReconciliationExecutionError(
           'Unexpected error during reconciliation execution: ' +

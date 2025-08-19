@@ -57,3 +57,8 @@ export function loadEnv(raw: EnvVars = process.env): Env {
   cached = parsed.data;
   return cached;
 }
+
+// For tests: allow resetting cached environment between test cases.
+export function resetEnvCache() {
+  cached = null;
+}

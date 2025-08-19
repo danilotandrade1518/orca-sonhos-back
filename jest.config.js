@@ -32,5 +32,6 @@ module.exports = {
     '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
     '^@http/(.*)$': '<rootDir>/src/interface/http/$1',
     '^@main/(.*)$': '<rootDir>/src/main/$1',
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
   },
 };

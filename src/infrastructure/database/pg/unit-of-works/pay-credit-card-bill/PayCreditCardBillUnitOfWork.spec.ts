@@ -211,16 +211,26 @@ describe('PayCreditCardBillUnitOfWork', () => {
         unexpectedError,
       );
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       const result = await unitOfWork.executePayment(paymentParams);
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(PaymentExecutionError);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to rollback transaction:',
-        rollbackError,
-      );
+
+      // Assert that a structured rollback_failure log was emitted
+      const logged = (consoleSpy.mock.calls as unknown[][]).some((c) => {
+        try {
+          const obj = JSON.parse(c[0] as string);
+          return (
+            obj.msg === 'rollback_failure' &&
+            obj.operation === 'pay_credit_card_bill'
+          );
+        } catch {
+          return false;
+        }
+      });
+      expect(logged).toBe(true);
 
       consoleSpy.mockRestore();
     });

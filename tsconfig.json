@@ -36,7 +36,8 @@
       "@infrastructure/*": ["infrastructure/*"],
       "@http/*": ["interface/http/*"],
       "@main/*": ["main/*"],
-      "@either": ["shared/core/either.ts"]
+      "@either": ["shared/core/either.ts"],
+      "@shared/*": ["shared/*"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */

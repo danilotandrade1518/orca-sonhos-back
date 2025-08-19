@@ -11,6 +11,11 @@ import {
 } from '../../../../adapters/IPostgresConnectionAdapter';
 import { SaveCreditCardBillRepository } from '../../repositories/credit-card-bill/save-credit-card-bill-repository/SaveCreditCardBillRepository';
 import { AddTransactionRepository } from '../../repositories/transaction/add-transaction-repository/AddTransactionRepository';
+import { logger } from '@shared/logging/logger';
+import {
+  logMutationStart,
+  logMutationEnd,
+} from '@shared/observability/mutation-logger';
 
 export class PayCreditCardBillUnitOfWork
   implements IPayCreditCardBillUnitOfWork
@@ -34,6 +39,12 @@ export class PayCreditCardBillUnitOfWork
     bill: CreditCardBill;
   }): Promise<Either<DomainError, void>> {
     const { debitTransaction, bill } = params;
+    const started = process.hrtime.bigint();
+    logMutationStart(logger, {
+      operation: 'pay_credit_card_bill',
+      entityType: 'credit_card_bill',
+      entityId: bill.id, // assuming getter id
+    });
 
     let client: IDatabaseClient;
 
@@ -74,7 +85,14 @@ export class PayCreditCardBillUnitOfWork
 
       await client.query('COMMIT');
       client.release();
-
+      const ended = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'pay_credit_card_bill',
+        entityType: 'credit_card_bill',
+        entityId: bill.id,
+        durationMs: Number(ended - started) / 1_000_000,
+        outcome: 'success',
+      });
       return Either.success<DomainError, void>(undefined);
     } catch (error) {
       if (client!) {
@@ -82,10 +100,23 @@ export class PayCreditCardBillUnitOfWork
           await client.query('ROLLBACK');
           client.release();
         } catch (rollbackError) {
-          console.error('Failed to rollback transaction:', rollbackError);
+          logger.error({
+            msg: 'rollback_failure',
+            operation: 'pay_credit_card_bill',
+            error: (rollbackError as Error).message,
+          });
         }
       }
-
+      const ended = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'pay_credit_card_bill',
+        entityType: 'credit_card_bill',
+        entityId: bill.id,
+        durationMs: Number(ended - started) / 1_000_000,
+        outcome: 'error',
+        errorName: (error as Error).name,
+        errorMessage: (error as Error).message,
+      });
       return Either.error<DomainError, void>(
         new PaymentExecutionError(
           'Unexpected error during payment execution: ' +

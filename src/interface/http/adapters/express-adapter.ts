@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import { getMutationCounters } from '@shared/observability/mutation-metrics';
 import {
   HttpController,
   HttpMiddleware,
@@ -24,6 +25,10 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
 
   constructor() {
     this.app.use(express.json());
+    // Lightweight metrics endpoint (internal use) - no auth for now; protect via network layer
+    this.app.get('/internal/metrics/mutations', (_req, res) => {
+      res.json({ mutations: getMutationCounters() });
+    });
     // Configurable CORS (simple implementation, framework-agnostic behavior)
     if (process.env.CORS_ENABLED === 'true') {
       const originsRaw = process.env.CORS_ORIGINS || '*';

@@ -1,6 +1,9 @@
-import { loadEnv } from '../../../../config/env';
+import { loadEnv, resetEnvCache } from '../../../../config/env';
 
 describe('Env Category IDs', () => {
+  beforeEach(() => {
+    resetEnvCache();
+  });
   it('should load default category ids when not provided', () => {
     const env = loadEnv({
       NODE_ENV: 'test',

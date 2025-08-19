@@ -11,6 +11,11 @@ import {
 } from '../../../../adapters/IPostgresConnectionAdapter';
 import { SaveAccountRepository } from '../../repositories/account/save-account-repository/SaveAccountRepository';
 import { AddTransactionRepository } from '../../repositories/transaction/add-transaction-repository/AddTransactionRepository';
+import { logger } from '@shared/logging/logger';
+import {
+  logMutationStart,
+  logMutationEnd,
+} from '@shared/observability/mutation-logger';
 
 export class TransferBetweenAccountsUnitOfWork
   implements ITransferBetweenAccountsUnitOfWork
@@ -37,6 +42,12 @@ export class TransferBetweenAccountsUnitOfWork
   }): Promise<Either<DomainError, void>> {
     const { fromAccount, toAccount, debitTransaction, creditTransaction } =
       params;
+    const startTs = process.hrtime.bigint();
+    logMutationStart(logger, {
+      operation: 'transfer_between_accounts',
+      entityType: 'account',
+      entityId: fromAccount.id,
+    });
 
     let client: IDatabaseClient;
 
@@ -108,7 +119,14 @@ export class TransferBetweenAccountsUnitOfWork
 
       await client.query('COMMIT');
       client.release();
-
+      const endTs = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'transfer_between_accounts',
+        entityType: 'account',
+        entityId: fromAccount.id,
+        durationMs: Number(endTs - startTs) / 1_000_000,
+        outcome: 'success',
+      });
       return Either.success<DomainError, void>(undefined);
     } catch (error) {
       if (client!) {
@@ -119,7 +137,16 @@ export class TransferBetweenAccountsUnitOfWork
           console.error('Failed to rollback transaction:', rollbackError);
         }
       }
-
+      const endTs = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'transfer_between_accounts',
+        entityType: 'account',
+        entityId: fromAccount.id,
+        durationMs: Number(endTs - startTs) / 1_000_000,
+        outcome: 'error',
+        errorName: (error as Error).name,
+        errorMessage: (error as Error).message,
+      });
       return Either.error<DomainError, void>(
         new TransferExecutionError(
           'Unexpected error during transfer execution: ' +

@@ -9,6 +9,11 @@ import {
   IPostgresConnectionAdapter,
 } from '../../../../adapters/IPostgresConnectionAdapter';
 import { SaveEnvelopeRepository } from '../../repositories/envelope/save-envelope-repository/SaveEnvelopeRepository';
+import { logger } from '@shared/logging/logger';
+import {
+  logMutationStart,
+  logMutationEnd,
+} from '@shared/observability/mutation-logger';
 
 export class TransferBetweenEnvelopesUnitOfWork
   implements ITransferBetweenEnvelopesUnitOfWork
@@ -28,6 +33,12 @@ export class TransferBetweenEnvelopesUnitOfWork
     targetEnvelope: Envelope;
   }): Promise<Either<DomainError, void>> {
     const { sourceEnvelope, targetEnvelope } = params;
+    const started = process.hrtime.bigint();
+    logMutationStart(logger, {
+      operation: 'transfer_between_envelopes',
+      entityType: 'envelope',
+      entityId: sourceEnvelope.id,
+    });
 
     let client: IDatabaseClient | undefined;
 
@@ -71,7 +82,14 @@ export class TransferBetweenEnvelopesUnitOfWork
 
       await client.query('COMMIT');
       client.release();
-
+      const ended = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'transfer_between_envelopes',
+        entityType: 'envelope',
+        entityId: sourceEnvelope.id,
+        durationMs: Number(ended - started) / 1_000_000,
+        outcome: 'success',
+      });
       return Either.success<DomainError, void>(undefined);
     } catch (error) {
       if (client) {
@@ -79,10 +97,23 @@ export class TransferBetweenEnvelopesUnitOfWork
           await client.query('ROLLBACK');
           client.release();
         } catch (rollbackError) {
-          console.error('Failed to rollback transaction:', rollbackError);
+          logger.error({
+            msg: 'rollback_failure',
+            operation: 'transfer_between_envelopes',
+            error: (rollbackError as Error).message,
+          });
         }
       }
-
+      const ended = process.hrtime.bigint();
+      logMutationEnd(logger, {
+        operation: 'transfer_between_envelopes',
+        entityType: 'envelope',
+        entityId: sourceEnvelope.id,
+        durationMs: Number(ended - started) / 1_000_000,
+        outcome: 'error',
+        errorName: (error as Error).name,
+        errorMessage: (error as Error).message,
+      });
       return Either.error<DomainError, void>(
         new EnvelopeTransferExecutionError(
           'Unexpected error during envelope transfer execution: ' +
