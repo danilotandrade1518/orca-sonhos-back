@@ -124,7 +124,7 @@ jobs:
       BICEP_FILE: infra/main.bicep
       BASE_NAME: orcasonhos-prod
       POSTGRES_SERVER_NAME: orcasonhosprodpg
-      AZURE_LOCATION: brazilsouth
+      AZURE_LOCATION: chilecentral
     steps:
       - name: Checkout
         uses: actions/checkout@v4
