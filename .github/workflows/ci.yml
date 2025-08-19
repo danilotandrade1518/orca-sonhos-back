@@ -133,30 +133,31 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Ensure latest Azure CLI
+        uses: azure/cli@v2
+        with:
+          inlineScript: az version
       - name: Azure CLI version
         run: az version
       - name: Set IMAGE env (digest)
         run: echo "IMAGE=ghcr.io/${{ github.repository }}@${{ needs.docker-build-push.outputs.image-digest }}" >> $GITHUB_ENV
       - name: Create resource group
         run: az group create -n $AZURE_RESOURCE_GROUP -l brazilsouth
-      - name: What-if (non-blocking)
-        run: |
-          set +e
-          echo "Running what-if preview (non-blocking)..."
-          az deployment group what-if \
-            -g $AZURE_RESOURCE_GROUP \
-            --template-file $BICEP_FILE \
-            --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE || echo "what-if failed (possibly service/CLI bug) – continuing"
-          set -e
+      - name: Precompile Bicep
+        run: az bicep build --file $BICEP_FILE --outfile infra/compiled.json
       - name: Deploy infra (Bicep)
         run: |
           set -euo pipefail
           echo "Starting deployment (will retry once on transient CLI stream errors)..."
           for attempt in 1 2; do
+            TEMPLATE_PATH=$BICEP_FILE
+            # On second attempt use precompiled JSON to avoid potential stream reuse bug
+            if [ $attempt -eq 2 ]; then TEMPLATE_PATH=infra/compiled.json; fi
             if az deployment group create \
               -g $AZURE_RESOURCE_GROUP \
               -n $AZURE_DEPLOYMENT_NAME \
-              --template-file $BICEP_FILE \
+              --template-file $TEMPLATE_PATH \
+              --mode Incremental \
               --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE; then
               echo "Deployment succeeded on attempt $attempt"; break
             else
@@ -170,8 +171,8 @@ jobs:
                 az deployment group create \
                   -g $AZURE_RESOURCE_GROUP \
                   -n ${AZURE_DEPLOYMENT_NAME}-debug \
-                  --only-show-errors \
-                  --template-file $BICEP_FILE \
+                  --template-file infra/compiled.json \
+                  --mode Incremental \
                   --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE --debug || true
                 exit $status
               fi

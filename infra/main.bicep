@@ -124,7 +124,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 // Postgres Flexible Server
-resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
+resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' = {
   name: postgresServerName
   location: location
   sku: {
@@ -149,7 +149,7 @@ resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
 }
 
 // Database inside server
-resource pgDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
+resource pgDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2022-12-01' = {
   name: postgresDatabaseName
   parent: pg
   properties: {}
