@@ -18,8 +18,6 @@ param postgresVersion string = '16'
 param postgresSkuName string = 'Standard_B1ms'
 @description('Tier do Postgres')
 param postgresTier string = 'GeneralPurpose'
-@description('Capacidade (vCores) Postgres')
-param postgresSkuCapacity int = 1
 @description('Storage MB Postgres')
 param postgresStorageMb int = 32768
 @description('Usuário administrador Postgres')
@@ -99,9 +97,9 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
           name: 'APPINSIGHTS_ROLE_NAME'
           value: '${baseName}-api'
         }
-        if (appInsightsSampling > 0) {
+        {
           name: 'APPINSIGHTS_SAMPLING_PERCENTAGE'
-          value: string(appInsightsSampling)
+          value: string(appInsightsSampling == 0 ? 100 : appInsightsSampling)
         }
       ]
       alwaysOn: true
@@ -111,10 +109,9 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   identity: {
     type: 'SystemAssigned'
   }
-  dependsOn: [ plan ]
+  // dependsOn removido (implícito pelo serverFarmId)
 }
 
-// Application Insights (Workspace-based optional future; simple classic for now)
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${baseName}-ai'
   location: location
@@ -133,7 +130,6 @@ resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
   sku: {
     name: postgresSkuName
     tier: postgresTier
-    capacity: postgresSkuCapacity
   }
   properties: {
     version: postgresVersion
@@ -149,15 +145,13 @@ resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2023-03-01-preview' = {
     highAvailability: {
       mode: 'Disabled'
     }
-    network: {
-      publicNetworkAccess: 'Enabled'
-    }
   }
 }
 
 // Database inside server
 resource pgDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-03-01-preview' = {
-  name: '${pg.name}/${postgresDatabaseName}'
+  name: postgresDatabaseName
+  parent: pg
   properties: {}
 }
 
