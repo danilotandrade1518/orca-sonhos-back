@@ -48,6 +48,19 @@ Variáveis relevantes:
 
 Logs de mutações seguem par `mutation.start` / `mutation.end` com `durationMs` e `outcome`.
 
+### Application Insights
+
+Opcionalmente é possível habilitar o Azure Application Insights definindo as variáveis:
+
+| Variável                          | Descrição                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `APPINSIGHTS_CONNECTION_STRING`   | Connection string do recurso Application Insights (quando ausente, a instrumentação é ignorada). |
+| `APPINSIGHTS_ROLE_NAME`           | Nome lógico (cloud role) para filtrar no portal (default: `orca-sonhos-api`).                    |
+| `APPINSIGHTS_SAMPLING_PERCENTAGE` | Percentual de amostragem (0-100). Quando não definido, usa default do SDK.                       |
+| `APPINSIGHTS_DISABLED`            | Quando `true`, força desativação mesmo com connection string.                                    |
+
+O SDK é inicializado de forma idempotente em `src/shared/observability/app-insights.ts` e chamado no bootstrap (`src/index.ts`). Console logs, requests, dependências (PostgreSQL) e exceções são coletados automaticamente. Live Metrics está desabilitado por padrão.
+
 ## Migrations
 
 - As migrations do banco são gerenciadas com [umzug](https://github.com/sequelize/umzug).

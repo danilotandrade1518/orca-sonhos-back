@@ -13,10 +13,14 @@ import { loadEnv } from './config/env';
 import { DatabaseConfig } from './infrastructure/adapters/IPostgresConnectionAdapter';
 import { registerMutationRoutes } from './main/routes/route-registry';
 import swaggerDocument from './swagger.json';
+import { initAppInsights } from './shared/observability/app-insights';
 
 dotenv.config();
 const env = loadEnv();
 process.env.TZ = 'UTC';
+
+// Initialize Application Insights (no-op if not configured)
+initAppInsights();
 
 // Infra dependencies
 const dbConfig: DatabaseConfig = {

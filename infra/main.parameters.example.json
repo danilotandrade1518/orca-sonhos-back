@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "value": "orcasonhos-prod" },
+    "location": { "value": "brazilsouth" },
+    "containerImage": { "value": "ghcr.io/ORG/orca-sonhos-back:latest" },
+    "postgresServerName": { "value": "orcasonhosprodpg" },
+    "postgresAdminUser": { "value": "pgadmin" },
+    "postgresAdminPassword": { "value": "CHANGE_ME_SECURE" }
+  }
+}

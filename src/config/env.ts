@@ -34,6 +34,16 @@ const envSchema = z.object({
   AUTH_ISSUER: z.string().optional(),
   AUTH_AUDIENCE: z.string().optional(),
   AUTH_USER_ID_CLAIM: z.string().default('sub'),
+  APPINSIGHTS_CONNECTION_STRING: z.string().optional(),
+  APPINSIGHTS_ROLE_NAME: z.string().default('orca-sonhos-api'),
+  APPINSIGHTS_SAMPLING_PERCENTAGE: z
+    .string()
+    .regex(/^(100|[0-9]{1,2})(\.[0-9]+)?$/)
+    .optional(),
+  APPINSIGHTS_DISABLED: z
+    .string()
+    .transform((v) => v === 'true')
+    .optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
