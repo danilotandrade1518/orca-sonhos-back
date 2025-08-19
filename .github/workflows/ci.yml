@@ -124,6 +124,7 @@ jobs:
       BICEP_FILE: infra/main.bicep
       BASE_NAME: orcasonhos-prod
       POSTGRES_SERVER_NAME: orcasonhosprodpg
+      AZURE_LOCATION: eastus
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -142,7 +143,10 @@ jobs:
       - name: Set IMAGE env (digest)
         run: echo "IMAGE=ghcr.io/${{ github.repository }}@${{ needs.docker-build-push.outputs.image-digest }}" >> $GITHUB_ENV
       - name: Create resource group
-        run: az group create -n $AZURE_RESOURCE_GROUP -l brazilsouth
+        run: az group create -n $AZURE_RESOURCE_GROUP -l $AZURE_LOCATION
+      - name: Show policy assignments (non-blocking)
+        run: |
+          az policy assignment list --query "[].{name:name, scope:scope}" -o table || true
       - name: Precompile Bicep
         run: az bicep build --file $BICEP_FILE --outfile infra/compiled.json
       - name: Deploy infra (Bicep)
@@ -158,7 +162,7 @@ jobs:
               -n $AZURE_DEPLOYMENT_NAME \
               --template-file $TEMPLATE_PATH \
               --mode Incremental \
-              --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE; then
+              --parameters baseName=$BASE_NAME location=$AZURE_LOCATION postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE; then
               echo "Deployment succeeded on attempt $attempt"; break
             else
               status=$?
@@ -173,7 +177,7 @@ jobs:
                   -n ${AZURE_DEPLOYMENT_NAME}-debug \
                   --template-file infra/compiled.json \
                   --mode Incremental \
-                  --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE --debug || true
+                  --parameters baseName=$BASE_NAME location=$AZURE_LOCATION postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE --debug || true
                 exit $status
               fi
             fi
