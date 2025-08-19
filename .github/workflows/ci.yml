@@ -140,20 +140,6 @@ jobs:
           inlineScript: az version
       - name: Azure CLI version
         run: az version
-      - name: Ensure required resource providers registered
-        run: |
-          # Register Application Insights (microsoft.insights) and Postgres provider if not already
-          az provider register --namespace Microsoft.Insights || true
-          az provider register --namespace Microsoft.DBforPostgreSQL || true
-          echo "Waiting for provider registration (polling)..."
-          for rp in Microsoft.Insights Microsoft.DBforPostgreSQL; do
-            for i in {1..10}; do
-              state=$(az provider show --namespace $rp --query "registrationState" -o tsv || echo unknown)
-              echo "$rp state: $state"
-              if [ "$state" = "Registered" ]; then break; fi
-              sleep 10
-            done
-          done
       - name: Set IMAGE env (digest)
         run: echo "IMAGE=ghcr.io/${{ github.repository }}@${{ needs.docker-build-push.outputs.image-digest }}" >> $GITHUB_ENV
       - name: Create resource group
