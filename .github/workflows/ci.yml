@@ -137,13 +137,41 @@ jobs:
         run: echo "IMAGE=ghcr.io/${{ github.repository }}@${{ needs.docker-build-push.outputs.image-digest }}" >> $GITHUB_ENV
       - name: Create resource group
         run: az group create -n $AZURE_RESOURCE_GROUP -l brazilsouth
-      - name: Deploy infra (Bicep)
+      - name: Validate infra (Bicep)
         run: |
-          az deployment group create \
+          az deployment group validate \
             -g $AZURE_RESOURCE_GROUP \
-            -n $AZURE_DEPLOYMENT_NAME \
             --template-file $BICEP_FILE \
             --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE
+      - name: Deploy infra (Bicep)
+        run: |
+          set -euo pipefail
+          echo "Starting deployment (will retry once on transient CLI stream errors)..."
+          for attempt in 1 2; do
+            if az deployment group create \
+              -g $AZURE_RESOURCE_GROUP \
+              -n $AZURE_DEPLOYMENT_NAME \
+              --template-file $BICEP_FILE \
+              --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE; then
+              echo "Deployment succeeded on attempt $attempt"; break
+            else
+              status=$?
+              if [ $attempt -eq 1 ]; then
+                echo "Deployment attempt $attempt failed (exit $status). Possible transient 'content already consumed' issue. Retrying..." >&2
+                sleep 10
+              else
+                echo "Deployment failed after retry (exit $status)" >&2
+                echo "Re-running with --debug to capture diagnostics" >&2
+                az deployment group create \
+                  -g $AZURE_RESOURCE_GROUP \
+                  -n ${AZURE_DEPLOYMENT_NAME}-debug \
+                  --only-show-errors \
+                  --template-file $BICEP_FILE \
+                  --parameters baseName=$BASE_NAME postgresServerName=$POSTGRES_SERVER_NAME postgresAdminUser=${{ secrets.PG_ADMIN_USER }} postgresAdminPassword='${{ secrets.PG_ADMIN_PASSWORD }}' containerImage=$IMAGE --debug || true
+                exit $status
+              fi
+            fi
+          done
       - name: Show deployment outputs
         run: az deployment group show -g $AZURE_RESOURCE_GROUP -n $AZURE_DEPLOYMENT_NAME --query properties.outputs
       - name: Run database migrations
