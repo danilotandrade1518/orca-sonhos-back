@@ -1,0 +1,55 @@
+###############################
+# Production Dockerfile (multi-stage)
+# Target: minimal runtime image with only production deps and compiled JS
+###############################
+
+FROM node:22-alpine AS base
+WORKDIR /app
+ENV NODE_ENV=production \
+    TZ=UTC
+
+# ---------- Dependencies (full, for build) ----------
+FROM base AS deps
+COPY package*.json ./
+# Install all deps (including dev) for TypeScript build & type generation
+RUN npm ci
+
+# ---------- Build ----------
+FROM deps AS build
+COPY tsconfig*.json ./
+COPY src ./src
+COPY swagger.json ./
+RUN npm run build
+
+# ---------- Production deps only ----------
+FROM base AS prod-deps
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# ---------- Final Runtime ----------
+FROM node:22-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=3000 \
+    TZ=UTC
+
+# Add minimal tools for diagnostics & (optional) healthcheck
+RUN apk add --no-cache dumb-init wget
+
+# Create non-root user
+RUN addgroup -S app && adduser -S app -G app
+USER app
+
+# Copy production node_modules then built artifacts
+COPY --chown=app:app --from=prod-deps /app/node_modules ./node_modules
+COPY --chown=app:app package*.json ./
+COPY --chown=app:app --from=build /app/dist ./dist
+COPY --chown=app:app swagger.json ./swagger.json
+
+EXPOSE 3000
+
+# (Optional) simple healthcheck hitting /health (will succeed if server ready)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:3000/health || exit 1
+
+CMD ["dumb-init", "node", "dist/index.js"]
