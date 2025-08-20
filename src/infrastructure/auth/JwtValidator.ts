@@ -18,6 +18,8 @@ interface JwtValidatorConfig {
   userIdClaim: string;
   required: boolean;
   fetchFn?: typeof fetch; // allows test
+  jwksTtlMs?: number;
+  clockSkewSec?: number; // allowed clock skew for exp check
 }
 
 export class JwtValidator implements IJwtValidator {
@@ -59,7 +61,9 @@ export class JwtValidator implements IJwtValidator {
     if (this.cfg.audience && payload.aud !== this.cfg.audience)
       return Either.error(new AuthTokenInvalidError('Audience mismatch'));
 
-    if (Date.now() / 1000 > payload.exp)
+    const now = Date.now() / 1000;
+    const skew = this.cfg.clockSkewSec ?? 30;
+    if (now - skew > payload.exp)
       return Either.error(new AuthTokenInvalidError('Token expired'));
 
     // Signature verification (RS256 only) minimal implementation
@@ -87,16 +91,24 @@ export class JwtValidator implements IJwtValidator {
 
   private async getPemForKid(kid: string): Promise<string | null> {
     if (!this.cfg.jwksUri) return null;
-    // Always fetch JWKS fresh (no local cache) to avoid stale keys in multi-container deployments
-    let key;
-    try {
-      const res = await this.fetchFn(this.cfg.jwksUri);
-      const data = await res.json();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      key = (data.keys || []).find((k: any) => k.kid === kid);
-    } catch {
-      return null;
+    const ttl = this.cfg.jwksTtlMs ?? 5 * 60 * 1000;
+    if (
+      !JwtValidator.jwksCache ||
+      Date.now() > JwtValidator.jwksCache.expiresAt
+    ) {
+      try {
+        const res = await this.fetchFn(this.cfg.jwksUri);
+        const data = await res.json();
+        JwtValidator.jwksCache = {
+          keys: data.keys || [],
+          expiresAt: Date.now() + ttl,
+        };
+      } catch {
+        return null;
+      }
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const key = JwtValidator.jwksCache.keys.find((k: any) => k.kid === kid);
     if (!key || !key.n || !key.e) return null;
     return this.rsaPublicKeyToPem(key.n, key.e);
   }
@@ -155,4 +167,6 @@ export class JwtValidator implements IJwtValidator {
     const pem = `-----BEGIN PUBLIC KEY-----\n${b64.match(/.{1,64}/g)?.join('\n')}\n-----END PUBLIC KEY-----`;
     return pem;
   }
+  // Static JWKS cache
+  private static jwksCache: { keys: any[]; expiresAt: number } | null = null; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

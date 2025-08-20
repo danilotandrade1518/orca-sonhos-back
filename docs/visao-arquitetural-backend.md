@@ -607,3 +607,102 @@ Esta convenção aplica-se exclusivamente a operações de **mutação** (comman
 ---
 
 > Esta seção será revisitada quando introduzirmos query endpoints especializados ou se adotarmos GraphQL / gRPC para leitura.
+
+## 15. Fluxo de Autenticação SPA (Authorization Code + PKCE)
+
+### 15.1. Decisão
+
+Adotaremos fluxo de autenticação do tipo **SPA pública** (public client) utilizando **Authorization Code + PKCE** diretamente entre o frontend e o Provedor de Identidade (ex: Azure AD B2C conforme ADR-0007). O backend permanecerá totalmente **stateless** em relação a sessão do usuário, recebendo apenas o **Bearer Access Token** no header `Authorization` em cada requisição autenticada.
+
+### 15.2. Motivação
+
+1. Reduz complexidade inicial (sem camada de sessão/refresh server-side, sem storage de estado de login no backend).
+2. Acelera time-to-market do MVP mantendo segurança adequada (code + PKCE evita interceptação de authorization code).
+3. Alinha-se ao modelo já implementado de validação de JWT com cache de JWKS e tolerância de clock skew.
+4. Evita necessidade de endpoints adicionais de login/logout no backend (delegado ao IdP + frontend).
+
+### 15.3. Fluxo Resumido
+
+1. SPA gera `code_verifier` (alta entropia) e `code_challenge` (S256).
+2. Redireciona usuário para `/authorize` do IdP com `response_type=code`, `code_challenge`, `code_challenge_method=S256`, `client_id`, `redirect_uri`, `scope`, `state` e (opcional) `prompt`.
+3. IdP autentica usuário e redireciona de volta com `code` e `state`.
+4. SPA troca diretamente (`POST /token`) enviando `code_verifier` + `code` e recebe `access_token` (e opcional `refresh_token` se política permitir).
+5. Em cada requisição ao backend: `Authorization: Bearer <access_token>`.
+6. Backend valida: assinatura (RS256), issuer, audience, exp/nbf com tolerância de clock skew, presença de claim `sub` (mapeada a `userId`).
+7. Endpoint `/me` devolve identificação derivada do token (ou anônimo se ausência).
+
+### 15.4. Não teremos inicialmente
+
+- Sessão HTTP server-side (cookies de sessão, redis, etc.).
+- Endpoints `/auth/login`, `/auth/callback`, `/auth/logout` no backend.
+- Armazenamento de refresh token no backend.
+
+### 15.5. Logout
+
+O logout consiste em: (a) SPA limpar tokens em memória; (b) redirecionar para endpoint de logout do IdP (`/logout` / `end_session_endpoint`) passando `post_logout_redirect_uri`. O backend não precisa invalidar nada (stateless). Tokens antigos expiram naturalmente.
+
+### 15.6. Renovação / Refresh
+
+Preferência:
+
+1. **Access tokens curtos (ex: 5–15 min)**.
+2. **Silent auth / prompt=none** via iframe se suportado pelo IdP ou uso de **refresh token rotativo para SPA pública** (feature suportada em alguns provedores, exigir políticas de proteção). Se refresh token for usado, SPA deve armazená-lo apenas em memória (não `localStorage`) para mitigar XSS (revogado ao fechar aba). Se persistência across reload for indispensável, considerar evolução para backend-managed token exchange (ver 15.11).
+
+### 15.7. Armazenamento de Tokens no Frontend
+
+- **Acesso**: Em memória (variable/module scope ou state manager). Evitar `localStorage` / `sessionStorage` para minimizar impacto de XSS.
+- **Fallback**: Re-obter via silent auth; se falhar, fluxo de login interativo.
+
+### 15.8. Requisitos de Segurança no Backend
+
+- Validar `iss`, `aud`, `exp`, `nbf` e assinatura (já implementado em `JwtValidator`).
+- Clock skew configurado (já aplicado).
+- Cache de JWKS com TTL definido (reduz latência e load sobre IdP).
+- Rejeitar tokens sem `sub` ou com `alg` diferente do esperado.
+- CORS restrito a origens conhecidas do SPA.
+- Rate limiting (futuro) para endpoints sensíveis.
+- Métricas de sucesso/falha de autenticação (já implementadas) para detecção de anomalias.
+
+### 15.9. Implicações / Trade-offs
+
+| Aspecto              | Benefício                                 | Custo/Trade-off                                      |
+| -------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| Simplicidade backend | Menos código / menos estado               | SPA precisa lidar com renovação                      |
+| Escalabilidade       | Stateless => horizontal fácil             | Mais lógica no frontend                              |
+| Segurança XSS        | Tokens só em memória mitigam persistência | Perde-se persistência pós reload                     |
+| Logout               | Simples (apenas frontend + IdP)           | Revogação imediata não garantida (depende exp curto) |
+
+### 15.10. Formato de Requisições Autenticadas
+
+Header obrigatório: `Authorization: Bearer <access_token>`.
+Erros:
+
+- Ausente / malformado → `401 { code: 'AUTH_MISSING' }`
+- Token inválido / expirado → `401 { code: 'AUTH_INVALID' }`
+- Falta de permissão (futuro quando políticas forem aplicadas) → `403 { code: 'FORBIDDEN' }`.
+
+### 15.11. Evolução Futuras Possíveis
+
+| Necessidade                                 | Evolução                                                                                               | Notas                                         |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Persistir sessão pós reload com menor risco | Backend troca authorization code por tokens e grava session cookie `HttpOnly; Secure; SameSite=Strict` | Requer endpoints `/auth/*` e storage servidor |
+| Logout imediato global                      | Token revocation / introspection backend-managed                                                       | Depende de suporte IdP                        |
+| Escopos / Roles mais granulares             | Claims adicionais + authorization services                                                             | Integrar métricas de autorização              |
+| Multi-client (mobile + SPA)                 | Backend centraliza refresh                                                                             | Minimiza lógica duplicada                     |
+
+### 15.12. Impacto em Código Existente
+
+- `JwtValidator` já atende requisitos (cache + skew) → somente ajuste de doc.
+- `/me` permanece válido sem alteração.
+- Nenhum endpoint extra será criado agora.
+- Métricas de auth continuam emissoras para dashboard futuro.
+
+### 15.13. Referências
+
+- ADR-0007 (Infra inicial Azure / B2C / Key Vault)
+- RFC 7636 (PKCE)
+- NIST SP 800-63B (Sessões e autenticação)
+
+### 15.14. Status
+
+Ativo (implementação incremental; frontend assumirá responsabilidades de PKCE e gerenciamento de tokens). Backend pronto para consumo imediato.

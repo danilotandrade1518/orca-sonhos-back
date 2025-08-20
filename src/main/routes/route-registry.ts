@@ -10,6 +10,7 @@ import { buildEnvelopeRoutes } from './contexts/envelope-route-registry';
 import { buildGoalRoutes } from './contexts/goal-route-registry';
 import { buildHealthRoutes } from './contexts/health-route-registry';
 import { buildTransactionRoutes } from './contexts/transaction-route-registry';
+import { MeController } from '@http/controllers/auth/me.controller';
 
 // Controllers
 export interface RouteRegistryDeps {
@@ -46,6 +47,7 @@ export function registerMutationRoutes(deps: RouteRegistryDeps) {
     ...buildEnvelopeRoutes({ connection, auth: budgetAuthorizationService }),
     ...buildGoalRoutes({ connection }),
     ...buildHealthRoutes(),
+    { method: 'GET', path: '/me', controller: new MeController() },
   ];
 
   server.registerRoutes(routes);

@@ -89,6 +89,7 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
           name: 'DB_PASSWORD'
           value: postgresAdminPassword
         }
+        // FUTURO: trocar DB_USER/DB_PASSWORD por app_user via Key Vault (secret ref)
         {
           name: 'APPINSIGHTS_CONNECTION_STRING'
           value: appInsights.properties.ConnectionString
@@ -144,16 +145,6 @@ resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' = {
     highAvailability: {
       mode: 'Disabled'
     }
-  }
-}
-
-// Regra de firewall temporária abrindo acesso IPv4 completo (MVP). ATENÇÃO: endurecer depois (limitar IPs ou usar Private VNet + integração).
-resource pgFirewallAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2022-12-01' = {
-  name: 'allow-all-ipv4'
-  parent: pg
-  properties: {
-    startIpAddress: '0.0.0.0'
-    endIpAddress: '255.255.255.255'
   }
 }
 
