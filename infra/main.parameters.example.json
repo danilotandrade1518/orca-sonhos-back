@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "value": "orcasonhos-prod" },
-    "location": { "value": "brazilsouth" },
+    "location": { "value": "chilecentral" },
     "containerImage": { "value": "ghcr.io/ORG/orca-sonhos-back:latest" },
     "postgresServerName": { "value": "orcasonhosprodpg" },
     "postgresAdminUser": { "value": "pgadmin" },
