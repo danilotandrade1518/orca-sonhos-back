@@ -20,7 +20,6 @@ exports.up = (pgm) => {
     id: {
       type: 'uuid',
       primaryKey: true,
-      default: pgm.func('gen_random_uuid()'),
     },
     name: {
       type: 'varchar(255)',

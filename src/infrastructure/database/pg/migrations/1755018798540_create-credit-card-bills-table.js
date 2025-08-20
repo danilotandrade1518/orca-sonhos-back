@@ -15,7 +15,6 @@ exports.up = (pgm) => {
     id: {
       type: 'uuid',
       primaryKey: true,
-      default: pgm.func('gen_random_uuid()'),
     },
     credit_card_id: {
       type: 'uuid',

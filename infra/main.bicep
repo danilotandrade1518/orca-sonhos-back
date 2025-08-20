@@ -83,7 +83,6 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'DB_USER'
-          // Flexible Server autentica somente com o login base (sem @server)
           value: postgresAdminUser
         }
         {
