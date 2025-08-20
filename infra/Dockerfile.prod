@@ -18,8 +18,9 @@ RUN npm ci
 FROM deps AS build
 COPY tsconfig*.json ./
 COPY src ./src
-COPY swagger.json ./
 RUN npm run build
+# Copy swagger spec alongside dist output (TypeScript import uses './swagger.json' at runtime in compiled dist/index.js)
+COPY src/swagger.json ./dist/swagger.json
 
 # ---------- Production deps only ----------
 FROM base AS prod-deps
@@ -44,7 +45,7 @@ USER app
 COPY --chown=app:app --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=app:app package*.json ./
 COPY --chown=app:app --from=build /app/dist ./dist
-COPY --chown=app:app swagger.json ./swagger.json
+
 
 EXPOSE 3000
 
