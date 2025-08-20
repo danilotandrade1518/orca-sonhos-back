@@ -203,6 +203,14 @@ jobs:
           done
           echo "Testando porta 5432 via tcp"
           nc -vz ${POSTGRES_SERVER_NAME}.postgres.database.azure.com 5432 || true
+      - name: Ensure Postgres admin password matches secret
+        run: |
+          set -euo pipefail
+          echo "Forçando senha do admin para garantir alinhamento com segredo (idempotente)."
+          az postgres flexible-server update -n $POSTGRES_SERVER_NAME -g $AZURE_RESOURCE_GROUP --admin-password '${{ secrets.PG_ADMIN_PASSWORD }}' >/dev/null
+          # Pequeno wait para aplicar (geralmente rápido, estado permanece Ready)
+          sleep 5
+          echo "Senha atualizada (ou já estava correta)."
       - name: Run database migrations
         env:
           DB_HOST: ${{ env.POSTGRES_SERVER_NAME }}.postgres.database.azure.com
