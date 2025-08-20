@@ -216,16 +216,16 @@ jobs:
           DB_HOST: ${{ env.POSTGRES_SERVER_NAME }}.postgres.database.azure.com
           DB_PORT: 5432
           DB_NAME: orcasonhos
-          DB_USER: ${{ secrets.PG_ADMIN_USER }}@${{ env.POSTGRES_SERVER_NAME }}
+          DB_USER: ${{ secrets.PG_ADMIN_USER }}
           DB_PASSWORD: ${{ secrets.PG_ADMIN_PASSWORD }}
           # Vars esperadas pelo driver pg / node-pg-migrate (alternativa a DATABASE_URL)
           PGHOST: ${{ env.POSTGRES_SERVER_NAME }}.postgres.database.azure.com
           PGPORT: 5432
           PGDATABASE: orcasonhos
-          PGUSER: ${{ secrets.PG_ADMIN_USER }}@${{ env.POSTGRES_SERVER_NAME }}
+          PGUSER: ${{ secrets.PG_ADMIN_USER }}
           PGPASSWORD: ${{ secrets.PG_ADMIN_PASSWORD }}
           PGSSLMODE: require
-          DATABASE_URL: postgres://${{ secrets.PG_ADMIN_USER }}%40${{ env.POSTGRES_SERVER_NAME }}:${{ secrets.PG_ADMIN_PASSWORD }}@${{ env.POSTGRES_SERVER_NAME }}.postgres.database.azure.com:5432/orcasonhos?sslmode=require
+          DATABASE_URL: postgres://${{ secrets.PG_ADMIN_USER }}:${{ secrets.PG_ADMIN_PASSWORD }}@${{ env.POSTGRES_SERVER_NAME }}.postgres.database.azure.com:5432/orcasonhos?sslmode=require
           CATEGORY_ID_ADJUSTMENT: 00000000-0000-0000-0000-000000000002
           CATEGORY_ID_TRANSFER: 00000000-0000-0000-0000-000000000003
           NODE_ENV: production
