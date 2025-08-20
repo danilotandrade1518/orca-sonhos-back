@@ -147,6 +147,16 @@ resource pg 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' = {
   }
 }
 
+// Regra de firewall temporária abrindo acesso IPv4 completo (MVP). ATENÇÃO: endurecer depois (limitar IPs ou usar Private VNet + integração).
+resource pgFirewallAll 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2022-12-01' = {
+  name: 'allow-all-ipv4'
+  parent: pg
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '255.255.255.255'
+  }
+}
+
 // Database inside server
 resource pgDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2022-12-01' = {
   name: postgresDatabaseName

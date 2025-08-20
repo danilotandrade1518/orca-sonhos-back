@@ -186,6 +186,23 @@ jobs:
           done
       - name: Show deployment outputs
         run: az deployment group show -g $AZURE_RESOURCE_GROUP -n $AZURE_DEPLOYMENT_NAME --query properties.outputs
+      - name: Wait for Postgres ready
+        run: |
+          set -euo pipefail
+          echo "Aguardando status do Postgres flexible server..."
+          for i in {1..30}; do
+            status=$(az postgres flexible-server show -n $POSTGRES_SERVER_NAME -g $AZURE_RESOURCE_GROUP --query state -o tsv || echo unknown)
+            echo "Tentativa $i - estado: $status"
+            if [ "$status" = "Ready" ]; then
+              echo "Postgres pronto"; break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Timeout aguardando Postgres" >&2; exit 1
+            fi
+            sleep 10
+          done
+          echo "Testando porta 5432 via tcp"
+          nc -vz ${POSTGRES_SERVER_NAME}.postgres.database.azure.com 5432 || true
       - name: Run database migrations
         env:
           DB_HOST: ${{ env.POSTGRES_SERVER_NAME }}.postgres.database.azure.com
