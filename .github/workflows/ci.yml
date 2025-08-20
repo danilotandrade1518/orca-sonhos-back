@@ -205,6 +205,7 @@ jobs:
           CATEGORY_ID_TRANSFER: 00000000-0000-0000-0000-000000000003
           NODE_ENV: production
         run: |
-          # Instala todas as dependências (inclui dev, necessário para node-pg-migrate)
-          npm ci
+          # Instala dependências incluindo dev (husky) mesmo com NODE_ENV=production
+          NPM_CONFIG_PRODUCTION=false npm ci
+          # Executa migrações
           npm run migrate
