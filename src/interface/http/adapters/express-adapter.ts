@@ -1,18 +1,20 @@
-import express, { Request, Response } from 'express';
-import { getMutationCounters } from '@shared/observability/mutation-metrics';
 import { getAuthCounters } from '@shared/observability/auth-metrics';
+import { getMutationCounters } from '@shared/observability/mutation-metrics';
+import { getQueryMetrics } from '@shared/observability/query-metrics';
+import express, { Request, Response } from 'express';
+
 import {
   HttpController,
   HttpMiddleware,
   HttpRequest,
   HttpResponse,
 } from '../http-types';
-import { IHttpServerAdapter, RouteDefinition } from '../server-adapter';
-import { requestIdMiddleware } from '../middlewares/request-id-middleware';
+import { contextLoggerMiddleware } from '../middlewares/context-logger-middleware';
 import { errorHandlerMiddleware } from '../middlewares/error-handler-middleware';
 import { loggingMiddleware } from '../middlewares/logging-middleware';
-import { contextLoggerMiddleware } from '../middlewares/context-logger-middleware';
+import { requestIdMiddleware } from '../middlewares/request-id-middleware';
 import { createTimeoutMiddleware } from '../middlewares/timeout-middleware';
+import { IHttpServerAdapter, RouteDefinition } from '../server-adapter';
 
 export class ExpressHttpServerAdapter implements IHttpServerAdapter {
   private app = express();
@@ -33,6 +35,11 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
     });
     this.app.get('/internal/metrics/auth', (_req, res) => {
       res.json({ auth: getAuthCounters() });
+    });
+    this.app.get('/internal/metrics/queries', async (_req, res) => {
+      // Lazy import to avoid circular dep if needed
+      res.set('Content-Type', 'text/plain; version=0.0.4');
+      res.send(getQueryMetrics());
     });
 
     // Configurable CORS (simple implementation, framework-agnostic behavior)

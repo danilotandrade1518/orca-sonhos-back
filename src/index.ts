@@ -3,17 +3,18 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 
 import { PostgresConnectionAdapter } from './adapters/postgres/PostgresConnectionAdapter';
-import { IBudgetAuthorizationService } from './application/services/authorization/IBudgetAuthorizationService';
 import { BudgetAuthorizationService } from './application/services/authorization/BudgetAuthorizationService';
-import { GetBudgetRepository } from './infrastructure/database/pg/repositories/budget/get-budget-repository/GetBudgetRepository';
-import { JwtValidator } from './infrastructure/auth/JwtValidator';
-import { PrincipalFactory } from './infrastructure/auth/PrincipalFactory';
-import { createAuthMiddleware } from './interface/http/middlewares/auth-middleware';
+import { IBudgetAuthorizationService } from './application/services/authorization/IBudgetAuthorizationService';
 import { loadEnv } from './config/env';
 import { DatabaseConfig } from './infrastructure/adapters/IPostgresConnectionAdapter';
+import { JwtValidator } from './infrastructure/auth/JwtValidator';
+import { PrincipalFactory } from './infrastructure/auth/PrincipalFactory';
+import { GetBudgetRepository } from './infrastructure/database/pg/repositories/budget/get-budget-repository/GetBudgetRepository';
+import { createAuthMiddleware } from './interface/http/middlewares/auth-middleware';
+import { registerQueryRoutes } from './main/routes/query-route-registry';
 import { registerMutationRoutes } from './main/routes/route-registry';
-import swaggerDocument from './swagger.json';
 import { initAppInsights } from './shared/observability/app-insights';
+import swaggerDocument from './swagger.json';
 
 dotenv.config();
 const env = loadEnv();
@@ -74,6 +75,8 @@ registerMutationRoutes({
   budgetAuthorizationService: authService,
   categoryIds: { adjustmentCategoryId, transferCategoryId },
 });
+
+registerQueryRoutes({ server });
 
 server.listen(Number(env.HTTP_PORT), () => {
   console.log(`Servidor rodando na porta ${env.HTTP_PORT}`);
