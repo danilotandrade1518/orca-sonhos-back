@@ -246,7 +246,7 @@ Cada bloco define: _nome_, _campos_, _fonte_, _derivados_, _endpoint sugerido_.
 | ListAccountsQueryHandler     | budgetId,userId          | accounts[]      | AccountsDao                                             | Baixa             |
 | ListTransactionsQueryHandler | budgetId,userId, filtros | page transações | TransactionsDao                                         | Média (paginação) |
 | ListEnvelopesQueryHandler    | budgetId,userId          | envelopes[]     | EnvelopesDao                                            | Baixa             |
-| ListGoalsQueryHandler        | budgetId,userId          | goals[]         | GoalsDao                                                | Baixa             |
+| ListGoalsQueryHandler (Implemented)        | budgetId,userId          | goals[]         | GoalsDao                                                | Baixa             |
 | ListCategoriesQueryHandler   | (userId opcional)        | categorias[]    | CategoriesDao                                           | Baixa             |
 
 ## 6. Métricas & Observabilidade
