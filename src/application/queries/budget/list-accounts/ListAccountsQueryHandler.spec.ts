@@ -2,17 +2,16 @@ import {
   IListAccountsDao,
   ListAccountsItem,
 } from '@application/contracts/daos/account/IListAccountsDao';
-
+import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { ListAccountsQueryHandler } from './ListAccountsQueryHandler';
 
 class ListAccountsDaoStub implements IListAccountsDao {
-  public items: ListAccountsItem[] | null = [];
+  public items: ListAccountsItem[] = [];
 
-  async findByBudgetForUser(params: {
+  async findByBudget(params: {
     budgetId: string;
-    userId: string;
-  }): Promise<ListAccountsItem[] | null> {
-    if (params.budgetId && params.userId) {
+  }): Promise<ListAccountsItem[]> {
+    if (params.budgetId) {
       // noop
     }
     return this.items;
@@ -25,7 +24,10 @@ describe('ListAccountsQueryHandler', () => {
 
   beforeEach(() => {
     dao = new ListAccountsDaoStub();
-    handler = new ListAccountsQueryHandler(dao);
+    handler = new ListAccountsQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
   });
 
   it('should return empty array when dao returns []', async () => {

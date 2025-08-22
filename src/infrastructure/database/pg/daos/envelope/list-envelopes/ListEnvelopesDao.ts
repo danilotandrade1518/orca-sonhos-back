@@ -8,20 +8,10 @@ import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresCon
 export class ListEnvelopesDao implements IListEnvelopesDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findByBudgetForUser(params: {
+  async findByBudget(params: {
     budgetId: string;
-    userId: string;
-  }): Promise<EnvelopeListItem[] | null> {
-    const { budgetId, userId } = params;
-
-    const auth = await this.connection.query(
-      `SELECT 1 FROM budgets WHERE id = $1 AND (owner_id = $2 OR $2 = ANY(participant_ids))`,
-      [budgetId, userId],
-    );
-
-    if (!auth || auth.rowCount === 0) {
-      return null;
-    }
+  }): Promise<EnvelopeListItem[]> {
+    const { budgetId } = params;
 
     const result = await this.connection.query<{
       id: string;

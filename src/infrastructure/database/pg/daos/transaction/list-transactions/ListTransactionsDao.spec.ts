@@ -23,28 +23,11 @@ describe('ListTransactionsDao', () => {
     dao = new ListTransactionsDao(mockConnection);
   });
 
-  it('should return null when user not authorized', async () => {
+  it('should return empty rows when no transactions', async () => {
     mockConnection.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
 
-    const result = await dao.findPageForBudgetUser({
+    const result = await dao.findPageForBudget({
       budgetId: 'b1',
-      userId: 'u1',
-      offset: 0,
-      limit: 21,
-    });
-
-    expect(result).toBeNull();
-    expect(mockConnection.query).toHaveBeenCalledTimes(1);
-  });
-
-  it('should return empty rows when no transactions', async () => {
-    mockConnection.query
-      .mockResolvedValueOnce({ rows: [{}], rowCount: 1 })
-      .mockResolvedValueOnce({ rows: [], rowCount: 0 });
-
-    const result = await dao.findPageForBudgetUser({
-      budgetId: 'b1',
-      userId: 'u1',
       offset: 0,
       limit: 21,
     });
@@ -53,44 +36,41 @@ describe('ListTransactionsDao', () => {
   });
 
   it('should map rows and compute hasNext using limit+1', async () => {
-    mockConnection.query
-      .mockResolvedValueOnce({ rows: [{}], rowCount: 1 })
-      .mockResolvedValueOnce({
-        rows: [
-          {
-            id: 't3',
-            date: '2023-01-03',
-            description: 'd3',
-            amount_cents: 300,
-            direction: 'IN',
-            account_id: 'a1',
-            category_id: 'c1',
-          },
-          {
-            id: 't2',
-            date: '2023-01-02',
-            description: null,
-            amount_cents: -200,
-            direction: 'OUT',
-            account_id: 'a1',
-            category_id: null,
-          },
-          {
-            id: 't1',
-            date: '2023-01-01',
-            description: 'd1',
-            amount_cents: 100,
-            direction: 'IN',
-            account_id: 'a2',
-            category_id: 'c2',
-          },
-        ],
-        rowCount: 3,
-      });
+    mockConnection.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 't3',
+          date: '2023-01-03',
+          description: 'd3',
+          amount_cents: 300,
+          direction: 'IN',
+          account_id: 'a1',
+          category_id: 'c1',
+        },
+        {
+          id: 't2',
+          date: '2023-01-02',
+          description: null,
+          amount_cents: -200,
+          direction: 'OUT',
+          account_id: 'a1',
+          category_id: null,
+        },
+        {
+          id: 't1',
+          date: '2023-01-01',
+          description: 'd1',
+          amount_cents: 100,
+          direction: 'IN',
+          account_id: 'a2',
+          category_id: 'c2',
+        },
+      ],
+      rowCount: 3,
+    });
 
-    const result = await dao.findPageForBudgetUser({
+    const result = await dao.findPageForBudget({
       budgetId: 'b1',
-      userId: 'u1',
       offset: 0,
       limit: 3,
     });
@@ -109,13 +89,8 @@ describe('ListTransactionsDao', () => {
   });
 
   it('should apply filters correctly', async () => {
-    mockConnection.query
-      .mockResolvedValueOnce({ rows: [{}], rowCount: 1 })
-      .mockResolvedValueOnce({ rows: [], rowCount: 0 });
-
-    await dao.findPageForBudgetUser({
+    await dao.findPageForBudget({
       budgetId: 'b1',
-      userId: 'u1',
       offset: 10,
       limit: 11,
       accountId: 'a9',
@@ -124,7 +99,7 @@ describe('ListTransactionsDao', () => {
       dateTo: new Date('2023-01-31'),
     });
 
-    const call = mockConnection.query.mock.calls[1];
+    const call = mockConnection.query.mock.calls[0];
     expect(call[0]).toContain('account_id = $2');
     expect(call[0]).toContain('category_id = $3');
     expect(call[0]).toContain('occurred_on >= $4::date');

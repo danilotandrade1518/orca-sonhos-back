@@ -23,50 +23,29 @@ describe('ListGoalsDao', () => {
     dao = new ListGoalsDao(mockConnection);
   });
 
-  it('should return null when user is not authorized', async () => {
+  it('should return empty array when no goals are found', async () => {
     mockConnection.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
 
-    const result = await dao.findByBudgetForUser({
-      budgetId: 'b1',
-      userId: 'u1',
-    });
-
-    expect(result).toBeNull();
-  });
-
-  it('should return empty array when no goals are found', async () => {
-    mockConnection.query
-      .mockResolvedValueOnce({ rows: [{}], rowCount: 1 })
-      .mockResolvedValueOnce({ rows: [], rowCount: 0 });
-
-    const result = await dao.findByBudgetForUser({
-      budgetId: 'b1',
-      userId: 'u1',
-    });
+    const result = await dao.findByBudget({ budgetId: 'b1' });
 
     expect(result).toEqual([]);
   });
 
   it('should map rows correctly', async () => {
-    mockConnection.query
-      .mockResolvedValueOnce({ rows: [{}], rowCount: 1 })
-      .mockResolvedValueOnce({
-        rows: [
-          {
-            id: 'g1',
-            name: 'Goal 1',
-            total_amount: 1000,
-            accumulated_amount: 200,
-            due_date: '2024-12-31',
-          },
-        ],
-        rowCount: 1,
-      });
-
-    const result = await dao.findByBudgetForUser({
-      budgetId: 'b1',
-      userId: 'u1',
+    mockConnection.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 'g1',
+          name: 'Goal 1',
+          total_amount: 1000,
+          accumulated_amount: 200,
+          due_date: '2024-12-31',
+        },
+      ],
+      rowCount: 1,
     });
+
+    const result = await dao.findByBudget({ budgetId: 'b1' });
 
     expect(result).toEqual([
       {

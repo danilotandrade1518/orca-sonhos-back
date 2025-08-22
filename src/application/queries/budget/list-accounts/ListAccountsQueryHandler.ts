@@ -2,6 +2,8 @@ import {
   IListAccountsDao,
   ListAccountsItem,
 } from '@application/contracts/daos/account/IListAccountsDao';
+import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
+import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
 
 import { IQueryHandler } from '../../shared/IQueryHandler';
 
@@ -15,7 +17,10 @@ export type ListAccountsQueryResult = ListAccountsItem[];
 export class ListAccountsQueryHandler
   implements IQueryHandler<ListAccountsQuery, ListAccountsQueryResult>
 {
-  constructor(private readonly listAccountsDao: IListAccountsDao) {}
+  constructor(
+    private readonly listAccountsDao: IListAccountsDao,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
+  ) {}
 
   async execute(query: ListAccountsQuery): Promise<ListAccountsQueryResult> {
     const { budgetId, userId } = query;
@@ -24,10 +29,14 @@ export class ListAccountsQueryHandler
       throw new Error('INVALID_INPUT');
     }
 
-    const items = await this.listAccountsDao.findByBudgetForUser({
-      budgetId,
+    const auth = await this.budgetAuthorizationService.canAccessBudget(
       userId,
-    });
+      budgetId,
+    );
+    if (auth.hasError) throw auth.errors[0];
+    if (!auth.data) throw new InsufficientPermissionsError();
+
+    const items = await this.listAccountsDao.findByBudget({ budgetId });
 
     return (
       items?.map((item) => ({

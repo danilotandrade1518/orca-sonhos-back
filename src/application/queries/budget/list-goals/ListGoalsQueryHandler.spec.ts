@@ -2,6 +2,7 @@ import {
   GoalListItem,
   IListGoalsDao,
 } from '@application/contracts/daos/goal/IListGoalsDao';
+import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 
 import {
   ListGoalsQuery,
@@ -11,13 +12,10 @@ import {
 
 describe('ListGoalsQueryHandler', () => {
   class ListGoalsDaoStub implements IListGoalsDao {
-    public result: GoalListItem[] | null = [];
+    public result: GoalListItem[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async findByBudgetForUser(params: {
-      budgetId: string;
-      userId: string;
-    }): Promise<GoalListItem[] | null> {
+    async findByBudget(params: { budgetId: string }): Promise<GoalListItem[]> {
       return this.result;
     }
   }
@@ -27,7 +25,10 @@ describe('ListGoalsQueryHandler', () => {
 
   beforeEach(() => {
     dao = new ListGoalsDaoStub();
-    handler = new ListGoalsQueryHandler(dao);
+    handler = new ListGoalsQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
     jest.useFakeTimers().setSystemTime(new Date('2024-01-10'));
   });
 

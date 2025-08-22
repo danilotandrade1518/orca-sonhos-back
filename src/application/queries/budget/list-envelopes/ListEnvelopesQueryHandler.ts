@@ -1,4 +1,6 @@
 import { IListEnvelopesDao } from '../../../contracts/daos/envelope/IListEnvelopesDao';
+import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
+import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
 import { IQueryHandler } from '../../shared/IQueryHandler';
 
 export interface ListEnvelopesQuery {
@@ -20,16 +22,25 @@ export type ListEnvelopesQueryResult = ListEnvelopesItem[];
 export class ListEnvelopesQueryHandler
   implements IQueryHandler<ListEnvelopesQuery, ListEnvelopesQueryResult>
 {
-  constructor(private readonly listEnvelopesDao: IListEnvelopesDao) {}
+  constructor(
+    private readonly listEnvelopesDao: IListEnvelopesDao,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
+  ) {}
 
   async execute(query: ListEnvelopesQuery): Promise<ListEnvelopesQueryResult> {
     if (!query.budgetId || !query.userId) {
       throw new Error('INVALID_INPUT');
     }
 
-    const items = await this.listEnvelopesDao.findByBudgetForUser({
+    const auth = await this.budgetAuthorizationService.canAccessBudget(
+      query.userId,
+      query.budgetId,
+    );
+    if (auth.hasError) throw auth.errors[0];
+    if (!auth.data) throw new InsufficientPermissionsError();
+
+    const items = await this.listEnvelopesDao.findByBudget({
       budgetId: query.budgetId,
-      userId: query.userId,
     });
 
     return (

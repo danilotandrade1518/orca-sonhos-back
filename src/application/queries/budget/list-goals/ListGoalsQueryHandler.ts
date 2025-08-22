@@ -2,7 +2,8 @@ import {
   GoalListItem,
   IListGoalsDao,
 } from '@application/contracts/daos/goal/IListGoalsDao';
-
+import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
+import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
 import { IQueryHandler } from '../../shared/IQueryHandler';
 
 export interface ListGoalsQuery {
@@ -24,7 +25,10 @@ export type ListGoalsQueryResult = ListGoalsItem[];
 export class ListGoalsQueryHandler
   implements IQueryHandler<ListGoalsQuery, ListGoalsQueryResult>
 {
-  constructor(private readonly listGoalsDao: IListGoalsDao) {}
+  constructor(
+    private readonly listGoalsDao: IListGoalsDao,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
+  ) {}
 
   async execute(query: ListGoalsQuery): Promise<ListGoalsQueryResult> {
     const { budgetId, userId } = query;
@@ -32,10 +36,14 @@ export class ListGoalsQueryHandler
       throw new Error('INVALID_INPUT');
     }
 
-    const items = await this.listGoalsDao.findByBudgetForUser({
-      budgetId,
+    const auth = await this.budgetAuthorizationService.canAccessBudget(
       userId,
-    });
+      budgetId,
+    );
+    if (auth.hasError) throw auth.errors[0];
+    if (!auth.data) throw new InsufficientPermissionsError();
+
+    const items = await this.listGoalsDao.findByBudget({ budgetId });
 
     return (
       items?.map((i: GoalListItem) => {

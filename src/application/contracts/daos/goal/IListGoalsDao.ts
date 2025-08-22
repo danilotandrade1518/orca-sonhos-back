@@ -7,8 +7,5 @@ export interface GoalListItem {
 }
 
 export interface IListGoalsDao {
-  findByBudgetForUser(params: {
-    budgetId: string;
-    userId: string;
-  }): Promise<GoalListItem[] | null>;
+  findByBudget(params: { budgetId: string }): Promise<GoalListItem[]>;
 }

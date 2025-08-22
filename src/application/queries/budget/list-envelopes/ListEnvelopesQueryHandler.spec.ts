@@ -1,4 +1,5 @@
 import { IListEnvelopesDao } from '@application/contracts/daos/envelope/IListEnvelopesDao';
+import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { ListEnvelopesQueryHandler } from '@application/queries/budget/list-envelopes/ListEnvelopesQueryHandler';
 
 describe('ListEnvelopesQueryHandler', () => {
@@ -7,19 +8,22 @@ describe('ListEnvelopesQueryHandler', () => {
 
   beforeEach(() => {
     dao = {
-      findByBudgetForUser: jest.fn(),
+      findByBudget: jest.fn(),
     };
-    handler = new ListEnvelopesQueryHandler(dao);
+    handler = new ListEnvelopesQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
   });
 
   it('should return empty array when dao returns empty', async () => {
-    dao.findByBudgetForUser.mockResolvedValue([]);
+    (dao.findByBudget as jest.Mock).mockResolvedValue([]);
     const result = await handler.execute({ budgetId: 'b1', userId: 'u1' });
     expect(result).toEqual([]);
   });
 
   it('should map items with remaining and percentUsed', async () => {
-    dao.findByBudgetForUser.mockResolvedValue([
+    (dao.findByBudget as jest.Mock).mockResolvedValue([
       { id: 'e1', name: 'Food', allocated: 10000, spent: 2500 },
       { id: 'e2', name: 'Zero', allocated: 0, spent: 1000 },
     ]);

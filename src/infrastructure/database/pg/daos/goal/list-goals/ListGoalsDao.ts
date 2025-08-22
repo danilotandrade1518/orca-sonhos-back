@@ -8,24 +8,8 @@ import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresCon
 export class ListGoalsDao implements IListGoalsDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findByBudgetForUser(params: {
-    budgetId: string;
-    userId: string;
-  }): Promise<GoalListItem[] | null> {
-    const { budgetId, userId } = params;
-
-    const auth = await this.connection.query(
-      `SELECT 1
-         FROM budgets
-        WHERE id = $1
-          AND is_deleted = false
-          AND (owner_id = $2 OR $2 = ANY(participant_ids))`,
-      [budgetId, userId],
-    );
-
-    if (!auth?.rowCount) {
-      return null;
-    }
+  async findByBudget(params: { budgetId: string }): Promise<GoalListItem[]> {
+    const { budgetId } = params;
 
     const result = await this.connection.query<{
       id: string;

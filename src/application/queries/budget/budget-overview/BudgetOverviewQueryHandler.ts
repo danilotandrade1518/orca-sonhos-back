@@ -1,5 +1,7 @@
 import { IGetBudgetOverviewDao } from '@application/contracts/daos/budget/IGetBudgetOverviewDao';
 import { BudgetNotFoundError } from '@application/shared/errors/BudgetNotFoundError';
+import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
+import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
 
 import { IQueryHandler } from '../../shared/IQueryHandler';
 
@@ -30,7 +32,10 @@ export interface BudgetOverviewQueryResult {
 export class BudgetOverviewQueryHandler
   implements IQueryHandler<BudgetOverviewQuery, BudgetOverviewQueryResult>
 {
-  constructor(private readonly dao: IGetBudgetOverviewDao) {}
+  constructor(
+    private readonly dao: IGetBudgetOverviewDao,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
+  ) {}
 
   async execute(
     query: BudgetOverviewQuery,
@@ -39,9 +44,15 @@ export class BudgetOverviewQueryHandler
       throw new Error('INVALID_QUERY');
     }
 
+    const auth = await this.budgetAuthorizationService.canAccessBudget(
+      query.userId,
+      query.budgetId,
+    );
+    if (auth.hasError) throw auth.errors[0];
+    if (!auth.data) throw new InsufficientPermissionsError();
+
     const budgetCore = await this.dao.fetchBudgetCore({
       budgetId: query.budgetId,
-      userId: query.userId,
     });
     if (!budgetCore) throw new BudgetNotFoundError();
 

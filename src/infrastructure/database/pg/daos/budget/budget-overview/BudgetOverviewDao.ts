@@ -12,16 +12,14 @@ export class BudgetOverviewDao implements IGetBudgetOverviewDao {
 
   async fetchBudgetCore(params: {
     budgetId: string;
-    userId: string;
   }): Promise<BudgetCore | null> {
-    const { budgetId, userId } = params;
+    const { budgetId } = params;
 
     const result = await this.connection.query<BudgetCore>(
       `SELECT id, name, type
        FROM budgets
-       WHERE id = $1 AND is_deleted = false
-         AND (owner_id = $2 OR $2 = ANY(participant_ids))`,
-      [budgetId, userId],
+       WHERE id = $1 AND is_deleted = false`,
+      [budgetId],
     );
 
     if (!result || result.rowCount === 0) return null;
@@ -41,9 +39,12 @@ export class BudgetOverviewDao implements IGetBudgetOverviewDao {
     const result = await this.connection.query<{
       owner_id: string;
       participant_ids: string[];
-    }>(`SELECT owner_id, participant_ids FROM budgets WHERE id = $1`, [
-      budgetId,
-    ]);
+    }>(
+      `SELECT owner_id, participant_ids 
+      FROM budgets 
+      WHERE id = $1`,
+      [budgetId],
+    );
 
     if (!result || result.rowCount === 0) return [];
     const row = result.rows[0];

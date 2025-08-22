@@ -42,7 +42,6 @@ describe('BudgetOverviewDao', () => {
     mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
     const result = await dao.fetchBudgetCore({
       budgetId: 'b1',
-      userId: 'u1',
     });
     expect(result).toBeNull();
   });

@@ -9,14 +9,13 @@ export interface ListTransactionsItem {
 }
 
 export interface IListTransactionsDao {
-  findPageForBudgetUser(params: {
+  findPageForBudget(params: {
     budgetId: string;
-    userId: string;
     offset: number;
     limit: number;
     accountId?: string;
     categoryId?: string;
     dateFrom?: Date;
     dateTo?: Date;
-  }): Promise<{ rows: ListTransactionsItem[]; hasNext: boolean } | null>;
+  }): Promise<{ rows: ListTransactionsItem[]; hasNext: boolean }>;
 }

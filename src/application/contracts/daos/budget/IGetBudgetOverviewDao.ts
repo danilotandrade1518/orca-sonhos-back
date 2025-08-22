@@ -21,10 +21,7 @@ export interface MonthlyAggregates {
 }
 
 export interface IGetBudgetOverviewDao {
-  fetchBudgetCore(params: {
-    budgetId: string;
-    userId: string;
-  }): Promise<BudgetCore | null>;
+  fetchBudgetCore(params: { budgetId: string }): Promise<BudgetCore | null>;
 
   fetchParticipants(params: { budgetId: string }): Promise<BudgetParticipant[]>;
 

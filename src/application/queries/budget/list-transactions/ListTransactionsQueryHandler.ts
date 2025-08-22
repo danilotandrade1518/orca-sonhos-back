@@ -2,7 +2,8 @@ import {
   IListTransactionsDao,
   ListTransactionsItem,
 } from '@application/contracts/daos/transaction/IListTransactionsDao';
-
+import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
+import { InsufficientPermissionsError } from '@application/shared/errors/InsufficientPermissionsError';
 import { IQueryHandler } from '../../shared/IQueryHandler';
 
 export interface ListTransactionsQuery {
@@ -24,7 +25,10 @@ export interface ListTransactionsQueryResult {
 export class ListTransactionsQueryHandler
   implements IQueryHandler<ListTransactionsQuery, ListTransactionsQueryResult>
 {
-  constructor(private readonly dao: IListTransactionsDao) {}
+  constructor(
+    private readonly dao: IListTransactionsDao,
+    private readonly budgetAuthorizationService: IBudgetAuthorizationService,
+  ) {}
 
   async execute(
     query: ListTransactionsQuery,
@@ -45,9 +49,15 @@ export class ListTransactionsQueryHandler
     const offset = (page - 1) * pageSize;
     const limit = pageSize + 1;
 
-    const result = await this.dao.findPageForBudgetUser({
+    const auth = await this.budgetAuthorizationService.canAccessBudget(
+      query.userId,
+      query.budgetId,
+    );
+    if (auth.hasError) throw auth.errors[0];
+    if (!auth.data) throw new InsufficientPermissionsError();
+
+    const result = await this.dao.findPageForBudget({
       budgetId: query.budgetId,
-      userId: query.userId,
       offset,
       limit,
       accountId: query.accountId,
@@ -57,7 +67,7 @@ export class ListTransactionsQueryHandler
     });
 
     const items =
-      result?.rows.map((row) => ({
+      result.rows.map((row) => ({
         id: row.id,
         date: row.date,
         description: row.description,
@@ -69,7 +79,7 @@ export class ListTransactionsQueryHandler
 
     return {
       items,
-      meta: { page, pageSize, hasNext: result?.hasNext || false },
+      meta: { page, pageSize, hasNext: result.hasNext },
     };
   }
 }

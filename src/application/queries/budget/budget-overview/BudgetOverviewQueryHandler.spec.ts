@@ -6,6 +6,7 @@ import {
   MonthlyAggregates,
 } from '@application/contracts/daos/budget/IGetBudgetOverviewDao';
 import { BudgetNotFoundError } from '@application/shared/errors/BudgetNotFoundError';
+import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { BudgetOverviewQueryHandler } from './BudgetOverviewQueryHandler';
 
 describe('BudgetOverviewQueryHandler', () => {
@@ -31,7 +32,10 @@ describe('BudgetOverviewQueryHandler', () => {
   it('should throw not found when budget inaccessible', async () => {
     const dao = new DaoStub();
     dao.budget = null;
-    const handler = new BudgetOverviewQueryHandler(dao);
+    const handler = new BudgetOverviewQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
     await expect(
       handler.execute({ budgetId: 'b1', userId: 'u1' }),
     ).rejects.toBeInstanceOf(BudgetNotFoundError);
@@ -47,7 +51,10 @@ describe('BudgetOverviewQueryHandler', () => {
     ];
     dao.aggregates = { income: 5000, expense: 3000 };
 
-    const handler = new BudgetOverviewQueryHandler(dao);
+    const handler = new BudgetOverviewQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
     const result = await handler.execute({ budgetId: 'b1', userId: 'u1' });
 
     expect(result).toEqual({

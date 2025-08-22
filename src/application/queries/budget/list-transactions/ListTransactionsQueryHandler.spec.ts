@@ -2,19 +2,19 @@ import {
   IListTransactionsDao,
   ListTransactionsItem,
 } from '@application/contracts/daos/transaction/IListTransactionsDao';
+import { BudgetAuthorizationServiceStub } from '@application/shared/tests/stubs/BudgetAuthorizationServiceStub';
 
 import { ListTransactionsQueryHandler } from './ListTransactionsQueryHandler';
 
 class ListTransactionsDaoStub implements IListTransactionsDao {
-  public result: { rows: ListTransactionsItem[]; hasNext: boolean } | null = {
+  public result: { rows: ListTransactionsItem[]; hasNext: boolean } = {
     rows: [],
     hasNext: false,
   };
   public params: unknown;
 
-  async findPageForBudgetUser(params: {
+  async findPageForBudget(params: {
     budgetId: string;
-    userId: string;
     offset: number;
     limit: number;
     accountId?: string;
@@ -30,7 +30,10 @@ class ListTransactionsDaoStub implements IListTransactionsDao {
 describe('ListTransactionsQueryHandler', () => {
   it('should throw INVALID_INPUT when budgetId missing or page invalid', async () => {
     const dao = new ListTransactionsDaoStub();
-    const handler = new ListTransactionsQueryHandler(dao);
+    const handler = new ListTransactionsQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
     await expect(
       handler.execute({ budgetId: '', userId: 'u1' }),
     ).rejects.toThrow('INVALID_INPUT');
@@ -42,7 +45,10 @@ describe('ListTransactionsQueryHandler', () => {
   it('should return empty items when dao returns none', async () => {
     const dao = new ListTransactionsDaoStub();
     dao.result = { rows: [], hasNext: false };
-    const handler = new ListTransactionsQueryHandler(dao);
+    const handler = new ListTransactionsQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
     const result = await handler.execute({ budgetId: 'b1', userId: 'u1' });
     expect(result.items).toHaveLength(0);
     expect(result.meta).toEqual({ page: 1, pageSize: 20, hasNext: false });
@@ -64,7 +70,10 @@ describe('ListTransactionsQueryHandler', () => {
       ],
       hasNext: true,
     };
-    const handler = new ListTransactionsQueryHandler(dao);
+    const handler = new ListTransactionsQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
     const result = await handler.execute({
       budgetId: 'b1',
       userId: 'u1',

@@ -18,27 +18,26 @@ interface TransactionRow {
 export class ListTransactionsDao implements IListTransactionsDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findPageForBudgetUser(params: {
+  async findPageForBudget(params: {
     budgetId: string;
-    userId: string;
     offset: number;
     limit: number;
     accountId?: string;
     categoryId?: string;
     dateFrom?: Date;
     dateTo?: Date;
-  }): Promise<{ rows: ListTransactionsItem[]; hasNext: boolean } | null> {
-    const auth = await this.connection.query(
-      `SELECT 1 FROM budgets WHERE id = $1 AND (owner_id = $2 OR $2 = ANY(participant_ids))`,
-      [params.budgetId, params.userId],
-    );
-
-    if (!auth?.rowCount) {
-      return null;
-    }
-
-    let text =
-      'SELECT id, occurred_on::date AS date, description, amount_cents, direction, account_id, category_id FROM transactions WHERE budget_id = $1';
+  }): Promise<{ rows: ListTransactionsItem[]; hasNext: boolean }> {
+    let text = `
+      SELECT id,
+             occurred_on::date AS date,
+             description,
+             amount_cents,
+             direction,
+             account_id,
+             category_id
+      FROM transactions
+      WHERE budget_id = $1
+    `;
     const values: unknown[] = [params.budgetId];
     let idx = 2;
 

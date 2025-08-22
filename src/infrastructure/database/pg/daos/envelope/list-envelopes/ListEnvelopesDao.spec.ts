@@ -20,52 +20,32 @@ describe('ListEnvelopesDao', () => {
     dao = new ListEnvelopesDao(mockConnection);
   });
 
-  it('should return null when user unauthorized', async () => {
+  it('should return empty array when no envelopes', async () => {
     mockConnection.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
-    const result = await dao.findByBudgetForUser({
-      budgetId: 'b1',
-      userId: 'u1',
-    });
-    expect(result).toBeNull();
+    const result = await dao.findByBudget({ budgetId: 'b1' });
+    expect(result).toEqual([]);
     expect(mockConnection.query).toHaveBeenCalledTimes(1);
   });
 
-  it('should return empty array when no envelopes', async () => {
-    mockConnection.query
-      .mockResolvedValueOnce({ rows: [{ exists: 1 }], rowCount: 1 })
-      .mockResolvedValueOnce({ rows: [], rowCount: 0 });
-    const result = await dao.findByBudgetForUser({
-      budgetId: 'b1',
-      userId: 'u1',
-    });
-    expect(result).toEqual([]);
-    expect(mockConnection.query).toHaveBeenCalledTimes(2);
-  });
-
   it('should map rows correctly', async () => {
-    mockConnection.query
-      .mockResolvedValueOnce({ rows: [{ exists: 1 }], rowCount: 1 })
-      .mockResolvedValueOnce({
-        rows: [
-          {
-            id: 'e1',
-            name: 'Food',
-            allocated_cents: '1000',
-            spent_cents: '300',
-          },
-          {
-            id: 'e2',
-            name: 'Rent',
-            allocated_cents: '2000',
-            spent_cents: null,
-          },
-        ],
-        rowCount: 2,
-      });
-    const result = await dao.findByBudgetForUser({
-      budgetId: 'b1',
-      userId: 'u1',
+    mockConnection.query.mockResolvedValueOnce({
+      rows: [
+        {
+          id: 'e1',
+          name: 'Food',
+          allocated_cents: '1000',
+          spent_cents: '300',
+        },
+        {
+          id: 'e2',
+          name: 'Rent',
+          allocated_cents: '2000',
+          spent_cents: null,
+        },
+      ],
+      rowCount: 2,
     });
+    const result = await dao.findByBudget({ budgetId: 'b1' });
     expect(result).toEqual([
       { id: 'e1', name: 'Food', allocated: 1000, spent: 300 },
       { id: 'e2', name: 'Rent', allocated: 2000, spent: 0 },
