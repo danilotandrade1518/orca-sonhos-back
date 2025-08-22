@@ -241,7 +241,7 @@ Cada bloco define: _nome_, _campos_, _fonte_, _derivados_, _endpoint sugerido_.
 
 | Handler                      | Input                    | Output          | DAO(s)                                                  | Complexidade      |
 | ---------------------------- | ------------------------ | --------------- | ------------------------------------------------------- | ----------------- |
-| ListBudgetsQueryHandler      | userId                   | budgets[]       | BudgetsDao                                              | Baixa             |
+| ListBudgetsQueryHandler (Implemented)      | userId                   | budgets[]       | BudgetsDao                                              | Baixa             |
 | BudgetOverviewQueryHandler (Implemented)   | budgetId,userId          | overview        | BudgetsDao + AccountsDao + TransactionsDao (sum mensal) | Média             |
 | ListAccountsQueryHandler     | budgetId,userId          | accounts[]      | AccountsDao      | Baixa - Implemented |
 | ListTransactionsQueryHandler | budgetId,userId, filtros | page transações | TransactionsDao | Média (paginação) - Implemented |
