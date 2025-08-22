@@ -1,4 +1,5 @@
 import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
+
 import { ListEnvelopesDao } from './ListEnvelopesDao';
 
 describe('ListEnvelopesDao', () => {
@@ -21,7 +22,10 @@ describe('ListEnvelopesDao', () => {
 
   it('should return null when user unauthorized', async () => {
     mockConnection.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
-    const result = await dao.findByBudgetForUser('b1', 'u1');
+    const result = await dao.findByBudgetForUser({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
     expect(result).toBeNull();
     expect(mockConnection.query).toHaveBeenCalledTimes(1);
   });
@@ -30,7 +34,10 @@ describe('ListEnvelopesDao', () => {
     mockConnection.query
       .mockResolvedValueOnce({ rows: [{ exists: 1 }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 });
-    const result = await dao.findByBudgetForUser('b1', 'u1');
+    const result = await dao.findByBudgetForUser({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
     expect(result).toEqual([]);
     expect(mockConnection.query).toHaveBeenCalledTimes(2);
   });
@@ -55,7 +62,10 @@ describe('ListEnvelopesDao', () => {
         ],
         rowCount: 2,
       });
-    const result = await dao.findByBudgetForUser('b1', 'u1');
+    const result = await dao.findByBudgetForUser({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
     expect(result).toEqual([
       { id: 'e1', name: 'Food', allocated: 1000, spent: 300 },
       { id: 'e2', name: 'Rent', allocated: 2000, spent: 0 },

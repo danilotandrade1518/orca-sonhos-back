@@ -1,7 +1,7 @@
 export interface BudgetCore {
   id: string;
   name: string;
-  type: 'PERSONAL' | 'SHARED';
+  type: string;
 }
 
 export interface BudgetParticipant {
@@ -21,12 +21,18 @@ export interface MonthlyAggregates {
 }
 
 export interface IGetBudgetOverviewDao {
-  fetchBudgetCore(budgetId: string, userId: string): Promise<BudgetCore | null>;
-  fetchParticipants(budgetId: string): Promise<BudgetParticipant[]>;
-  fetchAccounts(budgetId: string): Promise<BudgetAccount[]>;
-  fetchMonthlyAggregates(
-    budgetId: string,
-    periodStart: Date,
-    periodEnd: Date,
-  ): Promise<MonthlyAggregates>;
+  fetchBudgetCore(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<BudgetCore | null>;
+
+  fetchParticipants(params: { budgetId: string }): Promise<BudgetParticipant[]>;
+
+  fetchAccounts(params: { budgetId: string }): Promise<BudgetAccount[]>;
+
+  fetchMonthlyAggregates(params: {
+    budgetId: string;
+    periodStart: Date;
+    periodEnd: Date;
+  }): Promise<MonthlyAggregates>;
 }

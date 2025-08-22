@@ -6,8 +6,8 @@ export interface EnvelopeListItem {
 }
 
 export interface IListEnvelopesDao {
-  findByBudgetForUser(
-    budgetId: string,
-    userId: string,
-  ): Promise<EnvelopeListItem[] | null>;
+  findByBudgetForUser(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<EnvelopeListItem[] | null>;
 }

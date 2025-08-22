@@ -1,13 +1,7 @@
-// [ ] DAO methods implemented
-// [ ] Handler passes all tests
-// [ ] Route registered
-// [ ] NotFound path covered
-// [ ] Derived totals correct
-// [ ] No other files changed
-
-import { IQueryHandler } from '../../shared/IQueryHandler';
 import { IGetBudgetOverviewDao } from '@application/contracts/daos/budget/IGetBudgetOverviewDao';
 import { BudgetNotFoundError } from '@application/shared/errors/BudgetNotFoundError';
+
+import { IQueryHandler } from '../../shared/IQueryHandler';
 
 export interface BudgetOverviewQuery {
   budgetId: string;
@@ -17,7 +11,7 @@ export interface BudgetOverviewQuery {
 export interface BudgetOverviewQueryResult {
   id: string;
   name: string;
-  type: 'PERSONAL' | 'SHARED';
+  type: string;
   participants: { id: string }[];
   totals: {
     accountsBalance: number;
@@ -45,10 +39,10 @@ export class BudgetOverviewQueryHandler
       throw new Error('INVALID_QUERY');
     }
 
-    const budgetCore = await this.dao.fetchBudgetCore(
-      query.budgetId,
-      query.userId,
-    );
+    const budgetCore = await this.dao.fetchBudgetCore({
+      budgetId: query.budgetId,
+      userId: query.userId,
+    });
     if (!budgetCore) throw new BudgetNotFoundError();
 
     const now = new Date();
@@ -60,9 +54,13 @@ export class BudgetOverviewQueryHandler
     );
 
     const [participants, accounts, aggregates] = await Promise.all([
-      this.dao.fetchParticipants(query.budgetId),
-      this.dao.fetchAccounts(query.budgetId),
-      this.dao.fetchMonthlyAggregates(query.budgetId, periodStart, periodEnd),
+      this.dao.fetchParticipants({ budgetId: query.budgetId }),
+      this.dao.fetchAccounts({ budgetId: query.budgetId }),
+      this.dao.fetchMonthlyAggregates({
+        budgetId: query.budgetId,
+        periodStart,
+        periodEnd,
+      }),
     ]);
 
     const accountsBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);

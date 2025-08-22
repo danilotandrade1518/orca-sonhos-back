@@ -1,4 +1,5 @@
 import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
+
 import { ListTransactionsDao } from './ListTransactionsDao';
 
 describe('ListTransactionsDao', () => {
@@ -119,8 +120,8 @@ describe('ListTransactionsDao', () => {
       limit: 11,
       accountId: 'a9',
       categoryId: 'c9',
-      dateFrom: '2023-01-01',
-      dateTo: '2023-01-31',
+      dateFrom: new Date('2023-01-01'),
+      dateTo: new Date('2023-01-31'),
     });
 
     const call = mockConnection.query.mock.calls[1];
@@ -133,8 +134,8 @@ describe('ListTransactionsDao', () => {
       'b1',
       'a9',
       'c9',
-      '2023-01-01',
-      '2023-01-31',
+      new Date('2023-01-01'),
+      new Date('2023-01-31'),
       11,
       10,
     ]);

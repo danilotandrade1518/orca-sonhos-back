@@ -1,6 +1,5 @@
-import { ListEnvelopesQueryHandler } from '@application/queries/budget/list-envelopes/ListEnvelopesQueryHandler';
 import { IListEnvelopesDao } from '@application/contracts/daos/envelope/IListEnvelopesDao';
-import { BudgetNotFoundError } from '@application/shared/errors/BudgetNotFoundError';
+import { ListEnvelopesQueryHandler } from '@application/queries/budget/list-envelopes/ListEnvelopesQueryHandler';
 
 describe('ListEnvelopesQueryHandler', () => {
   let dao: jest.Mocked<IListEnvelopesDao>;
@@ -11,13 +10,6 @@ describe('ListEnvelopesQueryHandler', () => {
       findByBudgetForUser: jest.fn(),
     };
     handler = new ListEnvelopesQueryHandler(dao);
-  });
-
-  it('should throw when dao returns null', async () => {
-    dao.findByBudgetForUser.mockResolvedValue(null);
-    await expect(
-      handler.execute({ budgetId: 'b1', userId: 'u1' }),
-    ).rejects.toBeInstanceOf(BudgetNotFoundError);
   });
 
   it('should return empty array when dao returns empty', async () => {

@@ -24,9 +24,14 @@ describe('ListCategoriesDao', () => {
   });
 
   it('should return empty array when no categories', async () => {
-    mockConnection.query.mockResolvedValue({ rows: [], rowCount: 0 });
+    mockConnection.query
+      .mockResolvedValueOnce({ rows: [{}], rowCount: 1 })
+      .mockResolvedValue({ rows: [], rowCount: 0 });
 
-    const result = await dao.findAll();
+    const result = await dao.findAll({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
 
     expect(mockConnection.query).toHaveBeenCalled();
     expect(result).toEqual([]);
@@ -41,7 +46,10 @@ describe('ListCategoriesDao', () => {
       rowCount: 2,
     });
 
-    const result = await dao.findAll();
+    const result = await dao.findAll({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
 
     expect(mockConnection.query).toHaveBeenCalled();
     expect(result).toEqual([
@@ -50,4 +58,3 @@ describe('ListCategoriesDao', () => {
     ]);
   });
 });
-

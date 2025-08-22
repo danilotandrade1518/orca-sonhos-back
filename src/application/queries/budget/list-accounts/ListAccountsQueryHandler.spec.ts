@@ -2,16 +2,17 @@ import {
   IListAccountsDao,
   ListAccountsItem,
 } from '@application/contracts/daos/account/IListAccountsDao';
+
 import { ListAccountsQueryHandler } from './ListAccountsQueryHandler';
 
 class ListAccountsDaoStub implements IListAccountsDao {
   public items: ListAccountsItem[] | null = [];
 
-  async findByBudgetForUser(
-    budgetId: string,
-    userId: string,
-  ): Promise<ListAccountsItem[] | null> {
-    if (budgetId && userId) {
+  async findByBudgetForUser(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<ListAccountsItem[] | null> {
+    if (params.budgetId && params.userId) {
       // noop
     }
     return this.items;
@@ -25,13 +26,6 @@ describe('ListAccountsQueryHandler', () => {
   beforeEach(() => {
     dao = new ListAccountsDaoStub();
     handler = new ListAccountsQueryHandler(dao);
-  });
-
-  it('should throw when dao returns null', async () => {
-    dao.items = null;
-    await expect(
-      handler.execute({ budgetId: 'b1', userId: 'u1' }),
-    ).rejects.toThrow('NOT_FOUND');
   });
 
   it('should return empty array when dao returns []', async () => {

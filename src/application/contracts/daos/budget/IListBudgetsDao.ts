@@ -1,10 +1,10 @@
 export interface BudgetListItem {
   id: string;
   name: string;
-  type: 'PERSONAL' | 'SHARED';
+  type: string;
   participantsCount: number;
 }
 
 export interface IListBudgetsDao {
-  findByUser(userId: string): Promise<BudgetListItem[]>;
+  findByUser(params: { userId: string }): Promise<BudgetListItem[]>;
 }

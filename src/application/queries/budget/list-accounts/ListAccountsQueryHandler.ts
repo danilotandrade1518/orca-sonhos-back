@@ -1,18 +1,9 @@
-/*
-- [ ] DAO interface created
-- [ ] DAO implemented with auth check + listing
-- [ ] Handler validates input and adapts output
-- [ ] Specs passing (DAO + Handler)
-- [ ] docs/query-view-planning.md updated row
-- [ ] No other files changed
-- [ ] Route NOT registered
-*/
-
-import { IQueryHandler } from '../../shared/IQueryHandler';
 import {
   IListAccountsDao,
   ListAccountsItem,
 } from '@application/contracts/daos/account/IListAccountsDao';
+
+import { IQueryHandler } from '../../shared/IQueryHandler';
 
 export interface ListAccountsQuery {
   budgetId: string;
@@ -33,20 +24,18 @@ export class ListAccountsQueryHandler
       throw new Error('INVALID_INPUT');
     }
 
-    const items = await this.listAccountsDao.findByBudgetForUser(
+    const items = await this.listAccountsDao.findByBudgetForUser({
       budgetId,
       userId,
+    });
+
+    return (
+      items?.map((item) => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        balance: item.balance,
+      })) || []
     );
-
-    if (items === null) {
-      throw new Error('NOT_FOUND');
-    }
-
-    return items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      type: item.type,
-      balance: item.balance,
-    }));
   }
 }

@@ -6,8 +6,8 @@ export interface ListAccountsItem {
 }
 
 export interface IListAccountsDao {
-  findByBudgetForUser(
-    budgetId: string,
-    userId: string,
-  ): Promise<ListAccountsItem[] | null>;
+  findByBudgetForUser(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<ListAccountsItem[] | null>;
 }

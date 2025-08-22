@@ -1,12 +1,12 @@
-export type CategoryType = 'INCOME' | 'EXPENSE';
-
 export interface ListCategoriesItem {
   id: string;
   name: string;
-  type: CategoryType;
+  type: string;
 }
 
 export interface IListCategoriesDao {
-  findAll(): Promise<ListCategoriesItem[]>;
+  findAll(params: {
+    userId: string;
+    budgetId: string;
+  }): Promise<ListCategoriesItem[] | null>;
 }
-

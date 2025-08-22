@@ -26,7 +26,10 @@ describe('ListGoalsDao', () => {
   it('should return null when user is not authorized', async () => {
     mockConnection.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
 
-    const result = await dao.findByBudgetForUser('b1', 'u1');
+    const result = await dao.findByBudgetForUser({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
 
     expect(result).toBeNull();
   });
@@ -36,7 +39,10 @@ describe('ListGoalsDao', () => {
       .mockResolvedValueOnce({ rows: [{}], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 });
 
-    const result = await dao.findByBudgetForUser('b1', 'u1');
+    const result = await dao.findByBudgetForUser({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
 
     expect(result).toEqual([]);
   });
@@ -57,7 +63,10 @@ describe('ListGoalsDao', () => {
         rowCount: 1,
       });
 
-    const result = await dao.findByBudgetForUser('b1', 'u1');
+    const result = await dao.findByBudgetForUser({
+      budgetId: 'b1',
+      userId: 'u1',
+    });
 
     expect(result).toEqual([
       {

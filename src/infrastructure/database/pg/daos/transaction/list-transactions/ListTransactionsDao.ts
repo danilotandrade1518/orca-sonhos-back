@@ -2,6 +2,7 @@ import {
   IListTransactionsDao,
   ListTransactionsItem,
 } from '@application/contracts/daos/transaction/IListTransactionsDao';
+
 import { IPostgresConnectionAdapter } from './../../../../../adapters/IPostgresConnectionAdapter';
 
 interface TransactionRow {
@@ -24,8 +25,8 @@ export class ListTransactionsDao implements IListTransactionsDao {
     limit: number;
     accountId?: string;
     categoryId?: string;
-    dateFrom?: string;
-    dateTo?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
   }): Promise<{ rows: ListTransactionsItem[]; hasNext: boolean } | null> {
     const auth = await this.connection.query(
       `SELECT 1 FROM budgets WHERE id = $1 AND (owner_id = $2 OR $2 = ANY(participant_ids))`,
@@ -71,19 +72,19 @@ export class ListTransactionsDao implements IListTransactionsDao {
     const result = await this.connection.query<TransactionRow>(text, values);
     const dbRows = result?.rows ?? [];
     const hasNext = dbRows.length === params.limit;
-    const sliceRows: TransactionRow[] = hasNext
-      ? dbRows.slice(0, -1)
-      : dbRows;
+    const sliceRows: TransactionRow[] = hasNext ? dbRows.slice(0, -1) : dbRows;
 
-    const rows: ListTransactionsItem[] = sliceRows.map((row: TransactionRow) => ({
-      id: row.id,
-      date: row.date,
-      description: row.description,
-      amount: Number(row.amount_cents),
-      direction: row.direction,
-      accountId: row.account_id,
-      categoryId: row.category_id,
-    }));
+    const rows: ListTransactionsItem[] = sliceRows.map(
+      (row: TransactionRow) => ({
+        id: row.id,
+        date: row.date,
+        description: row.description,
+        amount: Number(row.amount_cents),
+        direction: row.direction,
+        accountId: row.account_id,
+        categoryId: row.category_id,
+      }),
+    );
 
     return { rows, hasNext };
   }

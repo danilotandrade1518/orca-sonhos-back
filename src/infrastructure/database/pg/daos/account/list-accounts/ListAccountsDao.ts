@@ -2,15 +2,18 @@ import {
   IListAccountsDao,
   ListAccountsItem,
 } from '@application/contracts/daos/account/IListAccountsDao';
+
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 
 export class ListAccountsDao implements IListAccountsDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findByBudgetForUser(
-    budgetId: string,
-    userId: string,
-  ): Promise<ListAccountsItem[] | null> {
+  async findByBudgetForUser(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<ListAccountsItem[] | null> {
+    const { budgetId, userId } = params;
+
     const auth = await this.connection.query(
       `SELECT 1 FROM budgets WHERE id = $1 AND (owner_id = $2 OR $2 = ANY(participant_ids))`,
       [budgetId, userId],

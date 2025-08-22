@@ -8,7 +8,9 @@ import { IPostgresConnectionAdapter } from './../../../../../adapters/IPostgresC
 export class ListBudgetsDao implements IListBudgetsDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findByUser(userId: string): Promise<BudgetListItem[]> {
+  async findByUser(params: { userId: string }): Promise<BudgetListItem[]> {
+    const { userId } = params;
+
     const result = await this.connection.query<
       BudgetListItem & { participantscount: string }
     >(
@@ -24,7 +26,7 @@ export class ListBudgetsDao implements IListBudgetsDao {
       result?.rows.map((row) => ({
         id: row.id,
         name: row.name,
-        type: row.type as 'PERSONAL' | 'SHARED',
+        type: row.type,
         participantsCount: Number(row.participantscount),
       })) || []
     );

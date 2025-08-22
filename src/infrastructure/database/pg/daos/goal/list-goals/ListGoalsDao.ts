@@ -2,15 +2,18 @@ import {
   GoalListItem,
   IListGoalsDao,
 } from '@application/contracts/daos/goal/IListGoalsDao';
+
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 
 export class ListGoalsDao implements IListGoalsDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findByBudgetForUser(
-    budgetId: string,
-    userId: string,
-  ): Promise<GoalListItem[] | null> {
+  async findByBudgetForUser(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<GoalListItem[] | null> {
+    const { budgetId, userId } = params;
+
     const auth = await this.connection.query(
       `SELECT 1
          FROM budgets

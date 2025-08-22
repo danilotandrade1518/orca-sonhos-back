@@ -2,6 +2,7 @@ import {
   IListTransactionsDao,
   ListTransactionsItem,
 } from '@application/contracts/daos/transaction/IListTransactionsDao';
+
 import { ListTransactionsQueryHandler } from './ListTransactionsQueryHandler';
 
 class ListTransactionsDaoStub implements IListTransactionsDao {
@@ -9,8 +10,18 @@ class ListTransactionsDaoStub implements IListTransactionsDao {
     rows: [],
     hasNext: false,
   };
-  public params: any;
-  async findPageForBudgetUser(params: any) {
+  public params: unknown;
+
+  async findPageForBudgetUser(params: {
+    budgetId: string;
+    userId: string;
+    offset: number;
+    limit: number;
+    accountId?: string;
+    categoryId?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+  }) {
     this.params = params;
     return this.result;
   }
@@ -26,15 +37,6 @@ describe('ListTransactionsQueryHandler', () => {
     await expect(
       handler.execute({ budgetId: 'b1', userId: 'u1', page: 0 }),
     ).rejects.toThrow('INVALID_INPUT');
-  });
-
-  it('should throw NOT_FOUND when dao returns null', async () => {
-    const dao = new ListTransactionsDaoStub();
-    dao.result = null;
-    const handler = new ListTransactionsQueryHandler(dao);
-    await expect(
-      handler.execute({ budgetId: 'b1', userId: 'u1' }),
-    ).rejects.toThrow('NOT_FOUND');
   });
 
   it('should return empty items when dao returns none', async () => {

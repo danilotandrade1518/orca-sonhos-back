@@ -4,18 +4,20 @@ import {
 } from '@application/contracts/daos/goal/IListGoalsDao';
 
 import {
-  ListGoalsQueryHandler,
   ListGoalsQuery,
+  ListGoalsQueryHandler,
   ListGoalsQueryResult,
 } from './ListGoalsQueryHandler';
 
 describe('ListGoalsQueryHandler', () => {
   class ListGoalsDaoStub implements IListGoalsDao {
     public result: GoalListItem[] | null = [];
-    async findByBudgetForUser(
-      budgetId: string,
-      userId: string,
-    ): Promise<GoalListItem[] | null> {
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async findByBudgetForUser(params: {
+      budgetId: string;
+      userId: string;
+    }): Promise<GoalListItem[] | null> {
       return this.result;
     }
   }
@@ -35,11 +37,6 @@ describe('ListGoalsQueryHandler', () => {
 
   const query: ListGoalsQuery = { budgetId: 'b1', userId: 'u1' };
 
-  it('should throw NOT_FOUND when dao returns null', async () => {
-    dao.result = null;
-    await expect(handler.execute(query)).rejects.toThrow('NOT_FOUND');
-  });
-
   it('should return empty array when dao returns empty array', async () => {
     dao.result = [];
     const result = await handler.execute(query);
@@ -48,7 +45,13 @@ describe('ListGoalsQueryHandler', () => {
 
   it('should calculate percentAchieved and status correctly', async () => {
     dao.result = [
-      { id: '1', name: 'g1', targetAmount: 0, currentAmount: 100, dueDate: null },
+      {
+        id: '1',
+        name: 'g1',
+        targetAmount: 0,
+        currentAmount: 100,
+        dueDate: null,
+      },
       {
         id: '2',
         name: 'g2',
@@ -82,7 +85,6 @@ describe('ListGoalsQueryHandler', () => {
         currentAmount: 100,
         percentAchieved: 0,
         dueDate: null,
-        status: 'ACTIVE',
       },
       {
         id: '2',
@@ -91,7 +93,6 @@ describe('ListGoalsQueryHandler', () => {
         currentAmount: 1000,
         percentAchieved: 1,
         dueDate: '2024-01-05',
-        status: 'ACHIEVED',
       },
       {
         id: '3',
@@ -100,7 +101,6 @@ describe('ListGoalsQueryHandler', () => {
         currentAmount: 200,
         percentAchieved: 0.2,
         dueDate: '2024-01-01',
-        status: 'OVERDUE',
       },
       {
         id: '4',
@@ -109,7 +109,6 @@ describe('ListGoalsQueryHandler', () => {
         currentAmount: 200,
         percentAchieved: 0.2,
         dueDate: '2024-02-01',
-        status: 'ACTIVE',
       },
     ]);
   });

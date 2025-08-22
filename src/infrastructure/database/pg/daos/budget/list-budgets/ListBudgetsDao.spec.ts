@@ -36,7 +36,7 @@ describe('ListBudgetsDao', () => {
       rowCount: 1,
     });
 
-    const result = await dao.findByUser('user-1');
+    const result = await dao.findByUser({ userId: 'user-1' });
 
     expect(mockConnection.query).toHaveBeenCalled();
     expect(result).toEqual([

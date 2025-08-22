@@ -8,7 +8,7 @@ export interface ListBudgetsQuery {
 export interface ListBudgetsQueryResult {
   id: string;
   name: string;
-  type: 'PERSONAL' | 'SHARED';
+  type: string;
   participantsCount: number;
 }
 
@@ -18,7 +18,10 @@ export class ListBudgetsQueryHandler
   constructor(private readonly listBudgetsDao: IListBudgetsDao) {}
 
   async execute(query: ListBudgetsQuery): Promise<ListBudgetsQueryResult[]> {
-    const items = await this.listBudgetsDao.findByUser(query.userId);
+    const items = await this.listBudgetsDao.findByUser({
+      userId: query.userId,
+    });
+
     return items.map((item) => ({
       id: item.id,
       name: item.name,

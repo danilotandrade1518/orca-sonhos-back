@@ -16,7 +16,7 @@ export interface IListTransactionsDao {
     limit: number;
     accountId?: string;
     categoryId?: string;
-    dateFrom?: string;
-    dateTo?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
   }): Promise<{ rows: ListTransactionsItem[]; hasNext: boolean } | null>;
 }

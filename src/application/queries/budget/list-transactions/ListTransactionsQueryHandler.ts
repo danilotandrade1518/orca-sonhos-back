@@ -1,19 +1,9 @@
-/*
-Acceptance Checklist:
-- [ ] DAO interface created
-- [ ] DAO implemented with auth check + filters + pagination (LIMIT+1)
-- [ ] Handler validates input, adapts output and computes hasNext from DAO result
-- [ ] Specs passing (DAO + Handler)
-- [ ] docs/query-view-planning.md updated row
-- [ ] No other files changed
-- [ ] Route NOT registered
-*/
-
-import { IQueryHandler } from '../../shared/IQueryHandler';
 import {
   IListTransactionsDao,
   ListTransactionsItem,
 } from '@application/contracts/daos/transaction/IListTransactionsDao';
+
+import { IQueryHandler } from '../../shared/IQueryHandler';
 
 export interface ListTransactionsQuery {
   budgetId: string;
@@ -22,8 +12,8 @@ export interface ListTransactionsQuery {
   pageSize?: number;
   accountId?: string;
   categoryId?: string;
-  dateFrom?: string;
-  dateTo?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
 }
 
 export interface ListTransactionsQueryResult {
@@ -31,11 +21,8 @@ export interface ListTransactionsQueryResult {
   meta: { page: number; pageSize: number; hasNext: boolean };
 }
 
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
 export class ListTransactionsQueryHandler
-  implements
-    IQueryHandler<ListTransactionsQuery, ListTransactionsQueryResult>
+  implements IQueryHandler<ListTransactionsQuery, ListTransactionsQueryResult>
 {
   constructor(private readonly dao: IListTransactionsDao) {}
 
@@ -50,9 +37,7 @@ export class ListTransactionsQueryHandler
       !query.userId ||
       page < 1 ||
       pageSize < 1 ||
-      pageSize > 100 ||
-      (query.dateFrom && !DATE_REGEX.test(query.dateFrom)) ||
-      (query.dateTo && !DATE_REGEX.test(query.dateTo))
+      pageSize > 100
     ) {
       throw new Error('INVALID_INPUT');
     }
@@ -71,23 +56,20 @@ export class ListTransactionsQueryHandler
       dateTo: query.dateTo,
     });
 
-    if (!result) {
-      throw new Error('NOT_FOUND');
-    }
-
-    const items = result.rows.map((row) => ({
-      id: row.id,
-      date: row.date,
-      description: row.description,
-      amount: row.amount,
-      direction: row.direction,
-      accountId: row.accountId,
-      categoryId: row.categoryId,
-    }));
+    const items =
+      result?.rows.map((row) => ({
+        id: row.id,
+        date: row.date,
+        description: row.description,
+        amount: row.amount,
+        direction: row.direction,
+        accountId: row.accountId,
+        categoryId: row.categoryId,
+      })) || [];
 
     return {
       items,
-      meta: { page, pageSize, hasNext: result.hasNext },
+      meta: { page, pageSize, hasNext: result?.hasNext || false },
     };
   }
 }

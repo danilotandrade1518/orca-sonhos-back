@@ -10,10 +10,12 @@ import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresCo
 export class BudgetOverviewDao implements IGetBudgetOverviewDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async fetchBudgetCore(
-    budgetId: string,
-    userId: string,
-  ): Promise<BudgetCore | null> {
+  async fetchBudgetCore(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<BudgetCore | null> {
+    const { budgetId, userId } = params;
+
     const result = await this.connection.query<BudgetCore>(
       `SELECT id, name, type
        FROM budgets
@@ -31,7 +33,11 @@ export class BudgetOverviewDao implements IGetBudgetOverviewDao {
     };
   }
 
-  async fetchParticipants(budgetId: string): Promise<BudgetParticipant[]> {
+  async fetchParticipants(params: {
+    budgetId: string;
+  }): Promise<BudgetParticipant[]> {
+    const { budgetId } = params;
+
     const result = await this.connection.query<{
       owner_id: string;
       participant_ids: string[];
@@ -49,7 +55,9 @@ export class BudgetOverviewDao implements IGetBudgetOverviewDao {
     return Array.from(set).map((id) => ({ id }));
   }
 
-  async fetchAccounts(budgetId: string): Promise<BudgetAccount[]> {
+  async fetchAccounts(params: { budgetId: string }): Promise<BudgetAccount[]> {
+    const { budgetId } = params;
+
     const result = await this.connection.query<
       BudgetAccount & { balance: string }
     >(
@@ -69,11 +77,13 @@ export class BudgetOverviewDao implements IGetBudgetOverviewDao {
     );
   }
 
-  async fetchMonthlyAggregates(
-    budgetId: string,
-    periodStart: Date,
-    periodEnd: Date,
-  ): Promise<MonthlyAggregates> {
+  async fetchMonthlyAggregates(params: {
+    budgetId: string;
+    periodStart: Date;
+    periodEnd: Date;
+  }): Promise<MonthlyAggregates> {
+    const { budgetId, periodStart, periodEnd } = params;
+
     const result = await this.connection.query<{
       income: string | null;
       expense: string | null;

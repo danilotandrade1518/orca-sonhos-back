@@ -2,15 +2,18 @@ import {
   EnvelopeListItem,
   IListEnvelopesDao,
 } from '@application/contracts/daos/envelope/IListEnvelopesDao';
+
 import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresConnectionAdapter';
 
 export class ListEnvelopesDao implements IListEnvelopesDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findByBudgetForUser(
-    budgetId: string,
-    userId: string,
-  ): Promise<EnvelopeListItem[] | null> {
+  async findByBudgetForUser(params: {
+    budgetId: string;
+    userId: string;
+  }): Promise<EnvelopeListItem[] | null> {
+    const { budgetId, userId } = params;
+
     const auth = await this.connection.query(
       `SELECT 1 FROM budgets WHERE id = $1 AND (owner_id = $2 OR $2 = ANY(participant_ids))`,
       [budgetId, userId],
