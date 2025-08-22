@@ -242,12 +242,12 @@ Cada bloco define: _nome_, _campos_, _fonte_, _derivados_, _endpoint sugerido_.
 | Handler                      | Input                    | Output          | DAO(s)                                                  | Complexidade      |
 | ---------------------------- | ------------------------ | --------------- | ------------------------------------------------------- | ----------------- |
 | ListBudgetsQueryHandler      | userId                   | budgets[]       | BudgetsDao                                              | Baixa             |
-| BudgetOverviewQueryHandler   | budgetId,userId          | overview        | BudgetsDao + AccountsDao + TransactionsDao (sum mensal) | Média             |
+| BudgetOverviewQueryHandler (Implemented)   | budgetId,userId          | overview        | BudgetsDao + AccountsDao + TransactionsDao (sum mensal) | Média             |
 | ListAccountsQueryHandler     | budgetId,userId          | accounts[]      | AccountsDao                                             | Baixa             |
-| ListTransactionsQueryHandler | budgetId,userId, filtros | page transações | TransactionsDao                                         | Média (paginação) |
+| ListTransactionsQueryHandler | budgetId,userId, filtros | page transações | TransactionsDao | Média (paginação) - Implemented |
 | ListEnvelopesQueryHandler | budgetId,userId | envelopes[] | EnvelopesDao | Baixa (Implemented) |
-| ListGoalsQueryHandler        | budgetId,userId          | goals[]         | GoalsDao                                                | Baixa             |
-| ListCategoriesQueryHandler   | (userId opcional)        | categorias[]    | CategoriesDao                                           | Baixa             |
+| ListGoalsQueryHandler (Implemented)        | budgetId,userId          | goals[]         | GoalsDao                                                | Baixa             |
+| ListCategoriesQueryHandler (Implemented)   | (userId opcional)        | categorias[]    | CategoriesDao                                           | Baixa             |
 
 ## 6. Métricas & Observabilidade
 
