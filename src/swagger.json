@@ -5,5 +5,1174 @@
     "version": "1.0.0",
     "description": "Documentação inicial da API OrçaSonhos."
   },
-  "paths": {}
+  "paths": {
+    "/budgets": {
+      "get": {
+        "summary": "Lista os orçamentos do usuário autenticado",
+        "tags": ["Budgets"],
+        "responses": {
+          "200": { "description": "Lista retornada com sucesso" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/budget/{budgetId}/overview": {
+      "get": {
+        "summary": "Resumo do orçamento (overview)",
+        "tags": ["Budgets"],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Resumo retornado com sucesso" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Retorna informações do usuário autenticado",
+        "tags": ["Auth"],
+        "responses": {
+          "200": { "description": "Dados do usuário ou anônimo" }
+        }
+      }
+    },
+    "/accounts": {
+      "get": {
+        "summary": "Lista contas do orçamento",
+        "tags": ["Accounts"],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": { "description": "Lista retornada com sucesso" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "summary": "Lista transações do orçamento (com filtros e paginação)",
+        "tags": ["Transactions"],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "required": true
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1 }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 200 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Lista retornada com sucesso" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/envelopes": {
+      "get": {
+        "summary": "Lista envelopes do orçamento",
+        "tags": ["Envelopes"],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": { "description": "Lista retornada com sucesso" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/goals": {
+      "get": {
+        "summary": "Lista metas do orçamento",
+        "tags": ["Goals"],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": { "description": "Lista retornada com sucesso" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "summary": "Lista categorias (por orçamento)",
+        "tags": ["Categories"],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "query",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Lista retornada com sucesso" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/budget/create-budget": {
+      "post": {
+        "summary": "Cria um orçamento",
+        "tags": ["Budgets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "ownerId": { "type": "string", "format": "uuid" },
+                  "participantIds": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "uuid" }
+                  },
+                  "type": { "type": "string", "example": "personal|shared" }
+                },
+                "required": ["name", "ownerId", "type"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Criado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/budget/update-budget": {
+      "post": {
+        "summary": "Atualiza dados do orçamento",
+        "tags": ["Budgets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "name": { "type": "string" }
+                },
+                "required": ["userId", "budgetId", "name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/budget/delete-budget": {
+      "post": {
+        "summary": "Exclui um orçamento",
+        "tags": ["Budgets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["userId", "budgetId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Excluído" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/budget/add-participant": {
+      "post": {
+        "summary": "Adiciona um participante ao orçamento",
+        "tags": ["Budgets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "participantId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["userId", "budgetId", "participantId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Participante adicionado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/budget/remove-participant": {
+      "post": {
+        "summary": "Remove um participante do orçamento",
+        "tags": ["Budgets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "participantId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["userId", "budgetId", "participantId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Participante removido" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/account/create-account": {
+      "post": {
+        "summary": "Cria uma conta",
+        "tags": ["Accounts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "name": { "type": "string" },
+                  "type": { "type": "string" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "initialBalance": { "type": "number" },
+                  "description": { "type": "string" }
+                },
+                "required": ["userId", "name", "type", "budgetId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Criado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/account/update-account": {
+      "post": {
+        "summary": "Atualiza uma conta",
+        "tags": ["Accounts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "initialBalance": { "type": "number" }
+                },
+                "required": ["id", "userId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/account/delete-account": {
+      "post": {
+        "summary": "Exclui uma conta",
+        "tags": ["Accounts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "accountId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["userId", "accountId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Excluído" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/account/reconcile-account": {
+      "post": {
+        "summary": "Reconcilia o saldo de uma conta",
+        "tags": ["Accounts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "accountId": { "type": "string", "format": "uuid" },
+                  "realBalance": { "type": "number" }
+                },
+                "required": ["userId", "budgetId", "accountId", "realBalance"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Conciliação realizada" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/account/transfer-between-accounts": {
+      "post": {
+        "summary": "Transfere valor entre contas",
+        "tags": ["Accounts"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "fromAccountId": { "type": "string", "format": "uuid" },
+                  "toAccountId": { "type": "string", "format": "uuid" },
+                  "amount": { "type": "number" },
+                  "description": { "type": "string" }
+                },
+                "required": ["userId", "fromAccountId", "toAccountId", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Transferência realizada" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/envelope/create-envelope": {
+      "post": {
+        "summary": "Cria um envelope",
+        "tags": ["Envelopes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "monthlyLimit": { "type": "number" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "categoryId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" }
+                },
+                "required": [
+                  "name",
+                  "monthlyLimit",
+                  "budgetId",
+                  "categoryId",
+                  "userId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Criado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/envelope/update-envelope": {
+      "post": {
+        "summary": "Atualiza um envelope",
+        "tags": ["Envelopes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "envelopeId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "name": { "type": "string" },
+                  "monthlyLimit": { "type": "number" }
+                },
+                "required": ["envelopeId", "userId", "budgetId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/envelope/delete-envelope": {
+      "post": {
+        "summary": "Exclui um envelope",
+        "tags": ["Envelopes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "envelopeId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["envelopeId", "userId", "budgetId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Excluído" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/envelope/add-amount-envelope": {
+      "post": {
+        "summary": "Adiciona valor ao envelope",
+        "tags": ["Envelopes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "envelopeId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "amount": { "type": "number" }
+                },
+                "required": ["envelopeId", "userId", "budgetId", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Valor adicionado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/envelope/remove-amount-envelope": {
+      "post": {
+        "summary": "Remove valor do envelope",
+        "tags": ["Envelopes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "envelopeId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "amount": { "type": "number" }
+                },
+                "required": ["envelopeId", "userId", "budgetId", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Valor removido" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/envelope/transfer-between-envelopes": {
+      "post": {
+        "summary": "Transfere valor entre envelopes",
+        "tags": ["Envelopes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sourceEnvelopeId": { "type": "string", "format": "uuid" },
+                  "targetEnvelopeId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "amount": { "type": "number" }
+                },
+                "required": [
+                  "sourceEnvelopeId",
+                  "targetEnvelopeId",
+                  "userId",
+                  "budgetId",
+                  "amount"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Transferência realizada" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/goal/create-goal": {
+      "post": {
+        "summary": "Cria uma meta",
+        "tags": ["Goals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "totalAmount": { "type": "number" },
+                  "accumulatedAmount": { "type": "number" },
+                  "deadline": { "type": "string", "format": "date-time" },
+                  "budgetId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["name", "totalAmount", "budgetId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Criado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/goal/update-goal": {
+      "post": {
+        "summary": "Atualiza uma meta",
+        "tags": ["Goals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "name": { "type": "string" },
+                  "totalAmount": { "type": "number" },
+                  "deadline": { "type": "string", "format": "date-time" }
+                },
+                "required": ["id", "name", "totalAmount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/goal/delete-goal": {
+      "post": {
+        "summary": "Exclui uma meta",
+        "tags": ["Goals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" }
+                },
+                "required": ["id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Excluído" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/goal/add-amount-goal": {
+      "post": {
+        "summary": "Adiciona valor à meta",
+        "tags": ["Goals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "amount": { "type": "number" }
+                },
+                "required": ["id", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Valor adicionado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/credit-card/create-credit-card": {
+      "post": {
+        "summary": "Cria um cartão de crédito",
+        "tags": ["Credit Cards"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "limit": { "type": "number" },
+                  "closingDay": { "type": "integer" },
+                  "dueDay": { "type": "integer" },
+                  "budgetId": { "type": "string", "format": "uuid" }
+                },
+                "required": [
+                  "name",
+                  "limit",
+                  "closingDay",
+                  "dueDay",
+                  "budgetId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Criado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/credit-card/update-credit-card": {
+      "post": {
+        "summary": "Atualiza um cartão de crédito",
+        "tags": ["Credit Cards"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "name": { "type": "string" },
+                  "limit": { "type": "number" },
+                  "closingDay": { "type": "integer" },
+                  "dueDay": { "type": "integer" }
+                },
+                "required": ["id", "name", "limit", "closingDay", "dueDay"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/credit-card/delete-credit-card": {
+      "post": {
+        "summary": "Exclui um cartão de crédito",
+        "tags": ["Credit Cards"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" }
+                },
+                "required": ["id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Excluído" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/credit-card-bill/create-credit-card-bill": {
+      "post": {
+        "summary": "Cria uma fatura de cartão",
+        "tags": ["Credit Card Bills"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "creditCardId": { "type": "string", "format": "uuid" },
+                  "closingDate": { "type": "string", "format": "date-time" },
+                  "dueDate": { "type": "string", "format": "date-time" },
+                  "amount": { "type": "number" }
+                },
+                "required": ["creditCardId", "closingDate", "dueDate", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Criado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/credit-card-bill/update-credit-card-bill": {
+      "post": {
+        "summary": "Atualiza uma fatura de cartão",
+        "tags": ["Credit Card Bills"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "closingDate": { "type": "string", "format": "date-time" },
+                  "dueDate": { "type": "string", "format": "date-time" },
+                  "amount": { "type": "number" }
+                },
+                "required": ["id", "closingDate", "dueDate", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/credit-card-bill/delete-credit-card-bill": {
+      "post": {
+        "summary": "Exclui uma fatura de cartão",
+        "tags": ["Credit Card Bills"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" }
+                },
+                "required": ["id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Excluído" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/credit-card-bill/pay-credit-card-bill": {
+      "post": {
+        "summary": "Paga uma fatura de cartão",
+        "tags": ["Credit Card Bills"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "creditCardBillId": { "type": "string", "format": "uuid" },
+                  "accountId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "amount": { "type": "number" },
+                  "paymentCategoryId": { "type": "string", "format": "uuid" },
+                  "paidAt": { "type": "string", "format": "date-time" }
+                },
+                "required": [
+                  "creditCardBillId",
+                  "accountId",
+                  "userId",
+                  "budgetId",
+                  "amount",
+                  "paymentCategoryId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Pago" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/credit-card-bill/reopen-credit-card-bill": {
+      "post": {
+        "summary": "Reabre uma fatura de cartão",
+        "tags": ["Credit Card Bills"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "creditCardBillId": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "justification": { "type": "string" }
+                },
+                "required": [
+                  "creditCardBillId",
+                  "userId",
+                  "budgetId",
+                  "justification"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Reaberta" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/transaction/create-transaction": {
+      "post": {
+        "summary": "Cria uma transação",
+        "tags": ["Transactions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "description": { "type": "string" },
+                  "amount": { "type": "number" },
+                  "type": { "type": "string" },
+                  "accountId": { "type": "string", "format": "uuid" },
+                  "categoryId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "transactionDate": { "type": "string", "format": "date-time" }
+                },
+                "required": [
+                  "userId",
+                  "description",
+                  "amount",
+                  "type",
+                  "accountId",
+                  "categoryId",
+                  "budgetId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Criado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/transaction/update-transaction": {
+      "post": {
+        "summary": "Atualiza uma transação",
+        "tags": ["Transactions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "id": { "type": "string", "format": "uuid" },
+                  "description": { "type": "string" },
+                  "amount": { "type": "number" },
+                  "type": { "type": "string" },
+                  "accountId": { "type": "string", "format": "uuid" },
+                  "categoryId": { "type": "string", "format": "uuid" },
+                  "transactionDate": { "type": "string", "format": "date-time" }
+                },
+                "required": ["userId", "id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/transaction/delete-transaction": {
+      "post": {
+        "summary": "Exclui uma transação",
+        "tags": ["Transactions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "userId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["id", "userId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Excluído" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/transaction/cancel-scheduled-transaction": {
+      "post": {
+        "summary": "Cancela uma transação agendada",
+        "tags": ["Transactions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string", "format": "uuid" },
+                  "budgetId": { "type": "string", "format": "uuid" },
+                  "transactionId": { "type": "string", "format": "uuid" },
+                  "cancellationReason": { "type": "string" }
+                },
+                "required": [
+                  "userId",
+                  "budgetId",
+                  "transactionId",
+                  "cancellationReason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Cancelado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
+    "/transaction/mark-transaction-late": {
+      "post": {
+        "summary": "Marca uma transação como atrasada",
+        "tags": ["Transactions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transactionId": { "type": "string", "format": "uuid" },
+                  "lateDate": { "type": "string", "format": "date-time" }
+                },
+                "required": ["transactionId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Atualizado" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "tags": ["Health"],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "summary": "Readiness check",
+        "tags": ["Health"],
+        "responses": {
+          "200": { "description": "Ready" }
+        }
+      }
+    }
+  }
 }

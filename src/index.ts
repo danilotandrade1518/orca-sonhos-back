@@ -1,4 +1,5 @@
 import { ExpressHttpServerAdapter } from '@http/adapters/express-adapter';
+import { registerHealthRoutes } from '@main/routes/health-route-registry';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 
@@ -76,7 +77,13 @@ registerMutationRoutes({
   categoryIds: { adjustmentCategoryId, transferCategoryId },
 });
 
-registerQueryRoutes({ server });
+registerQueryRoutes({
+  server,
+  connection,
+  budgetAuthorizationService: authService,
+});
+
+registerHealthRoutes(server);
 
 server.listen(Number(env.HTTP_PORT), () => {
   console.log(`Servidor rodando na porta ${env.HTTP_PORT}`);
