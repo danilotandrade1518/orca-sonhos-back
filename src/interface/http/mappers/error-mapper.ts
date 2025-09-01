@@ -32,7 +32,7 @@ function determineStatus(errors: (DomainError | ApplicationError)[]): number {
   if (errors.some((e) => /NotFound/i.test(e.name))) return 404;
   if (
     errors.some((e) =>
-      /Unauthorized|Forbidden|Authorization|AuthToken/i.test(e.name),
+      /Unauthorized|Forbidden|Authorization|AuthToken|Permission/i.test(e.name),
     )
   )
     return 403;

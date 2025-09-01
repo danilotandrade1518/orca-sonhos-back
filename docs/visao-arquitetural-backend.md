@@ -608,17 +608,17 @@ Esta convenção aplica-se exclusivamente a operações de **mutação** (comman
 
 > Esta seção será revisitada quando introduzirmos query endpoints especializados ou se adotarmos GraphQL / gRPC para leitura.
 
-## 15. Fluxo de Autenticação SPA (Authorization Code + PKCE)
+## 15. Fluxo de Autenticação SPA (Authorization Code + PKCE com Azure AD B2C)
 
 ### 15.1. Decisão
 
-Adotaremos fluxo de autenticação do tipo **SPA pública** (public client) utilizando **Authorization Code + PKCE** diretamente entre o frontend e o Provedor de Identidade (ex: Azure AD B2C conforme ADR-0007). O backend permanecerá totalmente **stateless** em relação a sessão do usuário, recebendo apenas o **Bearer Access Token** no header `Authorization` em cada requisição autenticada.
+Adotaremos fluxo de autenticação do tipo **SPA pública** (public client) utilizando **Authorization Code + PKCE** diretamente entre o frontend e o Provedor de Identidade — Azure AD B2C (conforme ADR-0007). O backend permanecerá totalmente **stateless** em relação à sessão do usuário, recebendo apenas o **Bearer Access Token** no header `Authorization` em cada requisição autenticada.
 
 ### 15.2. Motivação
 
 1. Reduz complexidade inicial (sem camada de sessão/refresh server-side, sem storage de estado de login no backend).
 2. Acelera time-to-market do MVP mantendo segurança adequada (code + PKCE evita interceptação de authorization code).
-3. Alinha-se ao modelo já implementado de validação de JWT com cache de JWKS e tolerância de clock skew.
+3. Alinha-se ao modelo já implementado de validação de JWT com cache de JWKS e tolerância de clock skew (Azure AD B2C como emissor).
 4. Evita necessidade de endpoints adicionais de login/logout no backend (delegado ao IdP + frontend).
 
 ### 15.3. Fluxo Resumido
@@ -628,7 +628,7 @@ Adotaremos fluxo de autenticação do tipo **SPA pública** (public client) util
 3. IdP autentica usuário e redireciona de volta com `code` e `state`.
 4. SPA troca diretamente (`POST /token`) enviando `code_verifier` + `code` e recebe `access_token` (e opcional `refresh_token` se política permitir).
 5. Em cada requisição ao backend: `Authorization: Bearer <access_token>`.
-6. Backend valida: assinatura (RS256), issuer, audience, exp/nbf com tolerância de clock skew, presença de claim `sub` (mapeada a `userId`).
+6. Backend valida: assinatura (RS256), issuer, audience, exp/nbf com tolerância de clock skew, presença de claim `sub` (mapeada a `userId`). As configurações de issuer/tenant/metadata apontam para o Azure AD B2C do ambiente.
 7. Endpoint `/me` devolve identificação derivada do token (ou anônimo se ausência).
 
 ### 15.4. Não teremos inicialmente
@@ -700,6 +700,7 @@ Erros:
 ### 15.13. Referências
 
 - ADR-0007 (Infra inicial Azure / B2C / Key Vault)
+- Azure AD B2C: Authorization code flow with PKCE (SPA)
 - RFC 7636 (PKCE)
 - NIST SP 800-63B (Sessões e autenticação)
 
