@@ -7,4 +7,4 @@ Para se preparar para esta sessão, por favor:
 2 - Meta Specs
 
 - Revise o index.md nas META SPECS deste projeto e memorize para que saiba quais arquivos pode ler mais tarde quando necessário.
-- Meta specs estão nesta pasta: /Users/luisnovo/dev/projetos/project-docs/projects/{project-name}
+- As meta specs estão no repositório: https://github.com/danilotandrade1518/orca-sonhos-meta-specs

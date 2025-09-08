@@ -1,6 +1,26 @@
 # OrçaSonhos Backend
 
-API de gestão financeira familiar, focada em orçamentos, metas e controle de gastos.
+API de gestão financeira que transforma sonhos em metas financeiras alcançáveis, com foco em orçamentos flexíveis, colaboração familiar e controle de gastos.
+
+## Sobre o Projeto
+
+OrçaSonhos é uma plataforma de gestão financeira projetada para transformar sonhos pessoais em objetivos financeiros estruturados e alcançáveis.
+
+### Funcionalidades Principais
+
+- **Múltiplos Orçamentos**: Acompanhamento flexível de orçamentos em diferentes contextos financeiros
+- **Metas SMART**: Definição de objetivos financeiros estruturados e mensuráveis
+- **Colaboração Familiar**: Planejamento financeiro colaborativo simplificado
+- **Offline-First**: Funcionalidade robusta mesmo sem conexão
+- **Mobile-First**: Interface otimizada para dispositivos móveis
+
+### Arquitetura
+
+- **Backend**: Clean Architecture + Domain-Driven Design (DDD)
+- **Autenticação**: Firebase
+- **Princípios**: Offline-first, Mobile-first
+
+**Status:** MVP em desenvolvimento
 
 ## Como rodar
 
@@ -60,11 +80,6 @@ Opcionalmente é possível habilitar o Azure Application Insights definindo as v
 | `APPINSIGHTS_DISABLED`            | Quando `true`, força desativação mesmo com connection string.                                    |
 
 O SDK é inicializado de forma idempotente em `src/shared/observability/app-insights.ts` e chamado no bootstrap (`src/index.ts`). Console logs, requests, dependências (PostgreSQL) e exceções são coletados automaticamente. Live Metrics está desabilitado por padrão.
-
-## Migrations
-
-- As migrations do banco são gerenciadas com [umzug](https://github.com/sequelize/umzug).
-- Para rodar as migrations, utilize o script npm correspondente (ver abaixo).
 
 ## COMMANDS
 
