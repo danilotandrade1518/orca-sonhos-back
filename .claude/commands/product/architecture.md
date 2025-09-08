@@ -1,4 +1,3 @@
-
 # Início da Engenharia
 
 Este é o comando para disparar o início do design de arquitetura para uma funcionalidade.
@@ -6,13 +5,14 @@ Este é o comando para disparar o início do design de arquitetura para uma func
 ## Análise
 
 1. Passe pelos cards, pais e filhos se necessário, e construa um entendimento inicial do que precisa ser construído. Pense cuidadosamente sobre o que é solicitado, certifique-se de que entende exatamente:
-    - Por que isso está sendo construído (contexto)
-    - Qual é o resultado esperado para esta issue? (objetivo)
-    - Como deve ser construído, apenas direcionalmente, não em detalhes (abordagem)
-    - Se requer usar novas APIs/ferramentas, você as entende?
-    - Como deve ser testado?
-    - Quais são as dependências?
-    - Quais são as restrições?
+
+   - Por que isso está sendo construído (contexto)
+   - Qual é o resultado esperado para esta issue? (objetivo)
+   - Como deve ser construído, apenas direcionalmente, não em detalhes (abordagem)
+   - Se requer usar novas APIs/ferramentas, você as entende?
+   - Como deve ser testado?
+   - Quais são as dependências?
+   - Quais são as restrições?
 
 2. Depois de refletir sobre essas perguntas, elabore os 3-5 esclarecimentos mais importantes necessários para completar a tarefa.
 
@@ -24,7 +24,7 @@ Este é o comando para disparar o início do design de arquitetura para uma func
 
 6. Se o humano concordar com seu entendimento, você pode proceder para o próximo passo. Caso contrário, continue iterando juntos até obter aprovação explícita para prosseguir.
 
-7. Se algo que vocês discutiram aqui afeta o que foi escrito nos requisitos, peça permissão ao humano para editar esses requisitos e fazer ajustes seja editando (mudanças estruturais) ou adicionando comentários (esclarecimentos). Se o requisito está em um card do Linear, edite o card do linear.
+7. Se algo que vocês discutiram aqui afeta o que foi escrito nos requisitos, peça permissão ao humano para editar esses requisitos e fazer ajustes seja editando (mudanças estruturais) ou adicionando comentários (esclarecimentos). Se o requisito está em um card do Jira, edite o card do Jira.
 
 8. Não proceda para o próximo passo a menos que o humano tenha claramente dado o sinal verde nesta fase.
 
@@ -41,20 +41,13 @@ Aqui é onde você colocará seu chapéu de super pensamento e considerará o me
 3. Construa uma proposta de arquitetura que se alinhe com os padrões e melhores práticas do projeto.
 
 Dicas:
-   - Use as ferramentas code-expert (se disponíveis) para encontrar arquivos específicos baseados nas respostas de descoberta
-   - Mergulhe fundo em funcionalidades e padrões similares
-   - Analise detalhes específicos de implementação
-   - Use WebSearch ou context7 para melhores práticas ou documentação de biblioteca (se necessário)
 
-Seu documento de arquitetura deve incluir:
-    - Uma visão geral de alto nível do sistema (antes e depois da mudança)
-    - Componentes afetados e seus relacionamentos, dependências
-    - Padrões e melhores práticas que serão mantidos ou introduzidos
-    - Dependências externas que serão usadas ou que precisam ser adicionadas ao projeto
-    - Restrições e suposições
-    - Trade-offs e alternativas
-    - Consequências negativas (se houver) ao implementar este design
-    - Lista dos principais arquivos a serem editados/criados
+- Use as ferramentas code-expert (se disponíveis) para encontrar arquivos específicos baseados nas respostas de descoberta
+- Mergulhe fundo em funcionalidades e padrões similares
+- Analise detalhes específicos de implementação
+- Use WebSearch ou context7 para melhores práticas ou documentação de biblioteca (se necessário)
+
+Seu documento de arquitetura deve incluir: - Uma visão geral de alto nível do sistema (antes e depois da mudança) - Componentes afetados e seus relacionamentos, dependências - Padrões e melhores práticas que serão mantidos ou introduzidos - Dependências externas que serão usadas ou que precisam ser adicionadas ao projeto - Restrições e suposições - Trade-offs e alternativas - Consequências negativas (se houver) ao implementar este design - Lista dos principais arquivos a serem editados/criados
 
 Se ajudar a construir um diagrama MERMAID, sinta-se livre para fazê-lo.
 
@@ -62,7 +55,7 @@ Se ajudar a construir um diagrama MERMAID, sinta-se livre para fazê-lo.
 
 5. Uma vez que tenha um bom entendimento do que está sendo construído, mostre ao usuário na forma de um artefato e aguarde sua aprovação. Iterate juntos até estar pronto. PAUSE para aguardar a aprovação do humano.
 
-6. Quando o humano concordar com seu entendimento, você pode proceder ao próximo passo, salvando os detalhes da arquitetura no card do linear como um comentário ao card original.
+6. Quando o humano concordar com seu entendimento, você pode proceder ao próximo passo, salvando os detalhes da arquitetura no card do Jira como um comentário ao card original.
 
 ## Pesquisa
 
