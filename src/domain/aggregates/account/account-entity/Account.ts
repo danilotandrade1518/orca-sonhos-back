@@ -150,6 +150,23 @@ export class Account extends AggregateRoot implements IEntity {
     return currentBalance >= amount;
   }
 
+  getAvailableBalance(
+    totalReservedForGoals: number,
+  ): Either<DomainError, number> {
+    const currentBalance = this._balance.value?.cents ?? 0;
+    const availableBalance = currentBalance - totalReservedForGoals;
+
+    if (availableBalance < 0 && !this.allowsNegativeBalance()) {
+      return Either.error(new InsufficientBalanceError());
+    }
+
+    return Either.success(availableBalance);
+  }
+
+  private allowsNegativeBalance(): boolean {
+    return this._type.value?.allowsNegativeBalance ?? false;
+  }
+
   update(data: UpdateAccountDTO): Either<DomainError, Account> {
     const either = new Either<DomainError, Account>();
 

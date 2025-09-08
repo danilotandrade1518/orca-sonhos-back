@@ -6,7 +6,6 @@ import { IEntity } from '../../../shared/IEntity';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
 import { EntityName } from '../../../shared/value-objects/entity-name/EntityName';
 import { MoneyVo } from '../../../shared/value-objects/money-vo/MoneyVo';
-import { GoalAlreadyAchievedError } from '../errors/GoalAlreadyAchievedError';
 import { GoalAlreadyDeletedError } from '../errors/GoalAlreadyDeletedError';
 import { InvalidGoalAmountError } from '../errors/InvalidGoalAmountError';
 
@@ -16,6 +15,7 @@ export interface CreateGoalDTO {
   accumulatedAmount?: number;
   deadline?: Date;
   budgetId: string;
+  sourceAccountId: string;
 }
 
 export interface UpdateGoalDTO {
@@ -31,6 +31,7 @@ export interface RestoreGoalDTO {
   accumulatedAmount: number;
   deadline?: Date;
   budgetId: string;
+  sourceAccountId: string;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -53,6 +54,7 @@ export class Goal extends AggregateRoot implements IEntity {
     private _deadline: Date | undefined,
     private readonly _budgetId: EntityId,
     private _accumulatedAmount: MoneyVo,
+    private readonly _sourceAccountId: EntityId,
     existingId?: EntityId,
   ) {
     super();
@@ -80,6 +82,9 @@ export class Goal extends AggregateRoot implements IEntity {
   get budgetId(): string {
     return this._budgetId.value?.id ?? '';
   }
+  get sourceAccountId(): string {
+    return this._sourceAccountId.value?.id ?? '';
+  }
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -93,14 +98,30 @@ export class Goal extends AggregateRoot implements IEntity {
   addAmount(amount: number): Either<DomainError, void> {
     if (this._isDeleted)
       return Either.error<DomainError, void>(new GoalAlreadyDeletedError());
-    if (this.isAchieved())
-      return Either.error<DomainError, void>(new GoalAlreadyAchievedError());
 
     const amountVo = MoneyVo.create(amount);
     if (amountVo.hasError) return Either.errors(amountVo.errors);
 
     const newAccumulated = this.accumulatedAmount + amount;
-    if (newAccumulated > this.totalAmount)
+    const newAccumulatedVo = MoneyVo.create(newAccumulated);
+    if (newAccumulatedVo.hasError)
+      return Either.errors(newAccumulatedVo.errors);
+
+    this._accumulatedAmount = newAccumulatedVo;
+    this._updatedAt = new Date();
+
+    return Either.success();
+  }
+
+  removeAmount(amount: number): Either<DomainError, void> {
+    if (this._isDeleted)
+      return Either.error<DomainError, void>(new GoalAlreadyDeletedError());
+
+    const amountVo = MoneyVo.create(amount);
+    if (amountVo.hasError) return Either.errors(amountVo.errors);
+
+    const newAccumulated = this.accumulatedAmount - amount;
+    if (newAccumulated < 0)
       return Either.error<DomainError, void>(new InvalidGoalAmountError());
 
     const newAccumulatedVo = MoneyVo.create(newAccumulated);
@@ -202,10 +223,9 @@ export class Goal extends AggregateRoot implements IEntity {
     const budgetIdVo = EntityId.fromString(data.budgetId);
     if (budgetIdVo.hasError) either.addManyErrors(budgetIdVo.errors);
 
-    if (accumulatedAmountVo.value && totalAmountVo.value) {
-      if (accumulatedAmountVo.value.cents > totalAmountVo.value.cents)
-        either.addError(new InvalidGoalAmountError());
-    }
+    const sourceAccountIdVo = EntityId.fromString(data.sourceAccountId);
+    if (sourceAccountIdVo.hasError)
+      either.addManyErrors(sourceAccountIdVo.errors);
 
     if (either.hasError) return either;
 
@@ -215,6 +235,7 @@ export class Goal extends AggregateRoot implements IEntity {
       data.deadline,
       budgetIdVo,
       accumulatedAmountVo,
+      sourceAccountIdVo,
     );
 
     return Either.success<DomainError, Goal>(goal);
@@ -228,6 +249,7 @@ export class Goal extends AggregateRoot implements IEntity {
     const totalAmountVo = MoneyVo.create(data.totalAmount);
     const accumulatedAmountVo = MoneyVo.create(data.accumulatedAmount);
     const budgetIdVo = EntityId.fromString(data.budgetId);
+    const sourceAccountIdVo = EntityId.fromString(data.sourceAccountId);
 
     if (idVo.hasError) either.addManyErrors(idVo.errors);
     if (nameVo.hasError) either.addManyErrors(nameVo.errors);
@@ -235,11 +257,8 @@ export class Goal extends AggregateRoot implements IEntity {
     if (accumulatedAmountVo.hasError)
       either.addManyErrors(accumulatedAmountVo.errors);
     if (budgetIdVo.hasError) either.addManyErrors(budgetIdVo.errors);
-
-    if (accumulatedAmountVo.value && totalAmountVo.value) {
-      if (accumulatedAmountVo.value.cents > totalAmountVo.value.cents)
-        either.addError(new InvalidGoalAmountError());
-    }
+    if (sourceAccountIdVo.hasError)
+      either.addManyErrors(sourceAccountIdVo.errors);
 
     if (either.hasError) return either;
 
@@ -249,6 +268,7 @@ export class Goal extends AggregateRoot implements IEntity {
       data.deadline,
       budgetIdVo,
       accumulatedAmountVo,
+      sourceAccountIdVo,
       idVo,
     );
 

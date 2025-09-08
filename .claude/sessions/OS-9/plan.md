@@ -2,41 +2,55 @@
 
 Se você está trabalhando nesta funcionalidade, certifique-se de atualizar este arquivo plan.md conforme progride.
 
-## FASE 1: Fundação - Domain Layer e Contratos [Não Iniciada ⏳]
+## FASE 1: Fundação - Domain Layer e Contratos [Concluída ✅]
 
 Implementar modificações nos agregados e criar contratos base necessários para o modelo de reservas.
 
-### Modificar Goal Aggregate [Não Iniciada ⏳]
+### Modificar Goal Aggregate [Concluída ✅]
 
 **Arquivo**: `src/domain/aggregates/goal/goal-entity/Goal.ts`
-- Adicionar `sourceAccountId: EntityId` na estrutura interna
-- Adicionar getter `sourceAccountId`
-- Modificar `CreateGoalDTO` para incluir `sourceAccountId: string`
-- Implementar `removeAmount(amount: number): Either<DomainError, void>`
-- Atualizar factory method `create()` para aceitar sourceAccountId
-- Atualizar factory method `restore()` para lidar com sourceAccountId
+- ✅ Adicionar `sourceAccountId: EntityId` na estrutura interna
+- ✅ Adicionar getter `sourceAccountId`
+- ✅ Modificar `CreateGoalDTO` para incluir `sourceAccountId: string`
+- ✅ Modificar `RestoreGoalDTO` para incluir `sourceAccountId: string`
+- ✅ Implementar `removeAmount(amount: number): Either<DomainError, void>`
+- ✅ Atualizar `addAmount()` para permitir over-reserving (removendo validação targetAmount)
+- ✅ Atualizar factory method `create()` para aceitar sourceAccountId
+- ✅ Atualizar factory method `restore()` para lidar com sourceAccountId
 
-### Modificar Account Aggregate [Não Iniciada ⏳]
+**Decisões tomadas:**
+- Removida validação de over-reserva em addAmount() conforme especificação
+- RemoveAmount valida que não pode remover mais que o valor atual (currentAmount >= 0)
+
+### Modificar Account Aggregate [Concluída ✅]
 
 **Arquivo**: `src/domain/aggregates/account/account-entity/Account.ts`
-- Implementar `getAvailableBalance(totalReservedForGoals: number): Either<DomainError, number>`
-- Adicionar método privado `allowsNegativeBalance(): boolean`
-- Criar validações para saldo disponível considerando reservas
+- ✅ Implementar `getAvailableBalance(totalReservedForGoals: number): Either<DomainError, number>`
+- ✅ Adicionar método privado `allowsNegativeBalance(): boolean`
+- ✅ Criar validações para saldo disponível considerando reservas
+- ✅ Validação retorna erro se saldo insuficiente e conta não permite negativo
 
-### Criar Domain Errors [Não Iniciada ⏳]
+**Decisões tomadas:**
+- getAvailableBalance() usa AccountType.allowsNegativeBalance para validação
+- Retorna InsufficientBalanceError quando saldo insuficiente e conta não permite negativo
 
-- **InsufficientAccountBalanceError**: `src/domain/aggregates/goal/errors/InsufficientAccountBalanceError.ts`
-- **GoalAccountMismatchError**: `src/domain/aggregates/goal/errors/GoalAccountMismatchError.ts`
-- **InvalidReserveAmountError**: Para validações de removeAmount
+### Criar Domain Errors [Concluída ✅]
 
-### Criar Contratos de Repositório [Não Iniciada ⏳]
+- ✅ **InsufficientAccountBalanceError**: `src/domain/aggregates/goal/errors/InsufficientAccountBalanceError.ts`
+- ✅ **GoalAccountMismatchError**: `src/domain/aggregates/goal/errors/GoalAccountMismatchError.ts`
+- ✅ **InvalidReserveAmountError**: `src/domain/aggregates/goal/errors/InvalidReserveAmountError.ts`
+
+**Decisões tomadas:**
+- Todos os erros seguem padrão existente com fieldName específico
+- InsufficientAccountBalanceError aponta para 'sourceAccount'
+- GoalAccountMismatchError aponta para 'budgetId' 
+- InvalidReserveAmountError aponta para 'amount'
+
+### Criar Contratos de Repositório [Concluída ✅]
 
 **Arquivo**: `src/application/contracts/repositories/goal/IGetGoalsByAccountRepository.ts`
-```typescript
-export interface IGetGoalsByAccountRepository {
-  execute(accountId: string): Promise<Either<RepositoryError, Goal[]>>;
-}
-```
+- ✅ Interface criada seguindo padrão dos repositórios existentes
+- ✅ Retorna `Either<RepositoryError, Goal[]>` conforme padrão do projeto
 
 ## FASE 2: Unit of Work e Repositórios [Não Iniciada ⏳]
 
