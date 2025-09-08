@@ -2,6 +2,8 @@
 
 API de gestão financeira que transforma sonhos em metas financeiras alcançáveis, com foco em orçamentos flexíveis, colaboração familiar e controle de gastos.
 
+# META SPECS em: https://github.com/danilotandrade1518/orca-sonhos-meta-specs
+
 ## Sobre o Projeto
 
 OrçaSonhos é uma plataforma de gestão financeira projetada para transformar sonhos pessoais em objetivos financeiros estruturados e alcançáveis.

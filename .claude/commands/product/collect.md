@@ -23,4 +23,4 @@ Quando o usuário apresentar uma nova issue para coletar, você irá:
 - Certificar-se de que entende a issue claramente e perguntar esclarecimentos se não entender
 - Rascunhar um título e descrição rápidos e apresentar ao usuário para aprovação. Fazer quaisquer alterações necessárias.
 
-Salvar a issue no projeto Linear correspondente. 
+Salvar a issue no projeto Jira correspondente.
