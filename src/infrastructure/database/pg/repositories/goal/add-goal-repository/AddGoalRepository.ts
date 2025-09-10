@@ -15,13 +15,14 @@ export class AddGoalRepository implements IAddGoalRepository {
 
       const query = `
         INSERT INTO goals (
-          id, name, total_amount, accumulated_amount, deadline, budget_id, 
+          id, source_account_id, name, total_amount, accumulated_amount, deadline, budget_id, 
           is_deleted, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `;
 
       const params = [
         row.id,
+        row.source_account_id,
         row.name,
         row.total_amount,
         row.accumulated_amount,

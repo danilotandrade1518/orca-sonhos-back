@@ -1,14 +1,17 @@
-import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
-
-import { AddGoalRepository } from '@infrastructure/database/pg/repositories/goal/add-goal-repository/AddGoalRepository';
-import { GetGoalByIdRepository } from '@infrastructure/database/pg/repositories/goal/get-goal-by-id-repository/GetGoalByIdRepository';
-import { SaveGoalRepository } from '@infrastructure/database/pg/repositories/goal/save-goal-repository/SaveGoalRepository';
-import { DeleteGoalRepository } from '@infrastructure/database/pg/repositories/goal/delete-goal-repository/DeleteGoalRepository';
-
-import { CreateGoalUseCase } from '@application/use-cases/goal/create-goal/CreateGoalUseCase';
-import { UpdateGoalUseCase } from '@application/use-cases/goal/update-goal/UpdateGoalUseCase';
+import { BudgetAuthorizationService } from '@application/services/authorization/BudgetAuthorizationService';
 import { AddAmountToGoalUseCase } from '@application/use-cases/goal/add-amount-to-goal/AddAmountToGoalUseCase';
+import { CreateGoalUseCase } from '@application/use-cases/goal/create-goal/CreateGoalUseCase';
 import { DeleteGoalUseCase } from '@application/use-cases/goal/delete-goal/DeleteGoalUseCase';
+import { RemoveAmountFromGoalUseCase } from '@application/use-cases/goal/remove-amount-from-goal/RemoveAmountFromGoalUseCase';
+import { UpdateGoalUseCase } from '@application/use-cases/goal/update-goal/UpdateGoalUseCase';
+import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
+import { GetAccountRepository } from '@infrastructure/database/pg/repositories/account/get-account-repository/GetAccountRepository';
+import { GetBudgetRepository } from '@infrastructure/database/pg/repositories/budget/get-budget-repository/GetBudgetRepository';
+import { AddGoalRepository } from '@infrastructure/database/pg/repositories/goal/add-goal-repository/AddGoalRepository';
+import { DeleteGoalRepository } from '@infrastructure/database/pg/repositories/goal/delete-goal-repository/DeleteGoalRepository';
+import { GetGoalByIdRepository } from '@infrastructure/database/pg/repositories/goal/get-goal-by-id-repository/GetGoalByIdRepository';
+import { GetGoalsByAccountRepository } from '@infrastructure/database/pg/repositories/goal/get-goals-by-account-repository/GetGoalsByAccountRepository';
+import { SaveGoalRepository } from '@infrastructure/database/pg/repositories/goal/save-goal-repository/SaveGoalRepository';
 
 export class GoalCompositionRoot {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
@@ -30,6 +33,23 @@ export class GoalCompositionRoot {
     return new DeleteGoalRepository(this.connection);
   }
 
+  private createGetAccountRepository(): GetAccountRepository {
+    return new GetAccountRepository(this.connection);
+  }
+
+  private createGetGoalsByAccountRepository(): GetGoalsByAccountRepository {
+    return new GetGoalsByAccountRepository(this.connection);
+  }
+
+  private createGetBudgetRepository(): GetBudgetRepository {
+    return new GetBudgetRepository(this.connection);
+  }
+
+  private createBudgetAuthorizationService(): BudgetAuthorizationService {
+    const getBudgetRepo = this.createGetBudgetRepository();
+    return new BudgetAuthorizationService(getBudgetRepo);
+  }
+
   // Use cases
   public createCreateGoalUseCase(): CreateGoalUseCase {
     const addRepo = this.createAddGoalRepository();
@@ -43,9 +63,33 @@ export class GoalCompositionRoot {
   }
 
   public createAddAmountToGoalUseCase(): AddAmountToGoalUseCase {
-    const getRepo = this.createGetGoalRepository();
-    const saveRepo = this.createSaveGoalRepository();
-    return new AddAmountToGoalUseCase(getRepo, saveRepo);
+    const getGoalRepo = this.createGetGoalRepository();
+    const getAccountRepo = this.createGetAccountRepository();
+    const getGoalsByAccountRepo = this.createGetGoalsByAccountRepository();
+    const saveGoalRepo = this.createSaveGoalRepository();
+    const authService = this.createBudgetAuthorizationService();
+
+    return new AddAmountToGoalUseCase(
+      getGoalRepo,
+      getAccountRepo,
+      getGoalsByAccountRepo,
+      saveGoalRepo,
+      authService,
+    );
+  }
+
+  public createRemoveAmountFromGoalUseCase(): RemoveAmountFromGoalUseCase {
+    const getGoalRepo = this.createGetGoalRepository();
+    const getAccountRepo = this.createGetAccountRepository();
+    const saveGoalRepo = this.createSaveGoalRepository();
+    const authService = this.createBudgetAuthorizationService();
+
+    return new RemoveAmountFromGoalUseCase(
+      getGoalRepo,
+      getAccountRepo,
+      saveGoalRepo,
+      authService,
+    );
   }
 
   public createDeleteGoalUseCase(): DeleteGoalUseCase {

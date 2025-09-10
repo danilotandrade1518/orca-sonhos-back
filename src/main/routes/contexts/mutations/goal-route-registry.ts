@@ -1,6 +1,7 @@
 import { AddAmountGoalController } from '@http/controllers/goal/add-amount-goal.controller';
 import { CreateGoalController } from '@http/controllers/goal/create-goal.controller';
 import { DeleteGoalController } from '@http/controllers/goal/delete-goal.controller';
+import { RemoveAmountGoalController } from '@http/controllers/goal/remove-amount-goal.controller';
 import { UpdateGoalController } from '@http/controllers/goal/update-goal.controller';
 import { RouteDefinition } from '@http/server-adapter';
 import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresConnectionAdapter';
@@ -32,6 +33,13 @@ export function buildGoalRoutes(params: {
       path: '/goal/add-amount-goal',
       controller: new AddAmountGoalController(
         root.createAddAmountToGoalUseCase(),
+      ),
+    },
+    {
+      method: 'POST',
+      path: '/goal/remove-amount-goal',
+      controller: new RemoveAmountGoalController(
+        root.createRemoveAmountFromGoalUseCase(),
       ),
     },
   ];

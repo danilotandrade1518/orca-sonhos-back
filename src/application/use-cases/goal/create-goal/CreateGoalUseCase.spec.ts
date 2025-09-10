@@ -35,6 +35,7 @@ const makeValidDto = (): CreateGoalDto => ({
   accumulatedAmount: 0,
   deadline: new Date('2024-12-31'),
   budgetId: '550e8400-e29b-41d4-a716-446655440001',
+  sourceAccountId: '550e8400-e29b-41d4-a716-446655440002',
 });
 
 describe('CreateGoalUseCase', () => {
@@ -105,14 +106,15 @@ describe('CreateGoalUseCase', () => {
       expect(result.errors[0]).toBeInstanceOf(RepositoryError);
     });
 
-    it('deve retornar erro se valor acumulado for maior que total', async () => {
+    it('deve aceitar valor acumulado maior que total (over-reserving permitido)', async () => {
       const { sut } = makeSut();
       const dto = makeValidDto();
       dto.accumulatedAmount = 6000; // maior que totalAmount (5000)
 
       const result = await sut.execute(dto);
 
-      expect(result.hasError).toBe(true);
+      expect(result.hasError).toBe(false);
+      expect(result.data).toHaveProperty('id');
     });
 
     it('deve aceitar valor acumulado igual ao total', async () => {

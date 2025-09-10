@@ -10,6 +10,8 @@ describe('GoalMapper', () => {
       const now = new Date();
       const deadline = new Date('2025-12-31');
 
+      const sourceAccountId = EntityId.create().value!.id;
+
       const row: GoalRow = {
         id,
         name: 'Emergency Fund',
@@ -17,6 +19,7 @@ describe('GoalMapper', () => {
         accumulated_amount: 25000,
         deadline,
         budget_id: budgetId,
+        source_account_id: sourceAccountId,
         is_deleted: false,
         created_at: now,
         updated_at: now,
@@ -41,6 +44,8 @@ describe('GoalMapper', () => {
       const budgetId = EntityId.create().value!.id;
       const now = new Date();
 
+      const sourceAccountId = EntityId.create().value!.id;
+
       const row: GoalRow = {
         id,
         name: 'Vacation Fund',
@@ -48,6 +53,7 @@ describe('GoalMapper', () => {
         accumulated_amount: 10000,
         deadline: null,
         budget_id: budgetId,
+        source_account_id: sourceAccountId,
         is_deleted: false,
         created_at: now,
         updated_at: now,
@@ -62,6 +68,7 @@ describe('GoalMapper', () => {
     it('should handle deleted goal', () => {
       const id = EntityId.create().value!.id;
       const budgetId = EntityId.create().value!.id;
+      const sourceAccountId = EntityId.create().value!.id;
       const now = new Date();
 
       const row: GoalRow = {
@@ -71,6 +78,7 @@ describe('GoalMapper', () => {
         accumulated_amount: 0,
         deadline: null,
         budget_id: budgetId,
+        source_account_id: sourceAccountId,
         is_deleted: true,
         created_at: now,
         updated_at: now,
@@ -90,6 +98,7 @@ describe('GoalMapper', () => {
         accumulated_amount: -500,
         deadline: null,
         budget_id: 'invalid-budget-id',
+        source_account_id: 'invalid-source-account-id',
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -108,6 +117,7 @@ describe('GoalMapper', () => {
         name: 'New Car',
         totalAmount: 500000,
         budgetId: EntityId.create().value!.id,
+        sourceAccountId: EntityId.create().value!.id,
         deadline,
         accumulatedAmount: 100000,
       }).data!;
@@ -130,6 +140,7 @@ describe('GoalMapper', () => {
         name: 'Open Goal',
         totalAmount: 200000,
         budgetId: EntityId.create().value!.id,
+        sourceAccountId: EntityId.create().value!.id,
         accumulatedAmount: 50000,
       }).data!;
 
@@ -143,6 +154,7 @@ describe('GoalMapper', () => {
         name: 'Achieved Goal',
         totalAmount: 100000,
         budgetId: EntityId.create().value!.id,
+        sourceAccountId: EntityId.create().value!.id,
         accumulatedAmount: 100000,
       }).data!;
 
@@ -156,6 +168,7 @@ describe('GoalMapper', () => {
         name: 'Goal to Delete',
         totalAmount: 150000,
         budgetId: EntityId.create().value!.id,
+        sourceAccountId: EntityId.create().value!.id,
         accumulatedAmount: 30000,
       }).data!;
 
@@ -168,10 +181,12 @@ describe('GoalMapper', () => {
 
     it('should preserve all entity properties', () => {
       const budgetId = EntityId.create().value!.id;
+      const sourceAccountId = EntityId.create().value!.id;
       const goal = Goal.create({
         name: 'Complete Goal',
         totalAmount: 300000,
         budgetId,
+        sourceAccountId,
         accumulatedAmount: 75000,
       }).data!;
 
@@ -182,6 +197,7 @@ describe('GoalMapper', () => {
       expect(typeof result.total_amount).toBe('number');
       expect(typeof result.accumulated_amount).toBe('number');
       expect(result.budget_id).toBe(budgetId);
+      expect(result.source_account_id).toBe(sourceAccountId);
       expect(typeof result.is_deleted).toBe('boolean');
       expect(result.created_at).toBeInstanceOf(Date);
       expect(result.updated_at).toBeInstanceOf(Date);

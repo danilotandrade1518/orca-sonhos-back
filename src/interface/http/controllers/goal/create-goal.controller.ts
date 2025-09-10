@@ -11,20 +11,29 @@ interface CreateGoalBody {
   accumulatedAmount?: number;
   deadline?: string;
   budgetId: string;
+  sourceAccountId: string;
 }
 
 export class CreateGoalController implements HttpController {
   constructor(private readonly useCase: CreateGoalUseCase) {}
 
   async handle(request: HttpRequest<CreateGoalBody>): Promise<HttpResponse> {
-    const { name, totalAmount, accumulatedAmount, deadline, budgetId } =
-      request.body;
+    const {
+      name,
+      totalAmount,
+      accumulatedAmount,
+      deadline,
+      budgetId,
+      sourceAccountId,
+    } = request.body;
+
     const result = await this.useCase.execute({
       name,
       totalAmount,
       accumulatedAmount,
       deadline: deadline ? new Date(deadline) : undefined,
       budgetId,
+      sourceAccountId,
     });
 
     if (result.hasError)

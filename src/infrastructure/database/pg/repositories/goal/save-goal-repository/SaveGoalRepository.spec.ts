@@ -8,13 +8,12 @@ import { SaveGoalRepository } from './SaveGoalRepository';
 describe('SaveGoalRepository', () => {
   let repository: SaveGoalRepository;
   let mockConnection: jest.Mocked<IPostgresConnectionAdapter>;
+  let mockClient = {
+    query: jest.fn(),
+    release: jest.fn(),
+  };
 
   beforeEach(() => {
-    const mockClient = {
-      query: jest.fn(),
-      release: jest.fn(),
-    };
-
     mockConnection = {
       query: jest.fn(),
       transaction: jest.fn(),
@@ -33,6 +32,7 @@ describe('SaveGoalRepository', () => {
       name: 'Test Goal',
       totalAmount: 100000,
       budgetId: EntityId.create().value!.id,
+      sourceAccountId: EntityId.create().value!.id,
       accumulatedAmount: 25000,
     }).data!;
   };
@@ -42,7 +42,7 @@ describe('SaveGoalRepository', () => {
       const goal = createValidGoal();
       goal.addAmount(15000);
 
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
@@ -50,8 +50,8 @@ describe('SaveGoalRepository', () => {
       const result = await repository.execute(goal);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledTimes(1);
-      expect(mockConnection.query).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledTimes(1);
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([
           goal.id,
@@ -60,7 +60,7 @@ describe('SaveGoalRepository', () => {
           40000, // 25000 + 15000
           null, // deadline
           goal.budgetId,
-          false, // is_achieved
+          goal.sourceAccountId,
           false, // is_deleted
           goal.updatedAt,
         ]),
@@ -69,24 +69,25 @@ describe('SaveGoalRepository', () => {
 
     it('should call UPDATE with correct SQL structure', async () => {
       const goal = createValidGoal();
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
 
       await repository.execute(goal);
 
-      const [query, params] = mockConnection.query.mock.calls[0];
+      const [query, params] = mockClient.query.mock.calls[0];
       expect(query).toContain('UPDATE goals');
       expect(query).toContain('name = $2');
       expect(query).toContain('total_amount = $3');
       expect(query).toContain('accumulated_amount = $4');
       expect(query).toContain('deadline = $5');
       expect(query).toContain('budget_id = $6');
-      expect(query).toContain('is_deleted = $7');
-      expect(query).toContain('updated_at = $8');
+      expect(query).toContain('source_account_id = $7');
+      expect(query).toContain('is_deleted = $8');
+      expect(query).toContain('updated_at = $9');
       expect(query).toContain('WHERE id = $1');
-      expect(params).toHaveLength(8);
+      expect(params).toHaveLength(9);
     });
 
     it('should handle goal with deadline', async () => {
@@ -95,11 +96,12 @@ describe('SaveGoalRepository', () => {
         name: 'Vacation Goal',
         totalAmount: 50000,
         budgetId: EntityId.create().value!.id,
+        sourceAccountId: EntityId.create().value!.id,
         deadline,
         accumulatedAmount: 10000,
       }).data!;
 
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
@@ -107,7 +109,7 @@ describe('SaveGoalRepository', () => {
       const result = await repository.execute(goal);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([deadline]),
       );
@@ -117,7 +119,7 @@ describe('SaveGoalRepository', () => {
       const goal = createValidGoal();
       goal.delete();
 
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
@@ -125,7 +127,7 @@ describe('SaveGoalRepository', () => {
       const result = await repository.execute(goal);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([true]), // is_deleted = true
       );
@@ -135,7 +137,7 @@ describe('SaveGoalRepository', () => {
       const goal = createValidGoal();
       goal.addAmount(25000);
 
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
@@ -143,7 +145,7 @@ describe('SaveGoalRepository', () => {
       const result = await repository.execute(goal);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([50000]), // 25000 + 25000
       );
@@ -153,7 +155,7 @@ describe('SaveGoalRepository', () => {
       const goal = createValidGoal();
       goal.addAmount(25000);
 
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
@@ -161,7 +163,7 @@ describe('SaveGoalRepository', () => {
       const result = await repository.execute(goal);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([50000]), // 25000 + 25000
       );
@@ -169,7 +171,7 @@ describe('SaveGoalRepository', () => {
 
     it('should return error when goal not found', async () => {
       const goal = createValidGoal();
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [],
         rowCount: 0,
       });
@@ -185,7 +187,7 @@ describe('SaveGoalRepository', () => {
 
     it('should return error when query returns null', async () => {
       const goal = createValidGoal();
-      mockConnection.query.mockResolvedValue(null);
+      mockClient.query.mockResolvedValue(null);
 
       const result = await repository.execute(goal);
 
@@ -197,7 +199,7 @@ describe('SaveGoalRepository', () => {
     it('should return error when database fails', async () => {
       const goal = createValidGoal();
       const dbError = new Error('Database connection failed');
-      mockConnection.query.mockRejectedValue(dbError);
+      mockClient.query.mockRejectedValue(dbError);
 
       const result = await repository.execute(goal);
 
@@ -213,11 +215,12 @@ describe('SaveGoalRepository', () => {
         name: 'Future Goal',
         totalAmount: 200000,
         budgetId: EntityId.create().value!.id,
+        sourceAccountId: EntityId.create().value!.id,
         deadline: futureDate,
         accumulatedAmount: 50000,
       }).data!;
 
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
@@ -225,7 +228,7 @@ describe('SaveGoalRepository', () => {
       const result = await repository.execute(goal);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([futureDate]),
       );
@@ -241,7 +244,7 @@ describe('SaveGoalRepository', () => {
       goal.addAmount(10000);
       expect(goal.accumulatedAmount).toBe(40000);
 
-      mockConnection.query.mockResolvedValue({
+      mockClient.query.mockResolvedValue({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
       });
@@ -249,7 +252,7 @@ describe('SaveGoalRepository', () => {
       const result = await repository.execute(goal);
 
       expect(result.hasError).toBe(false);
-      expect(mockConnection.query).toHaveBeenCalledWith(
+      expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         expect.arrayContaining([40000]),
       );

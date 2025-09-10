@@ -67,6 +67,7 @@ const makeValidGoal = (): Goal => {
     totalAmount: 5000,
     accumulatedAmount: 1000,
     budgetId: '550e8400-e29b-41d4-a716-446655440002',
+    sourceAccountId: '550e8400-e29b-41d4-a716-446655440003',
   });
   return goalResult.data!;
 };

@@ -9,6 +9,7 @@ import { TestContainersSetup } from './setup/testcontainers-setup';
 let testUserId: string;
 let testBudgetId: string;
 let testGoalId: string;
+let testSourceAccountId: string;
 
 describe('GoalCompositionRoot Integration Tests', () => {
   let connection: PostgresConnectionAdapter;
@@ -38,6 +39,21 @@ describe('GoalCompositionRoot Integration Tests', () => {
       [testBudgetId, 'Budget Goal', testUserId, BudgetTypeEnum.PERSONAL],
     );
 
+    // Seed source account
+    testSourceAccountId = EntityId.create().value!.id;
+    await connection.query(
+      `INSERT INTO accounts (id, name, type, balance, budget_id, is_deleted, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
+      [
+        testSourceAccountId,
+        'Test Account',
+        'CHECKING_ACCOUNT',
+        100000,
+        testBudgetId,
+        false,
+      ],
+    );
+
     authService.clearPermissions();
     authService.setUserPermissions(testUserId, [testBudgetId]);
   });
@@ -49,6 +65,7 @@ describe('GoalCompositionRoot Integration Tests', () => {
         budgetId: testBudgetId,
         name: 'Trip',
         totalAmount: 100000, // cents
+        sourceAccountId: testSourceAccountId,
         accumulatedAmount: 0,
         deadline: undefined,
       });
@@ -73,6 +90,7 @@ describe('GoalCompositionRoot Integration Tests', () => {
         budgetId: testBudgetId,
         name: 'Car',
         totalAmount: 500000,
+        sourceAccountId: testSourceAccountId,
       });
       testGoalId = created.data!.id;
     });
@@ -102,14 +120,23 @@ describe('GoalCompositionRoot Integration Tests', () => {
         budgetId: testBudgetId,
         name: 'Laptop',
         totalAmount: 300000,
+        sourceAccountId: testSourceAccountId,
       });
       testGoalId = created.data!.id;
     });
 
     it('should accumulate added amounts', async () => {
       const addAmount = compositionRoot.createAddAmountToGoalUseCase();
-      await addAmount.execute({ id: testGoalId, amount: 10000 });
-      await addAmount.execute({ id: testGoalId, amount: 5000 });
+      await addAmount.execute({
+        id: testGoalId,
+        amount: 10000,
+        userId: testUserId,
+      });
+      await addAmount.execute({
+        id: testGoalId,
+        amount: 5000,
+        userId: testUserId,
+      });
 
       const db = await connection.query(
         'SELECT accumulated_amount FROM goals WHERE id = $1',
@@ -126,7 +153,10 @@ describe('GoalCompositionRoot Integration Tests', () => {
         budgetId: testBudgetId,
         name: 'Remove Me',
         totalAmount: 100000,
+        sourceAccountId: testSourceAccountId,
       });
+
+      console.log(created);
       testGoalId = created.data!.id;
     });
 
@@ -134,6 +164,7 @@ describe('GoalCompositionRoot Integration Tests', () => {
       const del = compositionRoot.createDeleteGoalUseCase();
       const result = await del.execute({ id: testGoalId });
 
+      console.log(result.errors);
       expect(result.hasError).toBe(false);
 
       const db = await connection.query(

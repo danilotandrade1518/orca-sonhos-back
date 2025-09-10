@@ -1,9 +1,11 @@
+import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { Either } from '@either';
 
 import { Account } from '../../../../domain/aggregates/account/account-entity/Account';
-import { AccountTypeEnum } from '../../../../domain/aggregates/account/value-objects/account-type/AccountType';
 import { GoalAlreadyDeletedError } from '../../../../domain/aggregates/goal/errors/GoalAlreadyDeletedError';
+import { InvalidGoalAmountError } from '../../../../domain/aggregates/goal/errors/InvalidGoalAmountError';
 import { Goal } from '../../../../domain/aggregates/goal/goal-entity/Goal';
+import { InvalidMoneyError } from '../../../../domain/shared/errors/InvalidMoneyError';
 import { IGetGoalRepository } from '../../../contracts/repositories/goal/IGetGoalRepository';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
@@ -11,12 +13,10 @@ import { GoalNotFoundError } from '../../../shared/errors/GoalNotFoundError';
 import { RepositoryError } from '../../../shared/errors/RepositoryError';
 import { BudgetAuthorizationServiceStub } from '../../../shared/tests/stubs/BudgetAuthorizationServiceStub';
 import { GetAccountRepositoryStub } from '../../../shared/tests/stubs/GetAccountRepositoryStub';
-import { GetGoalsByAccountRepositoryStub } from '../../../shared/tests/stubs/GetGoalsByAccountRepositoryStub';
 import { SaveGoalRepositoryStub } from '../../../shared/tests/stubs/SaveGoalRepositoryStub';
-import { AddAmountToGoalDto } from './AddAmountToGoalDto';
-import { AddAmountToGoalUseCase } from './AddAmountToGoalUseCase';
+import { RemoveAmountFromGoalDto } from './RemoveAmountFromGoalDto';
+import { RemoveAmountFromGoalUseCase } from './RemoveAmountFromGoalUseCase';
 
-// Stubs
 class GetGoalByIdRepositoryStub implements IGetGoalRepository {
   public shouldFail = false;
   public shouldReturnNull = false;
@@ -56,14 +56,12 @@ class GetGoalByIdRepositoryStub implements IGetGoalRepository {
 const makeSut = () => {
   const getGoalByIdRepository = new GetGoalByIdRepositoryStub();
   const getAccountByIdRepository = new GetAccountRepositoryStub();
-  const getGoalsByAccountRepository = new GetGoalsByAccountRepositoryStub();
   const saveGoalRepository = new SaveGoalRepositoryStub();
   const budgetAuthorizationService = new BudgetAuthorizationServiceStub();
 
-  const sut = new AddAmountToGoalUseCase(
+  const sut = new RemoveAmountFromGoalUseCase(
     getGoalByIdRepository,
     getAccountByIdRepository,
-    getGoalsByAccountRepository,
     saveGoalRepository,
     budgetAuthorizationService,
   );
@@ -72,25 +70,27 @@ const makeSut = () => {
     sut,
     getGoalByIdRepository,
     getAccountByIdRepository,
-    getGoalsByAccountRepository,
     saveGoalRepository,
     budgetAuthorizationService,
   };
 };
 
-const makeValidDto = (): AddAmountToGoalDto => ({
+const makeValidDto = (): RemoveAmountFromGoalDto => ({
   id: '550e8400-e29b-41d4-a716-446655440001',
-  amount: 500,
+  amount: 300,
   userId: '550e8400-e29b-41d4-a716-446655440003',
 });
 
+const BUDGET_ID = '550e8400-e29b-41d4-a716-446655440002';
+const ACCOUNT_ID = '550e8400-e29b-41d4-a716-446655440004';
+
 const makeValidGoal = (): Goal => {
   const goalResult = Goal.create({
-    name: 'Meta Para Aporte',
+    name: 'Meta Para Remoção',
     totalAmount: 5000,
     accumulatedAmount: 1000,
-    budgetId: '550e8400-e29b-41d4-a716-446655440002',
-    sourceAccountId: '550e8400-e29b-41d4-a716-446655440004',
+    budgetId: BUDGET_ID,
+    sourceAccountId: ACCOUNT_ID,
   });
   return goalResult.data!;
 };
@@ -100,38 +100,29 @@ const makeValidAccount = (): Account => {
     name: 'Conta Corrente',
     type: AccountTypeEnum.CHECKING_ACCOUNT,
     initialBalance: 10000,
-    budgetId: '550e8400-e29b-41d4-a716-446655440002',
+    budgetId: BUDGET_ID,
   });
   return accountResult.data!;
 };
 
-describe('AddAmountToGoalUseCase', () => {
+describe('RemoveAmountFromGoalUseCase', () => {
   describe('execute', () => {
-    it('deve adicionar valor à meta com sucesso', async () => {
+    it('deve remover valor da meta com sucesso', async () => {
       const {
         sut,
         getGoalByIdRepository,
         getAccountByIdRepository,
-        getGoalsByAccountRepository,
         budgetAuthorizationService,
       } = makeSut();
 
+      const goal = makeValidGoal();
       const account = makeValidAccount();
 
-      // Criar Goal com o sourceAccountId igual ao account.id
-      const goalResult = Goal.create({
-        name: 'Meta Para Aporte',
-        totalAmount: 5000,
-        accumulatedAmount: 1000,
-        budgetId: account.budgetId!, // Mesmo budget
-        sourceAccountId: account.id, // Mesmo account
-      });
-      const goal = goalResult.data!;
-
-      // Setup stubs
       getGoalByIdRepository.mockGoal = goal;
       getAccountByIdRepository.mockAccount = account;
-      getGoalsByAccountRepository.setGoalsForAccount(account.id, []);
+
+      getAccountByIdRepository.accounts[ACCOUNT_ID] = account;
+
       budgetAuthorizationService.mockHasAccess = true;
 
       const dto = makeValidDto();
@@ -169,7 +160,7 @@ describe('AddAmountToGoalUseCase', () => {
 
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(ApplicationError);
-      expect(result.errors[0].message).toContain('Insufficient permissions');
+      expect(result.errors[0].message).toContain('not authorized');
     });
 
     it('deve retornar erro se Account não existir', async () => {
@@ -202,32 +193,21 @@ describe('AddAmountToGoalUseCase', () => {
         budgetAuthorizationService,
       } = makeSut();
 
-      // Criar Account com Budget diferente
+      const goal = makeValidGoal();
+
+      const DIFFERENT_BUDGET_ID = '550e8400-e29b-41d4-a716-446655440099';
       const accountResult = Account.create({
         name: 'Conta Corrente',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
         initialBalance: 10000,
-        budgetId: '550e8400-e29b-41d4-a716-446655440099',
+        budgetId: DIFFERENT_BUDGET_ID,
       });
-      if (accountResult.hasError) {
-        throw new Error(
-          `Failed to create account: ${accountResult.errors[0].message}`,
-        );
-      }
       const accountDifferentBudget = accountResult.data!;
 
-      // Criar Goal que aponta para esta Account mas com Budget diferente
-      const goalResult = Goal.create({
-        name: 'Meta Para Aporte',
-        totalAmount: 5000,
-        accumulatedAmount: 1000,
-        budgetId: '550e8400-e29b-41d4-a716-446655440088', // Budget diferente da Account
-        sourceAccountId: accountDifferentBudget.id, // Aponta para Account
-      });
-      const goal = goalResult.data!;
-
       getGoalByIdRepository.mockGoal = goal;
-      getAccountByIdRepository.mockAccount = accountDifferentBudget;
+      getAccountByIdRepository.accounts[goal.sourceAccountId] =
+        accountDifferentBudget;
+
       budgetAuthorizationService.mockHasAccess = true;
 
       const dto = makeValidDto();
@@ -236,7 +216,10 @@ describe('AddAmountToGoalUseCase', () => {
       const result = await sut.execute(dto);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].message).toContain('same budget');
+      expect(result.errors[0]).toBeInstanceOf(ApplicationError);
+      expect(result.errors[0].message).toContain(
+        'Goal and Account must belong to the same Budget',
+      );
     });
 
     it('deve retornar erro se meta estiver deletada', async () => {
@@ -244,26 +227,18 @@ describe('AddAmountToGoalUseCase', () => {
         sut,
         getGoalByIdRepository,
         getAccountByIdRepository,
-        getGoalsByAccountRepository,
         budgetAuthorizationService,
       } = makeSut();
 
+      const goal = makeValidGoal();
       const account = makeValidAccount();
 
-      // Criar Goal corretamente vinculada à Account
-      const goalResult = Goal.create({
-        name: 'Meta Para Aporte',
-        totalAmount: 5000,
-        accumulatedAmount: 1000,
-        budgetId: account.budgetId!,
-        sourceAccountId: account.id,
-      });
-      const goal = goalResult.data!;
-      goal.delete(); // deleta a meta
+      goal.delete();
 
       getGoalByIdRepository.mockGoal = goal;
       getAccountByIdRepository.mockAccount = account;
-      getGoalsByAccountRepository.setGoalsForAccount(account.id, []);
+      getAccountByIdRepository.accounts[ACCOUNT_ID] = account;
+
       budgetAuthorizationService.mockHasAccess = true;
 
       const dto = makeValidDto();
@@ -275,40 +250,58 @@ describe('AddAmountToGoalUseCase', () => {
       expect(result.errors[0]).toBeInstanceOf(GoalAlreadyDeletedError);
     });
 
+    it('deve retornar erro se tentar remover mais que o valor atual', async () => {
+      const {
+        sut,
+        getGoalByIdRepository,
+        getAccountByIdRepository,
+        budgetAuthorizationService,
+      } = makeSut();
+
+      const goal = makeValidGoal();
+      const account = makeValidAccount();
+
+      getGoalByIdRepository.mockGoal = goal;
+      getAccountByIdRepository.mockAccount = account;
+      getAccountByIdRepository.accounts[ACCOUNT_ID] = account;
+
+      budgetAuthorizationService.mockHasAccess = true;
+
+      const dto = makeValidDto();
+      dto.id = goal.id;
+      dto.amount = 1500;
+
+      const result = await sut.execute(dto);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(InvalidGoalAmountError);
+    });
+
     it('deve retornar erro se valor for negativo', async () => {
       const {
         sut,
         getGoalByIdRepository,
         getAccountByIdRepository,
-        getGoalsByAccountRepository,
         budgetAuthorizationService,
       } = makeSut();
 
+      const goal = makeValidGoal();
       const account = makeValidAccount();
-
-      // Criar Goal corretamente vinculada à Account
-      const goalResult = Goal.create({
-        name: 'Meta Para Aporte',
-        totalAmount: 5000,
-        accumulatedAmount: 1000,
-        budgetId: account.budgetId!,
-        sourceAccountId: account.id,
-      });
-      const goal = goalResult.data!;
 
       getGoalByIdRepository.mockGoal = goal;
       getAccountByIdRepository.mockAccount = account;
-      getGoalsByAccountRepository.setGoalsForAccount(account.id, []);
+      getAccountByIdRepository.accounts[ACCOUNT_ID] = account;
+
       budgetAuthorizationService.mockHasAccess = true;
 
       const dto = makeValidDto();
       dto.id = goal.id;
-      dto.amount = -100; // valor negativo
+      dto.amount = -100;
 
       const result = await sut.execute(dto);
 
       expect(result.hasError).toBe(true);
-      expect(result.errors[0].message).toContain('valid money');
+      expect(result.errors[0]).toBeInstanceOf(InvalidMoneyError);
     });
 
     it('deve retornar erro se Unit of Work falhar', async () => {
@@ -316,7 +309,6 @@ describe('AddAmountToGoalUseCase', () => {
         sut,
         getGoalByIdRepository,
         getAccountByIdRepository,
-        getGoalsByAccountRepository,
         saveGoalRepository,
         budgetAuthorizationService,
       } = makeSut();
@@ -326,7 +318,7 @@ describe('AddAmountToGoalUseCase', () => {
 
       getGoalByIdRepository.mockGoal = goal;
       getAccountByIdRepository.mockAccount = account;
-      getGoalsByAccountRepository.setGoalsForAccount(account.id, []);
+
       saveGoalRepository.shouldFail = true;
       budgetAuthorizationService.mockHasAccess = true;
 
@@ -338,65 +330,42 @@ describe('AddAmountToGoalUseCase', () => {
       expect(result.hasError).toBe(true);
     });
 
-    it('deve calcular reservas excluindo a Goal atual', async () => {
+    it('deve calcular reservas incluindo o novo valor da Goal após remoção', async () => {
       const {
         sut,
         getGoalByIdRepository,
         getAccountByIdRepository,
-        getGoalsByAccountRepository,
         saveGoalRepository,
         budgetAuthorizationService,
       } = makeSut();
 
       const account = makeValidAccount();
 
-      // Criar Goal principal vinculada à Account
-      const goalResult = Goal.create({
-        name: 'Meta Para Aporte',
+      const goal = Goal.create({
+        name: 'Meta Para Remoção',
         totalAmount: 5000,
         accumulatedAmount: 1000,
-        budgetId: account.budgetId!,
-        sourceAccountId: account.id,
-      });
-      const goal = goalResult.data!;
-
-      // Criar Goals adicionais vinculadas à mesma Account
-      const otherGoal1 = Goal.create({
-        name: 'Outra Meta 1',
-        totalAmount: 2000,
-        accumulatedAmount: 300,
-        budgetId: account.budgetId!,
-        sourceAccountId: account.id,
-      }).data!;
-
-      const otherGoal2 = Goal.create({
-        name: 'Outra Meta 2',
-        totalAmount: 3000,
-        accumulatedAmount: 700,
-        budgetId: account.budgetId!,
+        budgetId: BUDGET_ID,
         sourceAccountId: account.id,
       }).data!;
 
       getGoalByIdRepository.mockGoal = goal;
       getAccountByIdRepository.mockAccount = account;
-      getGoalsByAccountRepository.setGoalsForAccount(account.id, [
-        goal,
-        otherGoal1,
-        otherGoal2,
-      ]);
+
+      getAccountByIdRepository.accounts[account.id] = account;
+
       budgetAuthorizationService.mockHasAccess = true;
 
       const dto = makeValidDto();
       dto.id = goal.id;
+      dto.amount = 300;
 
       await sut.execute(dto);
 
-      // Verificar se Unit of Work foi chamado com totalReservedForGoals correto
       expect(saveGoalRepository.executeCalls).toHaveLength(1);
 
-      // Verificar se a Goal foi salva com o valor correto após addAmount
       const executedGoal = saveGoalRepository.executeCalls[0];
-      expect(executedGoal.accumulatedAmount).toBe(1500); // valor original 1000 + amount 500
+      expect(executedGoal.accumulatedAmount).toBe(700);
     });
   });
 });

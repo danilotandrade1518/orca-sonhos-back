@@ -494,6 +494,101 @@ describe('Account', () => {
     });
   });
 
+  describe('getAvailableBalance', () => {
+    const budgetId = EntityId.create().value!.id;
+
+    it('should return available balance with no reserves for checking account', () => {
+      const account = Account.create({
+        name: 'Conta Corrente',
+        type: AccountTypeEnum.CHECKING_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = account.getAvailableBalance(0);
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBe(1000);
+    });
+
+    it('should return available balance minus reserves for checking account', () => {
+      const account = Account.create({
+        name: 'Conta Corrente',
+        type: AccountTypeEnum.CHECKING_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = account.getAvailableBalance(300);
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBe(700);
+    });
+
+    it('should allow negative balance for checking account', () => {
+      const account = Account.create({
+        name: 'Conta Corrente',
+        type: AccountTypeEnum.CHECKING_ACCOUNT,
+        budgetId,
+        initialBalance: 500,
+      }).data!;
+
+      const result = account.getAvailableBalance(800);
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBe(-300);
+    });
+
+    it('should return error for insufficient balance in savings account', () => {
+      const account = Account.create({
+        name: 'Conta Poupança',
+        type: AccountTypeEnum.SAVINGS_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = account.getAvailableBalance(1200);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0].name).toBe('InsufficientBalanceError');
+    });
+
+    it('should return available balance for savings account with sufficient funds', () => {
+      const account = Account.create({
+        name: 'Conta Poupança',
+        type: AccountTypeEnum.SAVINGS_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = account.getAvailableBalance(600);
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBe(400);
+    });
+
+    it('should return error for insufficient balance in investment account', () => {
+      const account = Account.create({
+        name: 'Conta Investimento',
+        type: AccountTypeEnum.INVESTMENT_ACCOUNT,
+        budgetId,
+        initialBalance: 5000,
+      }).data!;
+
+      const result = account.getAvailableBalance(5500);
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0].name).toBe('InsufficientBalanceError');
+    });
+
+    it('should handle zero reserves correctly', () => {
+      const account = Account.create({
+        name: 'Conta Poupança',
+        type: AccountTypeEnum.SAVINGS_ACCOUNT,
+        budgetId,
+        initialBalance: 1000,
+      }).data!;
+
+      const result = account.getAvailableBalance(0);
+      expect(result.hasError).toBe(false);
+      expect(result.data).toBe(1000);
+    });
+  });
+
   describe('reconcile', () => {
     const budgetId = EntityId.create().value!.id;
 

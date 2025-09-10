@@ -8,7 +8,7 @@ export class GetAccountRepositoryStub implements IGetAccountRepository {
   public shouldFail = false;
   public shouldReturnNull = false;
   public executeCalls: string[] = [];
-  private accounts: Record<string, Account> = {};
+  public accounts: Record<string, Account> = {};
   private _mockAccount: Account | null = null;
 
   set mockAccount(account: Account | null) {
@@ -36,11 +36,14 @@ export class GetAccountRepositoryStub implements IGetAccountRepository {
     }
 
     const account = this.accounts[id];
-
-    if (!account) {
-      return Either.success(null);
+    if (account) {
+      return Either.success(account);
     }
 
-    return Either.success(account);
+    if (this._mockAccount) {
+      return Either.success(this._mockAccount);
+    }
+
+    return Either.success(null);
   }
 }

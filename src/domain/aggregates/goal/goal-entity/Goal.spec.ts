@@ -1,7 +1,6 @@
 import { InvalidEntityIdError } from '../../../shared/errors/InvalidEntityIdError';
 import { InvalidEntityNameError } from '../../../shared/errors/InvalidEntityNameError';
 import { EntityId } from '../../../shared/value-objects/entity-id/EntityId';
-import { GoalAlreadyAchievedError } from '../errors/GoalAlreadyAchievedError';
 import { GoalAlreadyDeletedError } from '../errors/GoalAlreadyDeletedError';
 import { InvalidGoalAmountError } from '../errors/InvalidGoalAmountError';
 import { Goal } from './Goal';
@@ -9,6 +8,7 @@ import { Goal } from './Goal';
 const validName = 'Minha Meta';
 const validTotal = 1000;
 const validBudgetId = EntityId.create().value!.id;
+const validSourceAccountId = EntityId.create().value!.id;
 const validDeadline = new Date('2025-12-31');
 
 function makeDTO(overrides = {}) {
@@ -16,6 +16,7 @@ function makeDTO(overrides = {}) {
     name: validName,
     totalAmount: validTotal,
     budgetId: validBudgetId,
+    sourceAccountId: validSourceAccountId,
     deadline: validDeadline,
     ...overrides,
   };
@@ -64,20 +65,55 @@ describe('Goal', () => {
       expect(result.errors[0]).toBeInstanceOf(GoalAlreadyDeletedError);
     });
 
-    it('deve retornar erro se goal já estiver atingida', () => {
+    it('deve permitir adicionar mesmo se goal já estiver atingida (over-reserving)', () => {
       const goal = Goal.create(makeDTO({ accumulatedAmount: 1000 })).data!;
       const result = goal.addAmount(10);
 
-      expect(result.hasError).toBe(true);
-      expect(result.errors[0]).toBeInstanceOf(GoalAlreadyAchievedError);
+      expect(result.hasError).toBe(false);
+      expect(goal.accumulatedAmount).toBe(1010);
     });
 
-    it('nao deve permitir ultrapassar o valor total', () => {
+    it('deve permitir ultrapassar o valor total (over-reserving)', () => {
       const goal = Goal.create(makeDTO()).data!;
       const result = goal.addAmount(2000);
 
+      expect(result.hasError).toBe(false);
+      expect(goal.accumulatedAmount).toBe(2000);
+    });
+  });
+
+  describe('removeAmount', () => {
+    it('deve remover aporte válido', () => {
+      const goal = Goal.create(makeDTO({ accumulatedAmount: 500 })).data!;
+      const result = goal.removeAmount(200);
+
+      expect(result.hasError).toBe(false);
+      expect(goal.accumulatedAmount).toBe(300);
+    });
+
+    it('deve retornar erro se goal estiver deletada', () => {
+      const goal = Goal.create(makeDTO({ accumulatedAmount: 500 })).data!;
+      goal.delete();
+      const result = goal.removeAmount(100);
+
+      expect(result.hasError).toBe(true);
+      expect(result.errors[0]).toBeInstanceOf(GoalAlreadyDeletedError);
+    });
+
+    it('deve retornar erro se tentar remover mais do que tem acumulado', () => {
+      const goal = Goal.create(makeDTO({ accumulatedAmount: 100 })).data!;
+      const result = goal.removeAmount(200);
+
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(InvalidGoalAmountError);
+    });
+
+    it('deve permitir remover tudo (zerar acumulado)', () => {
+      const goal = Goal.create(makeDTO({ accumulatedAmount: 500 })).data!;
+      const result = goal.removeAmount(500);
+
+      expect(result.hasError).toBe(false);
+      expect(goal.accumulatedAmount).toBe(0);
     });
   });
 

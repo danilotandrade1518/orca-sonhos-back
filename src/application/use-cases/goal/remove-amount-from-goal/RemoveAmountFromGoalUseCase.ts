@@ -1,33 +1,42 @@
 import { DomainError } from '@domain/shared/DomainError';
 import { Either } from '@either';
 
-import { GoalReservationDomainService } from '../../../../domain/aggregates/goal/services/GoalReservationDomainService';
 import { IGetAccountRepository } from '../../../contracts/repositories/account/IGetAccountRepository';
 import { IGetGoalRepository } from '../../../contracts/repositories/goal/IGetGoalRepository';
-import { IGetGoalsByAccountRepository } from '../../../contracts/repositories/goal/IGetGoalsByAccountRepository';
 import { ISaveGoalRepository } from '../../../contracts/repositories/goal/ISaveGoalRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { AccountNotFoundError } from '../../../shared/errors/AccountNotFoundError';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
 import { GoalNotFoundError } from '../../../shared/errors/GoalNotFoundError';
-import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
 import { IUseCase, UseCaseResponse } from './../../../shared/IUseCase';
-import { AddAmountToGoalDto } from './AddAmountToGoalDto';
+import { RemoveAmountFromGoalDto } from './RemoveAmountFromGoalDto';
 
-export class AddAmountToGoalUseCase implements IUseCase<AddAmountToGoalDto> {
-  private readonly goalReservationDomainService: GoalReservationDomainService;
+class BudgetAuthorizationError extends ApplicationError {
+  constructor() {
+    super('User is not authorized to access this budget');
+    this.name = 'BudgetAuthorizationError';
+    this.fieldName = 'userId';
+  }
+}
 
+class GoalAccountMismatchError extends ApplicationError {
+  constructor() {
+    super('Goal and Account must belong to the same Budget');
+    this.name = 'GoalAccountMismatchError';
+    this.fieldName = 'budgetId';
+  }
+}
+export class RemoveAmountFromGoalUseCase
+  implements IUseCase<RemoveAmountFromGoalDto>
+{
   constructor(
     private readonly getGoalByIdRepository: IGetGoalRepository,
     private readonly getAccountByIdRepository: IGetAccountRepository,
-    private readonly getGoalsByAccountRepository: IGetGoalsByAccountRepository,
     private readonly saveGoalRepository: ISaveGoalRepository,
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
-  ) {
-    this.goalReservationDomainService = new GoalReservationDomainService();
-  }
+  ) {}
 
-  async execute(dto: AddAmountToGoalDto) {
+  async execute(dto: RemoveAmountFromGoalDto) {
     const goalResult = await this.getGoalByIdRepository.execute(dto.id);
     if (goalResult.hasError) {
       return Either.errors<ApplicationError, UseCaseResponse>(
@@ -53,7 +62,7 @@ export class AddAmountToGoalUseCase implements IUseCase<AddAmountToGoalDto> {
     }
     if (!authResult.data) {
       return Either.error<ApplicationError, UseCaseResponse>(
-        new InsufficientPermissionsError(),
+        new BudgetAuthorizationError(),
       );
     }
 
@@ -73,25 +82,16 @@ export class AddAmountToGoalUseCase implements IUseCase<AddAmountToGoalDto> {
       );
     }
 
-    const goalsResult = await this.getGoalsByAccountRepository.execute(
-      sourceAccount.id,
-    );
-    if (goalsResult.hasError) {
-      return Either.errors<ApplicationError, UseCaseResponse>(
-        goalsResult.errors,
+    if (goal.budgetId !== sourceAccount.budgetId) {
+      return Either.error<ApplicationError, UseCaseResponse>(
+        new GoalAccountMismatchError(),
       );
     }
 
-    const goalReservationResult =
-      this.goalReservationDomainService.validateReservationOperation({
-        goal,
-        sourceAccount,
-        allGoalsFromAccount: goalsResult.data || [],
-        additionalAmount: dto.amount,
-      });
-    if (goalReservationResult.hasError) {
+    const removeAmountResult = goal.removeAmount(dto.amount);
+    if (removeAmountResult.hasError) {
       return Either.errors<DomainError, UseCaseResponse>(
-        goalReservationResult.errors,
+        removeAmountResult.errors,
       );
     }
 

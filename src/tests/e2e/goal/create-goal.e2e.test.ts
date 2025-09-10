@@ -29,6 +29,7 @@ describe('POST /goals (E2E)', () => {
         accumulatedAmount: 100,
         deadline: new Date().toISOString(),
         budgetId: EntityId.create().value!.id,
+        sourceAccountId: EntityId.create().value!.id,
       })
       .expect(201);
     expect(res.body.id).toBeDefined();

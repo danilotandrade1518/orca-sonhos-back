@@ -17,6 +17,7 @@ export class CreateGoalUseCase implements IUseCase<CreateGoalDto> {
       accumulatedAmount: dto.accumulatedAmount,
       deadline: dto.deadline,
       budgetId: dto.budgetId,
+      sourceAccountId: dto.sourceAccountId,
     });
 
     if (goalResult.hasError)

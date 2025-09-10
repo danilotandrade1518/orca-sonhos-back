@@ -4,4 +4,5 @@ export interface CreateGoalDto {
   accumulatedAmount?: number;
   deadline?: Date;
   budgetId: string;
+  sourceAccountId: string;
 }

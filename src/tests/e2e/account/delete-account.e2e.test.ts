@@ -6,6 +6,7 @@ import { DeleteAccountUseCase } from '@application/use-cases/account/delete-acco
 import { Account } from '@domain/aggregates/account/account-entity/Account';
 import { AccountTypeEnum } from '@domain/aggregates/account/value-objects/account-type/AccountType';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
+import { Either } from '@either';
 import { DeleteAccountController } from '@http/controllers/account/delete-account.controller';
 import { RouteDefinition } from '@http/server-adapter';
 import request from 'supertest';
@@ -48,6 +49,10 @@ describe('DELETE /accounts (E2E)', () => {
     await close();
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should delete an account and return 200', async () => {
     const res = await request(server.rawApp)
       .delete('/accounts')
@@ -61,6 +66,8 @@ describe('DELETE /accounts (E2E)', () => {
   });
 
   it('should 404 when account not found', async () => {
+    jest.spyOn(getRepoD, 'execute').mockResolvedValueOnce(Either.success(null));
+
     const res = await request(server.rawApp)
       .delete('/accounts')
       .send({

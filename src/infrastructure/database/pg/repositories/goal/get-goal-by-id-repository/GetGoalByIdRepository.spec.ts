@@ -49,6 +49,7 @@ describe('GetGoalByIdRepository', () => {
         accumulated_amount: 25000.0,
         deadline: new Date('2030-12-31T23:59:59Z'),
         budget_id: '550e8400-e29b-41d4-a716-446655440003',
+        source_account_id: '550e8400-e29b-41d4-a716-446655440004',
         is_deleted: false,
         created_at: new Date('2024-01-15T10:00:00Z'),
         updated_at: new Date('2024-01-15T10:00:00Z'),
@@ -134,6 +135,7 @@ describe('GetGoalByIdRepository', () => {
         accumulated_amount: 25000.0,
         deadline: new Date('2030-12-31T23:59:59Z'),
         budget_id: '550e8400-e29b-41d4-a716-446655440003',
+        source_account_id: '550e8400-e29b-41d4-a716-446655440004',
         is_deleted: false,
         created_at: new Date('2024-01-15T10:00:00Z'),
         updated_at: new Date('2024-01-15T10:00:00Z'),
@@ -178,6 +180,7 @@ describe('GetGoalByIdRepository', () => {
       expect(calledQuery).toContain(
         'id, name, total_amount, accumulated_amount, deadline, budget_id',
       );
+      expect(calledQuery).toContain('source_account_id');
       expect(calledQuery).toContain('is_deleted, created_at, updated_at');
       expect(calledQuery).toContain('FROM goals');
       expect(calledQuery).toContain('WHERE id = $1 AND is_deleted = false');
@@ -250,6 +253,7 @@ describe('GetGoalByIdRepository', () => {
         accumulated_amount: 150000.0,
         deadline: new Date('2025-06-30T23:59:59Z'),
         budget_id: '550e8400-e29b-41d4-a716-446655440004',
+        source_account_id: '550e8400-e29b-41d4-a716-446655440005',
         is_deleted: false,
         created_at: new Date('2024-02-01T08:30:00Z'),
         updated_at: new Date('2024-02-15T14:45:00Z'),
@@ -288,6 +292,7 @@ describe('GetGoalByIdRepository', () => {
     it('should handle goal without deadline', async () => {
       const mockRow: GoalRow = {
         id: goalId,
+        source_account_id: '550e8400-e29b-41d4-a716-446655440006',
         name: 'Meta sem Prazo',
         total_amount: 50000.0,
         accumulated_amount: 10000.0,

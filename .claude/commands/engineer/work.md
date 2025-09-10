@@ -15,6 +15,14 @@ Para trabalhar nisso, você deve:
 
 Importante:
 
+## Não manter comentários ou instruções no código
+
+- O código final não deve conter comentários ou instruções
+- Remova qualquer comentário ou instrução antes de finalizar o código
+- O código deve ser limpo e pronto para produção
+- O código deve ser legível e seguir as melhores práticas
+- O código deve seguir regras de linting e formatação apropriadas conforme configurações do projeto
+
 ## Code review
 
 ## Prioridades de Revisão (em ordem)

@@ -34,6 +34,7 @@ describe('AddGoalRepository', () => {
       totalAmount: 100000,
       budgetId: EntityId.create().value!.id,
       accumulatedAmount: 25000,
+      sourceAccountId: EntityId.create().value!.id,
     }).data!;
   };
 
@@ -70,11 +71,13 @@ describe('AddGoalRepository', () => {
       const [query, params] = mockConnection.query.mock.calls[0];
       expect(query).toContain('INSERT INTO goals');
       expect(query).toContain(
-        'id, name, total_amount, accumulated_amount, deadline, budget_id',
+        'id, source_account_id, name, total_amount, accumulated_amount, deadline, budget_id',
       );
       expect(query).toContain('is_deleted, created_at, updated_at');
-      expect(query).toContain('VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)');
-      expect(params).toHaveLength(9);
+      expect(query).toContain(
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+      );
+      expect(params).toHaveLength(10);
     });
 
     it('should handle goal with deadline', async () => {
@@ -85,6 +88,7 @@ describe('AddGoalRepository', () => {
         budgetId: EntityId.create().value!.id,
         deadline,
         accumulatedAmount: 10000,
+        sourceAccountId: EntityId.create().value!.id,
       }).data!;
 
       const result = await repository.execute(goal);
