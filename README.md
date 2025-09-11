@@ -1,8 +1,8 @@
 # OrçaSonhos Backend
 
-API de gestão financeira que transforma sonhos em metas financeiras alcançáveis, com foco em orçamentos flexíveis, colaboração familiar e controle de gastos.
+## Meta Specs em: https://github.com/danilotandrade1518/orca-sonhos-meta-specs
 
-# META SPECS em: https://github.com/danilotandrade1518/orca-sonhos-meta-specs
+API de gestão financeira que transforma sonhos em metas financeiras alcançáveis, com foco em orçamentos flexíveis, colaboração familiar e controle de gastos.
 
 ## Sobre o Projeto
 
@@ -18,11 +18,21 @@ OrçaSonhos é uma plataforma de gestão financeira projetada para transformar s
 
 ### Arquitetura
 
-- **Backend**: Clean Architecture + Domain-Driven Design (DDD)
-- **Autenticação**: Firebase
+- **Backend**: Clean Architecture + Domain-Driven Design (DDD) + CQRS
+- **Banco de dados**: PostgreSQL
+- **Autenticação**: Firebase Authentication (SPA flow)
+- **Infraestrutura**: Azure (App Service, PostgreSQL, B2C, KeyVault)
 - **Princípios**: Offline-first, Mobile-first
 
 **Status:** MVP em desenvolvimento
+
+### 📚 Documentação Detalhada
+
+Para informações completas sobre arquitetura, domínio e decisões técnicas, consulte as **Meta Specs**:
+- **[Visão de Produto e Domínio](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/business/01_visao_produto.md)**: Conceitos centrais (Budget, Account, Goal, Transaction, etc.)
+- **[Arquitetura Backend](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/technical/01_visao-arquitetural-backend.md)**: Clean Architecture, DDD, agregados, CQRS, padrões
+- **[Stack Tecnológico](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/technical/03_stack_tecnologico.md)**: PostgreSQL, Firebase, Azure, ferramentas
+- **[ADRs](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/adr/index.md)**: Histórico de decisões arquiteturais
 
 ## Como rodar
 
@@ -42,19 +52,31 @@ docker-compose up --build
 
 ```bash
 # Testes unitários (arquivos .spec.ts)
+npm run test:unity
+
+# Testes unitários em modo watch
 npm run test:watch
 
-# Testes integrados (arquivos .test.ts)
+# Testes de integração (arquivos .test.ts)
 npm run test:integration
 
+# Testes e2e (arquivos .e2e.test.ts)
+npm run test:e2e
+
 # Cobertura de testes
-npm test:coverage
+npm run test:coverage
+
+# Pipeline completa de testes (CI)
+npm run test:ci
 ```
 
 ## Scripts úteis
 
 - `npm run lint` — Lint do código
 - `npm run format` — Formata o código com Prettier
+- `npm run migrate` — Executa migrações do banco
+- `npm run migrate:down` — Reverte última migração
+- `npm run migrate:create <nome>` — Cria nova migração
 
 ## Contribuição
 
@@ -181,18 +203,3 @@ Depois, basta informar ao agente onde encontrar os metaspecs.
 
 - No caso do Claude Desktop, coloque no prompt de instruções
 - No caso do Claude Code, coloque no arquivo CLAUDE.md do usuário ou do repositório
-
-### Como eu forneço acesso ao codebase para os agentes consultarem?
-
-Você pode oferecer acesso ao codebase de 3 maneiras:
-
-- Passando o caminho local da sua maquina
-- Passando o repositório diretamente
-- Usando algum MCP como [Code Expert](https://github.com/lfnovo/code-expert-mcp) ou [RepoPrompt](https://repoprompt.com/).
-
-Depois, basta informar ao agente onde encontrar o código.
-
-- No caso do Claude Desktop, coloque no prompt de instruções
-- No caso do Claude Code, coloque no arquivo CLAUDE.md do usuário ou do repositório
-
-Claude Code já tem acesso ao repositório local, obviamente. Este passo é apenas para quando ele precisa acessar outros repos do projeto.
