@@ -29,8 +29,8 @@ OrçaSonhos é uma plataforma de gestão financeira projetada para transformar s
 ### 📚 Documentação Detalhada
 
 Para informações completas sobre arquitetura, domínio e decisões técnicas, consulte as **Meta Specs**:
-- **[Visão de Produto e Domínio](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/business/01_visao_produto.md)**: Conceitos centrais (Budget, Account, Goal, Transaction, etc.)
-- **[Arquitetura Backend](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/technical/01_visao-arquitetural-backend.md)**: Clean Architecture, DDD, agregados, CQRS, padrões
+- **[Visão de Produto e Domínio](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/tree/main/business/product-vision)**: Conceitos centrais (Budget, Account, Goal, Transaction, etc.)
+- **[Arquitetura Backend](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/tree/main/technical/backend-architecture)**: Clean Architecture, DDD, agregados, CQRS, padrões
 - **[Stack Tecnológico](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/technical/03_stack_tecnologico.md)**: PostgreSQL, Firebase, Azure, ferramentas
 - **[ADRs](https://github.com/danilotandrade1518/orca-sonhos-meta-specs/blob/main/adr/index.md)**: Histórico de decisões arquiteturais
 
