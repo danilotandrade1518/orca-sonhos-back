@@ -1,10 +1,11 @@
 Agora é solicitado que você faça um PR. Siga estes passos cuidadosamente para completar a tarefa:
 
 1. Primeiro, garanta que todos os testes estão funcionando para a branch atual. Execute a suíte de testes apropriada para seu projeto e confirme que todos os testes passam. Se algum teste falhar, corrija os problemas antes de prosseguir.
+   Comando: npm test
 
 2. Faça commit das mudanças que você fez. Use uma mensagem de commit clara e concisa que resuma as alterações.
 
-3. Mova o card do Linear associado com esta tarefa para o status "In Review". 
+3. Mova o card do Jira associado com esta tarefa para o status "In Review".
 
 4. Abra um Pull Request (PR) com os detalhes da implementação:
 
@@ -27,9 +28,10 @@ Seu output final deve ser uma mensagem para o usuário, formatada da seguinte fo
 
 <task_completion_message>
 Tarefa completada:
+
 - Testes estão passando
 - Mudanças commitadas
-- Card do Linear [INSERT CARD ID] movido para "In Review"
+- Card do Jira [INSERT CARD ID] movido para "In Review"
 - PR aberto: [INSERT PR TITLE]
 - Comentários do code review automatizado abordados e correções pushed
 
@@ -37,4 +39,3 @@ O PR está agora pronto para sua revisão final e merge manual.
 
 [INSERT PR LINK]
 </task_completion_message>
-

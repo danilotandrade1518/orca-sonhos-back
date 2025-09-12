@@ -1,4 +1,3 @@
-
 Este é um projeto de documentação para vários projetos open source de nossa organização. A ideia deste repositório é ser a especificação única que direciona todas as outras especificações, código, design e artefatos de teste. É nossa fonte canônica de verdade para todos os nossos projetos.
 
 Cada projeto tem sua própria pasta sob a pasta @/projects/
@@ -13,14 +12,13 @@ Este índice deve fornecer informações básicas sobre cada projeto, tais como:
 
 - nome com link para sua pasta
 - descrição breve
-- id do projeto linear
-- id da equipe linear
+- id do projeto Jira
+- id da equipe Jira
 - url do repositório
 
 Esta informação está facilmente disponível dentro dos arquivos principais dos projetos (seja index.md ou 2-project_management.md)
 
 Não adicione mais nada além das informações acima.
-
 
 ### /build-index <nome-do-projeto>
 
