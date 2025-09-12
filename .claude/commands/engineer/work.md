@@ -8,10 +8,11 @@ Estamos atualmente trabalhando em uma funcionalidade que está especificada na s
 
 Para trabalhar nisso, você deve:
 
-- Mover o Card do Jira para "Em Progresso"
-- Ler todos os arquivos markdown na pasta
-- Revisar o arquivo plan.md e identificar qual Fase está atualmente em progresso
-- Apresentar ao usuário um plano para abordar a próxima fase
+1 - Mover o Card do Jira para "Em Progresso"
+2 - Ler todos os arquivos markdown na pasta
+3 - Revisar o arquivo plan.md e identificar qual Fase está atualmente em progresso
+4 - Apresentar ao usuário um plano para abordar a próxima fase
+5 - Se não estivermos em uma feature branch, peça permissão para criar uma. Se estivermos em uma feature branch que corresponde ao nome da funcionalidade, estamos prontos.
 
 Importante:
 

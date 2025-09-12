@@ -4,8 +4,6 @@ Este é o comando para iniciar o desenvolvimento de uma funcionalidade.
 
 ## Configuração
 
-- Se não estivermos em uma feature branch, peça permissão para criar uma
-- Se estivermos em uma feature branch que corresponde ao nome da funcionalidade, estamos prontos.
 - Certifique-se de que existe uma pasta .claude/sessions/<feature_slug>
 - Peça ao usuário o input para esta sessão (você receberá um ou mais cards do Jira para trabalhar)
 
