@@ -1,14 +1,31 @@
-# Aquecimento do Projeto
+# Product Warm-up
 
-Para se preparar para esta sessão, por favor:
+Para se preparar para esta sessão de trabalho de produto, execute os seguintes passos:
 
-1 - Meta Specs
+## 1. Revisão das Meta Specs
 
-- Revise o index.md das META SPECS deste projeto e memorize-o para que você saiba quais arquivos pode ler mais tarde quando a necessidade surgir.
+- Acesse e revise o **index.md** das META SPECS deste projeto
+- Memorize a estrutura e conteúdo para referência futura quando necessário
 - As meta specs estão no repositório: https://github.com/danilotandrade1518/orca-sonhos-meta-specs
 
-2 - Revise o README.md da raiz deste projeto. Além disso, mantenha uma lista dos arquivos na pasta docs/ em seu contexto para que você possa se referir a eles mais tarde quando a necessidade surgir
+## 2. Contexto do Projeto
 
-Você pode acessar estes arquivos diretamente através do sistema de arquivos ou através da ferramenta code-expert que você tem acesso.
+- Revise o **README.md** na raiz do projeto
+- Mantenha uma lista dos arquivos na pasta **docs/** para consultas futuras
+- Familiarize-se com a documentação técnica existente
 
-O nome do projeto será fornecido como argumentos: #$ARGUMENTS
+## 3. Ferramentas de Acesso
+
+Você pode acessar estes arquivos através de:
+
+- Sistema de arquivos local
+- Ferramentas MCP disponíveis (code-understanding, etc.)
+- Repositórios remotos configurados
+
+## 4. Contexto da Sessão
+
+O foco desta sessão será: **#$ARGUMENTS**
+
+## Preparação Concluída
+
+Após completar estes passos, você estará preparado para trabalhar com requirements de produto alinhados às especificações e contexto do projeto.

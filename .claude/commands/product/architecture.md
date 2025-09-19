@@ -1,66 +1,239 @@
-# Início da Engenharia
+# Product Architecture Design
 
-Este é o comando para disparar o início do design de arquitetura para uma funcionalidade.
+Você é um especialista em produto e arquitetura encarregado de projetar a arquitetura de uma funcionalidade baseada em especificações aprovadas.
 
-## Análise
+## Argumentos da Sessão
 
-1. Passe pelos cards, pais e filhos se necessário, e construa um entendimento inicial do que precisa ser construído. Pense cuidadosamente sobre o que é solicitado, certifique-se de que entende exatamente:
-
-   - Por que isso está sendo construído (contexto)
-   - Qual é o resultado esperado para esta issue? (objetivo)
-   - Como deve ser construído, apenas direcionalmente, não em detalhes (abordagem)
-   - Se requer usar novas APIs/ferramentas, você as entende?
-   - Como deve ser testado?
-   - Quais são as dependências?
-   - Quais são as restrições?
-
-2. Depois de refletir sobre essas perguntas, elabore os 3-5 esclarecimentos mais importantes necessários para completar a tarefa.
-
-3. Pergunte ao humano essas questões, ao mesmo tempo fornecendo seu entendimento e sugestões. PAUSE para aguardar as respostas do humano.
-
-4. Depois de obter as respostas do humano, considere se precisa fazer mais perguntas. Se sim, faça mais perguntas ao humano. PAUSE para aguardar as respostas do humano.
-
-5. Uma vez que tenha um bom entendimento do que está sendo construído, declare-o claramente de volta ao humano para revisão. Faça isso na forma de um artefato para que seja mais fácil de revisar.
-
-6. Se o humano concordar com seu entendimento, você pode proceder para o próximo passo. Caso contrário, continue iterando juntos até obter aprovação explícita para prosseguir.
-
-7. Se algo que vocês discutiram aqui afeta o que foi escrito nos requisitos, peça permissão ao humano para editar esses requisitos e fazer ajustes seja editando (mudanças estruturais) ou adicionando comentários (esclarecimentos). Se o requisito está em um card do Jira, edite o card do Jira.
-
-8. Não proceda para o próximo passo a menos que o humano tenha claramente dado o sinal verde nesta fase.
-
-## Arquitetura
-
-Dado seu entendimento do que será construído, você agora procederá ao desenvolvimento da arquitetura da funcionalidade. O documento de arquitetura deve mapear o que está sendo construído, os componentes, as dependências, os padrões, as tecnologias, as restrições, as suposições, os trade-offs, as alternativas, as consequências.
-
-Aqui é onde você colocará seu chapéu de super pensamento e considerará o melhor caminho para construir a funcionalidade, ao mesmo tempo considerando os padrões e melhores práticas para este projeto.
-
-1. Passe pelo código-fonte relevante, entenda sua estrutura e propósito e procure pelos arquivos importantes para esta implementação.
-
-2. Revise os documentos de meta specs técnicas do projeto para garantir que esta funcionalidade se alinhe com nossa visão técnica
-
-3. Construa uma proposta de arquitetura que se alinhe com os padrões e melhores práticas do projeto.
-
-Dicas:
-
-- Use as ferramentas code-expert (se disponíveis) para encontrar arquivos específicos baseados nas respostas de descoberta
-- Mergulhe fundo em funcionalidades e padrões similares
-- Analise detalhes específicos de implementação
-- Use WebSearch ou context7 para melhores práticas ou documentação de biblioteca (se necessário)
-
-Seu documento de arquitetura deve incluir: - Uma visão geral de alto nível do sistema (antes e depois da mudança) - Componentes afetados e seus relacionamentos, dependências - Padrões e melhores práticas que serão mantidos ou introduzidos - Dependências externas que serão usadas ou que precisam ser adicionadas ao projeto - Restrições e suposições - Trade-offs e alternativas - Consequências negativas (se houver) ao implementar este design - Lista dos principais arquivos a serem editados/criados
-
-Se ajudar a construir um diagrama MERMAID, sinta-se livre para fazê-lo.
-
-4. Se, em algum ponto, você tiver perguntas ou se encontrar algo que contradiz o que entendeu anteriormente, peça esclarecimento ao humano.
-
-5. Uma vez que tenha um bom entendimento do que está sendo construído, mostre ao usuário na forma de um artefato e aguarde sua aprovação. Iterate juntos até estar pronto. PAUSE para aguardar a aprovação do humano.
-
-6. Quando o humano concordar com seu entendimento, você pode proceder ao próximo passo, salvando os detalhes da arquitetura no card do Jira como um comentário ao card original.
-
-## Pesquisa
-
-Se não tiver certeza de como uma biblioteca específica funciona, você pode usar Context7 e Perplexity para buscar informações sobre ela. Então, não tente adivinhar.
-
-<feature_slug>
+<feature_specification>
 #$ARGUMENTS
-</feature_slug>
+</feature_specification>
+
+## Objetivo
+
+Desenvolver um design arquitetural detalhado que traduza os requisitos de produto em uma estrutura técnica implementável, alinhada com os padrões do projeto.
+
+## Processo de Design Arquitetural
+
+### 1. Análise dos Requisitos
+
+Analise a especificação fornecida e construa entendimento sobre:
+
+- **Contexto**: Por que isso está sendo construído
+- **Objetivo**: Qual o resultado esperado
+- **Abordagem**: Como deve ser implementado direcionalmente
+- **APIs/Ferramentas**: Novas dependências necessárias
+- **Testes**: Estratégia de validação
+- **Dependências**: Sistemas e componentes relacionados
+- **Restrições**: Limitações técnicas e de negócio
+
+### 2. Esclarecimentos Estratégicos
+
+Formule **3-5 perguntas críticas** para esclarecer:
+
+- Aspectos arquiteturais não cobertos
+- Decisões técnicas importantes
+- Trade-offs que precisam ser considerados
+- Impactos em sistemas existentes
+
+**Aguarde as respostas** antes de prosseguir.
+
+### 3. Validação do Entendimento
+
+Apresente seu entendimento na forma de artefato estruturado:
+
+```markdown
+## Entendimento Arquitetural
+
+### Problema a Resolver
+
+[Descrição clara do desafio técnico]
+
+### Abordagem Proposta
+
+[Estratégia geral de implementação]
+
+### Componentes Principais
+
+[Sistemas e módulos envolvidos]
+
+### Integrações Necessárias
+
+[APIs, serviços, dependências externas]
+
+### Restrições Identificadas
+
+[Limitações técnicas e de negócio]
+```
+
+**Aguarde aprovação explícita** antes de continuar.
+
+### 4. Atualização de Requisitos
+
+Se a discussão revelar novos insights:
+
+- Solicite permissão para atualizar requisitos
+- Faça ajustes estruturais ou adicione esclarecimentos
+- Atualize a documentação no sistema de gestão de tarefas
+
+### 5. Design Arquitetural Detalhado
+
+#### 5.1. Análise do Código Existente
+
+- Examine arquivos e padrões relevantes do projeto
+- Identifique funcionalidades similares como referência
+- Analise estruturas e convenções estabelecidas
+
+#### 5.2. Revisão das Meta Specs Técnicas
+
+- Consulte https://github.com/danilotandrade1518/orca-sonhos-meta-specs para diretrizes arquiteturais
+- Garanta alinhamento com a visão técnica do projeto
+- Identifique padrões obrigatórios
+
+#### 5.3. Desenvolvimento da Proposta
+
+Crie documentação arquitetural abrangente incluindo:
+
+## Template de Arquitetura
+
+````markdown
+# Arquitetura: [NOME DA FUNCIONALIDADE]
+
+## 🏗️ Visão Geral do Sistema
+
+### Estado Atual
+
+[Como o sistema funciona hoje]
+
+### Estado Futuro
+
+[Como ficará após a implementação]
+
+### Principais Mudanças
+
+[Transformações necessárias]
+
+## 🔧 Componentes e Relacionamentos
+
+### Componentes Afetados
+
+- **[Componente 1]**: [Descrição e mudanças]
+- **[Componente 2]**: [Descrição e mudanças]
+
+### Novos Componentes
+
+- **[Novo Componente]**: [Propósito e responsabilidades]
+
+### Diagrama de Arquitetura
+
+```mermaid
+[Diagrama mostrando relacionamentos]
+```
+````
+
+## 🏛️ Padrões e Práticas
+
+### Padrões Mantidos
+
+[Padrões arquiteturais seguidos]
+
+### Novos Padrões Introduzidos
+
+[Justificativa para novos padrões]
+
+### Melhores Práticas Aplicadas
+
+[Convenções e guidelines seguidos]
+
+## 📦 Dependências
+
+### Dependências Existentes
+
+[Bibliotecas e serviços já utilizados]
+
+### Novas Dependências
+
+- **[Dependência]**: [Justificativa e uso]
+
+### Integrações Externas
+
+[APIs e serviços de terceiros]
+
+## ⚖️ Trade-offs e Alternativas
+
+### Decisões Arquiteturais
+
+- **Decisão**: [Escolha feita]
+- **Alternativas**: [Outras opções consideradas]
+- **Justificativa**: [Por que esta escolha]
+
+### Consequências Negativas
+
+[Possíveis impactos negativos e mitigações]
+
+## 🚧 Restrições e Suposições
+
+### Limitações Técnicas
+
+[Restrições do ambiente/tecnologia]
+
+### Suposições de Negócio
+
+[Premissas assumidas]
+
+### Pontos de Atenção
+
+[Riscos arquiteturais identificados]
+
+## 📋 Plano de Implementação
+
+### Arquivos Principais a Modificar
+
+- `[arquivo1.js]`: [Tipo de mudança]
+- `[arquivo2.py]`: [Tipo de mudança]
+
+### Novos Arquivos a Criar
+
+- `[novo_arquivo.ts]`: [Propósito]
+
+### Ordem de Implementação
+
+1. [Primeira etapa]
+2. [Segunda etapa]
+3. [Terceira etapa]
+
+## 🧪 Estratégia de Testes
+
+### Testes Unitários
+
+[Componentes que precisam de testes]
+
+### Testes de Integração
+
+[Integrações que devem ser testadas]
+
+### Testes End-to-End
+
+[Fluxos completos a validar]
+
+```
+
+### 6. Validação Final
+
+- Apresente a arquitetura como artefato para revisão
+- Solicite feedback e iterações necessárias
+- **Aguarde aprovação explícita** antes de finalizar
+- Registre a arquitetura aprovada no Jira como comentário na tarefa
+
+## Ferramentas de Apoio
+
+- **Pesquisa de Código**: Use ferramentas MCP para análise
+- **Documentação Externa**: Consulte Context7 para bibliotecas
+- **Web Search**: Para melhores práticas quando necessário
+
+## Próximos Passos
+
+Após aprovação da arquitetura:
+1. **Validação** (`/check`) - Verificação final contra Meta Specs
+2. **Desenvolvimento** (`/start`) - Início da implementação
+3. **Planejamento** (`/plan`) - Quebra em etapas de desenvolvimento
+```

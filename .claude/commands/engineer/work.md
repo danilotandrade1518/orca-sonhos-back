@@ -1,235 +1,457 @@
 # Engineer Work
 
-Estamos atualmente trabalhando em uma funcionalidade que está especificada na seguinte pasta:
+Este é o comando para executar o desenvolvimento de uma funcionalidade seguindo o planejamento estabelecido.
+
+## Argumentos da Sessão
 
 <folder>
 #$ARGUMENTS
 </folder>
 
-Para trabalhar nisso, você deve:
+## Objetivo
 
-1 - Mover o Card do Jira para "Em Progresso"
-2 - Ler todos os arquivos markdown na pasta
-3 - Revisar o arquivo plan.md e identificar qual Fase está atualmente em progresso
-4 - Apresentar ao usuário um plano para abordar a próxima fase
-5 - Se não estivermos em uma feature branch, peça permissão para criar uma. Se estivermos em uma feature branch que corresponde ao nome da funcionalidade, estamos prontos.
+Implementar a funcionalidade seguindo o plano faseado, com foco na qualidade, padrões do projeto e aprovação entre etapas.
 
-Importante:
+## Processo de Desenvolvimento
 
-## Não manter comentários ou instruções no código
+### 0. Execução Automática Inicial
 
-- O código final não deve conter comentários ou instruções
-- Remova qualquer comentário ou instrução antes de finalizar o código
-- O código deve ser limpo e pronto para produção
-- O código deve ser legível e seguir as melhores práticas
-- O código deve seguir regras de linting e formatação apropriadas conforme configurações do projeto
+**OBRIGATÓRIO**: Execute estas ações automaticamente no início:
 
-## Code review
+#### Passo 1: Verificação e Criação de Branch
 
-## Prioridades de Revisão (em ordem)
+```bash
+# Verificar branch atual
+git branch --show-current
 
-1. **Correção** - O código realmente funciona para o caso de uso pretendido?
-2. **Segurança** - Há bugs óbvios, problemas de segurança ou padrões propensos a erro?
-3. **Clareza** - O código é legível e manutenível?
-4. **Adequação** - O nível de complexidade está certo para o problema?
-
-## Processo de Revisão
-
-### 1. Análise Funcional
-
-- **Resolve o requisito declarado?** Verifique contra o problema original
-- **Casos extremos**: Cenários óbvios de falha são tratados adequadamente?
-- **Integração**: Isso funcionará com o sistema/ambiente mais amplo?
-
-### 2. Avaliação da Qualidade do Código
-
-- **Legibilidade**: Alguém mais pode entender isso em 6 meses?
-- **Tratamento de erro**: Falhas prováveis são capturadas e tratadas adequadamente?
-- **Gerenciamento de recursos**: Limpeza adequada de arquivo/conexão, uso de memória
-- **Sinais vermelhos de performance**: Ineficiências óbvias (consultas N+1, loops desnecessários)
-
-### 3. Verificação de Manutenibilidade
-
-- **Dependências**: Novas dependências são justificadas e bem escolhidas?
-- **Acoplamento**: O código é adequadamente modular?
-- **Documentação**: Partes não-óbvias são explicadas?
-
-## O que Sinalizar
-
-### Problemas de Alta Prioridade (Sempre mencionar)
-
-- ❗ **Bugs de correção** - Código que não funcionará como esperado
-- ❗ **Vulnerabilidades de segurança** - SQL injection, XSS, segredos expostos
-- ❗ **Vazamentos de recursos** - Arquivos não fechados, conexões, problemas de memória
-- ❗ **Breaking changes** - Mudanças que quebram funcionalidade existente
-
-### Problemas de Prioridade Média (Mencionar se significativo)
-
-- ⚠️ **Lacunas de tratamento de erro** - Tratamento de exceção ausente para falhas prováveis
-- ⚠️ **Preocupações de performance** - Ineficiências óbvias que impactariam usuários
-- ⚠️ **Problemas de legibilidade** - Nomes de variáveis confusos, lógica complexa sem comentários
-- ⚠️ **Over-engineering** - Complexidade desnecessária para o problema dado
-
-### Prioridade Baixa (Mencionar apenas se flagrante)
-
-- 💡 **Inconsistências de estilo** - Violações menores do PEP 8
-- 💡 **Micro-otimizações** - Pequenas melhorias de performance
-- 💡 **Melhorias teóricas** - Padrões perfeitos que não agregam valor real
-
-## Formato de Revisão
-
-### Estrutura Padrão de Revisão
-
-```
-## Resumo da Revisão de Código
-
-**Avaliação Geral**: [Julgamento geral breve]
-
-### ✅ O que Funciona Bem
-- [Observações positivas específicas]
-- [Bons padrões ou abordagens usadas]
-
-### ❗ Problemas Críticos (se houver)
-- [Itens que devem ser corrigidos com explicação]
-
-### ⚠️ Sugestões de Melhoria
-- [Recomendações acionáveis com justificativa]
-
-### 💡 Melhorias Opcionais (se houver)
-- [Melhorias que seria bom ter]
-
-**Recomendação**: [Pronto para usar / Precisa de correções / Revisão maior necessária]
+# Se não estiver em feature branch, criar uma
+# Formato: feature-{nome-da-pasta-da-sessao}
 ```
 
-## Diretrizes de Revisão
+Se não estiver em uma feature branch:
 
-### Seja Construtivo
+1. Pergunte ao usuário: "Posso criar a feature branch `feature-{folder-name}`?"
+2. Após confirmação, execute: `git checkout -b feature-{folder-name}`
 
-- Explique POR QUE algo é um problema, não apenas O QUE está errado
-- Sugira alternativas específicas ao criticar
-- Reconheça bons padrões e decisões
-- Enquadre feedback como melhoria colaborativa
+#### Passo 2: Busca e Atualização do Jira
 
-### Seja Prático
+**Fluxo Automático**:
 
-- Foque no impacto do mundo real, não na perfeição teórica
-- Considere o contexto e complexidade do requisito original
-- Não sugira mudanças arquiteturais maiores a menos que haja um problema sério
+1. **Buscar Task**: Use `mcp__atlassian__search` com o nome da pasta da sessão
+2. **Identificar Transições**: Use `mcp__atlassian__getTransitionsForJiraIssue` para encontrar transição "Em Progresso"
+3. **Atualizar Status**: Use `mcp__atlassian__transitionJiraIssue` para fazer a transição
+4. **Confirmar**: Informe ao usuário: "✅ Task {KEY} atualizada para 'Em Progresso'"
 
-### Seja Específico
+**Tratamento de Erros**:
 
-- Aponte para linhas ou padrões exatos quando possível
-- Dê exemplos concretos de melhorias
-- Explique o impacto potencial dos problemas
+- Se não encontrar a task: Pergunte ao usuário qual task deve ser atualizada
+- Se não encontrar transição: Informe quais transições estão disponíveis
+- Se der erro de permissão: Informe que o usuário deve atualizar manualmente
 
-## Cenários Comuns de Revisão
+**Exemplo de Execução**:
 
-### Quando Código é Over-Engineered
+```typescript
+// 1. Buscar cloudId
+const resources = await mcp__atlassian__getAccessibleAtlassianResources();
 
+// 2. Buscar task baseada na pasta da sessão
+const searchResults = await mcp__atlassian__search({
+  query: '{folder-name}',
+});
+
+// 3. Se encontrou, fazer transição
+if (searchResults.issues?.length > 0) {
+  const issue = searchResults.issues[0];
+  const transitions = await mcp__atlassian__getTransitionsForJiraIssue({
+    cloudId: resources[0].id,
+    issueIdOrKey: issue.key,
+  });
+
+  // Encontrar transição para "Em Progresso" / "In Progress"
+  const inProgressTransition = transitions.find(
+    (t) => t.name.includes('Progress') || t.name.includes('Progresso'),
+  );
+
+  if (inProgressTransition) {
+    await mcp__atlassian__transitionJiraIssue({
+      cloudId: resources[0].id,
+      issueIdOrKey: issue.key,
+      transition: { id: inProgressTransition.id },
+    });
+  }
+}
 ```
-"A implementação funciona corretamente, mas parece mais complexa do que necessário para este requisito. Considere simplificar [área específica] pois [justificativa]."
+
+### 1. Preparação da Sessão
+
+#### Análise dos Documentos
+
+Leia todos os arquivos markdown na pasta da sessão:
+
+- **context.md**: Entendimento dos requisitos
+- **architecture.md**: Design técnico detalhado
+- **plan.md**: Plano faseado de implementação
+
+### 2. Identificação da Fase Atual
+
+- Revise o **plan.md** para identificar qual fase está atualmente em progresso
+- Revise o **work-log.md**(caso exista) para entender o que foi feito até agora
+- Se nenhuma fase estiver marcada como \"Em Progresso ⏰\", comece pela primeira fase não iniciada
+- Apresente ao usuário um plano claro para abordar a próxima fase
+
+### 3. Inicialização do Work Log
+
+Crie o arquivo `.claude/sessions/<folder>/work-log.md` se não existir:
+
+## Template do Work-Log.md
+
+```markdown
+# [NOME DA FUNCIONALIDADE] - Log de Desenvolvimento
+
+> **Propósito**: Registrar detalhadamente o progresso do desenvolvimento, linha de pensamento, decisões tomadas, problemas encontrados e soluções aplicadas durante as sessões de trabalho.
+
+## 📅 Resumo do Projeto
+
+- **Início**: [Data]
+- **Status Atual**: [Em progresso/Pausado/Finalizado]
+- **Fase Atual**: [Nome da fase do plan.md]
+- **Última Sessão**: [Data da última sessão]
+
+---
+
+## 📋 Sessões de Trabalho
+
+### 🗓️ Sessão [DATA] - [DURAÇÃO]
+
+**Fase**: [Nome da fase trabalhada]
+**Objetivo da Sessão**: [O que pretendia alcançar]
+
+#### ✅ Trabalho Realizado
+
+- [Tarefa específica completada]
+- [Funcionalidade implementada]
+- [Arquivo modificado]: [Tipo de mudança]
+
+#### 🤔 Decisões Técnicas
+
+- **Decisão**: [Escolha feita]
+- **Alternativas**: [Outras opções consideradas]
+- **Justificativa**: [Razão da decisão]
+
+#### 🚧 Problemas Encontrados
+
+- **Problema**: [Descrição do problema]
+- **Solução**: [Como foi resolvido]
+- **Lição Aprendida**: [O que aprendeu]
+
+#### 🧪 Testes Realizados
+
+- [Teste 1]: [Resultado]
+- [Validação executada]: [Status]
+
+#### 📝 Commits Relacionados
+
+- [hash-commit]: [Descrição do commit]
+
+#### ⏭️ Próximos Passos
+
+- [Próxima tarefa a executar]
+- [Item pendente para próxima sessão]
+
+#### 💭 Observações
+
+[Anotações gerais, insights, lembretes]
+
+---
+
+### 🗓️ Sessão [PRÓXIMA DATA] - [DURAÇÃO]
+
+[Template para próxima sessão]
+
+---
+
+## 📊 Resumo de Progresso
+
+### Por Fase
+
+- **Fase 1**: [Status - Completa ✅ / Em progresso ⏰ / Pendente ⏳]
+  - Sessões: [Número de sessões]
+  - Tempo total: [Horas]
+  - Principais realizações: [Lista]
+
+### Métricas Gerais
+
+- **Total de Sessões**: [Número]
+- **Tempo Total Investido**: [Horas]
+- **Arquivos Modificados**: [Número]
+- **Commits Realizados**: [Número]
+
+### Decisões Arquiteturais Importantes
+
+- [Decisão importante 1]: [Resumo e impacto]
+- [Decisão importante 2]: [Resumo e impacto]
+
+### Lições Aprendidas
+
+- [Lição 1]: [Descrição]
+- [Lição 2]: [Descrição]
+
+## 🔄 Estado de Recovery
+
+### Para Continuação
+
+**Se interrompido, para retomar:**
+
+1. [Passo específico para continuar]
+2. [Contexto importante para relembrar]
+3. [Arquivos que estavam sendo modificados]
+
+### Contexto Atual
+
+**Branch**: [Nome da branch]
+**Última modificação**: [Arquivo e descrição]
+**Testes passando**: [Sim/Não - quais falhando]
+**Próxima tarefa específica**: [Descrição detalhada]
 ```
 
-### Quando Código Tem Bugs
+### 4. Execução por Fases
 
+Para cada fase do desenvolvimento:
+
+#### Antes de Começar
+
+- Marque a fase como \"Em Progresso ⏰\" no plan.md
+- **Inicie nova sessão** no work-log.md com timestamp
+- Revise os critérios de conclusão da fase
+- Confirme entendimento das tarefas com o usuário
+
+#### Durante a Implementação
+
+**Princípios de Qualidade:**
+
+- **Código Limpo**: Sem comentários ou instruções temporárias no código final
+- **Padrões**: Siga as convenções estabelecidas no projeto
+- **Segurança**: Implemente tratamento adequado de erros e validações
+- **Manutenibilidade**: Código legível e bem estruturado
+
+**Processo de Revisão Contínua:**
+Apply continuous code review seguindo as prioridades:
+
+1. **🎯 Correção** - O código funciona para o caso de uso?
+2. **🔒 Segurança** - Há vulnerabilidades ou bugs óbvios?
+3. **📖 Clareza** - O código é legível e manutenível?
+4. **⚖️ Adequação** - A complexidade está apropriada?
+
+#### Após Completar Tarefas da Fase
+
+**🛑 PAUSE OBRIGATÓRIA**: Solicite validação do usuário antes de prosseguir
+
+- **Atualize work-log.md** com trabalho realizado na sessão
+- Apresente o código implementado
+- Aguarde aprovação explícita do usuário
+- Faça ajustes necessários baseados no feedback
+- **Registre decisões/problemas** no work-log.md
+- Apenas prossiga após aprovação clara
+
+### 4. Padrões de Code Review
+
+#### Template de Auto-Review
+
+```markdown
+## 🔍 Resumo da Implementação
+
+**Fase Completada**: [Nome da fase]
+**Arquivos Modificados**: [Lista de arquivos]
+
+### ✅ O que Foi Implementado
+
+- [Funcionalidade 1]: [Descrição do que foi feito]
+- [Funcionalidade 2]: [Detalhes da implementação]
+
+### 🧪 Testes Realizados
+
+- [Teste 1]: [Resultado]
+- [Teste 2]: [Validação]
+
+### ❗ Pontos de Atenção
+
+- [Decisão técnica importante]
+- [Trade-off realizado]
+
+**Status**: Pronto para revisão
 ```
-"Encontrei um problema potencial em [localização]: [descrição]. Isso poderia causar [impacto] quando [cenário]. Correção sugerida: [solução específica]."
+
+#### Categorias de Problemas a Identificar
+
+**🚨 Críticos (Sempre corrigir):**
+
+- Bugs funcionais
+- Vulnerabilidades de segurança
+- Vazamentos de recursos
+- Breaking changes não intencionais
+
+**⚠️ Importantes (Corrigir se significativo):**
+
+- Tratamento de erro ausente
+- Problemas de performance óbvios
+- Legibilidade comprometida
+- Over-engineering
+
+**💡 Melhorias (Opcional):**
+
+- Pequenas otimizações
+- Consistências de estilo menores
+
+### 5. Estratégia de Testes
+
+#### Princípios Fundamentais
+
+1. **Teste comportamento, não implementação**
+2. **Foque em problemas reais, não perfeição teórica**
+3. **Teste o código como está, não modifique para se adequar aos testes**
+
+#### Tipos de Testes (por prioridade)
+
+**Testes de Caminho Feliz** (Sempre incluir):
+
+- Casos de uso principais com entradas típicas
+- Verificação de saídas esperadas
+- Funcionalidade central funcionando
+
+**Testes de Casos Extremos** (Quando relevante):
+
+- Condições de limite (vazios, valores máximos)
+- Casos extremos do domínio
+- Entradas null/undefined
+
+**Testes de Condições de Erro** (Se existir tratamento):
+
+- Entradas inválidas
+- Exceções apropriadas
+- Mensagens de erro úteis
+
+### 6. Atualização do Plano
+
+Após completar cada fase:
+
+#### Marcar Conclusão
+
+- Atualize o **plan.md** marcando tarefas como \"Completada ✅\"
+- Adicione comentários úteis sobre decisões tomadas
+- Documente questões encontradas e como foram resolvidas
+- **Finalize sessão** no work-log.md com resumo da fase
+
+#### Exemplo de Atualização
+
+```markdown
+## 📅 FASE 1: Configuração Base [Completada ✅]
+
+### 📝 Comentários da Fase
+
+- **Decisão**: Optamos por usar biblioteca X ao invés de Y devido à melhor performance
+- **Problema encontrado**: API Z retornava dados em formato inesperado, adicionamos parser
+- **Observação**: Testes da Fase 2 dependem da fixture criada aqui
 ```
 
-### Quando Código é Bom
+### 7. Fluxo de Aprovação Entre Fases
 
+#### Para Cada Fase Completada:
+
+1. **🛑 PAUSE**: Apresente resultados ao usuário
+2. **📋 Review**: Solicite validação do código e approach
+3. **🔄 Iterate**: Faça ajustes baseados no feedback
+4. **✅ Approve**: Aguarde aprovação explícita
+5. **📝 Update**: Atualize plan.md com status e comentários
+6. **▶️ Next**: Apenas então inicie próxima fase
+
+#### Template de Solicitação de Aprovação
+
+```markdown
+## 🎯 Fase [X] Completada - Solicitação de Aprovação
+
+### ✅ Implementado Nesta Fase
+
+[Lista do que foi desenvolvido]
+
+### 🧪 Validações Realizadas
+
+[Testes executados e resultados]
+
+### 📋 Próximos Passos
+
+[O que será abordado na próxima fase]
+
+**Posso prosseguir para a Fase [X+1]?**
 ```
-"Implementação limpa que resolve bem o requisito. Bom uso de [padrão específico] e tratamento de erro apropriado."
-```
 
-## Estilo de Comunicação
+### 8. Gestão de Branch e Git
 
-- Comece com o que funciona bem
-- Seja direto sobre problemas reais mas respeitoso no tom
-- Forneça contexto para suas recomendações
-- Distinga entre deve-corrigir e seria-bom-ter
-- Se o código é bom, diga isso claramente
+#### Branches
 
-## Sinais Vermelhos a Evitar em suas Revisões
+- Uma feature branch por funcionalidade: `feature-[slug-da-funcionalidade]`
+- Commits frequentes com mensagens descritivas
+- Não fazer merge até aprovação final
 
-- ❌ Implicar com questões de estilo quando a funcionalidade está correta
-- ❌ Sugerir padrões complexos para problemas simples
-- ❌ Ser excessivamente crítico sem oferecer soluções
-- ❌ Focar em melhores práticas teóricas sobre preocupações práticas
-- ❌ Perder bugs funcionais óbvios enquanto comenta sobre estilo
+#### Commits
 
-Lembre-se: Seu objetivo é ajudar a entregar código funcional e manutenível, não alcançar perfeição teórica.
+- Commits por tarefa/subtarefa completada
+- Mensagens no formato: `feat: implementa [funcionalidade específica]`
+- Inclua referência à fase no commit se útil
 
-## Testes
+### 9. Ferramentas de Apoio
 
-## Princípios Fundamentais
+- **Linting/Formatação**: Execute conforme configuração do projeto
+- **Testes Automatizados**: Execute suite de testes após cada implementação
+- **Code Analysis**: Use ferramentas MCP para análise de qualidade
+- **Documentation**: Consulte Context7 para APIs de bibliotecas
 
-1. **Teste o código como está** - Nunca modifique implementação para se adequar aos testes
-2. **Teste comportamento, não implementação** - Foque no que o código deveria fazer, não em como faz
-3. **Encontre problemas reais** - Escreva testes que exponham problemas reais
-4. **Sinalize lacunas, não as corrija** - Relate problemas ao agente principal para resolução adequada
+### 10. Finalização da Implementação
 
-## Abordagem de Teste
+Quando todas as fases estiverem completas:
 
-### 1. Entenda o que Está Testando
+#### Verificação Final
 
-- **Leia o requisito original** - O que este código deveria fazer?
-- **Analise a implementação** - O que ele realmente faz?
-- **Identifique a interface pública** - Quais funções/métodos devem ser testados?
+- [ ] Todos os critérios de aceitação atendidos
+- [ ] Testes passando completamente
+- [ ] Código segue padrões do projeto
+- [ ] Documentação atualizada se necessário
+- [ ] Plan.md completamente atualizado
 
-### 2. Categorias de Teste (em ordem de prioridade)
+#### Preparação para PR
 
-#### **Testes de Caminho Feliz** (Sempre incluir)
+- Limpe commits se necessário (squash relacionados)
+- Verifique que não há código temporário ou debug
+- Confirme que branch está atualizada
+- Execute validações finais (lint, test, build)
 
-- Teste o caso de uso principal com entradas típicas
-- Verifique saídas esperadas para cenários normais
-- Garanta que funcionalidade central funciona
+#### Handoff
 
-#### **Testes de Casos Extremos** (Incluir quando relevante)
+- Atualize status no Jira para \"Ready for Review\"
+- Prepare summary das mudanças implementadas
+- Informe ao usuário que está pronto para `/pre-pr`
 
-- Condições de limite (entradas vazias, valores máximos, etc.)
-- Casos extremos comuns específicos do domínio do problema
-- Entradas Null/None onde aplicável
+## Princípios de Trabalho
 
-#### **Testes de Condição de Erro** (Incluir se tratamento de erro existe)
+1. **🔄 Iterativo**: Trabalhe em pequenas etapas com validação constante
+2. **🎯 Focado**: Siga o plano estabelecido, não se desvie sem discussão
+3. **🤝 Colaborativo**: Sempre busque aprovação antes de prosseguir
+4. **🔍 Qualidade**: Code review contínuo durante desenvolvimento
+5. **📝 Documentado**: Mantenha registros claros de decisões e progresso
 
-- Entradas inválidas que deveriam gerar exceções
-- Teste que exceções apropriadas são geradas
-- Verifique se mensagens de erro são úteis
+## Próximos Passos
 
-### 3. Estrutura de Teste
+Após completar toda implementação:
 
-#### Use Nomes de Teste Claros
+1. **Pre-PR** (`/pre-pr`) - Revisões automatizadas de qualidade
+2. **Pull Request** (`/pr`) - Criação e submissão do PR
 
-## O que Testar vs. O que Sinalizar
+---
 
-### ✅ Escrever Testes Para
+## ⚠️ LEMBRETE IMPORTANTE
 
-- **Funções e métodos públicos** - A interface real
-- **Tipos de entrada diferentes** - Vários cenários válidos
-- **Condições de erro esperadas** - Onde exceções devem ser geradas
-- **Pontos de integração** - Se o código chama serviços/APIs externos
+**SEMPRE execute a "Execução Automática Inicial" (Seção 0) ANTES de começar qualquer trabalho:**
 
-### 🚩 Sinalizar para Agente Principal (Não Contornar com Testes)
+1. ✅ Verificar/criar feature branch
+2. ✅ Buscar e atualizar task no Jira para "Em Progresso"
 
-- **Tratamento de erro ausente** - Código que deveria validar entradas mas não faz
-- **Tipos de retorno não claros** - Funções que às vezes retornam tipos diferentes
-- **Valores hard-coded** - Números ou strings mágicos que deveriam ser configuráveis
-- **Código não testável** - Funções muito complexas para testar efetivamente
-- **Funcionalidade ausente** - Requisitos não implementados
-
-## Lembre-se
-
-- Seu trabalho é verificar se o código funciona, não fazê-lo funcionar
-- Bons testes servem como documentação de comportamento esperado
-- Falhas de teste são informação valiosa, não problemas para contornar
-- Sinalize problemas de implementação claramente para que o agente principal possa abordá-los adequadamente
-
-Toda vez que completar uma fase do plano:
-
-- Pause e peça ao usuário para validar seu código.
-- Faça as mudanças necessárias até ser aprovado
-- Atualize a fase correspondente no arquivo plan.md marcando o que foi feito e adicionando comentários úteis para o desenvolvedor que abordará as próximas fases, especialmente sobre questões, decisões, etc.
-- Apenas inicie a próxima fase após o usuário concordar que você deve começar. Quando iniciar a próxima fase, atualize o arquivo plan.md marcando a nova fase como em progresso.
-
-Agora, veja a fase atual de desenvolvimento e forneça um plano ao usuário sobre como abordá-la.
+**NÃO pule estes passos** - eles são essenciais para o fluxo de trabalho adequado.
