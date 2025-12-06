@@ -71,7 +71,7 @@ Após aprovação, registre a issue no sistema de gestão configurado:
 
 - Jira
 - Acessar via MCP
-- Se houver falha, utilize o sistema de fallback local em `.claude/tasks/backlog/`
+- Se houver falha, utilize o sistema de fallback local em `tasks/backlog/`
 
 ## Template de Issue
 

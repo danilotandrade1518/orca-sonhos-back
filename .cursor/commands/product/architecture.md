@@ -2,17 +2,27 @@
 
 Você é um especialista em produto e arquitetura encarregado de projetar a arquitetura de uma funcionalidade baseada em especificações aprovadas.
 
+## Configuração de IA
+
+Antes de executar este comando, leia o arquivo `ai.properties.md` na raiz do projeto para obter configurações locais.
+
+Se o arquivo não existir ou não estiver configurado, use a URL padrão do GitHub.
+
 ## Argumentos da Sessão
 
-<feature_specification>
+<feature_identification>
 #$ARGUMENTS
-</feature_specification>
+</feature_identification>
 
 ## Objetivo
 
 Desenvolver um design arquitetural detalhado que traduza os requisitos de produto em uma estrutura técnica implementável, alinhada com os padrões do projeto.
 
 ## Processo de Design Arquitetural
+
+### 0. Recupere a Issue do Jira utilizando o feature identification fornecido
+
+Caso não consiga realizar este passo, páre e informe ao usuário até ter acesso à Issue para prosseguir.
 
 ### 1. Análise dos Requisitos
 
@@ -85,7 +95,7 @@ Se a discussão revelar novos insights:
 
 #### 5.2. Revisão das Meta Specs Técnicas
 
-- Consulte https://github.com/danilotandrade1518/orca-sonhos-meta-specs para diretrizes arquiteturais
+- Consulte [leia meta_specs_path do arquivo ai.properties.md na raiz do projeto, ou use 'https://github.com/danilotandrade1518/orca-sonhos-meta-specs' se não configurado] para diretrizes arquiteturais
 - Garanta alinhamento com a visão técnica do projeto
 - Identifique padrões obrigatórios
 

@@ -2,6 +2,12 @@
 
 Este é o comando para iniciar o desenvolvimento de uma funcionalidade baseada em especificações e arquitetura aprovadas.
 
+## Configuração de IA
+
+Antes de executar este comando, leia o arquivo `ai.properties.md` na raiz do projeto para obter configurações locais.
+
+Se o arquivo não existir ou não estiver configurado, use a URL padrão do GitHub.
+
 ## Argumentos da Sessão
 
 <feature_slug>
@@ -11,6 +17,9 @@ Este é o comando para iniciar o desenvolvimento de uma funcionalidade baseada e
 ## Objetivo
 
 Estabelecer o contexto inicial de desenvolvimento, criar documentação de sessão e preparar o ambiente para implementação estruturada.
+<feature_slug> se refere ao identificador único da funcionalidade, usado para organizar arquivos e pastas.
+Você deve buscar a task correspondente no Jira via MCP para obter os detalhes.
+Caso não encontre, páre e informe ao usuário.
 
 ## ⚠️ AÇÃO IMEDIATA OBRIGATÓRIA
 
@@ -77,7 +86,7 @@ git checkout -b feature-user-authentication
 
 ### 1. Configuração da Sessão
 
-- Crie a pasta `.claude/sessions/<feature_slug>` se não existir
+- Crie a pasta `sessions/<feature_slug>` se não existir
 - Solicite ao usuário o input desta sessão (issues, cards, especificações)
 - Organize os materiais de referência necessários
 
@@ -128,12 +137,14 @@ Formule **3-5 perguntas críticas** para esclarecer aspectos não cobertos:
 
 ### 4. Validação do Entendimento
 
-Após obter esclarecimentos, documente seu entendimento no arquivo `.claude/sessions/<feature_slug>/context.md`:
+Após obter esclarecimentos, documente seu entendimento no arquivo `sessions/<feature_slug>/context.md`:
 
 ## Template do Context.md
 
 ```markdown
 # [NOME DA FUNCIONALIDADE] - Contexto de Desenvolvimento
+
+# [JIRA ISSUE/CARD IDENTIFIER]
 
 ## 🎯 Objetivo
 
@@ -225,7 +236,7 @@ Com o contexto aprovado, proceda ao desenvolvimento da arquitetura técnica deta
 
 #### Consulta às Meta Specs
 
-- Revise diretrizes técnicas em **{META_SPECS_REPOSITORY}**
+- Revise diretrizes técnicas em [leia meta_specs_path do arquivo ai.properties.md na raiz do projeto, ou use 'https://github.com/danilotandrade1518/orca-sonhos-meta-specs' se não configurado]
 - Confirme alinhamento com padrões arquiteturais
 - Identifique convenções obrigatórias
 
@@ -237,7 +248,7 @@ Com o contexto aprovado, proceda ao desenvolvimento da arquitetura técnica deta
 
 ### 7. Documentação da Arquitetura
 
-Crie o arquivo `.claude/sessions/<feature_slug>/architecture.md`:
+Crie o arquivo `sessions/<feature_slug>/architecture.md`:
 
 ## Template do Architecture.md
 
@@ -333,7 +344,7 @@ Crie o arquivo `.claude/sessions/<feature_slug>/architecture.md`:
 
 ## 📚 Referências
 
-- [Meta Specs]: [Links relevantes]
+- [Meta Specs]: [leia meta_specs_path do arquivo ai.properties.md na raiz do projeto, ou use 'https://github.com/danilotandrade1518/orca-sonhos-meta-specs' se não configurado]
 - [Documentação]: [APIs, bibliotecas]
 - [Exemplos]: [Código similar no projeto]
 ```
@@ -346,7 +357,7 @@ Após todas as aprovações:
 
 - Confirme que ambos os arquivos estão completos e aprovados
 - Atualize o status no sistema de gestão de tarefas
-- Informe ao usuário que está pronto para o próximo passo: **planejamento** (`/plan`)
+- Informe ao usuário que está pronto para o próximo passo: **layout specification** (`/work-layout`)
 
 ## Ferramentas de Pesquisa
 
@@ -359,7 +370,8 @@ Após todas as aprovações:
 
 Após completion do `/start`:
 
-1. **Planejamento** (`/plan`) - Quebra em etapas de implementação
-2. **Desenvolvimento** (`/work`) - Execução das etapas
-3. **Revisão** (`/pre-pr`) - Validações antes do PR
-4. **Pull Request** (`/pr`) - Finalização e submissão
+1. **Layout Specification** (`/work-layout`) - Especificação de UI/UX e layout
+2. **Planejamento** (`/plan`) - Quebra em etapas de implementação
+3. **Desenvolvimento** (`/work`) - Execução das etapas
+4. **Revisão** (`/pre-pr`) - Validações antes do PR
+5. **Pull Request** (`/pr`) - Finalização e submissão
