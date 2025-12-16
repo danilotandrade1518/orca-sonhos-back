@@ -16,7 +16,6 @@ describe('EnvelopeMapper', () => {
         monthly_limit: 10000,
         budget_id: budgetId,
         category_id: categoryId,
-        current_balance: 5000,
         is_deleted: false,
         created_at: new Date('2025-01-01'),
         updated_at: new Date('2025-01-02'),
@@ -30,7 +29,6 @@ describe('EnvelopeMapper', () => {
       expect(result.data!.monthlyLimit).toBe(10000); // 100.00 * 100
       expect(result.data!.budgetId).toBe(budgetId);
       expect(result.data!.categoryId).toBe(categoryId);
-      expect(result.data!.currentBalance).toBe(5000); // 50.00 * 100
       expect(result.data!.isDeleted).toBe(false);
       expect(result.data!.createdAt).toEqual(new Date('2025-01-01'));
       expect(result.data!.updatedAt).toEqual(new Date('2025-01-02'));
@@ -43,7 +41,6 @@ describe('EnvelopeMapper', () => {
         monthly_limit: 150,
         budget_id: budgetId,
         category_id: categoryId,
-        current_balance: 99,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -53,7 +50,6 @@ describe('EnvelopeMapper', () => {
 
       expect(result.hasError).toBe(false);
       expect(result.data!.monthlyLimit).toBe(150); // 1.50 * 100
-      expect(result.data!.currentBalance).toBe(99); // 0.99 * 100
     });
 
     it('should return error for invalid envelope data', () => {
@@ -63,7 +59,6 @@ describe('EnvelopeMapper', () => {
         monthly_limit: 10000,
         budget_id: budgetId,
         category_id: categoryId,
-        current_balance: 5000,
         is_deleted: false,
         created_at: new Date(),
         updated_at: new Date(),
@@ -91,7 +86,6 @@ describe('EnvelopeMapper', () => {
       expect(result.monthly_limit).toBe(10000);
       expect(result.budget_id).toBe(envelope.budgetId);
       expect(result.category_id).toBe(envelope.categoryId);
-      expect(result.current_balance).toBe(0);
       expect(result.is_deleted).toBe(false);
       expect(result.created_at).toBeInstanceOf(Date);
       expect(result.updated_at).toBeInstanceOf(Date);
@@ -108,7 +102,6 @@ describe('EnvelopeMapper', () => {
       const result = EnvelopeMapper.toRow(envelope);
 
       expect(result.monthly_limit).toBe(150);
-      expect(result.current_balance).toBe(0);
     });
   });
 });

@@ -24,8 +24,8 @@ export class AddEnvelopeRepository implements IAddEnvelopeRepository {
       const query = `
         INSERT INTO envelopes (
           id, name, monthly_limit, budget_id, category_id, 
-          current_balance, is_deleted, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          is_deleted, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `;
 
       const params = [
@@ -34,7 +34,6 @@ export class AddEnvelopeRepository implements IAddEnvelopeRepository {
         row.monthly_limit,
         row.budget_id,
         row.category_id,
-        row.current_balance,
         row.is_deleted,
         row.created_at,
         row.updated_at,

@@ -173,9 +173,59 @@
 
 ---
 
+### 🗓️ Sessão 2025-01-27 - Continuação
+
+**Fase**: FASE 4 - Atualização de Infraestrutura
+**Objetivo**: Atualizar mappers, criar migração, corrigir DAO e verificar repositórios para remover referências a `current_balance`
+
+#### ✅ Trabalho Realizado
+
+**EnvelopeMapper**:
+
+- ✅ Removido campo `current_balance: number` da interface `EnvelopeRow`
+- ✅ Removido mapeamento de `currentBalance` no método `toDomain()`
+- ✅ Removido mapeamento de `current_balance` no método `toRow()`
+- ✅ Atualizada chamada de `Envelope.restore()` removendo parâmetro `currentBalance`
+- ✅ Testes atualizados removendo todas as referências a `currentBalance`
+
+**ListEnvelopesDao**:
+
+- ✅ Query SQL corrigida para usar relação através de Category:
+  - `t.envelope_id = e.id` → `t.category_id = e.category_id`
+  - `t.direction = 'OUT'` → `t.type = 'EXPENSE'`
+  - `t.amount_cents` → `t.amount`
+  - `e.allocated_cents` → `e.monthly_limit AS allocated_cents`
+- ✅ Adicionados filtros `t.is_deleted = false` e `e.is_deleted = false`
+
+**Repositórios**:
+
+- ✅ `GetEnvelopeRepository`: Removido `current_balance` do SELECT
+- ✅ `SaveEnvelopeRepository`: Removido `current_balance` do UPDATE
+- ✅ `AddEnvelopeRepository`: Removido `current_balance` do INSERT
+
+**Migrations**:
+
+- ✅ Criada migration `1765903198858_remove-current-balance-from-envelopes.js` para remover coluna e constraint
+- ✅ Migration inicial atualizada removendo `current_balance` e constraint `envelopes_balance_check`
+
+#### 🤔 Decisões/Problemas
+
+- **Observação**: Erros de compilação em `DeleteEnvelopeUseCase` e interface (controllers, routes, composition root) são esperados e serão corrigidos nas próximas fases
+- **Decisão**: Query do `ListEnvelopesDao` corrigida para usar relação através de Category - **Motivo**: Campos `t.envelope_id`, `t.direction`, `t.amount_cents` não existem na tabela `transactions`
+
+#### ⏭️ Próximos Passos
+
+- Iniciar FASE 5: Atualização de Interface e Composição
+- Remover 3 controllers HTTP
+- Remover 3 rotas do route registry
+- Atualizar `EnvelopeCompositionRoot` removendo métodos e imports
+- Remover 3 endpoints do swagger
+
+---
+
 ## 🔄 Estado Atual
 
 **Branch**: feature-OS-240
-**Fase Atual**: FASE 3 - Remoção de Use Cases e Infraestrutura Relacionada [Status: ✅ Completada]
-**Última Modificação**: Remoção completa dos 3 use cases e Unit of Work concluída
-**Próxima Tarefa**: Iniciar FASE 4 - Atualização de Infraestrutura
+**Fase Atual**: FASE 4 - Atualização de Infraestrutura [Status: ✅ Completada]
+**Última Modificação**: Atualização completa de infraestrutura concluída
+**Próxima Tarefa**: Iniciar FASE 5 - Atualização de Interface e Composição

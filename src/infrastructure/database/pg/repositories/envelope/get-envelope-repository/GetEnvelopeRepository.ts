@@ -25,7 +25,7 @@ export class GetEnvelopeRepository implements IGetEnvelopeRepository {
       const query = `
         SELECT
           id, name, monthly_limit, budget_id, category_id,
-          current_balance, is_deleted, created_at, updated_at
+          is_deleted, created_at, updated_at
         FROM envelopes
         WHERE id = $1 AND is_deleted = false
       `;

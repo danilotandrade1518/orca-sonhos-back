@@ -365,7 +365,7 @@ Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of 
 
 ---
 
-## 📅 FASE 4: Atualização de Infraestrutura [Status: ⏳]
+## 📅 FASE 4: Atualização de Infraestrutura [Status: ✅ Completada]
 
 ### 🎯 Objetivo
 
@@ -373,7 +373,7 @@ Atualizar mappers, criar migração, corrigir DAO e verificar repositórios para
 
 ### 📋 Tarefas
 
-#### Atualizar EnvelopeMapper [⏳]
+#### Atualizar EnvelopeMapper [✅]
 
 **Descrição**:
 
@@ -389,7 +389,7 @@ Atualizar mappers, criar migração, corrigir DAO e verificar repositórios para
 
 **Arquivo**: `src/infrastructure/database/pg/mappers/envelope/EnvelopeMapper.ts`
 
-#### Atualizar Testes do EnvelopeMapper [⏳]
+#### Atualizar Testes do EnvelopeMapper [✅]
 
 **Descrição**:
 
@@ -404,7 +404,7 @@ Atualizar mappers, criar migração, corrigir DAO e verificar repositórios para
 
 **Arquivo**: `src/infrastructure/database/pg/mappers/envelope/EnvelopeMapper.spec.ts`
 
-#### Corrigir ListEnvelopesDao [⏳]
+#### Corrigir ListEnvelopesDao [✅]
 
 **Descrição**:
 
@@ -439,7 +439,7 @@ GROUP BY e.id, e.name, e.monthly_limit
 ORDER BY e.name ASC
 ```
 
-#### Atualizar Testes do ListEnvelopesDao [⏳]
+#### Atualizar Testes do ListEnvelopesDao [✅]
 
 **Descrição**:
 
@@ -454,7 +454,7 @@ ORDER BY e.name ASC
 
 **Arquivo**: `src/infrastructure/database/pg/daos/envelope/list-envelopes/ListEnvelopesDao.spec.ts`
 
-#### Verificar e Atualizar Repositórios [⏳]
+#### Verificar e Atualizar Repositórios [✅]
 
 **Descrição**:
 
@@ -474,7 +474,7 @@ ORDER BY e.name ASC
 - `src/infrastructure/database/pg/repositories/envelope/save-envelope-repository/SaveEnvelopeRepository.ts`
 - `src/infrastructure/database/pg/repositories/envelope/add-envelope-repository/AddEnvelopeRepository.ts`
 
-#### Criar Migration de Remoção [⏳]
+#### Criar Migration de Remoção [✅]
 
 **Descrição**:
 
@@ -515,7 +515,7 @@ exports.down = (pgm) => {
 };
 ```
 
-#### Atualizar Migration Inicial [⏳]
+#### Atualizar Migration Inicial [✅]
 
 **Descrição**:
 
@@ -537,15 +537,44 @@ exports.down = (pgm) => {
 
 ### 🧪 Critérios de Validação
 
-- [ ] `EnvelopeMapper` atualizado e testes passando
-- [ ] `ListEnvelopesDao` corrigido e testes passando
-- [ ] Repositórios verificados e atualizados
-- [ ] Migration criada e testada
-- [ ] Migration inicial atualizada
+- [x] `EnvelopeMapper` atualizado e testes passando
+- [x] `ListEnvelopesDao` corrigido e testes passando
+- [x] Repositórios verificados e atualizados
+- [x] Migration criada e testada
+- [x] Migration inicial atualizada
 
 ### 📝 Comentários da Fase
 
-_[Observações sobre decisões tomadas]_
+**Atualizações Realizadas**:
+
+1. **EnvelopeMapper**:
+
+   - ✅ Removido campo `current_balance: number` da interface `EnvelopeRow`
+   - ✅ Removido mapeamento de `currentBalance` no método `toDomain()`
+   - ✅ Removido mapeamento de `current_balance` no método `toRow()`
+   - ✅ Atualizada chamada de `Envelope.restore()` removendo parâmetro `currentBalance`
+   - ✅ Testes atualizados removendo todas as referências a `currentBalance`
+
+2. **ListEnvelopesDao**:
+
+   - ✅ Query SQL corrigida para usar relação através de Category:
+     - `t.envelope_id = e.id` → `t.category_id = e.category_id`
+     - `t.direction = 'OUT'` → `t.type = 'EXPENSE'`
+     - `t.amount_cents` → `t.amount`
+     - `e.allocated_cents` → `e.monthly_limit AS allocated_cents`
+   - ✅ Adicionados filtros `t.is_deleted = false` e `e.is_deleted = false`
+
+3. **Repositórios**:
+
+   - ✅ `GetEnvelopeRepository`: Removido `current_balance` do SELECT
+   - ✅ `SaveEnvelopeRepository`: Removido `current_balance` do UPDATE
+   - ✅ `AddEnvelopeRepository`: Removido `current_balance` do INSERT
+
+4. **Migrations**:
+   - ✅ Criada migration `1765903198858_remove-current-balance-from-envelopes.js` para remover coluna e constraint
+   - ✅ Migration inicial atualizada removendo `current_balance` e constraint `envelopes_balance_check`
+
+**Observação**: Erros de compilação em `DeleteEnvelopeUseCase` e interface (controllers, routes, composition root) são esperados e serão corrigidos nas próximas fases.
 
 ---
 

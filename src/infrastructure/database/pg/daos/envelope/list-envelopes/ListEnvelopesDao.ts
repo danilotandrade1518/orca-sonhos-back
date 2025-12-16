@@ -21,15 +21,17 @@ export class ListEnvelopesDao implements IListEnvelopesDao {
     }>(
       `SELECT e.id,
               e.name,
-              e.allocated_cents,
-              COALESCE(SUM(CASE WHEN t.direction = 'OUT' THEN ABS(t.amount_cents) ELSE 0 END), 0) AS spent_cents
+              e.monthly_limit AS allocated_cents,
+              COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN ABS(t.amount) ELSE 0 END), 0) AS spent_cents
          FROM envelopes e
          LEFT JOIN transactions t
-           ON t.envelope_id = e.id
+           ON t.category_id = e.category_id
           AND t.budget_id = e.budget_id
-          AND t.direction = 'OUT'
+          AND t.type = 'EXPENSE'
+          AND t.is_deleted = false
         WHERE e.budget_id = $1
-        GROUP BY e.id, e.name, e.allocated_cents
+          AND e.is_deleted = false
+        GROUP BY e.id, e.name, e.monthly_limit
         ORDER BY e.name ASC`,
       [budgetId],
     );

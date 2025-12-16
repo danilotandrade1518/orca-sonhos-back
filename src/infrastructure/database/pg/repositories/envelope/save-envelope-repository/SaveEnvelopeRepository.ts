@@ -39,9 +39,8 @@ export class SaveEnvelopeRepository implements ISaveEnvelopeRepository {
         SET 
           name = $2,
           monthly_limit = $3,
-          current_balance = $4,
-          is_deleted = $5,
-          updated_at = $6
+          is_deleted = $4,
+          updated_at = $5
         WHERE id = $1
       `;
 
@@ -49,7 +48,6 @@ export class SaveEnvelopeRepository implements ISaveEnvelopeRepository {
         row.id,
         row.name,
         row.monthly_limit,
-        row.current_balance,
         row.is_deleted,
         row.updated_at,
       ];
