@@ -45,7 +45,6 @@ describe('AddEnvelopeRepository', () => {
         monthly_limit: 10000,
         budget_id: envelope.budgetId,
         category_id: envelope.categoryId,
-        current_balance: 0,
         is_deleted: false,
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
@@ -65,7 +64,6 @@ describe('AddEnvelopeRepository', () => {
           row.monthly_limit,
           row.budget_id,
           row.category_id,
-          row.current_balance,
           row.is_deleted,
           row.created_at,
           row.updated_at,
@@ -86,7 +84,6 @@ describe('AddEnvelopeRepository', () => {
         monthly_limit: 10000,
         budget_id: envelope.budgetId,
         category_id: envelope.categoryId,
-        current_balance: 0,
         is_deleted: false,
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
@@ -110,7 +107,6 @@ describe('AddEnvelopeRepository', () => {
         monthly_limit: 10000,
         budget_id: envelope.budgetId,
         category_id: envelope.categoryId,
-        current_balance: 0,
         is_deleted: false,
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
@@ -134,7 +130,6 @@ describe('AddEnvelopeRepository', () => {
         monthly_limit: 10000,
         budget_id: envelope.budgetId,
         category_id: envelope.categoryId,
-        current_balance: 0,
         is_deleted: false,
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
@@ -156,7 +151,6 @@ describe('AddEnvelopeRepository', () => {
         monthly_limit: 10000,
         budget_id: envelope.budgetId,
         category_id: envelope.categoryId,
-        current_balance: 0,
         is_deleted: false,
         created_at: envelope.createdAt,
         updated_at: envelope.updatedAt,
@@ -175,7 +169,7 @@ describe('AddEnvelopeRepository', () => {
         expect.any(Array),
       );
       expect(mockConnection.query).toHaveBeenCalledWith(
-        expect.stringContaining('VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)'),
+        expect.stringContaining('VALUES ($1, $2, $3, $4, $5, $6, $7, $8)'),
         expect.any(Array),
       );
     });

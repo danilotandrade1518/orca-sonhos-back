@@ -281,9 +281,59 @@
 
 ---
 
+### 🗓️ Sessão 2025-01-27 - Continuação
+
+**Fase**: FASE 6 - Atualização de Testes
+**Objetivo**: Remover testes E2E dos use cases removidos e atualizar testes de integração que referenciam os componentes removidos
+
+#### ✅ Trabalho Realizado
+
+**Testes E2E Removidos**:
+
+- ✅ `add-amount-envelope.e2e.test.ts` deletado
+- ✅ `remove-amount-envelope.e2e.test.ts` deletado
+- ✅ `transfer-between-envelopes.e2e.test.ts` deletado
+
+**Testes de Integração Atualizados**:
+
+- ✅ `envelope-composition-root.test.ts` atualizado:
+  - Removido describe block de `createAddAmountToEnvelopeUseCase & createRemoveAmountFromEnvelopeUseCase`
+  - Removido describe block de `createTransferBetweenEnvelopesUseCase`
+  - Atualizado teste de `createDeleteEnvelopeUseCase` (removida verificação de balance zero)
+
+**Testes de Repositórios Atualizados**:
+
+- ✅ `SaveEnvelopeRepository.spec.ts`: Removidas todas as referências a `current_balance` nos mocks e expectativas
+- ✅ `GetEnvelopeRepository.spec.ts`: Removida referência a `current_balance` no `EnvelopeRow` e na query SQL
+- ✅ `AddEnvelopeRepository.spec.ts`: Removidas todas as referências a `current_balance` nos mocks e expectativas
+
+**Testes E2E Atualizados**:
+
+- ✅ `delete-envelope.e2e.test.ts`: Removida referência a `currentBalance` na função `makeEnvelope`
+
+#### 🤔 Decisões/Problemas
+
+- **Observação**: Referências a `currentBalance` em `Account.ts` são válidas (Account tem balance, não Envelope)
+- **Observação**: Referências em migrations são esperadas (uma cria a coluna, outra remove)
+
+#### 🧪 Validações
+
+- ✅ Todos os testes dos repositórios passando (21 testes)
+- ✅ Teste do `DeleteEnvelopeUseCase` passando (5 testes)
+- ✅ Nenhuma referência a `currentBalance` nos testes (exceto Account.ts que é válido)
+
+#### ⏭️ Próximos Passos
+
+- Iniciar FASE 7: Validação Final e Limpeza
+- Executar todos os testes
+- Verificação final de referências
+- Validar migration
+
+---
+
 ## 🔄 Estado Atual
 
 **Branch**: feature-OS-240
-**Fase Atual**: FASE 5 - Atualização de Interface e Composição [Status: ✅ Completada]
-**Última Modificação**: Remoção completa de controllers, rotas, endpoints e métodos do composition root
-**Próxima Tarefa**: Iniciar FASE 6 - Atualização de Testes
+**Fase Atual**: FASE 6 - Atualização de Testes [Status: ✅ Completada]
+**Última Modificação**: Remoção e atualização completa de todos os testes relacionados
+**Próxima Tarefa**: Iniciar FASE 7 - Validação Final e Limpeza

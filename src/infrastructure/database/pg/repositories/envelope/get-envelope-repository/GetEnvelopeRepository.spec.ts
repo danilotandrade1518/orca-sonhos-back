@@ -49,7 +49,6 @@ describe('GetEnvelopeRepository', () => {
       monthly_limit: 10000,
       budget_id: budgetId,
       category_id: categoryId,
-      current_balance: 5000,
       is_deleted: false,
       created_at: new Date(),
       updated_at: new Date(),
@@ -153,7 +152,7 @@ describe('GetEnvelopeRepository', () => {
         expect.any(Array),
       );
       expect(mockConnection.query).toHaveBeenCalledWith(
-        expect.stringContaining('current_balance, is_deleted'),
+        expect.stringContaining('is_deleted'),
         expect.any(Array),
       );
     });
