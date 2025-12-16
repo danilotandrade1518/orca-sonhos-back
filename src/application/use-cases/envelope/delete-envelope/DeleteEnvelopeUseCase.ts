@@ -5,7 +5,6 @@ import { IGetEnvelopeRepository } from '../../../contracts/repositories/envelope
 import { ISaveEnvelopeRepository } from '../../../contracts/repositories/envelope/ISaveEnvelopeRepository';
 import { IBudgetAuthorizationService } from '../../../services/authorization/IBudgetAuthorizationService';
 import { ApplicationError } from '../../../shared/errors/ApplicationError';
-import { EnvelopeDeletionFailedError } from '../../../shared/errors/EnvelopeDeletionFailedError';
 import { EnvelopeNotFoundError } from '../../../shared/errors/EnvelopeNotFoundError';
 import { EnvelopeRepositoryError } from '../../../shared/errors/EnvelopeRepositoryError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
@@ -46,10 +45,6 @@ export class DeleteEnvelopeUseCase implements IUseCase<DeleteEnvelopeDto> {
     const envelope = envelopeResult.data;
     if (!envelope || envelope.budgetId !== dto.budgetId) {
       return Either.error(new EnvelopeNotFoundError());
-    }
-
-    if (envelope.currentBalance > 0) {
-      return Either.error(new EnvelopeDeletionFailedError());
     }
 
     const deleteResult = envelope.delete();

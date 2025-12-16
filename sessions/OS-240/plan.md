@@ -578,7 +578,7 @@ exports.down = (pgm) => {
 
 ---
 
-## 📅 FASE 5: Atualização de Interface e Composição [Status: ⏳]
+## 📅 FASE 5: Atualização de Interface e Composição [Status: ✅ Completada]
 
 ### 🎯 Objetivo
 
@@ -586,7 +586,7 @@ Remover controllers HTTP, rotas, endpoints do swagger e métodos do composition 
 
 ### 📋 Tarefas
 
-#### Remover Controllers HTTP [⏳]
+#### Remover Controllers HTTP [✅]
 
 **Descrição**:
 
@@ -604,7 +604,7 @@ Remover controllers HTTP, rotas, endpoints do swagger e métodos do composition 
 - `src/interface/http/controllers/envelope/remove-amount-envelope.controller.ts`
 - `src/interface/http/controllers/envelope/transfer-between-envelopes.controller.ts`
 
-#### Atualizar Envelope Route Registry [⏳]
+#### Atualizar Envelope Route Registry [✅]
 
 **Descrição**:
 
@@ -622,7 +622,7 @@ Remover controllers HTTP, rotas, endpoints do swagger e métodos do composition 
 
 **Arquivo**: `src/main/routes/contexts/mutations/envelope-route-registry.ts`
 
-#### Atualizar EnvelopeCompositionRoot [⏳]
+#### Atualizar EnvelopeCompositionRoot [✅]
 
 **Descrição**:
 
@@ -643,7 +643,7 @@ Remover controllers HTTP, rotas, endpoints do swagger e métodos do composition 
 
 **Arquivo**: `src/main/composition/EnvelopeCompositionRoot.ts`
 
-#### Atualizar Swagger.json [⏳]
+#### Atualizar Swagger.json [✅]
 
 **Descrição**:
 
@@ -667,15 +667,45 @@ Remover controllers HTTP, rotas, endpoints do swagger e métodos do composition 
 
 ### 🧪 Critérios de Validação
 
-- [ ] 3 controllers removidos
-- [ ] 3 rotas removidas do route registry
-- [ ] `EnvelopeCompositionRoot` atualizado e compilando
-- [ ] 3 endpoints removidos do swagger
-- [ ] Aplicação compila sem erros
+- [x] 3 controllers removidos
+- [x] 3 rotas removidas do route registry
+- [x] `EnvelopeCompositionRoot` atualizado e compilando
+- [x] 3 endpoints removidos do swagger
+- [x] Aplicação compila sem erros
 
 ### 📝 Comentários da Fase
 
-_[Observações sobre decisões tomadas]_
+**Remoções Realizadas**:
+
+1. **Controllers HTTP**:
+
+   - ✅ `add-amount-envelope.controller.ts` deletado
+   - ✅ `remove-amount-envelope.controller.ts` deletado
+   - ✅ `transfer-between-envelopes.controller.ts` deletado
+
+2. **Route Registry**:
+
+   - ✅ Removidas 3 rotas (`/envelope/add-amount-envelope`, `/envelope/remove-amount-envelope`, `/envelope/transfer-between-envelopes`)
+   - ✅ Removidos imports dos 3 controllers
+
+3. **EnvelopeCompositionRoot**:
+
+   - ✅ Removido método `createAddAmountToEnvelopeUseCase()`
+   - ✅ Removido método `createRemoveAmountFromEnvelopeUseCase()`
+   - ✅ Removido método `createTransferBetweenEnvelopesUseCase()`
+   - ✅ Removida propriedade `transferUnitOfWork`
+   - ✅ Removida inicialização de `transferUnitOfWork` no construtor
+   - ✅ Removidos imports dos use cases removidos
+   - ✅ Removidos imports de `TransferBetweenEnvelopesService` e `TransferBetweenEnvelopesUnitOfWork`
+
+4. **Swagger.json**:
+
+   - ✅ Removido endpoint `/envelope/add-amount-envelope`
+   - ✅ Removido endpoint `/envelope/remove-amount-envelope`
+   - ✅ Removido endpoint `/envelope/transfer-between-envelopes`
+
+5. **Correção Adicional**:
+   - ✅ Atualizado `DeleteEnvelopeUseCase` removendo verificação de `currentBalance > 0` (linha 51)
 
 ---
 

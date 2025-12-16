@@ -223,9 +223,67 @@
 
 ---
 
+### 🗓️ Sessão 2025-01-27 - Continuação
+
+**Fase**: FASE 5 - Atualização de Interface e Composição
+**Objetivo**: Remover controllers HTTP, rotas, endpoints do swagger e métodos do composition root relacionados aos use cases removidos
+
+#### ✅ Trabalho Realizado
+
+**Controllers HTTP Removidos**:
+
+- ✅ `add-amount-envelope.controller.ts` deletado
+- ✅ `remove-amount-envelope.controller.ts` deletado
+- ✅ `transfer-between-envelopes.controller.ts` deletado
+
+**Route Registry Atualizado**:
+
+- ✅ Removidas 3 rotas (`/envelope/add-amount-envelope`, `/envelope/remove-amount-envelope`, `/envelope/transfer-between-envelopes`)
+- ✅ Removidos imports dos 3 controllers removidos
+
+**EnvelopeCompositionRoot Atualizado**:
+
+- ✅ Removido método `createAddAmountToEnvelopeUseCase()`
+- ✅ Removido método `createRemoveAmountFromEnvelopeUseCase()`
+- ✅ Removido método `createTransferBetweenEnvelopesUseCase()`
+- ✅ Removida propriedade `transferUnitOfWork`
+- ✅ Removida inicialização de `transferUnitOfWork` no construtor
+- ✅ Removidos imports dos use cases removidos
+- ✅ Removidos imports de `TransferBetweenEnvelopesService` e `TransferBetweenEnvelopesUnitOfWork`
+
+**Swagger.json Atualizado**:
+
+- ✅ Removido endpoint `/envelope/add-amount-envelope` completo
+- ✅ Removido endpoint `/envelope/remove-amount-envelope` completo
+- ✅ Removido endpoint `/envelope/transfer-between-envelopes` completo
+
+**Correção Adicional**:
+
+- ✅ Atualizado `DeleteEnvelopeUseCase` removendo verificação de `currentBalance > 0` (linha 51)
+
+#### 🤔 Decisões/Problemas
+
+- **Decisão**: Removida verificação de `currentBalance > 0` do `DeleteEnvelopeUseCase` - **Motivo**: Campo `currentBalance` não existe mais, e o saldo será calculado dinamicamente via queries no futuro
+- **Validação**: Projeto compila sem erros após todas as remoções
+
+#### 🧪 Validações
+
+- ✅ Compilação TypeScript bem-sucedida (`npm run build`)
+- ✅ Nenhum erro de compilação
+- ✅ Todos os imports quebrados corrigidos
+
+#### ⏭️ Próximos Passos
+
+- Iniciar FASE 6: Atualização de Testes
+- Remover testes E2E dos use cases removidos
+- Atualizar testes de integração
+- Atualizar outros testes com referências a `currentBalance`
+
+---
+
 ## 🔄 Estado Atual
 
 **Branch**: feature-OS-240
-**Fase Atual**: FASE 4 - Atualização de Infraestrutura [Status: ✅ Completada]
-**Última Modificação**: Atualização completa de infraestrutura concluída
-**Próxima Tarefa**: Iniciar FASE 5 - Atualização de Interface e Composição
+**Fase Atual**: FASE 5 - Atualização de Interface e Composição [Status: ✅ Completada]
+**Última Modificação**: Remoção completa de controllers, rotas, endpoints e métodos do composition root
+**Próxima Tarefa**: Iniciar FASE 6 - Atualização de Testes
