@@ -139,9 +139,43 @@
 
 ---
 
+### 🗓️ Sessão 2025-01-27 - Continuação
+
+**Fase**: FASE 3 - Remoção de Use Cases e Infraestrutura Relacionada
+**Objetivo**: Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of Work, interface, stub)
+
+#### ✅ Trabalho Realizado
+
+**Use Cases Removidos**:
+
+- ✅ `AddAmountToEnvelopeUseCase.ts`, `AddAmountToEnvelopeUseCase.spec.ts`, `AddAmountToEnvelopeDto.ts` deletados
+- ✅ `RemoveAmountFromEnvelopeUseCase.ts`, `RemoveAmountFromEnvelopeUseCase.spec.ts`, `RemoveAmountFromEnvelopeDto.ts` deletados
+- ✅ `TransferBetweenEnvelopesUseCase.ts`, `TransferBetweenEnvelopesUseCase.spec.ts`, `TransferBetweenEnvelopesDto.ts` deletados
+
+**Unit of Work Removido**:
+
+- ✅ `TransferBetweenEnvelopesUnitOfWork.ts` deletado
+- ✅ `TransferBetweenEnvelopesUnitOfWork.spec.ts` deletado
+- ✅ `ITransferBetweenEnvelopesUnitOfWork.ts` deletado
+- ✅ `TransferBetweenEnvelopesUnitOfWorkStub.ts` deletado
+
+#### 🤔 Decisões/Problemas
+
+- **Observação**: Erros de compilação em controllers, routes e composition root são esperados e serão corrigidos na Fase 5
+- **Observação**: `DeleteEnvelopeUseCase` ainda referencia `currentBalance` - será atualizado na Fase 4 ou 6
+
+#### ⏭️ Próximos Passos
+
+- Iniciar FASE 4: Atualização de Infraestrutura
+- Atualizar `EnvelopeMapper` removendo `current_balance`
+- Corrigir `ListEnvelopesDao` para usar relação correta através de Category
+- Criar migration para remover coluna `current_balance`
+
+---
+
 ## 🔄 Estado Atual
 
 **Branch**: feature-OS-240
-**Fase Atual**: FASE 2 - Remoção do Domínio [Status: ✅ Completada]
-**Última Modificação**: Remoção completa de `currentBalance` do domínio concluída
-**Próxima Tarefa**: Iniciar FASE 3 - Remoção de Use Cases e Infraestrutura Relacionada
+**Fase Atual**: FASE 3 - Remoção de Use Cases e Infraestrutura Relacionada [Status: ✅ Completada]
+**Última Modificação**: Remoção completa dos 3 use cases e Unit of Work concluída
+**Próxima Tarefa**: Iniciar FASE 4 - Atualização de Infraestrutura

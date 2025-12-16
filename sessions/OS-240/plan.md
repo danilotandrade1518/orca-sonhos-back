@@ -249,7 +249,7 @@ Remover `currentBalance` da entidade `Envelope`, remover value object `EnvelopeB
 
 ---
 
-## 📅 FASE 3: Remoção de Use Cases e Infraestrutura Relacionada [Status: ⏳]
+## 📅 FASE 3: Remoção de Use Cases e Infraestrutura Relacionada [Status: ✅ Completada]
 
 ### 🎯 Objetivo
 
@@ -257,7 +257,7 @@ Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of 
 
 ### 📋 Tarefas
 
-#### Remover Use Case AddAmountToEnvelope [⏳]
+#### Remover Use Case AddAmountToEnvelope [✅]
 
 **Descrição**:
 
@@ -272,7 +272,7 @@ Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of 
 
 - `src/application/use-cases/envelope/add-amount-to-envelope/` (diretório completo)
 
-#### Remover Use Case RemoveAmountFromEnvelope [⏳]
+#### Remover Use Case RemoveAmountFromEnvelope [✅]
 
 **Descrição**:
 
@@ -287,7 +287,7 @@ Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of 
 
 - `src/application/use-cases/envelope/remove-amount-from-envelope/` (diretório completo)
 
-#### Remover Use Case TransferBetweenEnvelopes [⏳]
+#### Remover Use Case TransferBetweenEnvelopes [✅]
 
 **Descrição**:
 
@@ -302,7 +302,7 @@ Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of 
 
 - `src/application/use-cases/envelope/transfer-between-envelopes/` (diretório completo)
 
-#### Remover TransferBetweenEnvelopesUnitOfWork [⏳]
+#### Remover TransferBetweenEnvelopesUnitOfWork [✅]
 
 **Descrição**:
 
@@ -319,7 +319,7 @@ Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of 
 - `src/infrastructure/database/pg/unit-of-works/transfer-between-envelopes/TransferBetweenEnvelopesUnitOfWork.ts`
 - `src/infrastructure/database/pg/unit-of-works/transfer-between-envelopes/TransferBetweenEnvelopesUnitOfWork.spec.ts`
 
-#### Remover Interface e Stub do Unit of Work [⏳]
+#### Remover Interface e Stub do Unit of Work [✅]
 
 **Descrição**:
 
@@ -341,13 +341,27 @@ Remover completamente os 3 use cases e toda infraestrutura relacionada (Unit of 
 
 ### 🧪 Critérios de Validação
 
-- [ ] 3 diretórios de use cases removidos completamente
-- [ ] Unit of Work, interface e stub removidos
-- [ ] Imports quebrados identificados (serão corrigidos na Fase 5)
+- [x] 3 diretórios de use cases removidos completamente
+- [x] Unit of Work, interface e stub removidos
+- [x] Imports quebrados identificados (serão corrigidos na Fase 5)
 
 ### 📝 Comentários da Fase
 
-_[Observações sobre decisões tomadas]_
+**Remoções Realizadas**:
+
+1. **Use Cases Removidos**:
+
+   - ✅ `AddAmountToEnvelopeUseCase.ts`, `AddAmountToEnvelopeUseCase.spec.ts`, `AddAmountToEnvelopeDto.ts` deletados
+   - ✅ `RemoveAmountFromEnvelopeUseCase.ts`, `RemoveAmountFromEnvelopeUseCase.spec.ts`, `RemoveAmountFromEnvelopeDto.ts` deletados
+   - ✅ `TransferBetweenEnvelopesUseCase.ts`, `TransferBetweenEnvelopesUseCase.spec.ts`, `TransferBetweenEnvelopesDto.ts` deletados
+
+2. **Unit of Work Removido**:
+   - ✅ `TransferBetweenEnvelopesUnitOfWork.ts` deletado
+   - ✅ `TransferBetweenEnvelopesUnitOfWork.spec.ts` deletado
+   - ✅ `ITransferBetweenEnvelopesUnitOfWork.ts` deletado
+   - ✅ `TransferBetweenEnvelopesUnitOfWorkStub.ts` deletado
+
+**Observação**: Erros de compilação em controllers, routes e composition root são esperados e serão corrigidos na Fase 5.
 
 ---
 
