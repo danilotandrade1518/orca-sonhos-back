@@ -17,7 +17,7 @@ Remoção completa do campo `currentBalance` da entidade `Envelope` e de todos o
 
 ---
 
-## 📅 FASE 1: Preparação e Análise [Status: ⏰ Em Progresso]
+## 📅 FASE 1: Preparação e Análise [Status: ✅ Completada]
 
 ### 🎯 Objetivo
 
@@ -124,7 +124,7 @@ grep -r "TransferBetweenEnvelopes" src/
 
 ---
 
-## 📅 FASE 2: Remoção do Domínio [Status: ⏳]
+## 📅 FASE 2: Remoção do Domínio [Status: ✅ Completada]
 
 ### 🎯 Objetivo
 
@@ -132,7 +132,7 @@ Remover `currentBalance` da entidade `Envelope`, remover value object `EnvelopeB
 
 ### 📋 Tarefas
 
-#### Remover currentBalance da Entidade Envelope [⏳]
+#### Remover currentBalance da Entidade Envelope [✅]
 
 **Descrição**:
 
@@ -152,7 +152,7 @@ Remover `currentBalance` da entidade `Envelope`, remover value object `EnvelopeB
 
 **Arquivo**: `src/domain/aggregates/envelope/envelope-entity/Envelope.ts`
 
-#### Remover Value Object EnvelopeBalance [⏳]
+#### Remover Value Object EnvelopeBalance [✅]
 
 **Descrição**:
 
@@ -170,7 +170,7 @@ Remover `currentBalance` da entidade `Envelope`, remover value object `EnvelopeB
 - `src/domain/aggregates/envelope/value-objects/envelope-balance/EnvelopeBalance.ts`
 - `src/domain/aggregates/envelope/value-objects/envelope-balance/EnvelopeBalance.spec.ts`
 
-#### Remover TransferBetweenEnvelopesService [⏳]
+#### Remover TransferBetweenEnvelopesService [✅]
 
 **Descrição**:
 
@@ -188,7 +188,7 @@ Remover `currentBalance` da entidade `Envelope`, remover value object `EnvelopeB
 - `src/domain/aggregates/envelope/services/TransferBetweenEnvelopesService.ts`
 - `src/domain/aggregates/envelope/services/TransferBetweenEnvelopesService.spec.ts`
 
-#### Atualizar Testes da Entidade Envelope [⏳]
+#### Atualizar Testes da Entidade Envelope [✅]
 
 **Descrição**:
 
@@ -212,14 +212,40 @@ Remover `currentBalance` da entidade `Envelope`, remover value object `EnvelopeB
 
 ### 🧪 Critérios de Validação
 
-- [ ] `Envelope.ts` compila sem erros
-- [ ] `Envelope.spec.ts` compila e testes restantes passam
-- [ ] `EnvelopeBalance` e `TransferBetweenEnvelopesService` removidos
-- [ ] Nenhuma referência a `currentBalance` na entidade `Envelope`
+- [x] `Envelope.ts` compila sem erros (isoladamente)
+- [x] `Envelope.spec.ts` compila e testes restantes passam
+- [x] `EnvelopeBalance` e `TransferBetweenEnvelopesService` removidos
+- [x] Nenhuma referência a `currentBalance` na entidade `Envelope`
 
 ### 📝 Comentários da Fase
 
-_[Observações sobre decisões tomadas]_
+**Remoções Realizadas**:
+
+1. **Entidade Envelope**:
+
+   - ✅ Propriedade privada `_currentBalance: EnvelopeBalance` removida
+   - ✅ Getter público `currentBalance` removido
+   - ✅ Métodos `addAmount()`, `removeAmount()`, `getAvailableLimit()` removidos
+   - ✅ Parâmetro `currentBalance` removido do método `restore()`
+   - ✅ Inicialização de `balanceVo` removida do método `create()`
+   - ✅ Imports de `EnvelopeBalance` e `EnvelopeLimitExceededError` removidos
+
+2. **Value Object EnvelopeBalance**:
+
+   - ✅ Arquivo `EnvelopeBalance.ts` deletado
+   - ✅ Arquivo `EnvelopeBalance.spec.ts` deletado
+
+3. **Serviço TransferBetweenEnvelopesService**:
+
+   - ✅ Arquivo `TransferBetweenEnvelopesService.ts` deletado
+   - ✅ Arquivo `TransferBetweenEnvelopesService.spec.ts` deletado
+
+4. **Testes da Entidade**:
+   - ✅ Todos os testes de balance management removidos
+   - ✅ Testes de `restore()` atualizados (removido parâmetro `currentBalance`)
+   - ✅ Imports de `EnvelopeLimitExceededError` e `InsufficientEnvelopeBalanceError` removidos
+
+**Observação**: Erros de compilação em outros arquivos são esperados e serão corrigidos nas próximas fases ao remover/atualizar os use cases e infraestrutura relacionados.
 
 ---
 

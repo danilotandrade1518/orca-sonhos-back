@@ -92,9 +92,56 @@
 
 ---
 
+### 🗓️ Sessão 2025-01-27 - Continuação
+
+**Fase**: FASE 2 - Remoção do Domínio
+**Objetivo**: Remover `currentBalance` da entidade `Envelope`, remover value object `EnvelopeBalance` e serviço `TransferBetweenEnvelopesService`
+
+#### ✅ Trabalho Realizado
+
+**Entidade Envelope**:
+
+- ✅ Removida propriedade privada `_currentBalance: EnvelopeBalance`
+- ✅ Removido getter público `currentBalance`
+- ✅ Removidos métodos `addAmount()`, `removeAmount()`, `getAvailableLimit()`
+- ✅ Removido parâmetro `currentBalance` do método `restore()`
+- ✅ Removida inicialização de `balanceVo` no método `create()`
+- ✅ Removidos imports de `EnvelopeBalance` e `EnvelopeLimitExceededError`
+
+**Value Object EnvelopeBalance**:
+
+- ✅ Deletado arquivo `EnvelopeBalance.ts`
+- ✅ Deletado arquivo `EnvelopeBalance.spec.ts`
+
+**Serviço TransferBetweenEnvelopesService**:
+
+- ✅ Deletado arquivo `TransferBetweenEnvelopesService.ts`
+- ✅ Deletado arquivo `TransferBetweenEnvelopesService.spec.ts`
+
+**Testes da Entidade**:
+
+- ✅ Removido describe block completo de "balance management"
+- ✅ Removidos testes de `addAmount()`, `removeAmount()`, `getAvailableLimit()`
+- ✅ Atualizados testes de `restore()` removendo parâmetro `currentBalance`
+- ✅ Removidos imports de `EnvelopeLimitExceededError` e `InsufficientEnvelopeBalanceError`
+- ✅ Removida verificação de `currentBalance` no teste de `create()`
+
+#### 🤔 Decisões/Problemas
+
+- **Observação**: Erros de compilação em outros arquivos são esperados e serão corrigidos nas próximas fases ao remover/atualizar os use cases e infraestrutura relacionados
+- **Decisão**: Mantido arquivo `EnvelopeLimitExceededError.ts` mesmo não sendo mais usado - **Motivo**: Pode ser útil no futuro, não causa problemas
+
+#### ⏭️ Próximos Passos
+
+- Iniciar FASE 3: Remoção de Use Cases e Infraestrutura Relacionada
+- Remover 3 use cases completos (`AddAmountToEnvelope`, `RemoveAmountFromEnvelope`, `TransferBetweenEnvelopes`)
+- Remover Unit of Work relacionado
+
+---
+
 ## 🔄 Estado Atual
 
 **Branch**: feature-OS-240
-**Fase Atual**: FASE 1 - Preparação e Análise [Status: ⏰ Em Progresso]
-**Última Modificação**: Análise completa de dependências concluída
-**Próxima Tarefa**: Iniciar FASE 2 - Remoção do Domínio
+**Fase Atual**: FASE 2 - Remoção do Domínio [Status: ✅ Completada]
+**Última Modificação**: Remoção completa de `currentBalance` do domínio concluída
+**Próxima Tarefa**: Iniciar FASE 3 - Remoção de Use Cases e Infraestrutura Relacionada
