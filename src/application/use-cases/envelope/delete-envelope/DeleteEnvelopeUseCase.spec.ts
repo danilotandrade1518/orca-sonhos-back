@@ -1,7 +1,6 @@
 import { Envelope } from '@domain/aggregates/envelope/envelope-entity/Envelope';
 import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 
-import { EnvelopeDeletionFailedError } from '../../../shared/errors/EnvelopeDeletionFailedError';
 import { EnvelopeNotFoundError } from '../../../shared/errors/EnvelopeNotFoundError';
 import { EnvelopeRepositoryError } from '../../../shared/errors/EnvelopeRepositoryError';
 import { InsufficientPermissionsError } from '../../../shared/errors/InsufficientPermissionsError';
@@ -54,19 +53,6 @@ describe('DeleteEnvelopeUseCase', () => {
     expect(result.hasError).toBe(false);
     expect(result.data!.id).toBe(envelope.id);
     expect(envelope.isDeleted).toBe(true);
-  });
-
-  it('should not delete envelope with balance', async () => {
-    envelope.addAmount(1000);
-    const dto: DeleteEnvelopeDto = {
-      envelopeId: envelope.id,
-      userId: 'user',
-      budgetId,
-    };
-
-    const result = await useCase.execute(dto);
-    expect(result.hasError).toBe(true);
-    expect(result.errors[0]).toBeInstanceOf(EnvelopeDeletionFailedError);
   });
 
   it('should return error when unauthorized', async () => {

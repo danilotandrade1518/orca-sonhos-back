@@ -15,11 +15,9 @@ function makeEnvelope(budgetId: string): Envelope {
   const env: Partial<Envelope> & {
     id: string;
     budgetId: string;
-    currentBalance: number;
   } = {
     id,
     budgetId,
-    currentBalance: 0,
     delete: () => Either.success(undefined),
   };
   return env as Envelope;

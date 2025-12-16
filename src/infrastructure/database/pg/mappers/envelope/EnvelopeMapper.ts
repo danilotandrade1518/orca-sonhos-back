@@ -8,7 +8,6 @@ export interface EnvelopeRow {
   monthly_limit: number;
   budget_id: string;
   category_id: string;
-  current_balance: number;
   is_deleted: boolean;
   created_at: Date;
   updated_at: Date;
@@ -22,7 +21,6 @@ export class EnvelopeMapper {
       monthlyLimit: Number(row.monthly_limit),
       budgetId: row.budget_id,
       categoryId: row.category_id,
-      currentBalance: Number(row.current_balance),
       isDeleted: row.is_deleted,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -36,7 +34,6 @@ export class EnvelopeMapper {
       monthly_limit: envelope.monthlyLimit,
       budget_id: envelope.budgetId,
       category_id: envelope.categoryId,
-      current_balance: envelope.currentBalance,
       is_deleted: envelope.isDeleted,
       created_at: envelope.createdAt,
       updated_at: envelope.updatedAt,

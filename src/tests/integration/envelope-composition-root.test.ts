@@ -9,7 +9,6 @@ import { TestContainersSetup } from './setup/testcontainers-setup';
 let testUserId: string;
 let testBudgetId: string;
 let testEnvelopeId: string;
-let targetEnvelopeId: string;
 let testCategoryId: string;
 
 describe('EnvelopeCompositionRoot Integration Tests', () => {
@@ -109,101 +108,6 @@ describe('EnvelopeCompositionRoot Integration Tests', () => {
     });
   });
 
-  describe('createAddAmountToEnvelopeUseCase & createRemoveAmountFromEnvelopeUseCase', () => {
-    beforeEach(async () => {
-      const create = compositionRoot.createCreateEnvelopeUseCase();
-      const created = await create.execute({
-        userId: testUserId,
-        budgetId: testBudgetId,
-        name: 'Entertainment',
-        monthlyLimit: 80000,
-        categoryId: testCategoryId,
-      });
-      testEnvelopeId = created.data!.id;
-    });
-
-    it('should add and then remove amount correctly', async () => {
-      const add = compositionRoot.createAddAmountToEnvelopeUseCase();
-      const addResult = await add.execute({
-        userId: testUserId,
-        budgetId: testBudgetId,
-        envelopeId: testEnvelopeId,
-        amount: 20000,
-      });
-      expect(addResult.hasError).toBe(false);
-
-      const remove = compositionRoot.createRemoveAmountFromEnvelopeUseCase();
-      const removeResult = await remove.execute({
-        userId: testUserId,
-        budgetId: testBudgetId,
-        envelopeId: testEnvelopeId,
-        amount: 5000,
-      });
-      expect(removeResult.hasError).toBe(false);
-
-      const db = await connection.query(
-        'SELECT current_balance FROM envelopes WHERE id = $1',
-        [testEnvelopeId],
-      );
-      expect(Number(db?.rows[0].current_balance)).toBe(15000);
-    });
-  });
-
-  describe('createTransferBetweenEnvelopesUseCase', () => {
-    beforeEach(async () => {
-      const create = compositionRoot.createCreateEnvelopeUseCase();
-      const createdA = await create.execute({
-        userId: testUserId,
-        budgetId: testBudgetId,
-        name: 'Source',
-        monthlyLimit: 40000,
-        categoryId: testCategoryId,
-      });
-      testEnvelopeId = createdA.data!.id;
-
-      const createdB = await create.execute({
-        userId: testUserId,
-        budgetId: testBudgetId,
-        name: 'Target',
-        monthlyLimit: 30000,
-        categoryId: testCategoryId,
-      });
-      targetEnvelopeId = createdB.data!.id;
-
-      // Add initial amount to source
-      const add = compositionRoot.createAddAmountToEnvelopeUseCase();
-      await add.execute({
-        userId: testUserId,
-        budgetId: testBudgetId,
-        envelopeId: testEnvelopeId,
-        amount: 10000,
-      });
-    });
-
-    it('should transfer between envelopes', async () => {
-      const transfer = compositionRoot.createTransferBetweenEnvelopesUseCase();
-      const result = await transfer.execute({
-        userId: testUserId,
-        budgetId: testBudgetId,
-        sourceEnvelopeId: testEnvelopeId,
-        targetEnvelopeId: targetEnvelopeId,
-        amount: 4000,
-      });
-      expect(result.hasError).toBe(false);
-
-      const dbSource = await connection.query(
-        'SELECT current_balance FROM envelopes WHERE id = $1',
-        [testEnvelopeId],
-      );
-      const dbTarget = await connection.query(
-        'SELECT current_balance FROM envelopes WHERE id = $1',
-        [targetEnvelopeId],
-      );
-      expect(Number(dbSource?.rows[0].current_balance)).toBe(6000);
-      expect(Number(dbTarget?.rows[0].current_balance)).toBe(4000);
-    });
-  });
-
   describe('createDeleteEnvelopeUseCase', () => {
     beforeEach(async () => {
       const create = compositionRoot.createCreateEnvelopeUseCase();
@@ -217,7 +121,7 @@ describe('EnvelopeCompositionRoot Integration Tests', () => {
       testEnvelopeId = created.data!.id;
     });
 
-    it('should delete envelope when balance is zero', async () => {
+    it('should delete envelope successfully', async () => {
       const del = compositionRoot.createDeleteEnvelopeUseCase();
       const result = await del.execute({
         userId: testUserId,
