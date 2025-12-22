@@ -6,5 +6,8 @@ export interface BudgetListItem {
 }
 
 export interface IListBudgetsDao {
-  findByUser(params: { userId: string }): Promise<BudgetListItem[]>;
+  findByUser(params: {
+    userId: string;
+    includeDeleted?: boolean;
+  }): Promise<BudgetListItem[]>;
 }
