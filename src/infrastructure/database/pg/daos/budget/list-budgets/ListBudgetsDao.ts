@@ -14,10 +14,11 @@ export class ListBudgetsDao implements IListBudgetsDao {
     const result = await this.connection.query<
       BudgetListItem & { participantscount: string }
     >(
-      `SELECT b.id, b.name, b.type, COUNT(bp.user_id) as participantsCount
+      `SELECT b.id, b.name, b.type, COUNT(DISTINCT bp.participant_id) as participantsCount
        FROM budgets b
        LEFT JOIN budget_participants bp ON bp.budget_id = b.id
-       WHERE bp.user_id = $1
+       WHERE b.owner_id = $1 
+          OR bp.participant_id = $1
        GROUP BY b.id, b.name, b.type`,
       [userId],
     );
