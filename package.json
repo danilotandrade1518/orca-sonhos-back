@@ -6,7 +6,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
     "build": "tsc --project tsconfig.build.json",
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts",
@@ -62,6 +62,7 @@
     "testcontainers": "^11.5.1",
     "ts-jest": "^29.3.4",
     "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
   },
   "node-pg-migrate": {

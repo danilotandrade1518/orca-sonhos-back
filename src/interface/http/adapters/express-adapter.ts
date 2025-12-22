@@ -27,6 +27,45 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
   ];
 
   constructor() {
+    // Configurable CORS (simple implementation, framework-agnostic behavior)
+    // IMPORTANTE: CORS deve ser aplicado ANTES de qualquer outro middleware
+    if (process.env.CORS_ENABLED === 'true') {
+      const originsRaw = process.env.CORS_ORIGINS || '*';
+      const allowedOrigins = originsRaw.split(',').map((o) => o.trim());
+      const allowMethods =
+        process.env.CORS_METHODS || 'GET,POST,PUT,PATCH,DELETE';
+      const allowHeaders =
+        process.env.CORS_HEADERS || 'Content-Type,Authorization';
+      const exposeHeaders =
+        process.env.CORS_EXPOSE_HEADERS || 'X-Request-Id,TraceId';
+      this.app.use((req, res, next) => {
+        const origin = req.headers.origin as string | undefined;
+
+        // Se há origin no request, verificar se está permitido
+        if (origin) {
+          if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+            res.setHeader('Access-Control-Allow-Origin', origin);
+            res.setHeader('Vary', 'Origin');
+          }
+        } else if (allowedOrigins.includes('*')) {
+          // Se não há origin mas está permitido *, permitir qualquer origem
+          res.setHeader('Access-Control-Allow-Origin', '*');
+        }
+
+        res.setHeader('Access-Control-Allow-Methods', allowMethods);
+        res.setHeader('Access-Control-Allow-Headers', allowHeaders);
+        res.setHeader('Access-Control-Expose-Headers', exposeHeaders);
+        res.setHeader('Access-Control-Max-Age', '600');
+
+        // Responder a requisições OPTIONS (preflight)
+        if (req.method === 'OPTIONS') {
+          res.status(204).end();
+          return;
+        }
+        next();
+      });
+    }
+
     this.app.use(express.json());
 
     // Lightweight metrics endpoint (internal use) - no auth for now; protect via network layer
@@ -41,36 +80,6 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
       res.set('Content-Type', 'text/plain; version=0.0.4');
       res.send(getQueryMetrics());
     });
-
-    // Configurable CORS (simple implementation, framework-agnostic behavior)
-    if (process.env.CORS_ENABLED === 'true') {
-      const originsRaw = process.env.CORS_ORIGINS || '*';
-      const allowedOrigins = originsRaw.split(',').map((o) => o.trim());
-      const allowMethods =
-        process.env.CORS_METHODS || 'GET,POST,PUT,PATCH,DELETE';
-      const allowHeaders =
-        process.env.CORS_HEADERS || 'Content-Type,Authorization';
-      const exposeHeaders =
-        process.env.CORS_EXPOSE_HEADERS || 'X-Request-Id,TraceId';
-      this.app.use((req, res, next) => {
-        const origin = req.headers.origin as string | undefined;
-        if (origin) {
-          if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-            res.setHeader('Access-Control-Allow-Origin', origin);
-            res.setHeader('Vary', 'Origin');
-          }
-        }
-        res.setHeader('Access-Control-Allow-Methods', allowMethods);
-        res.setHeader('Access-Control-Allow-Headers', allowHeaders);
-        res.setHeader('Access-Control-Expose-Headers', exposeHeaders);
-        res.setHeader('Access-Control-Max-Age', '600');
-        if (req.method === 'OPTIONS') {
-          res.status(204).end();
-          return;
-        }
-        next();
-      });
-    }
   }
 
   registerRoutes(routes: RouteDefinition[]) {
