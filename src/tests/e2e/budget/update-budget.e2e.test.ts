@@ -10,13 +10,11 @@ import { UpdateBudgetController } from '@http/controllers/budget/update-budget.c
 import { RouteDefinition } from '@http/server-adapter';
 import request from 'supertest';
 
-// Setup real use case with stubs
 const getRepo = new GetBudgetRepositoryStub();
 const saveRepo = new SaveBudgetRepositoryStub();
 const authService = new BudgetAuthorizationServiceStub();
 authService.mockHasAccess = true;
 
-// domain budget for success path
 const ownerId = EntityId.create().value!.id;
 const budgetResult = Budget.create({
   name: 'Old',

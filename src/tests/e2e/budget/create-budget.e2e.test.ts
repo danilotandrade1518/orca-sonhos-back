@@ -7,8 +7,6 @@ import { CreateBudgetController } from '@http/controllers/budget/create-budget.c
 import { RouteDefinition } from '@http/server-adapter';
 import request from 'supertest';
 
-// E2E focuses only on HTTP wiring (no DB). Using in-memory stub.
-
 describe('POST /budgets (E2E)', () => {
   const { server, register, close } = createHttpTestServer();
 

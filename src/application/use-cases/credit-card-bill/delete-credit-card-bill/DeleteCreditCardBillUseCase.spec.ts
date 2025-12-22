@@ -62,7 +62,7 @@ const makeCreditCardBill = (isDeleted = false): CreditCardBill => {
     creditCardId: EntityId.create().value!.id,
     closingDate: new Date('2024-01-15'),
     dueDate: new Date('2024-02-10'),
-    amount: 100000, // 1000.00 em centavos
+    amount: 100000,
     status: BillStatusEnum.OPEN,
     isDeleted,
     createdAt: new Date(),
@@ -147,7 +147,7 @@ describe('DeleteCreditCardBillUseCase', () => {
     });
 
     it('should return error when credit card bill is already deleted', async () => {
-      const creditCardBill = makeCreditCardBill(true); // already deleted
+      const creditCardBill = makeCreditCardBill(true);
       getCreditCardBillRepository.setCreditCardBill(creditCardBill);
 
       const dto: DeleteCreditCardBillRequestDTO = {
@@ -167,7 +167,7 @@ describe('DeleteCreditCardBillUseCase', () => {
         closingDate: new Date('2024-01-15'),
         dueDate: new Date('2024-02-10'),
         amount: 100000,
-        status: BillStatusEnum.PAID, // paid bill
+        status: BillStatusEnum.PAID,
         isDeleted: false,
         createdAt: new Date(),
         updatedAt: new Date(),

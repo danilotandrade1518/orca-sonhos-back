@@ -10,7 +10,6 @@ import request from 'supertest';
 
 import { createHttpTestServer } from '../support/http-test-server';
 
-// Simple stub for repository
 class AddCategoryRepositoryStub implements IAddCategoryRepository {
   public shouldFail = false;
   async execute(category: Category): Promise<Either<RepositoryError, void>> {
@@ -19,7 +18,7 @@ class AddCategoryRepositoryStub implements IAddCategoryRepository {
         new RepositoryError('failed to add category'),
       );
     }
-    // silence unused var if lint enforced
+
     void category;
     return Either.success<RepositoryError, void>(undefined);
   }

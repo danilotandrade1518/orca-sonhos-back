@@ -6,7 +6,7 @@ import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
 type UpdateAccountBody = {
-  id: string; // account id
+  id: string;
   userId: string;
   name?: string;
   description?: string;

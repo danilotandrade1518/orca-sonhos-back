@@ -16,7 +16,6 @@ export function incrementMutationCounter(operation: string, outcome: Outcome) {
 }
 
 export function getMutationCounters() {
-  // shallow clone to avoid external mutation
   return Object.fromEntries(
     Object.entries(counters).map(([op, c]) => [op, { ...c }]),
   );

@@ -31,7 +31,6 @@ describe('GoalCompositionRoot Integration Tests', () => {
 
     testUserId = EntityId.create().value!.id;
 
-    // Seed budget
     testBudgetId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO budgets (id, name, owner_id, type, created_at, updated_at)
@@ -39,7 +38,6 @@ describe('GoalCompositionRoot Integration Tests', () => {
       [testBudgetId, 'Budget Goal', testUserId, BudgetTypeEnum.PERSONAL],
     );
 
-    // Seed source account
     testSourceAccountId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO accounts (id, name, type, balance, budget_id, is_deleted, created_at, updated_at)
@@ -64,7 +62,7 @@ describe('GoalCompositionRoot Integration Tests', () => {
       const result = await useCase.execute({
         budgetId: testBudgetId,
         name: 'Trip',
-        totalAmount: 100000, // cents
+        totalAmount: 100000,
         sourceAccountId: testSourceAccountId,
         accumulatedAmount: 0,
         deadline: undefined,

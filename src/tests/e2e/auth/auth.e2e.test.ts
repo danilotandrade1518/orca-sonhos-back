@@ -13,7 +13,6 @@ import {
 import { Either } from '@either';
 import { ApplicationError } from '@application/shared/errors/ApplicationError';
 
-// Stubs focusing only on auth pipeline
 class StubValidator implements IJwtValidator {
   constructor(private mode: 'ok' | 'fail') {}
   async validate(token: string) {

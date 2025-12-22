@@ -40,7 +40,7 @@ const makeCreditCard = (isDeleted = false): CreditCard => {
   const data: RestoreCreditCardDTO = {
     id: validId,
     name: 'Valid Card',
-    limit: 500000, // 5000.00 em centavos
+    limit: 500000,
     closingDay: 15,
     dueDay: 25,
     budgetId: validBudgetId,
@@ -122,7 +122,7 @@ describe('DeleteCreditCardUseCase', () => {
     });
 
     it('should return error when credit card is already deleted', async () => {
-      const creditCard = makeCreditCard(true); // already deleted
+      const creditCard = makeCreditCard(true);
       getCreditCardRepository.setCreditCard(creditCard);
 
       const dto: DeleteCreditCardDto = {

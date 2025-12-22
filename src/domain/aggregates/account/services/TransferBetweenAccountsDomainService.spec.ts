@@ -54,7 +54,7 @@ describe('TransferBetweenAccountsDomainService', () => {
       const toAccount = Account.create({
         name: 'To Account',
         type: AccountTypeEnum.SAVINGS_ACCOUNT,
-        budgetId: EntityId.create().value!.id, // Different budget
+        budgetId: EntityId.create().value!.id,
         initialBalance: 500,
       }).data!;
 
@@ -106,7 +106,7 @@ describe('TransferBetweenAccountsDomainService', () => {
       const result = domainService.createTransferOperation(
         fromAccount,
         toAccount,
-        0, // Invalid amount
+        0,
         transferCategoryId,
       );
 

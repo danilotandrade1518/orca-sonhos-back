@@ -31,7 +31,6 @@ describe('EnvelopeCompositionRoot Integration Tests', () => {
 
     testUserId = EntityId.create().value!.id;
 
-    // Seed budget
     testBudgetId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO budgets (id, name, owner_id, type, created_at, updated_at)
@@ -39,7 +38,6 @@ describe('EnvelopeCompositionRoot Integration Tests', () => {
       [testBudgetId, 'Budget Env', testUserId, BudgetTypeEnum.PERSONAL],
     );
 
-    // Seed category
     testCategoryId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO categories (id, name, type, budget_id, created_at, updated_at)

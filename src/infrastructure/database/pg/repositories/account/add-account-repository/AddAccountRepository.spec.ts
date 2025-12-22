@@ -42,7 +42,6 @@ describe('AddAccountRepository', () => {
 
       const account = accountResult.data!;
 
-      // Mock AccountMapper.toRow to return a proper row
       const mockRow: AccountRow = {
         id: account.id,
         name: account.name || 'Test Account',
@@ -82,7 +81,6 @@ describe('AddAccountRepository', () => {
 
       const account = accountResult.data!;
 
-      // Mock AccountMapper.toRow to return a proper row
       const mockRow: AccountRow = {
         id: account.id,
         name: account.name || 'Test Account',

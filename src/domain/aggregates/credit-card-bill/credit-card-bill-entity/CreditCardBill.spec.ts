@@ -16,7 +16,7 @@ const makeValidDTO = (
     creditCardId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
     closingDate,
     dueDate,
-    amount: 50000, // R$ 500,00
+    amount: 50000,
     status: BillStatusEnum.OPEN,
     ...overrides,
   };
@@ -94,7 +94,7 @@ describe('CreditCardBill', () => {
     describe('isOverdue', () => {
       it('deve retornar true se a fatura estiver vencida e não paga', () => {
         const pastDueDate = new Date();
-        pastDueDate.setDate(pastDueDate.getDate() - 5); // 5 dias atrás
+        pastDueDate.setDate(pastDueDate.getDate() - 5);
 
         const dto = makeValidDTO({
           dueDate: pastDueDate,

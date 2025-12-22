@@ -1,6 +1,5 @@
 import { HttpMiddleware } from '../http-types';
 
-// Timeout interno simples. Se estourar, retorna 504.
 export function createTimeoutMiddleware(ms: number): HttpMiddleware {
   return async (req, next) => {
     let finished = false;

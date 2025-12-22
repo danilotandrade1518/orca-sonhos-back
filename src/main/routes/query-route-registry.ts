@@ -1,4 +1,3 @@
-// Registry de rotas de queries (views/read) agregando registries por contexto
 import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
 import { ExpressHttpServerAdapter } from '@http/adapters/express-adapter';
 import { MeController } from '@http/controllers/auth/me.controller';
@@ -12,7 +11,6 @@ import { buildEnvelopeQueryRoutes } from './contexts/queries/envelopes-query-rou
 import { buildGoalQueryRoutes } from './contexts/queries/goals-query-route-registry';
 import { buildTransactionQueryRoutes } from './contexts/queries/transactions-query-route-registry';
 
-// Dependências a serem injetadas (DAOs, serviços, etc.)
 export interface QueryRegistryDeps {
   server: ExpressHttpServerAdapter;
   connection: IPostgresConnectionAdapter;

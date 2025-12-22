@@ -8,12 +8,10 @@ import { ListAccountsQueryHandler } from './ListAccountsQueryHandler';
 class ListAccountsDaoStub implements IListAccountsDao {
   public items: ListAccountsItem[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findByBudget(params: {
     budgetId: string;
   }): Promise<ListAccountsItem[]> {
-    if (params.budgetId) {
-      // noop
-    }
     return this.items;
   }
 }

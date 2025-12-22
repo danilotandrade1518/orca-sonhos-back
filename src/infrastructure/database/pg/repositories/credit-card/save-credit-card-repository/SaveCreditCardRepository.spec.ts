@@ -148,14 +148,14 @@ describe('SaveCreditCardRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_cards'),
-        expect.arrayContaining([true]), // is_deleted = true
+        expect.arrayContaining([true]),
       );
     });
 
     it('should handle credit card with minimum limit', async () => {
       const creditCard = CreditCard.create({
         name: 'Basic Card',
-        limit: 100000, // R$ 1000.00
+        limit: 100000,
         closingDay: 1,
         dueDay: 1,
         budgetId: EntityId.create().value!.id,
@@ -237,7 +237,7 @@ describe('SaveCreditCardRepository', () => {
 
     it('should handle credit card name changes', async () => {
       const creditCard = createValidCreditCard();
-      // Simula mudança de nome (através de um novo objeto com mesmo ID)
+
       const updatedCreditCard = CreditCard.create({
         name: 'Updated Card Name',
         limit: 500000,

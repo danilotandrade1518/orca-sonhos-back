@@ -1,7 +1,6 @@
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 import { checkDbConnection } from '../../../../infrastructure/database/pg/connection';
 
-// Placeholder - futuramente incluir checagens (DB, migrations, etc.)
 export class ReadyController implements HttpController {
   async handle(request: HttpRequest): Promise<HttpResponse> {
     const dbOk = await checkDbConnection().catch(() => false);

@@ -15,7 +15,6 @@ export class EnvelopeCompositionRoot {
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
   ) {}
 
-  // Repositories
   private createAddEnvelopeRepository(): AddEnvelopeRepository {
     return new AddEnvelopeRepository(this.connection);
   }
@@ -28,7 +27,6 @@ export class EnvelopeCompositionRoot {
     return new SaveEnvelopeRepository(this.connection);
   }
 
-  // Use cases
   public createCreateEnvelopeUseCase(): CreateEnvelopeUseCase {
     const addRepo = this.createAddEnvelopeRepository();
     return new CreateEnvelopeUseCase(addRepo, this.budgetAuthorizationService);

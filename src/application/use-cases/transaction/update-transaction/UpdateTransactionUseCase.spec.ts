@@ -97,7 +97,7 @@ describe('UpdateTransactionUseCase', () => {
       const dto: UpdateTransactionDto = {
         userId,
         id: mockTransaction.id,
-        amount: 200, // Changed amount
+        amount: 200,
       };
 
       const result = await useCase.execute(dto);
@@ -107,7 +107,6 @@ describe('UpdateTransactionUseCase', () => {
     });
 
     it('should update transaction account with correct data', async () => {
-      // Create a second account in the same budget
       const secondAccountResult = Account.create({
         name: 'Second Account',
         type: AccountTypeEnum.SAVINGS_ACCOUNT,
@@ -125,7 +124,7 @@ describe('UpdateTransactionUseCase', () => {
       const dto: UpdateTransactionDto = {
         userId,
         id: mockTransaction.id,
-        accountId: secondAccount.id, // Changed account
+        accountId: secondAccount.id,
       };
 
       const result = await useCase.execute(dto);
@@ -186,7 +185,7 @@ describe('UpdateTransactionUseCase', () => {
       const dto: UpdateTransactionDto = {
         userId,
         id: mockTransaction.id,
-        amount: -100, // Invalid amount
+        amount: -100,
       };
 
       const result = await useCase.execute(dto);

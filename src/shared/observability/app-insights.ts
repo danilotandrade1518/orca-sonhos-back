@@ -1,5 +1,4 @@
 import * as appInsights from 'applicationinsights';
-// We intentionally do not call loadEnv to avoid requiring DB_* vars just to skip App Insights.
 
 interface MinimalEnv {
   APPINSIGHTS_CONNECTION_STRING?: string;
@@ -11,12 +10,12 @@ interface MinimalEnv {
 let started = false;
 
 export function initAppInsights() {
-  if (started) return appInsights; // idempotent
+  if (started) return appInsights;
   const env: MinimalEnv = process.env as MinimalEnv;
   const disabled =
     env.APPINSIGHTS_DISABLED === 'true' || env.APPINSIGHTS_DISABLED === true;
-  if (disabled) return appInsights; // Explicitly disabled
-  if (!env.APPINSIGHTS_CONNECTION_STRING) return appInsights; // Not configured
+  if (disabled) return appInsights;
+  if (!env.APPINSIGHTS_CONNECTION_STRING) return appInsights;
 
   appInsights
     .setup(env.APPINSIGHTS_CONNECTION_STRING)
@@ -40,7 +39,6 @@ export function initAppInsights() {
     }
   }
 
-  // Cloud role name for better filtering
   if (
     appInsights.defaultClient?.context?.tags &&
     appInsights.defaultClient?.context?.keys

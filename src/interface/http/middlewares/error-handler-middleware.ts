@@ -10,12 +10,11 @@ export const errorHandlerMiddleware: HttpMiddleware = async (req, next) => {
   } catch (err) {
     const activeLogger = req.logger || logger;
     const errorObj = err instanceof Error ? err : new Error('Unknown error');
-    // If it's an application or domain error, map properly to HTTP (403/404/400), else 500.
+
     if (
       errorObj instanceof DomainError ||
       errorObj instanceof ApplicationError
     ) {
-      // Map known domain/application errors via mapper (403/404/400)
       return mapErrorsToHttp([errorObj], req.requestId);
     }
     activeLogger.error({

@@ -29,7 +29,6 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
   constructor() {
     this.app.use(express.json());
 
-    // Lightweight metrics endpoint (internal use) - no auth for now; protect via network layer
     this.app.get('/internal/metrics/mutations', (_req, res) => {
       res.json({ mutations: getMutationCounters() });
     });
@@ -37,12 +36,10 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
       res.json({ auth: getAuthCounters() });
     });
     this.app.get('/internal/metrics/queries', async (_req, res) => {
-      // Lazy import to avoid circular dep if needed
       res.set('Content-Type', 'text/plain; version=0.0.4');
       res.send(getQueryMetrics());
     });
 
-    // Configurable CORS (simple implementation, framework-agnostic behavior)
     if (process.env.CORS_ENABLED === 'true') {
       const originsRaw = process.env.CORS_ORIGINS || '*';
       const allowedOrigins = originsRaw.split(',').map((o) => o.trim());
@@ -159,7 +156,6 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
     });
   }
 
-  // For test environments to drop references
   dispose() {
     this.globalMiddlewares = [];
   }

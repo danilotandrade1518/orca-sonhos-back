@@ -24,10 +24,8 @@ describe('CategoryCompositionRoot Integration Tests', () => {
   beforeEach(async () => {
     await TestContainersSetup.resetDatabase();
 
-    // Generate fresh ID for each test
     testBudgetId = EntityId.create().value!.id;
 
-    // Create a budget in the database first to satisfy foreign key constraint
     await connection.query(
       `
       INSERT INTO budgets (id, name, owner_id, type, created_at, updated_at)
@@ -67,7 +65,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
       const useCase = compositionRoot.createCreateCategoryUseCase();
 
       const result = await useCase.execute({
-        name: '', // Invalid empty name
+        name: '',
         type: CategoryTypeEnum.EXPENSE,
         budgetId: testBudgetId,
       });
@@ -93,7 +91,6 @@ describe('CategoryCompositionRoot Integration Tests', () => {
     let categoryId: string;
 
     beforeEach(async () => {
-      // Create a category first
       const createUseCase = compositionRoot.createCreateCategoryUseCase();
       const createResult = await createUseCase.execute({
         name: 'Category to Update',
@@ -144,7 +141,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
 
       const result = await updateUseCase.execute({
         id: categoryId,
-        name: '', // Invalid empty name
+        name: '',
         type: CategoryTypeEnum.EXPENSE,
       });
 
@@ -156,7 +153,6 @@ describe('CategoryCompositionRoot Integration Tests', () => {
     let categoryId: string;
 
     beforeEach(async () => {
-      // Create a category first
       const createUseCase = compositionRoot.createCreateCategoryUseCase();
       const createResult = await createUseCase.execute({
         name: 'Category to Delete',
@@ -200,11 +196,9 @@ describe('CategoryCompositionRoot Integration Tests', () => {
     it('should handle category with dependencies', async () => {
       const deleteUseCase = compositionRoot.createDeleteCategoryUseCase();
 
-      // First create a transaction using this category
       const transactionId = EntityId.create().value!.id;
       const accountId = EntityId.create().value!.id;
 
-      // Create account first
       await connection.query(
         `
         INSERT INTO accounts (id, name, budget_id, type, balance, created_at, updated_at)
@@ -213,7 +207,6 @@ describe('CategoryCompositionRoot Integration Tests', () => {
         [accountId, 'Test Account', testBudgetId, 'CHECKING_ACCOUNT', 1000],
       );
 
-      // Create transaction using this category
       await connection.query(
         `
         INSERT INTO transactions (id, description, amount, type, transaction_date, account_id, budget_id, category_id, created_at, updated_at)
@@ -296,7 +289,7 @@ describe('CategoryCompositionRoot Integration Tests', () => {
       const createUseCase = compositionRoot.createCreateCategoryUseCase();
 
       const result = await createUseCase.execute({
-        name: '', // Empty name should fail
+        name: '',
         type: CategoryTypeEnum.EXPENSE,
         budgetId: testBudgetId,
       });

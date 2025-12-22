@@ -32,7 +32,6 @@ export class CreditCardBillCompositionRoot {
     );
   }
 
-  // Repositories builders
   private createAddCreditCardBillRepository(): AddCreditCardBillRepository {
     return new AddCreditCardBillRepository(this.connection);
   }
@@ -57,7 +56,6 @@ export class CreditCardBillCompositionRoot {
     return new GetCreditCardRepository(this.connection);
   }
 
-  // Use cases
   public createCreateCreditCardBillUseCase(): CreateCreditCardBillUseCase {
     const addRepo = this.createAddCreditCardBillRepository();
     return makeCreateCreditCardBillUseCase(addRepo);

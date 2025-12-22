@@ -20,7 +20,7 @@ export function createAuthMiddleware(
       incAuthFail('missing');
       throw new AuthTokenMissingError();
     }
-    const [, token] = authz.split(' '); // Expecting 'Bearer <token>'
+    const [, token] = authz.split(' ');
     if (!token) {
       incAuthFail('missing');
       throw new AuthTokenMissingError();

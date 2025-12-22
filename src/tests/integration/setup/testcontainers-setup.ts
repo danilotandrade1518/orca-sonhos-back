@@ -39,7 +39,6 @@ export class TestContainersSetup {
       password: 'test_password',
     };
 
-    // Set test environment to prevent process.exit
     process.env.NODE_ENV = 'test';
 
     this.connection = new PostgresConnectionAdapter(config);

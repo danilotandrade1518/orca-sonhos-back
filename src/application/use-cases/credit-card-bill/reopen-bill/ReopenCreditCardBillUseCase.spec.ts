@@ -216,14 +216,13 @@ describe('ReopenCreditCardBillUseCase', () => {
   });
 
   it('deve retornar erro quando bill.reopen() falha', async () => {
-    // Create a bill that's already in OPEN status to trigger reopen error
     const data: RestoreCreditCardBillDTO = {
       id: EntityId.create().value!.id,
       creditCardId: EntityId.create().value!.id,
       closingDate: new Date('2024-01-01'),
       dueDate: new Date('2024-01-20'),
       amount: 1000,
-      status: BillStatusEnum.OPEN, // Already open, can't reopen
+      status: BillStatusEnum.OPEN,
       paidAt: undefined,
       isDeleted: false,
       createdAt: new Date(),

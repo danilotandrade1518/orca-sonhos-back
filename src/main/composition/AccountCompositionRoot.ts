@@ -33,7 +33,6 @@ export class AccountCompositionRoot {
     private readonly adjustmentCategoryId: string,
     private readonly transferCategoryId: string,
   ) {
-    // Instantiate production unit of works
     this.reconcileAccountUnitOfWork = new ReconcileAccountUnitOfWork(
       this.connection,
     );

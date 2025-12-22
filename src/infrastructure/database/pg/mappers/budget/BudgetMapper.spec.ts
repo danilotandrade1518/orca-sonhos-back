@@ -66,7 +66,7 @@ describe('BudgetMapper', () => {
         id,
         name: 'Null Participants Budget',
         owner_id: ownerId,
-        participant_ids: null as unknown as string[], // Simulating PostgreSQL null
+        participant_ids: null as unknown as string[],
         type: BudgetTypeEnum.SHARED,
         is_deleted: false,
         created_at: new Date(),
@@ -106,7 +106,7 @@ describe('BudgetMapper', () => {
 
       const row: BudgetRow = {
         id,
-        name: '', // Invalid empty name
+        name: '',
         owner_id: ownerId,
         participant_ids: [ownerId],
         type: BudgetTypeEnum.SHARED,
@@ -126,7 +126,7 @@ describe('BudgetMapper', () => {
       const row: BudgetRow = {
         id,
         name: 'Valid Name',
-        owner_id: '', // Invalid empty owner_id
+        owner_id: '',
         participant_ids: [],
         type: BudgetTypeEnum.SHARED,
         is_deleted: false,
@@ -208,7 +208,7 @@ describe('BudgetMapper', () => {
 
       const row = BudgetMapper.toRow(budget);
 
-      expect(row.participant_ids).toContain(ownerId); // Owner is always added
+      expect(row.participant_ids).toContain(ownerId);
     });
   });
 });

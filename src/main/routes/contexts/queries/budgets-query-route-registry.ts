@@ -4,15 +4,12 @@ import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresCo
 import { IBudgetAuthorizationService } from '@application/services/authorization/IBudgetAuthorizationService';
 import { AuthTokenInvalidError } from '@application/shared/errors/AuthTokenInvalidError';
 
-// Handlers
 import { ListBudgetsQueryHandler } from '@application/queries/budget/list-budgets/ListBudgetsQueryHandler';
 import { BudgetOverviewQueryHandler } from '@application/queries/budget/budget-overview/BudgetOverviewQueryHandler';
 
-// DAOs
 import { ListBudgetsDao } from '@infrastructure/database/pg/daos/budget/list-budgets/ListBudgetsDao';
 import { BudgetOverviewDao } from '@infrastructure/database/pg/daos/budget/budget-overview/BudgetOverviewDao';
 
-// Metrics
 import {
   queriesTotal,
   queryLatencyMs,
@@ -26,7 +23,6 @@ export function buildBudgetQueryRoutes(params: {
   const overviewDao = new BudgetOverviewDao(params.connection);
 
   return [
-    // GET /budgets
     {
       method: 'GET',
       path: '/budgets',
@@ -56,7 +52,6 @@ export function buildBudgetQueryRoutes(params: {
       },
     },
 
-    // GET /budget/:budgetId/overview
     {
       method: 'GET',
       path: '/budget/:budgetId/overview',

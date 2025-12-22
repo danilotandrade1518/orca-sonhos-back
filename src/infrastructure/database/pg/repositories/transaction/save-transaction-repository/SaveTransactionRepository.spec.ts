@@ -93,7 +93,7 @@ describe('SaveTransactionRepository', () => {
         row.transaction_date,
         row.status,
         row.is_deleted,
-        expect.any(Date), // updated_at é atualizado dinamicamente
+        expect.any(Date),
       ]);
     });
 

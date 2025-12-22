@@ -161,7 +161,6 @@ describe('CreditCardBillMapper', () => {
         amount: 200000,
       }).data!;
 
-      // Simulate payment
       bill.markAsPaid();
 
       const result = CreditCardBillMapper.toRow(bill);

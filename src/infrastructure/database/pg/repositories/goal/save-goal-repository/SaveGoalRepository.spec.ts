@@ -29,7 +29,6 @@ describe('SaveGoalRepository', () => {
   });
 
   const createValidGoal = async (): Promise<Goal> => {
-    // Mock automático para o INSERT do AddGoalRepository
     mockConnection.query.mockResolvedValueOnce({
       rows: [{ rowCount: 1 }],
       rowCount: 1,
@@ -54,7 +53,6 @@ describe('SaveGoalRepository', () => {
       const goal = await createValidGoal();
       goal.addAmount(15000);
 
-      // Mock para o UPDATE do SaveGoalRepository
       mockConnection.query.mockResolvedValueOnce({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
@@ -69,11 +67,11 @@ describe('SaveGoalRepository', () => {
           goal.id,
           'Test Goal',
           100000,
-          40000, // 25000 + 15000
-          null, // deadline
+          40000,
+          null,
           goal.budgetId,
           goal.sourceAccountId,
-          false, // is_deleted
+          false,
           goal.updatedAt,
         ]),
       );
@@ -82,7 +80,6 @@ describe('SaveGoalRepository', () => {
     it('should call UPDATE with correct SQL structure', async () => {
       const goal = await createValidGoal();
 
-      // Mock para o UPDATE do SaveGoalRepository
       mockConnection.query.mockResolvedValueOnce({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
@@ -90,7 +87,6 @@ describe('SaveGoalRepository', () => {
 
       await repository.execute(goal);
 
-      // Pega a segunda chamada (a primeira é o INSERT, a segunda é o UPDATE)
       const [query, params] = mockConnection.query.mock.calls[1];
       expect(query).toContain('UPDATE goals');
       expect(query).toContain('name = $2');
@@ -134,7 +130,6 @@ describe('SaveGoalRepository', () => {
       const goal = await createValidGoal();
       goal.delete();
 
-      // Mock para o UPDATE do SaveGoalRepository
       mockConnection.query.mockResolvedValueOnce({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
@@ -145,7 +140,7 @@ describe('SaveGoalRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
-        expect.arrayContaining([true]), // is_deleted = true
+        expect.arrayContaining([true]),
       );
     });
 
@@ -153,7 +148,6 @@ describe('SaveGoalRepository', () => {
       const goal = await createValidGoal();
       goal.addAmount(25000);
 
-      // Mock para o UPDATE do SaveGoalRepository
       mockConnection.query.mockResolvedValueOnce({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
@@ -164,7 +158,7 @@ describe('SaveGoalRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
-        expect.arrayContaining([50000]), // 25000 + 25000
+        expect.arrayContaining([50000]),
       );
     });
 
@@ -172,7 +166,6 @@ describe('SaveGoalRepository', () => {
       const goal = await createValidGoal();
       goal.addAmount(25000);
 
-      // Mock para o UPDATE do SaveGoalRepository
       mockConnection.query.mockResolvedValueOnce({
         rows: [{ rowCount: 1 }],
         rowCount: 1,
@@ -183,14 +176,13 @@ describe('SaveGoalRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
-        expect.arrayContaining([50000]), // 25000 + 25000
+        expect.arrayContaining([50000]),
       );
     });
 
     it('should return error when goal not found', async () => {
       const goal = await createValidGoal();
 
-      // Mock para o UPDATE do SaveGoalRepository retornando 0 linhas
       mockConnection.query.mockResolvedValueOnce({
         rows: [],
         rowCount: 0,
@@ -208,7 +200,6 @@ describe('SaveGoalRepository', () => {
     it('should return error when query returns null', async () => {
       const goal = await createValidGoal();
 
-      // Mock para o UPDATE do SaveGoalRepository retornando null
       mockConnection.query.mockResolvedValueOnce(null);
 
       const result = await repository.execute(goal);
@@ -222,7 +213,7 @@ describe('SaveGoalRepository', () => {
       const goal = await createValidGoal();
 
       const dbError = new Error('Database connection failed');
-      // Mock para o UPDATE do SaveGoalRepository lançando erro
+
       mockConnection.query.mockRejectedValueOnce(dbError);
 
       const result = await repository.execute(goal);
@@ -261,14 +252,12 @@ describe('SaveGoalRepository', () => {
     it('should handle goal amount additions correctly', async () => {
       const goal = await createValidGoal();
 
-      // Add amount twice
       goal.addAmount(5000);
       expect(goal.accumulatedAmount).toBe(30000);
 
       goal.addAmount(10000);
       expect(goal.accumulatedAmount).toBe(40000);
 
-      // Mock para o UPDATE do SaveGoalRepository
       mockConnection.query.mockResolvedValueOnce({
         rows: [{ rowCount: 1 }],
         rowCount: 1,

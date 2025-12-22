@@ -16,7 +16,6 @@ import { SaveGoalRepository } from '@infrastructure/database/pg/repositories/goa
 export class GoalCompositionRoot {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  // Repositories
   private createAddGoalRepository(): AddGoalRepository {
     return new AddGoalRepository(this.connection);
   }
@@ -50,7 +49,6 @@ export class GoalCompositionRoot {
     return new BudgetAuthorizationService(getBudgetRepo);
   }
 
-  // Use cases
   public createCreateGoalUseCase(): CreateGoalUseCase {
     const addRepo = this.createAddGoalRepository();
     return new CreateGoalUseCase(addRepo);

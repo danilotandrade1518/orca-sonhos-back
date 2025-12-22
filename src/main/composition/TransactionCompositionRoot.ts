@@ -17,7 +17,6 @@ export class TransactionCompositionRoot {
     private readonly budgetAuthorizationService: IBudgetAuthorizationService,
   ) {}
 
-  // Repositories
   private createAddTransactionRepository() {
     return new AddTransactionRepository(this.connection);
   }
@@ -37,7 +36,6 @@ export class TransactionCompositionRoot {
     return new GetAccountRepository(this.connection);
   }
 
-  // Use cases
   public createCreateTransactionUseCase() {
     return new CreateTransactionUseCase(
       this.createAddTransactionRepository(),

@@ -21,10 +21,8 @@ dotenv.config();
 const env = loadEnv();
 process.env.TZ = 'UTC';
 
-// Initialize Application Insights (no-op if not configured)
 initAppInsights();
 
-// Infra dependencies
 const dbConfig: DatabaseConfig = {
   host: env.DB_HOST,
   port: Number(env.DB_PORT),
@@ -34,7 +32,6 @@ const dbConfig: DatabaseConfig = {
 };
 const connection = new PostgresConnectionAdapter(dbConfig);
 
-// Auth components (MVP)
 const jwtValidator = new JwtValidator({
   jwksUri: env.AUTH_JWKS_URI,
   issuer: env.AUTH_ISSUER,
@@ -43,20 +40,17 @@ const jwtValidator = new JwtValidator({
   required: env.AUTH_REQUIRED,
 });
 const principalFactory = new PrincipalFactory();
-// Production budget authorization wired to real repository
+
 const getBudgetRepository = new GetBudgetRepository(connection);
 const authService: IBudgetAuthorizationService = new BudgetAuthorizationService(
   getBudgetRepository,
 );
 
-// Category IDs via env/config
 const adjustmentCategoryId = env.CATEGORY_ID_ADJUSTMENT;
 const transferCategoryId = env.CATEGORY_ID_TRANSFER;
 
-// HTTP Server Adapter
 const server = new ExpressHttpServerAdapter();
 
-// Expose swagger through raw express app
 server.rawApp.use(
   '/api-docs',
   swaggerUi.serve,
@@ -65,7 +59,7 @@ server.rawApp.use(
 server.rawApp.get('/', (_req, res) => {
   res.send('OrçaSonhos API rodando!');
 });
-// Attach auth middleware globally (non-required for now if AUTH_REQUIRED=false)
+
 server.addGlobalMiddleware(
   createAuthMiddleware(jwtValidator, principalFactory, env.AUTH_REQUIRED),
 );

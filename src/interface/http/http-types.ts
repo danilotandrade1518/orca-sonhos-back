@@ -19,7 +19,7 @@ export interface HttpRequest<
   query: TQuery;
   principal?: Principal;
   requestId: string;
-  raw?: unknown; // framework-specific reference
+  raw?: unknown;
   logger?: ILogger;
 }
 

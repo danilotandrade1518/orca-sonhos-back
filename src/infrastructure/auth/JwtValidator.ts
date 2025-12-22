@@ -8,18 +8,15 @@ import {
 import { ApplicationError } from '../../application/shared/errors/ApplicationError';
 import { AuthTokenInvalidError } from '../../application/shared/errors/AuthTokenInvalidError';
 
-// Minimal JWT verification (RS256) without external dependency.
-// NOTE: For production hardening, consider a vetted lib (e.g., jose) but keeping MVP dependency surface minimal.
-
 interface JwtValidatorConfig {
   jwksUri?: string;
   issuer?: string;
   audience?: string;
   userIdClaim: string;
   required: boolean;
-  fetchFn?: typeof fetch; // allows test
+  fetchFn?: typeof fetch;
   jwksTtlMs?: number;
-  clockSkewSec?: number; // allowed clock skew for exp check
+  clockSkewSec?: number;
 }
 
 export class JwtValidator implements IJwtValidator {
@@ -66,7 +63,6 @@ export class JwtValidator implements IJwtValidator {
     if (now - skew > payload.exp)
       return Either.error(new AuthTokenInvalidError('Token expired'));
 
-    // Signature verification (RS256 only) minimal implementation
     if (header.alg !== 'RS256')
       return Either.error(new AuthTokenInvalidError('Unsupported alg'));
 
@@ -120,7 +116,6 @@ export class JwtValidator implements IJwtValidator {
     const modulus = Buffer.from(modulusB64Url, 'base64url');
     const exponent = Buffer.from(exponentB64Url, 'base64url');
 
-    // Build minimal DER sequence for RSA public key
     function derEncodeLength(len: number): Buffer {
       if (len < 128) return Buffer.from([len]);
       const bytes: number[] = [];
@@ -156,7 +151,7 @@ export class JwtValidator implements IJwtValidator {
       Buffer.from([0x00]),
       fullSeq,
     ]);
-    const algId = Buffer.from('300d06092a864886f70d0101010500', 'hex'); // rsaEncryption OID
+    const algId = Buffer.from('300d06092a864886f70d0101010500', 'hex');
     const subjectPubKeyInfo = Buffer.concat([
       Buffer.from([0x30]),
       derEncodeLength(algId.length + bitString.length),
@@ -167,6 +162,6 @@ export class JwtValidator implements IJwtValidator {
     const pem = `-----BEGIN PUBLIC KEY-----\n${b64.match(/.{1,64}/g)?.join('\n')}\n-----END PUBLIC KEY-----`;
     return pem;
   }
-  // Static JWKS cache
+
   private static jwksCache: { keys: any[]; expiresAt: number } | null = null; // eslint-disable-line @typescript-eslint/no-explicit-any
 }

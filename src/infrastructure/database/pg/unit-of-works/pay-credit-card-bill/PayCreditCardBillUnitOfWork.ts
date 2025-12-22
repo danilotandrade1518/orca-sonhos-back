@@ -43,7 +43,7 @@ export class PayCreditCardBillUnitOfWork
     logMutationStart(logger, {
       operation: 'pay_credit_card_bill',
       entityType: 'credit_card_bill',
-      entityId: bill.id, // assuming getter id
+      entityId: bill.id,
     });
 
     let client: IDatabaseClient;

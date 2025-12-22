@@ -69,7 +69,7 @@ describe('CreateCreditCardBillUseCase', () => {
       const { sut } = makeSut();
       const dto = makeValidDto();
       dto.closingDate = new Date('2024-01-25');
-      dto.dueDate = new Date('2024-01-15'); // anterior ao fechamento
+      dto.dueDate = new Date('2024-01-15');
 
       const result = await sut.execute(dto);
 
@@ -116,7 +116,7 @@ describe('CreateCreditCardBillUseCase', () => {
       const { sut } = makeSut();
       const dto = makeValidDto();
       dto.closingDate = new Date('2024-01-20');
-      dto.dueDate = new Date('2024-01-25'); // deve ser posterior
+      dto.dueDate = new Date('2024-01-25');
 
       const result = await sut.execute(dto);
 

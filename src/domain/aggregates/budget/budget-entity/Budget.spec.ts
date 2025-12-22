@@ -423,7 +423,7 @@ describe('Budget', () => {
 
       const restoreData = {
         id,
-        name: '', // Invalid empty name
+        name: '',
         ownerId,
         participantIds: [ownerId],
         createdAt: new Date(),
@@ -443,7 +443,7 @@ describe('Budget', () => {
       const restoreData = {
         id,
         name: 'Valid Budget',
-        ownerId: '', // Invalid empty owner ID
+        ownerId: '',
         participantIds: [],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -460,7 +460,7 @@ describe('Budget', () => {
       const ownerId = EntityId.create().value!.id;
 
       const restoreData = {
-        id: '', // Invalid empty ID
+        id: '',
         name: 'Valid Budget',
         ownerId,
         participantIds: [ownerId],
@@ -483,7 +483,7 @@ describe('Budget', () => {
         id,
         name: 'Valid Budget',
         ownerId,
-        participantIds: ['', 'invalid-id'], // Invalid participant IDs
+        participantIds: ['', 'invalid-id'],
         createdAt: new Date(),
         updatedAt: new Date(),
         isDeleted: false,

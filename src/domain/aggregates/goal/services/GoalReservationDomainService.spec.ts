@@ -78,7 +78,7 @@ describe('GoalReservationDomainService', () => {
         validBudgetId,
         1000,
         AccountTypeEnum.SAVINGS_ACCOUNT,
-      ); // Savings account doesn't allow negative balance
+      );
       const goal = createValidGoal(validBudgetId, sourceAccount.id, 500);
       const otherGoal = createValidGoal(validBudgetId, sourceAccount.id, 400);
       const allGoals = [goal, otherGoal];
@@ -87,7 +87,7 @@ describe('GoalReservationDomainService', () => {
         goal,
         sourceAccount,
         allGoalsFromAccount: allGoals,
-        additionalAmount: 200, // This would make total reservation 1100 (400 + 500 + 200) > 1000 balance
+        additionalAmount: 200,
       });
 
       expect(result.hasError).toBe(true);
@@ -105,7 +105,7 @@ describe('GoalReservationDomainService', () => {
         goal,
         sourceAccount,
         allGoalsFromAccount: allGoals,
-        additionalAmount: 100, // Total would be: 1000 (other goals) + 400 (300+100) = 1400
+        additionalAmount: 100,
       });
 
       expect(result.hasError).toBe(false);

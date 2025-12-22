@@ -13,7 +13,7 @@ export function createBudgetAccessMiddleware(
     const params = req.params as Record<string, string>;
 
     const budgetId = params[budgetIdParam];
-    if (!budgetId) return next(); // if route doesn't have budget id param, skip
+    if (!budgetId) return next();
 
     const result = await authorizationService.canAccessBudget(
       principal.userId,

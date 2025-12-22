@@ -7,7 +7,7 @@ import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
 type ReconcileAccountBody = {
   userId: string;
-  budgetId: string; // forwarded to use case
+  budgetId: string;
   accountId: string;
   realBalance: number;
 };

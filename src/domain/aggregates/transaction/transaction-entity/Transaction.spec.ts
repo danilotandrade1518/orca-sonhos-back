@@ -16,7 +16,7 @@ import {
 describe('Transaction', () => {
   const validTransactionData: CreateTransactionDTO = {
     description: 'Supermercado ABC',
-    amount: 5000, // R$ 50,00 em centavos
+    amount: 5000,
     type: TransactionTypeEnum.EXPENSE,
     transactionDate: new Date(Date.now() + 86400000),
     categoryId: '123e4567-e89b-12d3-a456-426614174000',
@@ -75,7 +75,7 @@ describe('Transaction', () => {
     it('deve retornar erro se descrição for inválida', () => {
       const invalidData = {
         ...validTransactionData,
-        description: 'AB', // Muito curta
+        description: 'AB',
       };
 
       const result = Transaction.create(invalidData);
@@ -87,7 +87,7 @@ describe('Transaction', () => {
     it('deve retornar erro se amount for inválido', () => {
       const invalidData = {
         ...validTransactionData,
-        amount: -100, // Negativo
+        amount: -100,
       };
 
       const result = Transaction.create(invalidData);
@@ -570,8 +570,8 @@ describe('Transaction', () => {
     it('deve retornar erro ao restaurar com dados inválidos', () => {
       const restoreData = {
         id: 'invalid-id',
-        description: '', // Descrição inválida
-        amount: -100, // Valor inválido
+        description: '',
+        amount: -100,
         type: 'INVALID' as TransactionTypeEnum,
         accountId: 'invalid-account-id',
         categoryId: 'invalid-category-id',
@@ -604,7 +604,6 @@ describe('Transaction', () => {
         updatedAt: new Date(),
       };
 
-      // Testar todos os status possíveis
       const statuses = [
         TransactionStatusEnum.SCHEDULED,
         TransactionStatusEnum.COMPLETED,
@@ -635,7 +634,6 @@ describe('Transaction', () => {
         updatedAt: new Date(),
       };
 
-      // Testar todos os tipos possíveis
       const types = [
         TransactionTypeEnum.INCOME,
         TransactionTypeEnum.EXPENSE,
@@ -748,7 +746,7 @@ describe('Transaction', () => {
 
     it('deve retornar erro ao atualizar com descrição inválida', () => {
       const updateData: UpdateTransactionDTO = {
-        description: 'AB', // Muito curta
+        description: 'AB',
         amount: transaction.amount,
         type: transaction.type,
         accountId: transaction.accountId,
@@ -763,7 +761,7 @@ describe('Transaction', () => {
     it('deve retornar erro ao atualizar com valor inválido', () => {
       const updateData: UpdateTransactionDTO = {
         description: transaction.description,
-        amount: -100, // Negativo
+        amount: -100,
         type: transaction.type,
         accountId: transaction.accountId,
       };
@@ -843,7 +841,6 @@ describe('Transaction', () => {
       const transaction = Transaction.create(validTransactionData).data!;
       const originalUpdatedAt = transaction.updatedAt;
 
-      // Aguardar um pouco para garantir diferença de tempo
       setTimeout(() => {
         transaction.delete();
         expect(transaction.updatedAt).not.toEqual(originalUpdatedAt);
@@ -860,7 +857,7 @@ describe('Transaction', () => {
 
       const result = transaction.complete();
 
-      expect(result.hasError).toBe(false); // Não é erro completar uma já completada
+      expect(result.hasError).toBe(false);
       expect(transaction.status).toBe(TransactionStatusEnum.COMPLETED);
     });
 
@@ -871,7 +868,6 @@ describe('Transaction', () => {
       }).data!;
       const originalUpdatedAt = transaction.updatedAt;
 
-      // Aguardar um pouco para garantir diferença de tempo
       setTimeout(() => {
         transaction.complete();
         expect(transaction.updatedAt).not.toEqual(originalUpdatedAt);
@@ -918,7 +914,7 @@ describe('Transaction', () => {
 
       const result = transaction.markAsOverdue();
 
-      expect(result.hasError).toBe(false); // Não é erro marcar como atrasada uma já atrasada
+      expect(result.hasError).toBe(false);
       expect(transaction.status).toBe(TransactionStatusEnum.OVERDUE);
     });
 
@@ -933,7 +929,6 @@ describe('Transaction', () => {
       }).data!;
       const originalUpdatedAt = transaction.updatedAt;
 
-      // Aguardar um pouco para garantir diferença de tempo
       setTimeout(() => {
         transaction.markAsOverdue();
         expect(transaction.updatedAt).not.toEqual(originalUpdatedAt);
@@ -949,7 +944,7 @@ describe('Transaction', () => {
       const dataWithProvidedStatus: CreateTransactionDTO = {
         ...validTransactionData,
         transactionDate: futureDate,
-        status: TransactionStatusEnum.COMPLETED, // Status específico fornecido
+        status: TransactionStatusEnum.COMPLETED,
       };
 
       const transaction = Transaction.create(dataWithProvidedStatus).data!;
@@ -1004,7 +999,6 @@ describe('Transaction', () => {
     it('deve criar transação sem cartão de crédito', () => {
       const dataWithoutCreditCard: CreateTransactionDTO = {
         ...validTransactionData,
-        // creditCardId não especificado
       };
 
       const result = Transaction.create(dataWithoutCreditCard);
@@ -1064,7 +1058,6 @@ describe('Transaction', () => {
           status,
         }).data!;
 
-        // Verificar que apenas o helper correspondente retorna true
         const helpers = [
           { name: 'isScheduled', value: transaction.isScheduled },
           { name: 'isCompleted', value: transaction.isCompleted },
@@ -1076,7 +1069,6 @@ describe('Transaction', () => {
         const trueHelpers = helpers.filter((h) => h.value);
         expect(trueHelpers).toHaveLength(1);
 
-        // Verificar qual helper deve ser true para cada status
         switch (status) {
           case TransactionStatusEnum.SCHEDULED:
             expect(transaction.isScheduled).toBe(true);
@@ -1105,13 +1097,11 @@ describe('Transaction', () => {
       const originalCreatedAt = transaction.createdAt;
       const originalBudgetId = transaction.budgetId;
 
-      // Completar transação
       transaction.complete();
       expect(transaction.id).toBe(originalId);
       expect(transaction.createdAt).toBe(originalCreatedAt);
       expect(transaction.budgetId).toBe(originalBudgetId);
 
-      // Cancelar transação
       const newTransaction = Transaction.create(validTransactionData).data!;
       newTransaction.cancel('reason');
       expect(newTransaction.id).toBeDefined();
@@ -1120,10 +1110,8 @@ describe('Transaction', () => {
     });
 
     it('deve manter consistência entre create e restore', () => {
-      // Criar transação
       const createdTransaction = Transaction.create(validTransactionData).data!;
 
-      // Simular dados de restore baseados na transação criada
       const restoreData = {
         id: createdTransaction.id,
         description: createdTransaction.description,
@@ -1139,10 +1127,8 @@ describe('Transaction', () => {
         updatedAt: createdTransaction.updatedAt,
       };
 
-      // Restaurar transação
       const restoredTransaction = Transaction.restore(restoreData).data!;
 
-      // Verificar que os dados são consistentes
       expect(restoredTransaction.id).toBe(createdTransaction.id);
       expect(restoredTransaction.description).toBe(
         createdTransaction.description,

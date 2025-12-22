@@ -140,12 +140,11 @@ describe('TransferBetweenAccountsUseCase', () => {
     });
 
     it('should return error when domain service validation fails', async () => {
-      // Create a savings account that doesn't allow negative balance
       const accountWithInsufficientBalance = Account.create({
         name: 'Conta Poupança com saldo insuficiente',
-        type: AccountTypeEnum.SAVINGS_ACCOUNT, // Savings account doesn't allow negative balance
+        type: AccountTypeEnum.SAVINGS_ACCOUNT,
         budgetId,
-        initialBalance: 100, // Less than transfer amount
+        initialBalance: 100,
       }).data!;
 
       jest
@@ -162,7 +161,7 @@ describe('TransferBetweenAccountsUseCase', () => {
         userId,
         fromAccountId: accountWithInsufficientBalance.id,
         toAccountId: toAccount.id,
-        amount: 200, // More than available balance
+        amount: 200,
       };
 
       const result = await useCase.execute(dto);
@@ -226,7 +225,6 @@ describe('TransferBetweenAccountsUseCase', () => {
     });
 
     it('should return error when transfer category ID is invalid', async () => {
-      // Create a new use case with an invalid transfer category ID
       const invalidUseCase = new TransferBetweenAccountsUseCase(
         getAccountRepositoryStub,
         transferUnitOfWorkStub,

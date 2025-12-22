@@ -109,7 +109,7 @@ describe('CreateGoalUseCase', () => {
     it('deve aceitar valor acumulado maior que total (over-reserving permitido)', async () => {
       const { sut } = makeSut();
       const dto = makeValidDto();
-      dto.accumulatedAmount = 6000; // maior que totalAmount (5000)
+      dto.accumulatedAmount = 6000;
 
       const result = await sut.execute(dto);
 
@@ -120,7 +120,7 @@ describe('CreateGoalUseCase', () => {
     it('deve aceitar valor acumulado igual ao total', async () => {
       const { sut } = makeSut();
       const dto = makeValidDto();
-      dto.accumulatedAmount = 5000; // igual ao totalAmount
+      dto.accumulatedAmount = 5000;
 
       const result = await sut.execute(dto);
 

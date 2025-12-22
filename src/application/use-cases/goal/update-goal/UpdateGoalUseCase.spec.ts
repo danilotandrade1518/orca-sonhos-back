@@ -130,7 +130,7 @@ describe('UpdateGoalUseCase', () => {
       const goal = makeValidGoal();
       getGoalByIdRepository.setGoal(goal);
       const dto = makeValidDto();
-      dto.totalAmount = 500; // menor que o valor acumulado (1000)
+      dto.totalAmount = 500;
 
       const result = await sut.execute(dto);
 
@@ -145,7 +145,7 @@ describe('UpdateGoalUseCase', () => {
       const dto: UpdateGoalDto = {
         id: goal.id,
         name: 'Novo Nome',
-        totalAmount: goal.totalAmount, // mesmo valor
+        totalAmount: goal.totalAmount,
       };
 
       const result = await sut.execute(dto);

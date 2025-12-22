@@ -9,7 +9,6 @@ import { IPostgresConnectionAdapter } from '../../../../../adapters/IPostgresCon
 import { BudgetMapper, BudgetRow } from '../../../mappers/budget/BudgetMapper';
 import { GetBudgetRepository } from './GetBudgetRepository';
 
-// Mock do BudgetMapper
 jest.mock('../../../mappers/budget/BudgetMapper');
 
 class TestDomainError extends DomainError {
@@ -24,10 +23,8 @@ describe('GetBudgetRepository', () => {
   let mockBudgetMapper: jest.Mocked<typeof BudgetMapper>;
 
   beforeEach(() => {
-    // Reset dos mocks
     jest.clearAllMocks();
 
-    // Mock da conexão
     mockConnection = {
       query: jest.fn(),
       transaction: jest.fn(),

@@ -90,7 +90,7 @@ describe('ReconcileAccountUnitOfWork', () => {
       accountId: EntityId.create().value!.id,
       categoryId: EntityId.create().value!.id,
       budgetId: EntityId.create().value!.id,
-      amount: 50000, // R$ 500,00
+      amount: 50000,
       type: TransactionTypeEnum.INCOME,
       transactionDate: new Date(),
       description: 'Reconciliation adjustment transaction',
@@ -203,10 +203,9 @@ describe('ReconcileAccountUnitOfWork', () => {
       const unexpectedError = new Error('Unexpected error');
       const rollbackError = new Error('Rollback failed');
 
-      // Simulate an unexpected error during execution (after BEGIN succeeds)
       mockClient.query
-        .mockResolvedValueOnce(null) // BEGIN succeeds
-        .mockRejectedValueOnce(rollbackError); // ROLLBACK fails
+        .mockResolvedValueOnce(null)
+        .mockRejectedValueOnce(rollbackError);
 
       mockSaveAccountRepository.executeWithClient.mockRejectedValue(
         unexpectedError,

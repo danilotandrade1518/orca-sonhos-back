@@ -55,7 +55,7 @@ describe('AddCreditCardRepository', () => {
           15,
           10,
           creditCard.budgetId,
-          false, // is_deleted
+          false,
           creditCard.createdAt,
           creditCard.updatedAt,
         ]),
@@ -98,7 +98,7 @@ describe('AddCreditCardRepository', () => {
     it('should handle credit card with large limit', async () => {
       const creditCard = CreditCard.create({
         name: 'Premium Card',
-        limit: 1000000, // 10,000.00
+        limit: 1000000,
         closingDay: 30,
         dueDay: 20,
         budgetId: EntityId.create().value!.id,
@@ -122,7 +122,7 @@ describe('AddCreditCardRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO credit_cards'),
-        expect.arrayContaining([true]), // is_deleted = true
+        expect.arrayContaining([true]),
       );
     });
 

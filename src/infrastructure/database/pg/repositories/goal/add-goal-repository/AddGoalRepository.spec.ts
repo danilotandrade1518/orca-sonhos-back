@@ -53,10 +53,10 @@ describe('AddGoalRepository', () => {
           'Emergency Fund',
           100000,
           25000,
-          null, // deadline
+          null,
           goal.budgetId,
-          false, // is_achieved
-          false, // is_deleted
+          false,
+          false,
           goal.createdAt,
           goal.updatedAt,
         ]),
@@ -109,7 +109,7 @@ describe('AddGoalRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO goals'),
-        expect.arrayContaining([true]), // is_deleted = true
+        expect.arrayContaining([true]),
       );
     });
 

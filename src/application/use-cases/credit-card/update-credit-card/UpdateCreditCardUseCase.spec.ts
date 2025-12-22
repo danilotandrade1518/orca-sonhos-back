@@ -57,7 +57,7 @@ const makeValidCreditCard = (): CreditCard => {
   const creditCardResult = CreditCard.restore({
     id: validId,
     name: 'Cartão Original',
-    limit: 100000, // 1000.00 em centavos
+    limit: 100000,
     closingDay: 5,
     dueDay: 10,
     budgetId: validBudgetId,
@@ -186,7 +186,7 @@ describe('UpdateCreditCardUseCase', () => {
     it('deve retornar erro se tentar atualizar cartão deletado', async () => {
       const { sut, getCreditCardRepository } = makeSut();
       const creditCard = makeValidCreditCard();
-      creditCard.delete(); // deletar o cartão
+      creditCard.delete();
       getCreditCardRepository.setCreditCard(creditCard);
       const dto = makeValidDto();
 

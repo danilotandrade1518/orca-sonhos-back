@@ -133,7 +133,7 @@ describe('GetCreditCardRepository', () => {
       const mockRow: CreditCardRow = {
         id: creditCardId,
         name: 'Invalid Credit Card',
-        credit_limit: -1000.0, // Invalid limit
+        credit_limit: -1000.0,
         closing_day: 15,
         due_day: 10,
         budget_id: '550e8400-e29b-41d4-a716-446655440003',

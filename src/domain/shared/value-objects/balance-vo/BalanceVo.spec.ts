@@ -125,21 +125,21 @@ describe('BalanceVo', () => {
 
   describe('practical scenarios', () => {
     it('should handle bank account with positive balance', () => {
-      const balance = BalanceVo.create(150000); // R$ 1.500,00
+      const balance = BalanceVo.create(150000);
 
       expect(balance.hasError).toBe(false);
       expect(balance.asMonetaryValue).toBe(1500);
     });
 
     it('should handle bank account with negative balance (overdraft)', () => {
-      const balance = BalanceVo.create(-5000); // -R$ 50,00
+      const balance = BalanceVo.create(-5000);
 
       expect(balance.hasError).toBe(false);
       expect(balance.asMonetaryValue).toBe(-50);
     });
 
     it('should handle credit card balance (usually negative)', () => {
-      const balance = BalanceVo.create(-25000); // -R$ 250,00 debt
+      const balance = BalanceVo.create(-25000);
 
       expect(balance.hasError).toBe(false);
       expect(balance.asMonetaryValue).toBe(-250);

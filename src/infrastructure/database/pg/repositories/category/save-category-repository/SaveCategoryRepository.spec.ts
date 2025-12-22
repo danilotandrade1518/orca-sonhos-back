@@ -103,7 +103,7 @@ describe('SaveCategoryRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE categories'),
-        expect.arrayContaining([true]), // is_deleted = true
+        expect.arrayContaining([true]),
       );
     });
 
@@ -156,12 +156,12 @@ describe('SaveCategoryRepository', () => {
       await repository.execute(category);
 
       const [, params] = mockConnection.query.mock.calls[0];
-      expect(params[0]).toBe(category.id); // id
-      expect(params[1]).toBe('Updated Name'); // name
-      expect(params[2]).toBe(CategoryTypeEnum.EXPENSE); // type
-      expect(params[3]).toBe(budgetId); // budget_id
-      expect(params[4]).toBe(false); // is_deleted
-      expect(params[5]).toBeInstanceOf(Date); // updated_at
+      expect(params[0]).toBe(category.id);
+      expect(params[1]).toBe('Updated Name');
+      expect(params[2]).toBe(CategoryTypeEnum.EXPENSE);
+      expect(params[3]).toBe(budgetId);
+      expect(params[4]).toBe(false);
+      expect(params[5]).toBeInstanceOf(Date);
     });
 
     it('should handle category with different budget', async () => {

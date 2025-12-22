@@ -162,7 +162,7 @@ describe('DeleteCreditCardRepository', () => {
 
     it('should handle already deleted credit card (no rows affected)', async () => {
       const creditCardId = EntityId.create().value!.id;
-      // Simula que nenhuma linha foi afetada porque o credit card já estava deletado
+
       mockConnection.query.mockResolvedValue({
         rows: [],
         rowCount: 0,
@@ -199,7 +199,7 @@ describe('DeleteCreditCardRepository', () => {
       const result = await repository.execute(creditCardId);
 
       expect(result.hasError).toBe(false);
-      // Should work regardless of credit card limit
+
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_cards'),
         [creditCardId],
@@ -216,7 +216,7 @@ describe('DeleteCreditCardRepository', () => {
       const result = await repository.execute(creditCardId);
 
       expect(result.hasError).toBe(false);
-      // Should work regardless of closing/due days
+
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_cards'),
         [creditCardId],
@@ -233,7 +233,7 @@ describe('DeleteCreditCardRepository', () => {
       const result = await repository.execute(creditCardId);
 
       expect(result.hasError).toBe(false);
-      // Should work regardless of which budget it belongs to
+
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_cards'),
         [creditCardId],

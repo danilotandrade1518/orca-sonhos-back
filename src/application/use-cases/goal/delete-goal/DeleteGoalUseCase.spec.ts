@@ -115,7 +115,7 @@ describe('DeleteGoalUseCase', () => {
     it('deve retornar erro se tentar deletar meta já deletada', async () => {
       const { sut, getGoalByIdRepository } = makeSut();
       const goal = makeValidGoal();
-      goal.delete(); // deleta a meta primeiro
+      goal.delete();
       getGoalByIdRepository.setGoal(goal);
       const dto = makeValidDto();
 

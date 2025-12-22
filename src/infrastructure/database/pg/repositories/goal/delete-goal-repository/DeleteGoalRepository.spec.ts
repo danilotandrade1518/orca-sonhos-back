@@ -170,7 +170,7 @@ describe('DeleteGoalRepository', () => {
 
     it('should handle already deleted goal (no rows affected)', async () => {
       const goalId = EntityId.create().value!.id;
-      // Simula que nenhuma linha foi afetada porque a goal já estava deletada
+
       mockConnection.query.mockResolvedValue({
         rows: [],
         rowCount: 0,
@@ -207,7 +207,7 @@ describe('DeleteGoalRepository', () => {
       const result = await repository.execute(goalId);
 
       expect(result.hasError).toBe(false);
-      // Should work regardless of achievement status
+
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         [goalId],
@@ -224,7 +224,7 @@ describe('DeleteGoalRepository', () => {
       const result = await repository.execute(goalId);
 
       expect(result.hasError).toBe(false);
-      // Should work regardless of amounts
+
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE goals'),
         [goalId],

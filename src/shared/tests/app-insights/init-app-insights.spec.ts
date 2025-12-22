@@ -1,7 +1,5 @@
 import { resetEnvCache } from '../../../config/env';
 
-// We import dynamically after manipulating env to ensure loadEnv sees new vars.
-
 describe('initAppInsights', () => {
   const ORIGINAL_ENV = process.env;
 

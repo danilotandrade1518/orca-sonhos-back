@@ -65,7 +65,7 @@ const makeCreditCardBill = (): CreditCardBill => {
     creditCardId: validCreditCardId,
     closingDate: new Date('2024-01-15'),
     dueDate: new Date('2024-02-10'),
-    amount: 100000, // 1000.00 em centavos
+    amount: 100000,
     status: BillStatusEnum.OPEN,
     isDeleted: false,
     createdAt: new Date(),
@@ -100,7 +100,7 @@ describe('UpdateCreditCardBillUseCase', () => {
         id: creditCardBill.id,
         closingDate: new Date('2024-02-15'),
         dueDate: new Date('2024-03-10'),
-        amount: 150000, // 1500.00 em centavos
+        amount: 150000,
       };
 
       const result = await updateCreditCardBillUseCase.execute(dto);
@@ -166,7 +166,7 @@ describe('UpdateCreditCardBillUseCase', () => {
       const dto: UpdateCreditCardBillRequestDTO = {
         id: 'valid-bill-id',
         closingDate: new Date('2024-03-15'),
-        dueDate: new Date('2024-02-10'), // before closing date
+        dueDate: new Date('2024-02-10'),
         amount: 150000,
       };
 
@@ -184,7 +184,7 @@ describe('UpdateCreditCardBillUseCase', () => {
         id: 'valid-bill-id',
         closingDate: new Date('2024-02-15'),
         dueDate: new Date('2024-03-10'),
-        amount: -10000, // negative amount
+        amount: -10000,
       };
 
       const result = await updateCreditCardBillUseCase.execute(dto);

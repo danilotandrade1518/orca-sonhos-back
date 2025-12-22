@@ -50,10 +50,8 @@ export class ConsoleLogger implements ILogger {
   }
 }
 
-// Root logger; request-scoped loggers should be derived via contextLoggerMiddleware
 export const logger: ILogger = new ConsoleLogger();
 
-// Utility to create a child with request correlation (used if middleware not available)
 export function withRequestId(requestId: string): ILogger {
   return logger.child ? logger.child({ requestId }) : logger;
 }

@@ -171,7 +171,6 @@ describe('PayCreditCardBillUseCase', () => {
 
       getCreditCardBillRepository.setCreditCardBill(bill);
 
-      // Mock the repository to return the account for this specific test
       jest
         .spyOn(getAccountRepository, 'execute')
         .mockResolvedValueOnce(Either.success(account));
@@ -195,7 +194,7 @@ describe('PayCreditCardBillUseCase', () => {
         name: 'Conta Poupança',
         type: AccountTypeEnum.SAVINGS_ACCOUNT,
         budgetId,
-        balance: 10000, // Insufficient balance
+        balance: 10000,
         isDeleted: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -207,7 +206,7 @@ describe('PayCreditCardBillUseCase', () => {
       const dto = createValidDto({
         creditCardBillId: bill.id,
         accountId: savingsAccount.id,
-        amount: 50000, // More than account balance
+        amount: 50000,
       });
 
       const result = await useCase.execute(dto);

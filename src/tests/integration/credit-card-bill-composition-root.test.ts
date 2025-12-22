@@ -42,14 +42,12 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
     testBudgetId = EntityId.create().value!.id;
     testUserId = EntityId.create().value!.id;
 
-    // Seed budget
     await connection.query(
       `INSERT INTO budgets (id, name, owner_id, type, created_at, updated_at)
        VALUES ($1, $2, $3, $4, NOW(), NOW())`,
       [testBudgetId, 'Budget CC Bill', testUserId, BudgetTypeEnum.PERSONAL],
     );
 
-    // Seed account (simple)
     testAccountId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO accounts (id, name, balance, type, budget_id, created_at, updated_at)
@@ -63,7 +61,6 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
       ],
     );
 
-    // Seed category
     paymentCategoryId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO categories (id, name, type, budget_id, created_at, updated_at)
@@ -71,7 +68,6 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
       [paymentCategoryId, 'Payment', 'INCOME', testBudgetId],
     );
 
-    // Create credit card via composition root
     const createCardUseCase =
       creditCardCompositionRoot.createCreateCreditCardUseCase();
     const cardResult = await createCardUseCase.execute({
@@ -95,7 +91,7 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
         creditCardId: testCreditCardId,
         closingDate: new Date('2025-01-10'),
         dueDate: new Date('2025-01-20'),
-        amount: 150000, // R$ 1.500,00
+        amount: 150000,
       });
 
       expect(result.hasError).toBe(false);
@@ -163,7 +159,6 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
 
   describe('createReopenCreditCardBillUseCase', () => {
     it('should reopen a paid bill', async () => {
-      // Seed a PAID bill directly
       const billId = EntityId.create().value!.id;
       await connection.query(
         `INSERT INTO credit_card_bills (id, credit_card_id, closing_date, due_date, amount, status, paid_at, is_deleted, created_at, updated_at)
@@ -190,7 +185,6 @@ describe('CreditCardBillCompositionRoot Integration Tests', () => {
 
   describe('createPayCreditCardBillUseCase', () => {
     it('should pay bill successfully (debit transaction + status update)', async () => {
-      // Seed OPEN bill
       const billId = EntityId.create().value!.id;
       await connection.query(
         `INSERT INTO credit_card_bills (id, credit_card_id, closing_date, due_date, amount, status, paid_at, is_deleted, created_at, updated_at)

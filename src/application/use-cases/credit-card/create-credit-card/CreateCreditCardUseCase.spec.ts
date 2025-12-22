@@ -72,7 +72,7 @@ describe('CreateCreditCardUseCase', () => {
     it('deve retornar erro se dia de fechamento for inválido', async () => {
       const { sut } = makeSut();
       const dto = makeValidDto();
-      dto.closingDay = 0; // dia inválido
+      dto.closingDay = 0;
 
       const result = await sut.execute(dto);
 
@@ -83,7 +83,7 @@ describe('CreateCreditCardUseCase', () => {
     it('deve retornar erro se dia de vencimento for inválido', async () => {
       const { sut } = makeSut();
       const dto = makeValidDto();
-      dto.dueDay = 32; // dia inválido
+      dto.dueDay = 32;
 
       const result = await sut.execute(dto);
 

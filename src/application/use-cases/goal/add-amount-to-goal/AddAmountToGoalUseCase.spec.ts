@@ -16,7 +16,6 @@ import { SaveGoalRepositoryStub } from '../../../shared/tests/stubs/SaveGoalRepo
 import { AddAmountToGoalDto } from './AddAmountToGoalDto';
 import { AddAmountToGoalUseCase } from './AddAmountToGoalUseCase';
 
-// Stubs
 class GetGoalByIdRepositoryStub implements IGetGoalRepository {
   public shouldFail = false;
   public shouldReturnNull = false;
@@ -118,17 +117,15 @@ describe('AddAmountToGoalUseCase', () => {
 
       const account = makeValidAccount();
 
-      // Criar Goal com o sourceAccountId igual ao account.id
       const goalResult = Goal.create({
         name: 'Meta Para Aporte',
         totalAmount: 5000,
         accumulatedAmount: 1000,
-        budgetId: account.budgetId!, // Mesmo budget
-        sourceAccountId: account.id, // Mesmo account
+        budgetId: account.budgetId!,
+        sourceAccountId: account.id,
       });
       const goal = goalResult.data!;
 
-      // Setup stubs
       getGoalByIdRepository.mockGoal = goal;
       getAccountByIdRepository.mockAccount = account;
       getGoalsByAccountRepository.setGoalsForAccount(account.id, []);
@@ -202,7 +199,6 @@ describe('AddAmountToGoalUseCase', () => {
         budgetAuthorizationService,
       } = makeSut();
 
-      // Criar Account com Budget diferente
       const accountResult = Account.create({
         name: 'Conta Corrente',
         type: AccountTypeEnum.CHECKING_ACCOUNT,
@@ -216,13 +212,12 @@ describe('AddAmountToGoalUseCase', () => {
       }
       const accountDifferentBudget = accountResult.data!;
 
-      // Criar Goal que aponta para esta Account mas com Budget diferente
       const goalResult = Goal.create({
         name: 'Meta Para Aporte',
         totalAmount: 5000,
         accumulatedAmount: 1000,
-        budgetId: '550e8400-e29b-41d4-a716-446655440088', // Budget diferente da Account
-        sourceAccountId: accountDifferentBudget.id, // Aponta para Account
+        budgetId: '550e8400-e29b-41d4-a716-446655440088',
+        sourceAccountId: accountDifferentBudget.id,
       });
       const goal = goalResult.data!;
 
@@ -250,7 +245,6 @@ describe('AddAmountToGoalUseCase', () => {
 
       const account = makeValidAccount();
 
-      // Criar Goal corretamente vinculada à Account
       const goalResult = Goal.create({
         name: 'Meta Para Aporte',
         totalAmount: 5000,
@@ -259,7 +253,7 @@ describe('AddAmountToGoalUseCase', () => {
         sourceAccountId: account.id,
       });
       const goal = goalResult.data!;
-      goal.delete(); // deleta a meta
+      goal.delete();
 
       getGoalByIdRepository.mockGoal = goal;
       getAccountByIdRepository.mockAccount = account;
@@ -286,7 +280,6 @@ describe('AddAmountToGoalUseCase', () => {
 
       const account = makeValidAccount();
 
-      // Criar Goal corretamente vinculada à Account
       const goalResult = Goal.create({
         name: 'Meta Para Aporte',
         totalAmount: 5000,
@@ -303,7 +296,7 @@ describe('AddAmountToGoalUseCase', () => {
 
       const dto = makeValidDto();
       dto.id = goal.id;
-      dto.amount = -100; // valor negativo
+      dto.amount = -100;
 
       const result = await sut.execute(dto);
 
@@ -350,7 +343,6 @@ describe('AddAmountToGoalUseCase', () => {
 
       const account = makeValidAccount();
 
-      // Criar Goal principal vinculada à Account
       const goalResult = Goal.create({
         name: 'Meta Para Aporte',
         totalAmount: 5000,
@@ -360,7 +352,6 @@ describe('AddAmountToGoalUseCase', () => {
       });
       const goal = goalResult.data!;
 
-      // Criar Goals adicionais vinculadas à mesma Account
       const otherGoal1 = Goal.create({
         name: 'Outra Meta 1',
         totalAmount: 2000,
@@ -391,12 +382,10 @@ describe('AddAmountToGoalUseCase', () => {
 
       await sut.execute(dto);
 
-      // Verificar se Unit of Work foi chamado com totalReservedForGoals correto
       expect(saveGoalRepository.executeCalls).toHaveLength(1);
 
-      // Verificar se a Goal foi salva com o valor correto após addAmount
       const executedGoal = saveGoalRepository.executeCalls[0];
-      expect(executedGoal.accumulatedAmount).toBe(1500); // valor original 1000 + amount 500
+      expect(executedGoal.accumulatedAmount).toBe(1500);
     });
   });
 });

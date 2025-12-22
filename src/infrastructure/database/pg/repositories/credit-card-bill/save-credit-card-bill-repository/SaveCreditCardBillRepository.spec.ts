@@ -57,8 +57,8 @@ describe('SaveCreditCardBillRepository', () => {
           bill.dueDate,
           150000,
           BillStatusEnum.OPEN,
-          undefined, // paid_at
-          false, // is_deleted
+          undefined,
+          false,
           bill.updatedAt,
         ]),
       );
@@ -94,8 +94,8 @@ describe('SaveCreditCardBillRepository', () => {
 
       expect(result.hasError).toBe(false);
       const [, params] = mockClient.query.mock.calls[0];
-      expect(params[4]).toBe(BillStatusEnum.PAID); // status
-      expect(params[5]).toBeInstanceOf(Date); // paid_at
+      expect(params[4]).toBe(BillStatusEnum.PAID);
+      expect(params[5]).toBeInstanceOf(Date);
     });
 
     it('should handle deleted credit card bill', async () => {
@@ -109,7 +109,7 @@ describe('SaveCreditCardBillRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockClient.query).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE credit_card_bills'),
-        expect.arrayContaining([true]), // is_deleted = true
+        expect.arrayContaining([true]),
       );
     });
 
@@ -207,14 +207,14 @@ describe('SaveCreditCardBillRepository', () => {
       await repository.execute(bill);
 
       const [, params] = mockClient.query.mock.calls[0];
-      expect(params[0]).toBe(bill.id); // id
-      expect(params[1]).toBe(closingDate); // closing_date
-      expect(params[2]).toBe(dueDate); // due_date
-      expect(params[3]).toBe(350000); // amount
-      expect(params[4]).toBe(BillStatusEnum.OPEN); // status
-      expect(params[5]).toBe(undefined); // paid_at
-      expect(params[6]).toBe(false); // is_deleted
-      expect(params[7]).toBeInstanceOf(Date); // updated_at
+      expect(params[0]).toBe(bill.id);
+      expect(params[1]).toBe(closingDate);
+      expect(params[2]).toBe(dueDate);
+      expect(params[3]).toBe(350000);
+      expect(params[4]).toBe(BillStatusEnum.OPEN);
+      expect(params[5]).toBe(undefined);
+      expect(params[6]).toBe(false);
+      expect(params[7]).toBeInstanceOf(Date);
     });
 
     it('should handle credit card bill with future dates', async () => {
@@ -248,7 +248,7 @@ describe('SaveCreditCardBillRepository', () => {
 
       expect(result.hasError).toBe(false);
       expect(mockClient.query).toHaveBeenCalledTimes(1);
-      expect(mockClient.release).not.toHaveBeenCalled(); // Should not release when using provided client
+      expect(mockClient.release).not.toHaveBeenCalled();
     });
 
     it('should return error when executeWithClient query fails', async () => {

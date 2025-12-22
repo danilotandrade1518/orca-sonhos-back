@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// New namespaced variables (HTTP_, DB_, LOG_). Legacy ones kept for transitional compatibility.
 const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
@@ -68,7 +67,6 @@ export function loadEnv(raw: EnvVars = process.env): Env {
   return cached;
 }
 
-// For tests: allow resetting cached environment between test cases.
 export function resetEnvCache() {
   cached = null;
 }

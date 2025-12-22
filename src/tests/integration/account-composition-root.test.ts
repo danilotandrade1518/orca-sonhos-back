@@ -30,7 +30,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
 
     testUserId = EntityId.create().value!.id;
 
-    // Seed budget
     testBudgetId = EntityId.create().value!.id;
     await connection.query(
       `
@@ -40,7 +39,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       [testBudgetId, 'Test Budget', testUserId, 'PERSONAL'],
     );
 
-    // Seed adjustment category
     adjustmentCategoryId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO categories (id, name, type, budget_id, created_at, updated_at)
@@ -48,7 +46,6 @@ describe('AccountCompositionRoot Integration Tests', () => {
       [adjustmentCategoryId, 'Adjustment', 'INCOME', testBudgetId],
     );
 
-    // Seed transfer category
     transferCategoryId = EntityId.create().value!.id;
     await connection.query(
       `INSERT INTO categories (id, name, type, budget_id, created_at, updated_at)

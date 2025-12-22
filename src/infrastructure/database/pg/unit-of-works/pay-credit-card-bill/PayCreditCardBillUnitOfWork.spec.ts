@@ -76,8 +76,8 @@ describe('PayCreditCardBillUnitOfWork', () => {
       creditCardId: EntityId.create().value!.id,
       closingDate: new Date('2025-01-15'),
       dueDate: new Date('2025-02-10'),
-      amount: 100000, // R$ 1000,00
-      status: BillStatusEnum.PAID, // Já foi marcado como pago pelo domain service
+      amount: 100000,
+      status: BillStatusEnum.PAID,
       isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -202,10 +202,9 @@ describe('PayCreditCardBillUnitOfWork', () => {
       const unexpectedError = new Error('Unexpected error');
       const rollbackError = new Error('Rollback failed');
 
-      // Simulate an unexpected error during execution (after BEGIN succeeds)
       mockClient.query
-        .mockResolvedValueOnce(null) // BEGIN succeeds
-        .mockRejectedValueOnce(rollbackError); // ROLLBACK fails
+        .mockResolvedValueOnce(null)
+        .mockRejectedValueOnce(rollbackError);
 
       mockAddTransactionRepository.executeWithClient.mockRejectedValue(
         unexpectedError,
@@ -218,7 +217,6 @@ describe('PayCreditCardBillUnitOfWork', () => {
       expect(result.hasError).toBe(true);
       expect(result.errors[0]).toBeInstanceOf(PaymentExecutionError);
 
-      // Assert that a structured rollback_failure log was emitted
       const logged = (consoleSpy.mock.calls as unknown[][]).some((c) => {
         try {
           const obj = JSON.parse(c[0] as string);

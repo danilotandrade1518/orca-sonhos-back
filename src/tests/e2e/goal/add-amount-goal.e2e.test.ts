@@ -47,7 +47,6 @@ describe('PATCH /goals/amount (E2E)', () => {
   const getRepo = new GetGoalByIdRepositoryStub();
   getRepo.mockGoal = goal;
 
-  // TODO: Fix constructor - need 5 parameters
   const useCase = new AddAmountToGoalUseCase(
     getRepo,
     getAccountRepo,

@@ -38,7 +38,6 @@ describe('PATCH /categories (E2E)', () => {
   const controller = new UpdateCategoryController(useCase);
 
   beforeAll(() => {
-    // prepare existing category with valid UUID budgetId
     const created = Category.create({
       name: 'Old',
       type: CategoryTypeEnum.EXPENSE,
@@ -57,7 +56,6 @@ describe('PATCH /categories (E2E)', () => {
   });
 
   it('should update a category returning 200 and traceId', async () => {
-    // ensure category exists
     if (!getRepo.category) {
       const created = Category.create({
         name: 'Old',

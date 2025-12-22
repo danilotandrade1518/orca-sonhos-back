@@ -192,7 +192,7 @@ describe('UpdateAccountUseCase', () => {
       const dto: UpdateAccountDto = {
         id: mockAccount.id,
         userId: 'authorized-user',
-        name: '', // Invalid empty name
+        name: '',
       };
 
       const result = await useCase.execute(dto);

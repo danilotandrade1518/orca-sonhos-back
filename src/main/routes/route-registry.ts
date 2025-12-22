@@ -11,7 +11,6 @@ import { buildEnvelopeRoutes } from './contexts/mutations/envelope-route-registr
 import { buildGoalRoutes } from './contexts/mutations/goal-route-registry';
 import { buildTransactionRoutes } from './contexts/mutations/transaction-route-registry';
 
-// Controllers
 export interface RouteRegistryDeps {
   server: ExpressHttpServerAdapter;
   connection: IPostgresConnectionAdapter;

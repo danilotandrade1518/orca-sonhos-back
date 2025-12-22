@@ -66,7 +66,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     const createValidTransaction = (): Transaction => {
       const result = Transaction.create({
         description: 'Overdue transaction',
-        amount: 5000, // 50.00 em centavos
+        amount: 5000,
         type: TransactionTypeEnum.EXPENSE,
         accountId,
         categoryId,
@@ -78,7 +78,7 @@ describe('FindOverdueScheduledTransactionsRepository', () => {
     };
 
     it('should return overdue scheduled transactions', async () => {
-      const overdueDate = new Date('2025-08-07T00:00:00.000Z'); // Anterior à referência
+      const overdueDate = new Date('2025-08-07T00:00:00.000Z');
       const row = createValidRow(overdueDate);
       const transaction = createValidTransaction();
 

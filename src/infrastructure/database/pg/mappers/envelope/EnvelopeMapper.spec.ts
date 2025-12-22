@@ -26,7 +26,7 @@ describe('EnvelopeMapper', () => {
       expect(result.hasError).toBe(false);
       expect(result.data!.id).toBe(validId);
       expect(result.data!.name).toBe('Test Envelope');
-      expect(result.data!.monthlyLimit).toBe(10000); // 100.00 * 100
+      expect(result.data!.monthlyLimit).toBe(10000);
       expect(result.data!.budgetId).toBe(budgetId);
       expect(result.data!.categoryId).toBe(categoryId);
       expect(result.data!.isDeleted).toBe(false);
@@ -49,13 +49,13 @@ describe('EnvelopeMapper', () => {
       const result = EnvelopeMapper.toDomain(row);
 
       expect(result.hasError).toBe(false);
-      expect(result.data!.monthlyLimit).toBe(150); // 1.50 * 100
+      expect(result.data!.monthlyLimit).toBe(150);
     });
 
     it('should return error for invalid envelope data', () => {
       const row: EnvelopeRow = {
         id: 'invalid-id',
-        name: '', // Invalid name
+        name: '',
         monthly_limit: 10000,
         budget_id: budgetId,
         category_id: categoryId,
@@ -74,7 +74,7 @@ describe('EnvelopeMapper', () => {
     it('should convert domain to row successfully', () => {
       const envelope = Envelope.create({
         name: 'Test Envelope',
-        monthlyLimit: 10000, // 100.00 in cents
+        monthlyLimit: 10000,
         budgetId: EntityId.create().value!.id,
         categoryId: EntityId.create().value!.id,
       }).data!;
@@ -94,7 +94,7 @@ describe('EnvelopeMapper', () => {
     it('should handle monetary values correctly', () => {
       const envelope = Envelope.create({
         name: 'Test Envelope',
-        monthlyLimit: 150, // 1.50 in cents
+        monthlyLimit: 150,
         budgetId: EntityId.create().value!.id,
         categoryId: EntityId.create().value!.id,
       }).data!;

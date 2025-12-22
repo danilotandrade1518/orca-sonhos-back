@@ -29,7 +29,7 @@ describe('AddCreditCardBillRepository', () => {
       creditCardId: EntityId.create().value!.id,
       closingDate: new Date('2024-01-15'),
       dueDate: new Date('2024-02-10'),
-      amount: 150000, // R$ 1500.00
+      amount: 150000,
     }).data!;
   };
 
@@ -50,8 +50,8 @@ describe('AddCreditCardBillRepository', () => {
           bill.dueDate,
           150000,
           BillStatusEnum.OPEN,
-          undefined, // paid_at
-          false, // is_deleted
+          undefined,
+          false,
           bill.createdAt,
           bill.updatedAt,
         ]),
@@ -80,7 +80,7 @@ describe('AddCreditCardBillRepository', () => {
         creditCardId: EntityId.create().value!.id,
         closingDate: new Date('2024-02-15'),
         dueDate: new Date('2024-03-10'),
-        amount: 250000, // R$ 2500.00
+        amount: 250000,
       }).data!;
 
       const result = await repository.execute(bill);
@@ -101,7 +101,7 @@ describe('AddCreditCardBillRepository', () => {
       expect(result.hasError).toBe(false);
       expect(mockConnection.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO credit_card_bills'),
-        expect.arrayContaining([true]), // is_deleted = true
+        expect.arrayContaining([true]),
       );
     });
 
@@ -127,7 +127,7 @@ describe('AddCreditCardBillRepository', () => {
         creditCardId: EntityId.create().value!.id,
         closingDate: new Date('2024-04-15'),
         dueDate: new Date('2024-05-10'),
-        amount: 1000000, // R$ 10000.00
+        amount: 1000000,
       }).data!;
 
       const result = await repository.execute(bill);

@@ -131,7 +131,7 @@ describe('GetGoalByIdRepository', () => {
       const mockRow: GoalRow = {
         id: goalId,
         name: 'Meta Inválida',
-        total_amount: -1000.0, // Invalid amount
+        total_amount: -1000.0,
         accumulated_amount: 25000.0,
         deadline: new Date('2030-12-31T23:59:59Z'),
         budget_id: '550e8400-e29b-41d4-a716-446655440003',

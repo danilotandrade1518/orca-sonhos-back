@@ -7,9 +7,6 @@ export interface CreatedTestServer {
   close: () => Promise<void>;
 }
 
-/**
- * Helper para padronizar criação e teardown do servidor HTTP nos testes E2E.
- */
 export function createHttpTestServer(): CreatedTestServer {
   const server = new ExpressHttpServerAdapter();
 

@@ -21,7 +21,6 @@ describe('CreateCategoryUseCase', () => {
   });
 
   it('should create a category successfully', async () => {
-    // Arrange
     const dto: CreateCategoryDto = {
       name: 'Alimentação',
       type: CategoryTypeEnum.EXPENSE,
@@ -32,10 +31,8 @@ describe('CreateCategoryUseCase', () => {
       Either.success(undefined),
     );
 
-    // Act
     const result = await createCategoryUseCase.execute(dto);
 
-    // Assert
     expect(result.hasError).toBeFalsy();
     expect(result.data).toBeDefined();
     expect(result.data!.id).toBeDefined();
@@ -43,23 +40,19 @@ describe('CreateCategoryUseCase', () => {
   });
 
   it('should return error when category creation fails', async () => {
-    // Arrange
     const dto: CreateCategoryDto = {
       name: '',
       type: CategoryTypeEnum.EXPENSE,
       budgetId: '550e8400-e29b-41d4-a716-446655440000',
     };
 
-    // Act
     const result = await createCategoryUseCase.execute(dto);
 
-    // Assert
     expect(result.hasError).toBeTruthy();
     expect(mockAddCategoryRepository.execute).not.toHaveBeenCalled();
   });
 
   it('should return error when repository fails', async () => {
-    // Arrange
     const dto: CreateCategoryDto = {
       name: 'Alimentação',
       type: CategoryTypeEnum.EXPENSE,
@@ -71,10 +64,8 @@ describe('CreateCategoryUseCase', () => {
     );
     mockAddCategoryRepository.execute.mockResolvedValue(repositoryError);
 
-    // Act
     const result = await createCategoryUseCase.execute(dto);
 
-    // Assert
     expect(result.hasError).toBeTruthy();
     expect(mockAddCategoryRepository.execute).toHaveBeenCalledTimes(1);
   });

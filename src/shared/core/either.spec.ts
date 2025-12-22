@@ -29,9 +29,9 @@ describe('Either', () => {
     it('should handle undefined as valid data', () => {
       const result = Either.success(undefined);
 
-      expect(result.hasData).toBe(false); // hasData retorna false para undefined
+      expect(result.hasData).toBe(false);
       expect(result.hasError).toBe(false);
-      expect(result.data).toBe(null); // data getter retorna null quando hasData é false
+      expect(result.data).toBe(null);
     });
 
     it('should handle empty string as valid data', () => {
@@ -209,7 +209,6 @@ describe('Either', () => {
       const result = Either.success<Error, TestData>(data);
 
       if (result.hasData) {
-        // TypeScript should know result.data is TestData
         expect(result.data!.id).toBe('123');
         expect(result.data!.value).toBe(42);
       }
@@ -228,7 +227,6 @@ describe('Either', () => {
       const result = Either.error<CustomError, string>(error);
 
       if (result.hasError) {
-        // TypeScript should know result.errors contains CustomError
         expect(result.errors[0].code).toBe(404);
       }
     });
@@ -252,10 +250,8 @@ describe('Either', () => {
       const data = { nested: { value: 'original' } };
       const result = Either.success(data);
 
-      // Mutate the original object
       data.nested.value = 'modified';
 
-      // The Either should contain the mutated reference
       if (result.data) {
         expect(result.data.nested.value).toBe('modified');
       }
