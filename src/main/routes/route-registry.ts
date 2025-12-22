@@ -5,6 +5,7 @@ import { IPostgresConnectionAdapter } from '@infrastructure/adapters/IPostgresCo
 
 import { buildAccountRoutes } from './contexts/mutations/account-route-registry';
 import { buildBudgetRoutes } from './contexts/mutations/budget-route-registry';
+import { buildCategoryRoutes } from './contexts/mutations/category-route-registry';
 import { buildCreditCardBillRoutes } from './contexts/mutations/credit-card-bill-route-registry';
 import { buildCreditCardRoutes } from './contexts/mutations/credit-card-route-registry';
 import { buildEnvelopeRoutes } from './contexts/mutations/envelope-route-registry';
@@ -48,6 +49,7 @@ export function registerMutationRoutes(deps: RouteRegistryDeps) {
     }),
     ...buildEnvelopeRoutes({ connection, auth: budgetAuthorizationService }),
     ...buildGoalRoutes({ connection }),
+    ...buildCategoryRoutes({ connection, auth: budgetAuthorizationService }),
   ];
 
   server.registerRoutes(routes);

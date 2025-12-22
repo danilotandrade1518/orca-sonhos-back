@@ -51,16 +51,21 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
         process.env.CORS_EXPOSE_HEADERS || 'X-Request-Id,TraceId';
       this.app.use((req, res, next) => {
         const origin = req.headers.origin as string | undefined;
+
         if (origin) {
           if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
             res.setHeader('Access-Control-Allow-Origin', origin);
             res.setHeader('Vary', 'Origin');
           }
+        } else if (allowedOrigins.includes('*')) {
+          res.setHeader('Access-Control-Allow-Origin', '*');
         }
+
         res.setHeader('Access-Control-Allow-Methods', allowMethods);
         res.setHeader('Access-Control-Allow-Headers', allowHeaders);
         res.setHeader('Access-Control-Expose-Headers', exposeHeaders);
         res.setHeader('Access-Control-Max-Age', '600');
+
         if (req.method === 'OPTIONS') {
           res.status(204).end();
           return;
@@ -68,6 +73,19 @@ export class ExpressHttpServerAdapter implements IHttpServerAdapter {
         next();
       });
     }
+
+    this.app.use(express.json());
+
+    this.app.get('/internal/metrics/mutations', (_req, res) => {
+      res.json({ mutations: getMutationCounters() });
+    });
+    this.app.get('/internal/metrics/auth', (_req, res) => {
+      res.json({ auth: getAuthCounters() });
+    });
+    this.app.get('/internal/metrics/queries', async (_req, res) => {
+      res.set('Content-Type', 'text/plain; version=0.0.4');
+      res.send(getQueryMetrics());
+    });
   }
 
   registerRoutes(routes: RouteDefinition[]) {

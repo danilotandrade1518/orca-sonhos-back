@@ -3,6 +3,7 @@ import { IListBudgetsDao } from './../../../contracts/daos/budget/IListBudgetsDa
 
 export interface ListBudgetsQuery {
   userId: string;
+  includeDeleted?: boolean;
 }
 
 export interface ListBudgetsQueryResult {
@@ -20,6 +21,7 @@ export class ListBudgetsQueryHandler
   async execute(query: ListBudgetsQuery): Promise<ListBudgetsQueryResult[]> {
     const items = await this.listBudgetsDao.findByUser({
       userId: query.userId,
+      includeDeleted: query.includeDeleted,
     });
 
     return items.map((item) => ({

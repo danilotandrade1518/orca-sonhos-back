@@ -8,19 +8,30 @@ import { IPostgresConnectionAdapter } from './../../../../../adapters/IPostgresC
 export class ListBudgetsDao implements IListBudgetsDao {
   constructor(private readonly connection: IPostgresConnectionAdapter) {}
 
-  async findByUser(params: { userId: string }): Promise<BudgetListItem[]> {
-    const { userId } = params;
+  async findByUser(params: {
+    userId: string;
+    includeDeleted?: boolean;
+  }): Promise<BudgetListItem[]> {
+    const { userId, includeDeleted = false } = params;
+
+    const query = includeDeleted
+      ? `SELECT b.id, b.name, b.type, COUNT(DISTINCT bp.participant_id) as participantsCount
+         FROM budgets b
+         LEFT JOIN budget_participants bp ON bp.budget_id = b.id
+         WHERE (b.owner_id = $1 
+            OR bp.participant_id = $1)
+         GROUP BY b.id, b.name, b.type`
+      : `SELECT b.id, b.name, b.type, COUNT(DISTINCT bp.participant_id) as participantsCount
+         FROM budgets b
+         LEFT JOIN budget_participants bp ON bp.budget_id = b.id
+         WHERE (b.owner_id = $1 
+            OR bp.participant_id = $1)
+            AND b.is_deleted = false
+         GROUP BY b.id, b.name, b.type`;
 
     const result = await this.connection.query<
       BudgetListItem & { participantscount: string }
-    >(
-      `SELECT b.id, b.name, b.type, COUNT(bp.user_id) as participantsCount
-       FROM budgets b
-       LEFT JOIN budget_participants bp ON bp.budget_id = b.id
-       WHERE bp.user_id = $1
-       GROUP BY b.id, b.name, b.type`,
-      [userId],
-    );
+    >(query, [userId]);
 
     return (
       result?.rows.map((row) => ({

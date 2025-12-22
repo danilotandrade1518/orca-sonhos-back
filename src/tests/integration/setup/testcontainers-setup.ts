@@ -113,11 +113,39 @@ export class TestContainersSetup {
   }
 
   static async resetDatabase(): Promise<void> {
-    if (this.connection) {
-      await this.connection.query(
-        'TRUNCATE TABLE budgets RESTART IDENTITY CASCADE;',
-      );
+    if (!this.connection) {
+      throw new Error('Database connection not initialized');
     }
+
+    console.log('🧹 Resetting database...');
+
+    const tablesResult = await this.connection.query(`
+      SELECT tablename 
+      FROM pg_tables 
+      WHERE schemaname = 'public' 
+      ORDER BY tablename;
+    `);
+
+    const tables = tablesResult.rows.map(
+      (row: { tablename: string }) => row.tablename,
+    );
+
+    if (tables.length === 0) {
+      console.log('⚠️ No tables found to truncate');
+      return;
+    }
+
+    await this.connection.query('SET session_replication_role = replica;');
+
+    const truncateQuery = `TRUNCATE TABLE ${tables
+      .map((table) => `"${table}"`)
+      .join(', ')} RESTART IDENTITY CASCADE;`;
+
+    await this.connection.query(truncateQuery);
+
+    await this.connection.query('SET session_replication_role = DEFAULT;');
+
+    console.log(`✅ Database reset complete. Cleared ${tables.length} tables.`);
   }
 
   static getConnection(): PostgresConnectionAdapter {

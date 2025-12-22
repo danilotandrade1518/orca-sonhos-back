@@ -33,8 +33,12 @@ export function buildBudgetQueryRoutes(params: {
           try {
             if (!req.principal) throw new AuthTokenInvalidError();
             const handler = new ListBudgetsQueryHandler(budgetsDao);
+            const includeDeleted =
+              req.query.includeDeleted === 'true' ||
+              req.query.includeDeleted === '1';
             const data = await handler.execute({
               userId: req.principal.userId,
+              includeDeleted,
             });
             const res = DefaultResponseBuilder.ok(req.requestId, {
               data,

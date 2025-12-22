@@ -3,5 +3,5 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npx tsc
+# Não compilar TypeScript aqui - será feito em runtime com ts-node-dev
 CMD ["npm", "run", "dev"] 
