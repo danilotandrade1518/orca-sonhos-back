@@ -127,7 +127,7 @@ export class TestContainersSetup {
     `);
 
     const tables = tablesResult.rows.map(
-      (row: { tablename: string }) => row.tablename,
+      (row: Record<string, unknown>) => row.tablename as string,
     );
 
     if (tables.length === 0) {
