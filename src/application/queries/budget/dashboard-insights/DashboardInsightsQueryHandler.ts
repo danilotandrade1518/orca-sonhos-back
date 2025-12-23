@@ -169,7 +169,7 @@ export class DashboardInsightsQueryHandler
           ? Math.max(0, 100 - (monthsRemaining / 12) * 100)
           : 100;
 
-      return progress >= expectedProgress;
+      return progress >= expectedProgress || progress >= expectedProgress - 10;
     }).length;
     const goalsOnTrackPercentage =
       activeGoals.length > 0

@@ -56,7 +56,7 @@ exports.up = (pgm) => {
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
  * @returns {Promise<void> | void}
  */
-exports.down = (pgm) => {
+exports.down = () => {
   // Note: PostgreSQL doesn't support removing enum values directly
   // This would require recreating the enum type, which is complex
   // For now, we'll leave the enum values in place
