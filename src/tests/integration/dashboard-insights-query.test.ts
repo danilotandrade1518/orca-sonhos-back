@@ -182,16 +182,16 @@ describe('GET /budget/:budgetId/dashboard/insights (Integration)', () => {
 
       categoryId = EntityId.create().value!.id;
       await connection.query(
-        `INSERT INTO categories (id, name, type, user_id, budget_id, is_deleted, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, false, NOW(), NOW())`,
-        [categoryId, 'Test Category', 'EXPENSE', testUserId, testBudgetId],
+        `INSERT INTO categories (id, name, type, budget_id, is_deleted, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, false, NOW(), NOW())`,
+        [categoryId, 'Test Category', 'EXPENSE', testBudgetId],
       );
 
       accountId = EntityId.create().value!.id;
       await connection.query(
         `INSERT INTO accounts (id, name, type, balance, budget_id, is_deleted, created_at, updated_at)
          VALUES ($1, $2, $3, $4, $5, false, NOW(), NOW())`,
-        [accountId, 'Test Account', 'CHECKING', '100000', testBudgetId],
+        [accountId, 'Test Account', 'CHECKING_ACCOUNT', '100000', testBudgetId],
       );
 
       const now = new Date();

@@ -17,13 +17,19 @@ exports.up = (pgm) => {
     END $$;
   `);
 
-  // Adicionar coluna type à tabela budgets
-  pgm.addColumn('budgets', {
-    type: {
-      type: 'budget_type_enum',
-      notNull: false, // Permitir NULL temporariamente para dados existentes
-    },
-  });
+  // Verificar se a coluna type já existe antes de adicionar
+  pgm.sql(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'budgets' 
+        AND column_name = 'type'
+      ) THEN
+        ALTER TABLE budgets ADD COLUMN type budget_type_enum;
+      END IF;
+    END $$;
+  `);
 
   // Atualizar valores existentes: se não tem participantes, é PERSONAL, senão SHARED
   pgm.sql(`
@@ -36,10 +42,20 @@ exports.up = (pgm) => {
     WHERE type IS NULL;
   `);
 
-  // Tornar a coluna NOT NULL após popular valores
-  pgm.alterColumn('budgets', 'type', {
-    notNull: true,
-  });
+  // Tornar a coluna NOT NULL após popular valores (se a coluna existir)
+  pgm.sql(`
+    DO $$ BEGIN
+      IF EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'budgets' 
+        AND column_name = 'type'
+        AND is_nullable = 'YES'
+      ) THEN
+        ALTER TABLE budgets ALTER COLUMN type SET NOT NULL;
+      END IF;
+    END $$;
+  `);
 };
 
 /**
