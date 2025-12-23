@@ -20,7 +20,7 @@ export function buildAccountQueryRoutes(params: {
   return [
     {
       method: 'GET',
-      path: '/accounts',
+      path: '/account',
       controller: {
         handle: async (req) => {
           const start = Date.now();

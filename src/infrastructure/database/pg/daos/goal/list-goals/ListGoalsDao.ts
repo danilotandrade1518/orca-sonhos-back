@@ -16,17 +16,21 @@ export class ListGoalsDao implements IListGoalsDao {
       name: string;
       total_amount: number | string;
       accumulated_amount: number | string;
-      due_date: string | null;
+      deadline: string | null;
+      budget_id: string;
+      source_account_id: string | null;
     }>(
       `SELECT id,
               name,
               total_amount,
               accumulated_amount,
-              deadline::date AS due_date
+              deadline,
+              budget_id,
+              source_account_id
          FROM goals
         WHERE budget_id = $1
           AND is_deleted = false
-        ORDER BY due_date NULLS LAST, name ASC`,
+        ORDER BY deadline NULLS LAST, name ASC`,
       [budgetId],
     );
 
@@ -34,9 +38,11 @@ export class ListGoalsDao implements IListGoalsDao {
       result?.rows.map((row) => ({
         id: row.id,
         name: row.name,
-        targetAmount: Number(row.total_amount),
-        currentAmount: Number(row.accumulated_amount),
-        dueDate: row.due_date,
+        totalAmount: Number(row.total_amount) || 0,
+        accumulatedAmount: Number(row.accumulated_amount) || 0,
+        deadline: row.deadline,
+        budgetId: row.budget_id,
+        sourceAccountId: row.source_account_id || undefined,
       })) || []
     );
   }

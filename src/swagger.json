@@ -35,6 +35,53 @@
         }
       }
     },
+    "/budget/{budgetId}/dashboard/insights": {
+      "get": {
+        "summary": "Insights do dashboard (indicadores, ações sugeridas, conquistas e gastos por categoria)",
+        "tags": ["Budgets"],
+        "parameters": [
+          {
+            "name": "budgetId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Insights retornados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "indicators": {
+                          "type": "object",
+                          "properties": {
+                            "budgetUsage": { "type": "object", "nullable": true },
+                            "cashFlow": { "type": "object", "nullable": true },
+                            "goalsOnTrack": { "type": "object", "nullable": true },
+                            "emergencyReserve": { "type": "object", "nullable": true }
+                          }
+                        },
+                        "suggestedActions": { "type": "array" },
+                        "recentAchievements": { "type": "array" },
+                        "categorySpending": { "type": "array" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem acesso ao orçamento" }
+        }
+      }
+    },
     "/me": {
       "get": {
         "summary": "Retorna informações do usuário autenticado",
