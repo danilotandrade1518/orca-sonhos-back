@@ -21,8 +21,8 @@ export interface AccountsBalanceAggregate {
 export interface GoalStatus {
   id: string;
   name: string;
-  targetAmount: number;
-  currentAmount: number;
+  totalAmount: number;
+  accumulatedAmount: number;
   deadline: Date | null;
   createdAt: Date;
   updatedAt: Date;

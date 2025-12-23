@@ -95,6 +95,7 @@ export class BudgetOverviewDao implements IGetBudgetOverviewDao {
        FROM transactions
        WHERE budget_id = $1
          AND is_deleted = false
+         AND status = 'COMPLETED'
          AND transaction_date >= $2 AND transaction_date < $3`,
       [budgetId, periodStart, periodEnd],
     );

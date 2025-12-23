@@ -20,7 +20,7 @@ export function buildGoalQueryRoutes(params: {
   return [
     {
       method: 'GET',
-      path: '/goals',
+      path: '/goal',
       controller: {
         handle: async (req) => {
           const start = Date.now();

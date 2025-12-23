@@ -112,4 +112,51 @@ describe('DashboardInsightsQueryHandler', () => {
     expect(result.suggestedActions.length).toBeGreaterThan(0);
     expect(result.suggestedActions.length).toBeLessThanOrEqual(3);
   });
+
+  it('should calculate emergencyReserve monthsCovered correctly', async () => {
+    const dao = new DaoStub();
+    dao.aggregates.monthlyFinancial = {
+      incomeMonth: 10000,
+      expenseMonth: 5000,
+    };
+    dao.aggregates.accountsBalance = { totalBalance: 15000 };
+    const handler = new DashboardInsightsQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
+    const result = await handler.execute({ budgetId: 'b1', userId: 'u1' });
+
+    expect(result.indicators.emergencyReserve).not.toBeNull();
+    expect(result.indicators.emergencyReserve?.monthsCovered).toBe(3.0);
+    expect(result.indicators.emergencyReserve?.status).toBe('warning');
+  });
+
+  it('should calculate emergencyReserve using reserve goal when available', async () => {
+    const dao = new DaoStub();
+    dao.aggregates.monthlyFinancial = {
+      incomeMonth: 10000,
+      expenseMonth: 4000,
+    };
+    dao.aggregates.accountsBalance = { totalBalance: 10000 };
+    dao.aggregates.goals = [
+      {
+        id: 'g1',
+        name: 'Reserva de Emergência',
+        totalAmount: 50000,
+        accumulatedAmount: 24000,
+        deadline: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+    const handler = new DashboardInsightsQueryHandler(
+      dao,
+      new BudgetAuthorizationServiceStub(),
+    );
+    const result = await handler.execute({ budgetId: 'b1', userId: 'u1' });
+
+    expect(result.indicators.emergencyReserve).not.toBeNull();
+    expect(result.indicators.emergencyReserve?.monthsCovered).toBe(6.0);
+    expect(result.indicators.emergencyReserve?.status).toBe('healthy');
+  });
 });

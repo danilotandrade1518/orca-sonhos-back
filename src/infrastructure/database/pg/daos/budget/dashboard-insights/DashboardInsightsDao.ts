@@ -177,8 +177,8 @@ export class DashboardInsightsDao implements IDashboardInsightsDao {
       result?.rows.map((row) => ({
         id: row.id,
         name: row.name,
-        targetAmount: Number(row.total_amount),
-        currentAmount: Number(row.accumulated_amount),
+        totalAmount: Number(row.total_amount) || 0,
+        accumulatedAmount: Number(row.accumulated_amount) || 0,
         deadline: row.deadline ? new Date(row.deadline) : null,
         createdAt:
           row.created_at instanceof Date

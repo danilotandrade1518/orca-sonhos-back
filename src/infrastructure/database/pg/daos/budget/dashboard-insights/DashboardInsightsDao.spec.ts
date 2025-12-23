@@ -82,8 +82,8 @@ describe('DashboardInsightsDao', () => {
       expect(result.goals[0]).toMatchObject({
         id: 'goal-1',
         name: 'Meta Teste',
-        targetAmount: 10000,
-        currentAmount: 5000,
+        totalAmount: 10000,
+        accumulatedAmount: 5000,
       });
     });
   });
@@ -377,8 +377,8 @@ describe('DashboardInsightsDao', () => {
       expect(result.goals[0]).toMatchObject({
         id: 'goal-1',
         name: 'Meta 1',
-        targetAmount: 20000,
-        currentAmount: 10000,
+        totalAmount: 20000,
+        accumulatedAmount: 10000,
         deadline: expect.any(Date),
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
@@ -386,8 +386,8 @@ describe('DashboardInsightsDao', () => {
       expect(result.goals[1]).toMatchObject({
         id: 'goal-2',
         name: 'Meta 2',
-        targetAmount: 50000,
-        currentAmount: 50000,
+        totalAmount: 50000,
+        accumulatedAmount: 50000,
         deadline: null,
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),

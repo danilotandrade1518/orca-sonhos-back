@@ -39,7 +39,9 @@ describe('ListGoalsDao', () => {
           name: 'Goal 1',
           total_amount: 1000,
           accumulated_amount: 200,
-          due_date: '2024-12-31',
+          deadline: '2024-12-31',
+          budget_id: 'b1',
+          source_account_id: 'acc1',
         },
       ],
       rowCount: 1,
@@ -51,9 +53,11 @@ describe('ListGoalsDao', () => {
       {
         id: 'g1',
         name: 'Goal 1',
-        targetAmount: 1000,
-        currentAmount: 200,
-        dueDate: '2024-12-31',
+        totalAmount: 1000,
+        accumulatedAmount: 200,
+        deadline: '2024-12-31',
+        budgetId: 'b1',
+        sourceAccountId: 'acc1',
       },
     ]);
   });

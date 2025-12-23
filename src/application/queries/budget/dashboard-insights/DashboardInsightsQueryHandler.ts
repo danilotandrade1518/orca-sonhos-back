@@ -148,20 +148,27 @@ export class DashboardInsightsQueryHandler
           : 'critical';
 
     const activeGoals = aggregates.goals.filter(
-      (g) => g.currentAmount < g.targetAmount,
+      (g) => g.accumulatedAmount < g.totalAmount,
     );
     const goalsOnTrackCount = activeGoals.filter((goal) => {
       if (!goal.deadline) return true;
-      const progress = goal.currentAmount / Math.max(goal.targetAmount, 1);
-      const daysElapsed =
-        (now.getTime() - goal.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-      const daysTotal =
-        (goal.deadline.getTime() - goal.createdAt.getTime()) /
-        (1000 * 60 * 60 * 24);
-      const expectedProgress = Math.max(
-        0,
-        Math.min(1, daysElapsed / Math.max(daysTotal, 1)),
-      );
+
+      const deadline = new Date(goal.deadline);
+      if (deadline <= now) {
+        return goal.accumulatedAmount >= goal.totalAmount;
+      }
+
+      const progress =
+        goal.totalAmount > 0
+          ? (goal.accumulatedAmount / goal.totalAmount) * 100
+          : 0;
+
+      const monthsRemaining = this.calculateMonthsRemaining(now, deadline);
+      const expectedProgress =
+        monthsRemaining > 0
+          ? Math.max(0, 100 - (monthsRemaining / 12) * 100)
+          : 100;
+
       return progress >= expectedProgress;
     }).length;
     const goalsOnTrackPercentage =
@@ -177,11 +184,11 @@ export class DashboardInsightsQueryHandler
 
     const reserveAmount =
       aggregates.goals.find((g) => g.name.toLowerCase().includes('reserva'))
-        ?.currentAmount ?? aggregates.accountsBalance.totalBalance;
+        ?.accumulatedAmount ?? aggregates.accountsBalance.totalBalance;
     const avgMonthlyExpense = totalExpenseMonth;
     const monthsCovered =
       avgMonthlyExpense > 0
-        ? Math.round((reserveAmount / avgMonthlyExpense) * 100) / 100
+        ? Math.round((reserveAmount / avgMonthlyExpense) * 10) / 10
         : 0;
     const emergencyReserveStatus =
       monthsCovered >= 6
@@ -244,7 +251,7 @@ export class DashboardInsightsQueryHandler
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const completedGoals = aggregates.goals.filter(
       (g) =>
-        g.currentAmount >= g.targetAmount &&
+        g.accumulatedAmount >= g.totalAmount &&
         g.updatedAt >= sevenDaysAgo &&
         g.updatedAt <= now,
     );
@@ -305,5 +312,19 @@ export class DashboardInsightsQueryHandler
       recentAchievements,
       categorySpending: categorySpendingWithPercentage,
     };
+  }
+
+  private calculateMonthsRemaining(start: Date, end: Date): number {
+    const yearDiff = end.getFullYear() - start.getFullYear();
+    const monthDiff = end.getMonth() - start.getMonth();
+    const dayDiff = end.getDate() - start.getDate();
+
+    let months = yearDiff * 12 + monthDiff;
+
+    if (dayDiff < 0) {
+      months -= 1;
+    }
+
+    return Math.max(months, 0);
   }
 }

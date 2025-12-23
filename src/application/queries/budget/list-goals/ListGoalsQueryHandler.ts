@@ -14,10 +14,11 @@ export interface ListGoalsQuery {
 export interface ListGoalsItem {
   id: string;
   name: string;
-  targetAmount: number;
-  currentAmount: number;
-  percentAchieved: number;
-  dueDate: string | null;
+  totalAmount: number;
+  accumulatedAmount: number;
+  deadline: string | null;
+  budgetId: string;
+  sourceAccountId?: string;
 }
 
 export type ListGoalsQueryResult = ListGoalsItem[];
@@ -47,16 +48,14 @@ export class ListGoalsQueryHandler
 
     return (
       items?.map((i: GoalListItem) => {
-        const percent =
-          i.targetAmount === 0 ? 0 : i.currentAmount / i.targetAmount;
-
         return {
           id: i.id,
           name: i.name,
-          targetAmount: i.targetAmount,
-          currentAmount: i.currentAmount,
-          percentAchieved: percent,
-          dueDate: i.dueDate,
+          totalAmount: i.totalAmount,
+          accumulatedAmount: i.accumulatedAmount,
+          deadline: i.deadline,
+          budgetId: i.budgetId,
+          sourceAccountId: i.sourceAccountId,
         };
       }) || []
     );
