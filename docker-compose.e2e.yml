@@ -1,0 +1,47 @@
+services:
+  db_e2e:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      POSTGRES_DB: orcasonhos_e2e
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: senha
+      TZ: UTC
+    ports:
+      - '5433:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  backend_e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    command: sh -c "chmod +x scripts/e2e/start-e2e.sh && scripts/e2e/start-e2e.sh"
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - HTTP_PORT=3000
+      - DB_HOST=db_e2e
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=senha
+      - DB_NAME=orcasonhos_e2e
+      - DATABASE_URL=postgres://postgres:senha@db_e2e:5432/orcasonhos_e2e
+      - AUTH_REQUIRED=false
+      - CORS_ENABLED=true
+      - CORS_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
+      - CORS_METHODS=GET,POST,PUT,PATCH,DELETE,OPTIONS
+      - CORS_HEADERS=Content-Type,Authorization,X-Requested-With
+      - CORS_EXPOSE_HEADERS=X-Request-Id,TraceId
+    depends_on:
+      db_e2e:
+        condition: service_healthy
+
+

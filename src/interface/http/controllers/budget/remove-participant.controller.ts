@@ -1,12 +1,12 @@
-import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { RemoveParticipantFromBudgetUseCase } from '@application/use-cases/budget/remove-participant/RemoveParticipantFromBudgetUseCase';
+import { AuthTokenInvalidError } from '@application/shared/errors/AuthTokenInvalidError';
+import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { DomainError } from '@domain/shared/DomainError';
 
 import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
 type RemoveParticipantBody = {
-  userId: string;
   budgetId: string;
   participantId: string;
 };
@@ -18,9 +18,16 @@ export class RemoveParticipantFromBudgetController implements HttpController {
     request: HttpRequest<RemoveParticipantBody>,
   ): Promise<HttpResponse> {
     const body = request.body;
+    const userId = request.principal?.userId;
+
+    if (!userId) {
+      return DefaultResponseBuilder.errors(request.requestId, [
+        new AuthTokenInvalidError('Missing principal'),
+      ]);
+    }
 
     const result = await this.useCase.execute({
-      userId: body.userId,
+      userId,
       budgetId: body.budgetId,
       participantId: body.participantId,
     });

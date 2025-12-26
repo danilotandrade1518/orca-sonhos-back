@@ -7,10 +7,12 @@ import { AuthTokenInvalidError } from '@application/shared/errors/AuthTokenInval
 import { ListBudgetsQueryHandler } from '@application/queries/budget/list-budgets/ListBudgetsQueryHandler';
 import { BudgetOverviewQueryHandler } from '@application/queries/budget/budget-overview/BudgetOverviewQueryHandler';
 import { DashboardInsightsQueryHandler } from '@application/queries/budget/dashboard-insights/DashboardInsightsQueryHandler';
+import { MonthlyFinancialAnalysisQueryHandler } from '@application/queries/budget/monthly-financial-analysis/MonthlyFinancialAnalysisQueryHandler';
 
 import { ListBudgetsDao } from '@infrastructure/database/pg/daos/budget/list-budgets/ListBudgetsDao';
 import { BudgetOverviewDao } from '@infrastructure/database/pg/daos/budget/budget-overview/BudgetOverviewDao';
 import { DashboardInsightsDao } from '@infrastructure/database/pg/daos/budget/dashboard-insights/DashboardInsightsDao';
+import { MonthlyFinancialAnalysisDao } from '@infrastructure/database/pg/daos/budget/monthly-financial-analysis/MonthlyFinancialAnalysisDao';
 
 import {
   queriesTotal,
@@ -24,6 +26,9 @@ export function buildBudgetQueryRoutes(params: {
   const budgetsDao = new ListBudgetsDao(params.connection);
   const overviewDao = new BudgetOverviewDao(params.connection);
   const dashboardInsightsDao = new DashboardInsightsDao(params.connection);
+  const monthlyFinancialAnalysisDao = new MonthlyFinancialAnalysisDao(
+    params.connection,
+  );
 
   return [
     {
@@ -101,6 +106,37 @@ export function buildBudgetQueryRoutes(params: {
             if (!req.principal) throw new AuthTokenInvalidError();
             const handler = new DashboardInsightsQueryHandler(
               dashboardInsightsDao,
+              params.auth,
+            );
+            const budgetId = req.params.budgetId;
+            const data = await handler.execute({
+              budgetId,
+              userId: req.principal.userId,
+            });
+            const res = DefaultResponseBuilder.ok(req.requestId, { data });
+            queriesTotal.labels(queryName, 'true', '200').inc();
+            queryLatencyMs.labels(queryName).observe(Date.now() - start);
+            return res;
+          } catch (err) {
+            queriesTotal.labels(queryName, 'false', '500').inc();
+            queryLatencyMs.labels(queryName).observe(Date.now() - start);
+            throw err;
+          }
+        },
+      },
+    },
+
+    {
+      method: 'GET',
+      path: '/budget/:budgetId/monthly-analysis',
+      controller: {
+        handle: async (req) => {
+          const start = Date.now();
+          const queryName = 'MonthlyFinancialAnalysis';
+          try {
+            if (!req.principal) throw new AuthTokenInvalidError();
+            const handler = new MonthlyFinancialAnalysisQueryHandler(
+              monthlyFinancialAnalysisDao,
               params.auth,
             );
             const budgetId = req.params.budgetId;

@@ -1,12 +1,12 @@
-import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { AddParticipantToBudgetUseCase } from '@application/use-cases/budget/add-participant/AddParticipantToBudgetUseCase';
+import { AuthTokenInvalidError } from '@application/shared/errors/AuthTokenInvalidError';
+import { ApplicationError } from '@application/shared/errors/ApplicationError';
 import { DomainError } from '@domain/shared/DomainError';
 
 import { DefaultResponseBuilder } from '../../builders/DefaultResponseBuilder';
 import { HttpController, HttpRequest, HttpResponse } from '../../http-types';
 
 type AddParticipantBody = {
-  userId: string;
   budgetId: string;
   participantId: string;
 };
@@ -18,9 +18,16 @@ export class AddParticipantToBudgetController implements HttpController {
     request: HttpRequest<AddParticipantBody>,
   ): Promise<HttpResponse> {
     const body = request.body;
+    const userId = request.principal?.userId;
+
+    if (!userId) {
+      return DefaultResponseBuilder.errors(request.requestId, [
+        new AuthTokenInvalidError('Missing principal'),
+      ]);
+    }
 
     const result = await this.useCase.execute({
-      userId: body.userId,
+      userId,
       budgetId: body.budgetId,
       participantId: body.participantId,
     });

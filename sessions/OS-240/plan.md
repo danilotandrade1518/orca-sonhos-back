@@ -1013,3 +1013,5 @@ npm run build
 - **Architecture**: `sessions/OS-240/architecture.md`
 - **Issue Jira**: [OS-240](https://orca-sonhos.atlassian.net/browse/OS-240)
 - **Meta Specs**: https://github.com/danilotandrade1518/orca-sonhos-meta-specs
+
+

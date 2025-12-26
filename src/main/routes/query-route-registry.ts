@@ -10,6 +10,7 @@ import { buildCategoryQueryRoutes } from './contexts/queries/categories-query-ro
 import { buildEnvelopeQueryRoutes } from './contexts/queries/envelopes-query-route-registry';
 import { buildGoalQueryRoutes } from './contexts/queries/goals-query-route-registry';
 import { buildTransactionQueryRoutes } from './contexts/queries/transactions-query-route-registry';
+import { buildUsersQueryRoutes } from './contexts/queries/users-query-route-registry';
 
 export interface QueryRegistryDeps {
   server: ExpressHttpServerAdapter;
@@ -25,6 +26,7 @@ export function registerQueryRoutes(deps: QueryRegistryDeps) {
       connection,
       auth: budgetAuthorizationService,
     }),
+    ...buildUsersQueryRoutes({ connection }),
     ...buildAccountQueryRoutes({
       connection,
       auth: budgetAuthorizationService,

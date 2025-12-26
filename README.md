@@ -48,6 +48,28 @@ npm run dev
 docker-compose up --build
 ```
 
+## Ambiente Docker para E2E (backend, local)
+
+Este ambiente é feito para **testes E2E do front**, com **Postgres sempre limpo** e **seeds aplicados a cada subida**.
+
+- **Banco**: sobe em `localhost:5433` (internamente `5432`)
+- **API**: sobe em `http://localhost:3000`
+- **Auth**: `AUTH_REQUIRED=false` (permite usar `Authorization: Bearer mock-bearer-token`)
+- **Seed incluído**: usuários para `/users/search` (ex.: `ana@example.com`, `joao@example.com`)
+
+```bash
+cd orca-sonhos-back
+
+# subir (db tmpfs + migrations + seeds + api)
+docker compose -f docker-compose.e2e.yml up -d --build
+
+# logs
+docker logs -f orca-sonhos-back-backend_e2e-1
+
+# parar
+docker compose -f docker-compose.e2e.yml down
+```
+
 ## Testes
 
 ```bash

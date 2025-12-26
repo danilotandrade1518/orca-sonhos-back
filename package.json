@@ -9,6 +9,7 @@
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
     "build": "tsc --project tsconfig.build.json",
     "start": "node dist/index.js",
+    "start:e2e": "docker compose -f docker-compose.e2e.yml up -d --build --force-recreate",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",

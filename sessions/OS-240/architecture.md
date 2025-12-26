@@ -393,3 +393,5 @@ ORDER BY e.name ASC
 - O `ListEnvelopesQueryHandler` usa `allocated` para calcular `remaining = allocated - spent`
 - Adicionar filtros de `is_deleted` para garantir consistência
 - A query deve retornar `allocated_cents` como alias para manter compatibilidade com a interface
+
+

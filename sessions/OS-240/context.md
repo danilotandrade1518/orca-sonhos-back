@@ -167,3 +167,5 @@ Remover o campo `currentBalance` da entidade de domínio `Envelope` e de todos o
   - `t.direction` não existe → usar `t.type = 'EXPENSE'` para gastos
   - `t.amount_cents` não existe → usar `t.amount`
   - `e.allocated_cents` não existe na migração → usar `e.monthly_limit AS allocated_cents` (o campo `allocated` na interface corresponde ao `monthly_limit`)
+
+
