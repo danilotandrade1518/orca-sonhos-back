@@ -116,7 +116,7 @@ module.exports = [
     },
   },
   {
-    files: ['*.js', '*.cjs'],
+    files: ['*.js', '*.cjs', '**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node,

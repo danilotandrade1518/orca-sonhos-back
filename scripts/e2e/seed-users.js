@@ -47,7 +47,7 @@ async function main() {
         [u.id, u.name, u.email, u.phone]
       );
     }
-    // eslint-disable-next-line no-console
+     
     console.log(`✅ Seed E2E: inseridos/atualizados ${USERS.length} usuários`);
   } finally {
     await client.end();
@@ -55,7 +55,7 @@ async function main() {
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
+   
   console.error('❌ Seed E2E falhou:', err);
   process.exit(1);
 });
