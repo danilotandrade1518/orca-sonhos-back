@@ -8,6 +8,7 @@ import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { createHttpTestServer } from '../support/http-test-server';
 import { AddParticipantToBudgetController } from '@http/controllers/budget/add-participant.controller';
 import { RouteDefinition } from '@http/server-adapter';
+import { HttpMiddleware } from '@http/http-types';
 import request from 'supertest';
 
 const getRepoAdd = new GetBudgetRepositoryStub();
@@ -30,6 +31,16 @@ const addParticipantUseCase = new AddParticipantToBudgetUseCase(
   authAdd,
 );
 
+const createTestAuthMiddleware = (): HttpMiddleware => {
+  return async (req, next) => {
+    const body = req.body as { userId?: string };
+    if (body?.userId) {
+      req.principal = { userId: body.userId };
+    }
+    return next();
+  };
+};
+
 describe('POST /budgets/participants/add (add participant) E2E', () => {
   const { server, register, close } = createHttpTestServer();
 
@@ -38,7 +49,12 @@ describe('POST /budgets/participants/add (add participant) E2E', () => {
       addParticipantUseCase,
     );
     const routes: RouteDefinition[] = [
-      { method: 'POST', path: '/budgets/participants/add', controller },
+      {
+        method: 'POST',
+        path: '/budgets/participants/add',
+        controller,
+        middlewares: [createTestAuthMiddleware()],
+      },
     ];
     register(...routes);
   });

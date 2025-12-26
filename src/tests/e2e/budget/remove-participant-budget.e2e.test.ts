@@ -8,6 +8,7 @@ import { EntityId } from '@domain/shared/value-objects/entity-id/EntityId';
 import { createHttpTestServer } from '../support/http-test-server';
 import { RemoveParticipantFromBudgetController } from '@http/controllers/budget/remove-participant.controller';
 import { RouteDefinition } from '@http/server-adapter';
+import { HttpMiddleware } from '@http/http-types';
 import request from 'supertest';
 
 const getRepoRemove = new GetBudgetRepositoryStub();
@@ -30,6 +31,16 @@ const removeParticipantUseCase = new RemoveParticipantFromBudgetUseCase(
   authRemove,
 );
 
+const createTestAuthMiddleware = (): HttpMiddleware => {
+  return async (req, next) => {
+    const body = req.body as { userId?: string };
+    if (body?.userId) {
+      req.principal = { userId: body.userId };
+    }
+    return next();
+  };
+};
+
 describe('POST /budgets/participants/remove (remove participant) E2E', () => {
   const { server, register, close } = createHttpTestServer();
 
@@ -38,7 +49,12 @@ describe('POST /budgets/participants/remove (remove participant) E2E', () => {
       removeParticipantUseCase,
     );
     const routes: RouteDefinition[] = [
-      { method: 'POST', path: '/budgets/participants/remove', controller },
+      {
+        method: 'POST',
+        path: '/budgets/participants/remove',
+        controller,
+        middlewares: [createTestAuthMiddleware()],
+      },
     ];
     register(...routes);
   });
