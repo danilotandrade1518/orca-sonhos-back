@@ -42,8 +42,8 @@ describe('ListTransactionsDao', () => {
           id: 't3',
           date: '2023-01-03',
           description: 'd3',
-          amount_cents: 300,
-          direction: 'IN',
+          amount: 300,
+          type: 'INCOME',
           account_id: 'a1',
           category_id: 'c1',
         },
@@ -51,8 +51,8 @@ describe('ListTransactionsDao', () => {
           id: 't2',
           date: '2023-01-02',
           description: null,
-          amount_cents: -200,
-          direction: 'OUT',
+          amount: 200,
+          type: 'EXPENSE',
           account_id: 'a1',
           category_id: null,
         },
@@ -60,8 +60,8 @@ describe('ListTransactionsDao', () => {
           id: 't1',
           date: '2023-01-01',
           description: 'd1',
-          amount_cents: 100,
-          direction: 'IN',
+          amount: 100,
+          type: 'INCOME',
           account_id: 'a2',
           category_id: 'c2',
         },
@@ -102,8 +102,8 @@ describe('ListTransactionsDao', () => {
     const call = mockConnection.query.mock.calls[0];
     expect(call[0]).toContain('account_id = $2');
     expect(call[0]).toContain('category_id = $3');
-    expect(call[0]).toContain('occurred_on >= $4::date');
-    expect(call[0]).toContain('occurred_on <= $5::date');
+    expect(call[0]).toContain('transaction_date >= $4::date');
+    expect(call[0]).toContain('transaction_date <= $5::date');
     expect(call[0]).toContain('LIMIT $6 OFFSET $7');
     expect(call[1]).toEqual([
       'b1',

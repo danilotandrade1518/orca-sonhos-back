@@ -9,8 +9,8 @@ interface TransactionRow {
   id: string;
   date: string;
   description: string | null;
-  amount_cents: number;
-  direction: 'IN' | 'OUT';
+  amount: number;
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER';
   account_id: string;
   category_id: string | null;
 }
@@ -29,14 +29,14 @@ export class ListTransactionsDao implements IListTransactionsDao {
   }): Promise<{ rows: ListTransactionsItem[]; hasNext: boolean }> {
     let text = `
       SELECT id,
-             occurred_on::date AS date,
+             transaction_date::date AS date,
              description,
-             amount_cents,
-             direction,
+             amount,
+             type,
              account_id,
              category_id
       FROM transactions
-      WHERE budget_id = $1
+      WHERE budget_id = $1 AND is_deleted = false
     `;
     const values: unknown[] = [params.budgetId];
     let idx = 2;
@@ -54,18 +54,18 @@ export class ListTransactionsDao implements IListTransactionsDao {
     }
 
     if (params.dateFrom) {
-      text += ` AND occurred_on >= $${idx}::date`;
+      text += ` AND transaction_date >= $${idx}::date`;
       values.push(params.dateFrom);
       idx++;
     }
 
     if (params.dateTo) {
-      text += ` AND occurred_on <= $${idx}::date`;
+      text += ` AND transaction_date <= $${idx}::date`;
       values.push(params.dateTo);
       idx++;
     }
 
-    text += ` ORDER BY occurred_on DESC, id DESC LIMIT $${idx} OFFSET $${idx + 1}`;
+    text += ` ORDER BY transaction_date DESC, id DESC LIMIT $${idx} OFFSET $${idx + 1}`;
     values.push(params.limit, params.offset);
 
     const result = await this.connection.query<TransactionRow>(text, values);
@@ -78,8 +78,8 @@ export class ListTransactionsDao implements IListTransactionsDao {
         id: row.id,
         date: row.date,
         description: row.description,
-        amount: Number(row.amount_cents),
-        direction: row.direction,
+        amount: Number(row.amount),
+        direction: row.type === 'INCOME' ? 'IN' : 'OUT',
         accountId: row.account_id,
         categoryId: row.category_id,
       }),
